@@ -31,7 +31,8 @@ setup <- function(){
     "R.utils",
     "hrbrthemes",
     "pheatmap",
-    "scales"
+    "scales",
+    "RMariaDB"
   )
   for(package.i in list.of.packages){
     suppressPackageStartupMessages(
@@ -40,6 +41,7 @@ setup <- function(){
   }
 }
 
+setup()
 
 #' start_parallel
 #'
@@ -242,15 +244,31 @@ extract_longest_tx <- function(txdb, plot=FALSE){
   return(longest_cdstxid)
 }
 
-## only protein-coding genes are considered
-## make bed and bed 12 files from gtf file, exon.bed12 will the transcript.bed12
-## only the longest transcript of each gene is considered,
-## so the exons, introns, 3'utr and 5'utr are limited to the longest transcript of protein-coding genes
-gtf_to_bed_longest_tx <- function(txdb, featureName, feature_source=NULL, export=FALSE, longest=TRUE){
+
+#' gtf_to_bed_longest_tx
+#
+#' Make bed and bed 12 files from gtf file for protein coding genes, exon.bed12 will the transcript.bed12. If 'longest'=TRUE, only the
+#' longest transcript of each gene is considered, thus the exons, introns, 3'utr and 5'utr are limited to the longest transcript of
+#' protein-coding genes.
+#'
+#' @param txdb, a TxDb object defined in GenomicFeatures package
+#' @param feaureNmae, one of the gene feature in c("utr3", "utr5", "cds", "intron", "exon", "transcript", "gene")
+#' @param featureSource, the name of the gtf/gff3 file or the online database from which txdb is derived, used as name of output file
+#' @param export, a boolean object to indicate if the bed file should be produced
+#' @param longest, a boolean object to indicate whether the output should be limited to the longest transcript of each gene
+#' @return a list of two objects, the first is a GRanges object, the second is a GRangesList object
+#'
+#' @examples
+#' txdb <- makeTxDbFromEnsembl("Saccharomyces cerevisiae", server="useastdb.ensembl.org")
+#' output <- gtf_to_bed_longest_tx(txdb, featureName="utr3", feature_source="Ensembl", export=F, longest=T)
+#' @export gtf_to_bed_longest_tx
+#'
+#'
+gtf_to_bed_longest_tx <- function(txdb, featureName, featureSource=NULL, export=FALSE, longest=TRUE){
 
  # featureName <- "transcript"
   longest_tx <- extract_longest_tx(txdb)
-  if(!is.null(feature_source)){feature_source <- gsub("\\.gtf", "", feature_source)}
+  if(!is.null(feature_source)){featureSource <- gsub("\\.gtf", "", feature_source)}
   feature <- NULL
 
   if(featureName == "utr3"){
@@ -291,19 +309,19 @@ gtf_to_bed_longest_tx <- function(txdb, featureName, feature_source=NULL, export
     }else{
       feature_longest <- feature[names(feature) %in% longest_tx$tx_id]
     }
-    if(export){export.bed(stack(feature_longest), paste(feature_source, "_", featureName, "_longest.bed", sep=""))}
+    if(export){export.bed(stack(feature_longest), paste(featureSource, "_", featureName, "_longest.bed", sep=""))}
 
     if(featureName %in% c("cds", "utr5", "utr3", "exon") && export){
       bed12_feature_longest <- asBED(feature_longest) ## convert Grangeslist to Granges with blocks info as metadata
-      export.bed(bed12_feature_longest, paste(feature_source, "_", featureName, "_longest.bed12", sep=""))
+      export.bed(bed12_feature_longest, paste(featureSource, "_", featureName, "_longest.bed12", sep=""))
     }
     return(list("GRanges"=stack(feature_longest), "GRangesList"=feature_longest))
   }else{
-    if(export){export.bed(stack(feature), paste(feature_source, "_", featureName, "_all.bed", sep=""))}
+    if(export){export.bed(stack(feature), paste(featureSource, "_", featureName, "_all.bed", sep=""))}
 
     if(featureName %in% c("cds", "utr5", "utr3", "exon") && export){
       bed12_feature_all <- asBED(feature) ## convert Grangeslist to Granges with blocks info as metadata
-      export.bed(bed12_feature_all, paste(feature_source, "_", featureName, "_all.bed12", sep=""))
+      export.bed(bed12_feature_all, paste(featureSource, "_", featureName, "_all.bed12", sep=""))
     }
     return(list("GRanges"=stack(feature), "GRangesList"=feature))
 
@@ -311,24 +329,64 @@ gtf_to_bed_longest_tx <- function(txdb, featureName, feature_source=NULL, export
 
 }
 
+#' plot_start_end_feature
+#
+#' Plot reads or peak signal intensity of samples in the query files around stat and end of genomic features. The upstream and downstream windows
+#' can be given separately, within the window, a smaller window can be defined to test statistical difference between the signal intensity
+#' among samples. A line plot and a boxplot are displayed side by side for both start and end of feature.
+#'
+#' @param queryfiles, a vector of sample file names. The file should be in .bam, .bed, .wig or .bw format, mixture of formats is allowed
+#' @param querylabels, a vector of charactor strings serving as short labels of the queryfiles, will be used as sample labels in the plots
+#' @param txdb, a TxDb object defined in GenomicFeatures package
+#' @param feaureNmae, one of the gene feature in c("utr3", "utr5", "cds", "intron", "exon", "transcript", "gene")
+#' @param CLIP_reads, a boolean object to indicate if the bam reads should be shifted to the -1 positon at the 5' of the reads
+#' @param binsize, an integer defines bin size for intensity calculation
+#' @param extend_reads, an integer defines how long should the reads should be extended to
+#' @param norm, an boolean indicates if the intensities should be normalized by the sample library sizes
+#' @param longest, a boolean object to indicate whether the output should be limited to the longest transcript of each gene
+#' @param ext, a vector of four integers defining upstream and downstream boundaries of the plot window, flanking the start and end of features
+#' @param hl, a vector of four integers defining upstream and downstream boundaries of the highlight window, flanking the start and end of features
+#' @param randomize, a boolean indicate if randomized feature should generated and used as a contrast to the real feature
+#' @param stranded, a boolean indicate whether the strand of the feature should be considered
+#' @param scale, a boolean indicates whether the score matrix should be scaled to the range 0:1, so that samples with different baseline can be compared
+#' @param smo, a boolean indicates whether the line should smoothed with a spline smoothing algorithm
+#' @param heatmap, a boolean indicates whether a heatmap of the score matrix should be generated
+#' @param rm.outlier, a boolean indicates whether a row with abnormally high values in the score matrix should be removed
+#' @param genome, genome of the features, the program is mostly concerned with human, if non-human genome is used, certain features may not work
+#' @param outprefix, a character string specifying output file prefix for plots (outprefix.pdf)
+#'
+#' @return a list of two objects, the first is a GRanges object, the second is a GRangesList object
+#'
+#' @examples
+#' txdb <- makeTxDbFromEnsembl("Homo sapiens", release=75)
+#' queryfiles <- "YTHDF2.merged.thUni.bam"
+#' querylabels <- "YTHDF2_merged"
+#' inputfiles <- "Input_YTHDF2.thUni.bam"
+#' inputlabels <- "YTHDF2_Input"
+#' ext <- c(-500, 200, -200, 500)
+#' hl <- c(-50, 50, -50, 50)
+#' op <- "ratio_YTHDF2_merged_at_intron_boundary"
+#'
+#' plot_start_end_feature(queryfiles=queryfiles, querylabels=querylabels, inputfiles=inputfiles, inputlabels=inputlabels, txdb=txdb, featureName="intron", CLIP_read=F, binsize=10, extend_reads=0,
+#' longest=T, ext=ext, hl=hl, randomize=T, stranded=T, norm=F, scale=F, smo=F, heatmap=F, rm.outlier=F, genome="hg19", outprefix=op)
+#'
+#' @export plot_start_end_feature
+#'
+#'
 
-plot_start_end_gtf <- function(bedfiles=NULL, bedlabels=NULL, txdb=NULL, featureName=NULL, CLIP_reads=F, binsize=10, extend_reads=0, norm=F, longest=T, ext=c(0,0,0,0), hl=c(0,0,0,0), randomize=FALSE, stranded=T, genome="hg19"){
+plot_start_end_feature <- function(queryfiles=NULL, querylabels=NULL, inputfiles=NULL, inputlabels=NULL, txdb=NULL, featureName=NULL, CLIP_reads=F, binsize=10, extend_reads=0,
+                               longest=T, ext=c(0,0,0,0), hl=c(0,0,0,0), randomize=FALSE, stranded=T, norm=F, scale=F, smo=F, heatmap=F, rm.outlier=F, genome="hg19", outprefix="plots"){
 
-  if(0){
-    featureName <- "gene"
-    longest <- T
-    ext <- c(-500, 200, -200, 500)
-    hl <- c(-50, 50, -50, 50)
-    randomize <- T
-    CLIP_reads <- F
-    extend_reads <- 0
-    norm <- F
-    stranded <- T
-    binsize <- 10
-    genome <- "tetrahymeana"
+  names(querylabels) <- queryfiles
+  if(!is.null(inputfiles)){
+    if(length(queryfiles) != length(inputfiles)){
+      stop("the number of queryfiles and inputfiles must be the same!")
+    }
+    names(inputlabels) <- inputfiles
+    queryfiles <- c(queryfiles, inputfiles)
+    querylabels <- c(querylabels, inputlabels)
   }
 
-  names(bedlabels) <- bedfiles
   feature <- rfeature <- NULL
   fs <- fe <- rfs <- rfe <- NULL
 
@@ -338,7 +396,9 @@ plot_start_end_gtf <- function(bedfiles=NULL, bedlabels=NULL, txdb=NULL, feature
   fe <- promoters(resize(feature,width=1,fix="end"), upstream=-ext[3],downstream=ext[4])
 
   if(randomize){
-    rfeature <- randomizeFeature(disjoin(feature))
+    #rfeature <- randomizeFeature(disjoin(feature))
+    random_points <- sample(ext[1]:ext[4], length(feature), replace=T)
+    rfeature <- shift(feature, shift=random_points)
     rfs <- promoters(resize(rfeature,width=1,fix="start"), upstream=-ext[1],downstream=ext[2])
     rfe <- promoters(resize(rfeature,width=1,fix="end"), upstream=-ext[3],downstream=ext[4])
   }
@@ -353,12 +413,10 @@ plot_start_end_gtf <- function(bedfiles=NULL, bedlabels=NULL, txdb=NULL, feature
   mat_list[[paste("End of", featureName)]] <- list("window"=fe, "rwindow"=rfe,  s=ext[3], e=ext[4], "xmin"=hl[3], "xmax"=hl[4], "bin_num"=bin_num_e)
 
 
-  bedInputs <- handle_input(bedfiles, CLIP_reads=CLIP_reads, extend_reads=extend_reads,  useScore=TRUE, outRle=TRUE, norm=norm, genome=genome)
+  bedInputs <- handle_input(queryfiles, CLIP_reads=CLIP_reads, extend_reads=extend_reads,  useScore=TRUE, outRle=TRUE, norm=norm, genome=genome)
 
-
-  plot_list <- list()
-  plot_list_withRandom <- list()
-
+  scoreMatrix_list <- list()
+  scoreMatrix_list_random <- list()
   for(locus in names(mat_list)){
     windowR <- mat_list[[locus]]$window
     rwindowR <- mat_list[[locus]]$rwindow
@@ -368,90 +426,237 @@ plot_start_end_gtf <- function(bedfiles=NULL, bedlabels=NULL, txdb=NULL, feature
     start <- mat_list[[locus]]$s
     end <- mat_list[[locus]]$e
 
-    plot_df <- NULL
-    for(bedfile in bedfiles){
+    for(queryfile in queryfiles){
 
-      bedlabel <- bedlabels[bedfile]
-      print(bedlabel)
-      queryRegions <- bedInputs[[bedfile]]$query
+      querylabel <- querylabels[queryfile]
+      print(querylabel)
+      queryRegions <- bedInputs[[queryfile]]$query
+      libsize <- bedInputs[[queryfile]]$size
 
       bin_op <- "mean"
-      weight_col <- bedInputs[[bedfile]]$weight
+      weight_col <- bedInputs[[queryfile]]$weight
 
       fullmatrix <- parallel_scoreMatrixBin(queryRegions, windowR, bin_num, bin_op, weight_col, stranded)
-      fullmatrix[is.na(fullmatrix)] <- 0
+      fullmatrix <- process_scoreMatrix(fullmatrix, libsize, norm, scale, heatmap, rm.outlier=is.null(inputfiles))
 
+      scoreMatrix_list[[querylabel]][[locus]] <- fullmatrix
+
+      if(randomize){
+
+        rfullmatrix <- parallel_scoreMatrixBin(queryRegions, rwindowR, bin_num, bin_op, weight_col, stranded)
+        rfullmatrix <- process_scoreMatrix(rfullmatrix, libsize, norm, scale, heatmap, rm.outlier=is.null(inputfiles))
+        scoreMatrix_list_random[[querylabel]][[locus]] <- rfullmatrix
+      }
+    }
+  }
+
+  plot_df <- NULL
+  for(locus in names(mat_list)){
+
+    xmin <- mat_list[[locus]]$xmin
+    xmax <- mat_list[[locus]]$xmax
+    bin_num <- mat_list[[locus]]$bin_num
+    start <- mat_list[[locus]]$s
+    end <- mat_list[[locus]]$e
+
+    for(queryfile in queryfiles){
+
+      querylabel <- querylabels[queryfile]
+      print(querylabel)
+
+      fullmatrix <- scoreMatrix_list[[querylabel]][[locus]]
 
       colm <- apply(fullmatrix, 2, mean)
       colsd <- apply(fullmatrix, 2, sd)
       colse <- colsd/sqrt(nrow(fullmatrix))
       collabel <- seq(start, (end-binsize), binsize)
-      querybed <- rep(bedlabel, ncol(fullmatrix))
-      featuretype <- rep(featureName, ncol(fullmatrix))
+      querybed <- as.factor(rep(querylabel, ncol(fullmatrix)))
+      location <- as.factor(rep(locus, ncol(fullmatrix)))
+      levels(location) <- rev(levels(location))
 
       sub_df <- NULL
-      sub_df <- data.frame("Intensity"=colm, "sd"=colsd, "se"=colse, "Position"=collabel, "Query"=querybed, "Feature"=featuretype) %>%
-        mutate(lower=Intensity-se, upper=Intensity+se)
+      sub_df <- data.frame("Intensity"=colm, "sd"=colsd, "se"=colse, "Position"=collabel, "Query"=querybed, "Location"=location)
+      if(smo){
+        sub_df$Intensity <- as.vector(smooth.spline(sub_df$Intensity, df=as.integer(bin_num/5))$y)
+        sub_df$se <- as.vector(smooth.spline(sub_df$se, df=as.integer(bin_num/5))$y)
+      }
+      sub_df <- mutate(sub_df, lower=Intensity-se, upper=Intensity+se)
       plot_df <- rbind(plot_df, sub_df)
 
-      if(!is.null(rwindowR)){
+      if(randomize){
 
-        rfullmatrix <- parallel_scoreMatrixBin(queryRegions, rwindowR, bin_num, bin_op, weight_col, stranded)
-        rfullmatrix[is.na(rfullmatrix)] <- 0
+        rfullmatrix <- scoreMatrix_list_random[[querylabel]][[locus]]
 
         rcolm <- apply(rfullmatrix, 2, mean)
         rcolsd <- apply(rfullmatrix, 2, sd)
         rcolse <- rcolsd/sqrt(nrow(rfullmatrix))
         rcollabel <- seq(start, (end-binsize), binsize)
-        rquerybed <- rep(bedlabel, ncol(rfullmatrix))
-        rfeaturetype <- rep("Random", ncol(rfullmatrix))
+        rquerybed <- as.factor(rep(paste0(querylabel,":Random"), ncol(rfullmatrix)))
+        location <- as.factor(rep(locus, ncol(fullmatrix)))
+        levels(location) <- rev(levels(location))
 
         rsub_df <- NULL
-        rsub_df <- data.frame("Intensity"=rcolm, "sd"=rcolsd, "se"=rcolse, "Position"=rcollabel, "Query"=rquerybed, "Feature"=rfeaturetype) %>%
-          mutate(lower=Intensity-se, upper=Intensity+se)
+        rsub_df <- data.frame("Intensity"=rcolm, "sd"=rcolsd, "se"=rcolse, "Position"=rcollabel, "Query"=rquerybed, "Location"=location)
+        if(smo){
+          rsub_df$Intensity <- as.vector(smooth.spline(rsub_df$Intensity, df=as.integer(bin_num/5))$y)
+          rsub_df$se <- as.vector(smooth.spline(rsub_df$se, df=as.integer(bin_num/5))$y)
+        }
+        rsub_df <- mutate(rsub_df, lower=Intensity-se, upper=Intensity+se)
 
-        rplot_df <- rbind(sub_df, rsub_df)
+        plot_df <- rbind(plot_df, rsub_df)
 
-        ## plot feature and random lines for one bed
-        rp <- ggplot(rplot_df, aes(x=Position, y=Intensity, color=Feature)) +
-          geom_line(size=1) + #geom_point(color="grey30", size=2) +
-          #geom_vline(xintercept = 0, linetype="dotted", color = "blue", size=1) +
-          geom_ribbon(aes(ymin=lower, ymax=upper, fill=Feature), linetype=0, alpha=0.3) +
-          annotate("rect", xmin=xmin, xmax=xmax, ymin=-Inf, ymax=Inf, fill="grey", color="grey", alpha=0.3) +
-          theme_classic() + theme(legend.position="top") + xlab(locus) + ylab("Average signal") +
-          ggtitle(bedlabel)
+      }
+    }
+  }
 
-        plot_list_withRandom[[bedlabel]][[locus]] <- rp
+  ## plot multi bed lines for one feature
+  p <- ggplot(plot_df, aes(x=Position, y=Intensity, color=Query)) +
+    geom_line(size=1) + #geom_point(color="grey30", size=2) +
+    geom_vline(xintercept = 0, linetype="dotted", color = "blue", size=1) +
+    geom_ribbon(aes(ymin=lower, ymax=upper, fill=Query), linetype=0, alpha=0.3) +
+    annotate("rect", xmin=xmin, xmax=xmax, ymin=-Inf, ymax=Inf, fill="grey", color="grey", alpha=0.3) +
+    theme_classic() + theme(legend.position="top") + xlab("") + ylab("Signal intensity") +
+    ggtitle(featureName) +
+    facet_wrap(~Location, scales="free_x")
+  print(p)
+
+  if(!is.null(inputfiles)){
+    Ylab <- "Ratio-over-Input"
+    logYlab <- expression(paste(Log[10], " Ratio-over-Input"))
+    pseudo_count <- 0.1
+
+    ratiofiles <- queryfiles[!queryfiles %in% inputfiles]
+    ratiolabels <- querylabels[!querylabels %in% inputlabels]
+    inputMatrix_list <- scoreMatrix_list[inputlabels]
+    ratioMatrix_list <- scoreMatrix_list[ratiolabels]
+
+    inputMatrix_list_random <- scoreMatrix_list_random[inputlabels]
+    ratioMatrix_list_random <- scoreMatrix_list_random[ratiolabels]
+
+    for(locus in names(mat_list)){
+      if(0)locus <- names(mat_list)[1]
+      for(i in seq_along(ratiolabels)){
+        if(0) i <- 1
+        rm <- ratioMatrix_list[[ratiolabels[i]]][[locus]]
+        im <- inputMatrix_list[[inputlabels[i]]][[locus]]
+        minrow <- min(nrow(rm), nrow(im))
+
+        fullmatrix <- (rm[1:minrow,] + pseudo_count)/(im[1:minrow,] + pseudo_count)
+        fullmatrix[is.na(fullmatrix)] <- 0
+
+        if(rm.outlier){
+          fullmatrix  <- rmOutlier(fullmatrix)
+        }
+        ratioMatrix_list[[ratiolabels[i]]][[locus]] <- fullmatrix
+
+        ## for random feature
+        if(randomize){
+          rmr <- ratioMatrix_list_random[[ratiolabels[i]]][[locus]]
+          imr <- inputMatrix_list_random[[inputlabels[i]]][[locus]]
+          minrowr <- min(nrow(rmr), nrow(imr))
+
+          fullmatrix <- (rmr[1:minrowr,] + pseudo_count)/(imr[1:minrowr,] + pseudo_count)
+          fullmatrix[is.na(fullmatrix)] <- 0
+
+          if(rm.outlier){
+            fullmatrix  <- rmOutlier(fullmatrix)
+          }
+          ratioMatrix_list_random[[ratiolabels[i]]][[locus]] <- fullmatrix
+        }
+      }
+    }
+
+
+    plot_df <- NULL
+    for(locus in names(mat_list)){
+
+      xmin <- mat_list[[locus]]$xmin
+      xmax <- mat_list[[locus]]$xmax
+      bin_num <- mat_list[[locus]]$bin_num
+      start <- mat_list[[locus]]$s
+      end <- mat_list[[locus]]$e
+
+      for(ratiofile in ratiofiles){
+
+        ratiolabel <- ratiolabels[ratiofile]
+        print(ratiolabel)
+
+        fullmatrix <- ratioMatrix_list[[ratiolabel]][[locus]]
+
+        colm <- apply(fullmatrix, 2, mean)
+        colsd <- apply(fullmatrix, 2, sd)
+        colse <- colsd/sqrt(nrow(fullmatrix))
+        collabel <- seq(start, (end-binsize), binsize)
+        ratiobed <- as.factor(rep(ratiolabel, ncol(fullmatrix)))
+        location <- as.factor(rep(locus, ncol(fullmatrix)))
+        levels(location) <- rev(levels(location))
+
+        sub_df <- NULL
+        sub_df <- data.frame("Intensity"=colm, "sd"=colsd, "se"=colse, "Position"=collabel, "Query"=ratiobed, "Location"=location)
+        if(smo){
+          sub_df$Intensity <- as.vector(smooth.spline(sub_df$Intensity, df=as.integer(bin_num/5))$y)
+          sub_df$se <- as.vector(smooth.spline(sub_df$se, df=as.integer(bin_num/5))$y)
+        }
+        sub_df <- mutate(sub_df, lower=Intensity-se, upper=Intensity+se)
+        plot_df <- rbind(plot_df, sub_df)
+
+        if(randomize){
+
+          rfullmatrix <- ratioMatrix_list_random[[ratiolabel]][[locus]]
+
+          rcolm <- apply(rfullmatrix, 2, mean)
+          rcolsd <- apply(rfullmatrix, 2, sd)
+          rcolse <- rcolsd/sqrt(nrow(rfullmatrix))
+          rcollabel <- seq(start, (end-binsize), binsize)
+          rratiobed <- as.factor(rep(paste0(ratiolabel,":Random"), ncol(rfullmatrix)))
+          location <- as.factor(rep(locus, ncol(fullmatrix)))
+          levels(location) <- rev(levels(location))
+
+          rsub_df <- NULL
+          rsub_df <- data.frame("Intensity"=rcolm, "sd"=rcolsd, "se"=rcolse, "Position"=rcollabel, "Query"=rratiobed, "Location"=location)
+          if(smo){
+            rsub_df$Intensity <- as.vector(smooth.spline(rsub_df$Intensity, df=as.integer(bin_num/5))$y)
+            rsub_df$se <- as.vector(smooth.spline(rsub_df$se, df=as.integer(bin_num/5))$y)
+          }
+          rsub_df <- mutate(rsub_df, lower=Intensity-se, upper=Intensity+se)
+
+          plot_df <- rbind(plot_df, rsub_df)
+        }
       }
     }
 
     ## plot multi bed lines for one feature
     p <- ggplot(plot_df, aes(x=Position, y=Intensity, color=Query)) +
       geom_line(size=1) + #geom_point(color="grey30", size=2) +
-      #geom_vline(xintercept = 0, linetype="dotted", color = "blue", size=1) +
+      geom_vline(xintercept = 0, linetype="dotted", color = "blue", size=1) +
       geom_ribbon(aes(ymin=lower, ymax=upper, fill=Query), linetype=0, alpha=0.3) +
       annotate("rect", xmin=xmin, xmax=xmax, ymin=-Inf, ymax=Inf, fill="grey", color="grey", alpha=0.3) +
-      theme_classic() + theme(legend.position="top") + xlab(locus) + ylab("Average signal") +
-      ggtitle(featureName)
-    #p
-
-    plot_list[[locus]] <- p
-
-
+      theme_classic() + theme(legend.position="top") + xlab("") + ylab(Ylab) +
+      ggtitle(featureName) +
+      facet_wrap(~Location, scales="free_x")
+    print(p)
   }
-  grid.arrange(plot_list[[1]], plot_list[[2]], ncol=2)
-
-  if(!is.null(rfeature)){
-    for(bedlabel in bedlabels){
-      grid.arrange(plot_list_withRandom[[bedlabel]][[1]], plot_list_withRandom[[bedlabel]][[2]], ncol=2)
-    }
-  }
-
 }
 
-
-## function to be called by parLapply
-# windowRs is a list of GRangesList, it's names have to be the names of bin_nums (named vector)
+#' parallel_apply_scoreMatrixBin
+#'
+#' Function for parallel computation of scoreMatrixBin. The 'windows' parameter of the scoreMatrixBin method is provided as a list of
+#' GRangesList objects, allowing simultaneous processing of multiple windows objects.
+#'
+#' @param windowRs, a list of GRangesList objects.
+#' @param queryRegions, a RleList object or Granges object providing input for the 'target' parameter of the scoreMatrixBin method
+#' @param bin_num, number of bins the windows should be divided into
+#' @param bin_op, operation on the signals in a bin, a string in c("mean", "max", "min", "median", "sum") is accepted.
+#' @param weight_col, if the queryRegions is a GRanges object, a numeric column in meta data part can be used as weights.
+#' @param stranded, a boolean object to indicate if the strand of the windows should be considered to determine upstream and downstream
+#'
+#' @return a list of numeric matrices
+#'
+#' @example
+#'
+#' @export parallel_apply_scoreMatrixBin
+#'
+#'
 parallel_apply_scoreMatrixBin <- function(windowRs, queryRegions, bin_num, bin_op, weight_col, stranded){
   nc <- length(windowRs)
   cl <- start_parallel(nc)
@@ -468,7 +673,25 @@ parallel_apply_scoreMatrixBin <- function(windowRs, queryRegions, bin_num, bin_o
   smcList
 }
 
-## function to be called by parLapply
+#' parallel_scoreMatrixBin
+#'
+#' Function for parallel computation of scoreMatrixBin. The 'windows' parameter of the scoreMatrixBin method is split into 5 chunks,
+#' and scoreMatrixBin is called on each chunk simultaneously to speed up the computation.
+#'
+#' @param windowRs, a GRangesList object.
+#' @param queryRegions, a RleList object or Granges object providing input for the 'target' parameter of the scoreMatrixBin method
+#' @param bin_num, number of bins the windows should be divided into
+#' @param bin_op, operation on the signals in a bin, a string in c("mean", "max", "min", "median", "sum") is accepted.
+#' @param weight_col, if the queryRegions is a GRanges object, a numeric column in meta data part can be used as weights.
+#' @param stranded, a boolean object to indicate if the strand of the windows should be considered to determine upstream and downstream
+#'
+#' @return a numeric matrices
+#'
+#' @example
+#'
+#' @export parallel_scoreMatrixBin
+#'
+#'
 parallel_scoreMatrixBin <- function(queryRegions, windowRs, bin_num, bin_op, weight_col, stranded){
 
   nc <- 5
@@ -490,12 +713,43 @@ parallel_scoreMatrixBin <- function(queryRegions, windowRs, bin_num, bin_op, wei
   smdt
 }
 
-## bedfilse can be bed (for peaks, bed12 from gaped reads is not supported), or bam of gaped reads
-## txdb has to be gene model with transcripts and exons defined
-## norm is for normalizing to per million reads
+#' plot_3parts_metagene
+#
+#' Plot reads or peak signal intensity of samples in the query files around genes. The upstream and downstream windows flanking genes
+#' can be given separately, the parameter 'meta' controls if gene or metagene plots are generated.
+#'
+#' @param queryfiles, a vector of sample file names. The file should be in .bam, .bed, .wig or .bw format, mixture of formats is allowed
+#' @param querylabels, a vector of character strings serving as short labels of the queryfiles, will be used as sample labels in the plots
+#' @param txdb, a TxDb object defined in GenomicFeatures package
+#' @param meta, a boolean object indicating whether a metagene (intron excluded) or gene (intron included) plot should be produced
+#' @param inputfiles, a vector of input sample file names. The file should be in .bam, .bed, .wig or .bw format, mixture of formats is allowed
+#' @param inputlabels, a vector of character strings serving as short labels of the inputfiles, will be used as input labels in the plots
+#' @param CLIP_reads, a boolean object to indicate if the bam reads should be shifted to the -1 position at the 5' of the reads
+#' @param nbins, an integer defines the total number of bins
+#' @param fiveP, extension out of the 5' boundary of gene
+#' @param threeP, extension out of the 3' boundary of gene
+#' @param extend_reads, an integer defines how long should the reads should be extended to
+#' @param norm, an boolean indicates if the intensities should be normalized by the sample library sizes
+#' @param longest, a boolean object to indicate whether the output should be limited to the longest transcript of each gene
+#' @param stranded, a boolean indicate whether the strand of the feature should be considered
+#' @param scale, a boolean indicates whether the score matrix should be scaled to the range 0:1, so that samples with different baseline can be compared
+#' @param smo, a boolean indicates whether the line should smoothed with a spline smoothing algorithm
+#' @param heatmap, a boolean indicates whether a heatmap of the score matrix should be generated
+#' @param rm.outlier, a boolean indicates whether a row with abnormally high values in the score matrix should be removed
+#' @param genome, genome of the features, the program is mostly concerned with human, if non-human genome is used, certain features may not work
+#' @param outprefix, a character string specifying output file prefix for plots (outprefix.pdf)
+#'
+#' @return a list of two objects, the first is a GRanges object, the second is a GRangesList object
+#'
+#' @examples
+#'
+#'
+#' @export plot_3parts_metagene
 
 
-plot_3parts_metagene <- function(bedfiles=NULL, bedlabels=NULL, txdb=NULL, meta=T, inputfiles=NULL, ratioOverInput=F, nbins=100, norm=FALSE, longest=TRUE, extend_reads=0, CLIP_reads=FALSE, fiveP=1000, threeP=1000, smo=FALSE, stranded=TRUE, outPrefix=NULL, genome="hg19"){
+plot_3parts_metagene <- function(queryfiles=NULL, querylabels=NULL, txdb=NULL, meta=T, inputfiles=NULL, inputlabels=NULL, nbins=100, norm=FALSE, longest=TRUE, scale=FALSE,
+                                 extend_reads=0, CLIP_reads=FALSE, fiveP=1000, threeP=1000, smo=FALSE, stranded=TRUE, outPrefix="plots", genome="hg19",
+                                 heatmap=FALSE, rm.outlier=FALSE){
 
   if(0){
     nbins <- 100
@@ -512,27 +766,28 @@ plot_3parts_metagene <- function(bedfiles=NULL, bedlabels=NULL, txdb=NULL, meta=
   }
 
 
-  names(bedlabels) <- bedfiles
-  if(ratioOverInput){
-    if(length(bedfiles) != length(inputfiles)){
-      stop("the number of bedfiles and inputfiles must be the same!")
+  names(querylabels) <- queryfiles
+  if(!is.null(inputfiles)){
+    if(length(queryfiles) != length(inputfiles)){
+      stop("the number of queryfiles and inputfiles must be the same!")
     }
-    inputlabels <- bedlabels
     names(inputlabels) <- inputfiles
+    queryfiles <- c(queryfiles, inputfiles)
+    querylabels <- c(querylabels, inputlabels)
   }
 
   featureName <- ifelse(meta, "transcript", "gene")
   ## prepare transcripts that are suitable for overlap
   featureNames <-  c("promoter", featureName, "TTS")
 
-  if(meta){
-    tl <- transcriptLengths(txdb)
-    ## selecte the longest transcript for each gene
-    if(longest){
-      longest_tx <- extract_longest_tx(txdb)
-      tl <- tl %>% filter(tx_id %in% longest_tx$tx_id)
-    }
+  tl <- transcriptLengths(txdb, with.cds_len = T)
+  ## selecte the longest transcript for each gene
+  if(longest){
+    longest_tx <- extract_longest_tx(txdb)
+    tl <- tl %>% filter(tx_id %in% longest_tx$tx_id)
+  }
 
+  if(meta){
     means <- c(promoter=fiveP, median(tl$tx_len), TTS=threeP)
     scaled_bins <- round(means*nbins/sum(means))
 
@@ -553,6 +808,7 @@ plot_3parts_metagene <- function(bedfiles=NULL, bedlabels=NULL, txdb=NULL, meta=
 
   }else{
     feature <- genes(txdb)
+    feature <- feature[feature$gene_id %in% tl$gene_id]
     means <- c(promoter=fiveP, median(width(feature)), TTS=threeP)
     scaled_bins <- round(means*nbins/sum(means))
     feature <- feature[width(feature) > scaled_bins[2]]
@@ -584,72 +840,21 @@ plot_3parts_metagene <- function(bedfiles=NULL, bedlabels=NULL, txdb=NULL, meta=
 
   color_store <- c("#00AFBB", "#E7B800", "#A0BDE0", "#0020C2", "#64E986", "#F5DEB3", "#C19A6B", "#E8A317", "#8E7618", "#A0522D", "#990012", "#CB6D51")
 
-  if(ratioOverInput){
-    print("computing coverage for Inputs")
+  print("computing coverage for queryfiles")
+  scoreMatrix_list <- list()
 
-    InputMatrix_list <- list()
+  bedInputs <- handle_input(queryfiles, CLIP_reads=CLIP_reads, extend_reads=extend_reads, useScore=TRUE, outRle=TRUE, norm=norm, genome=genome)
 
-    myInputs <- handle_input(inputFiles=inputfiles, CLIP_reads=CLIP_reads, extend_reads=extend_reads, useScore=TRUE, outRle=TRUE, norm=norm, genome=genome)
-    for(inputfile in inputfiles){
-      inputlabel <- inputlabels[inputfile]
+  for(queryfile in queryfiles){
 
-      myInput <- myInputs[[inputfile]]
-      libsize <- myInput$size
-      queryRegions <- myInput$query
-      fileType <- myInput$type
-      weight_col <- myInput$weight
+    if(0)queryfile <- queryfiles[1]
+    querylabel <- querylabels[queryfile]
 
-      for(w in featureNames){
-        #w <- "utr5"
-        print(w)
-        windowR <- windowRs[[w]]
-        bin_num <- scaled_bins[w]
-
-        bin_op <- "mean"
-        fullmatrix <- parallel_scoreMatrixBin(queryRegions, windowR, bin_num, bin_op, weight_col, stranded)
-
-        fullmatrix[is.na(fullmatrix)] <- 0
-        print(dim(fullmatrix))
-
-        if(norm && !is.null(libsize)){
-          fullmatrix <- fullmatrix/(libsize/1000000)
-        }
-
-        InputMatrix_list[[inputlabel]][[w]] <- fullmatrix
-      }
-    }
-  }
-
-  print("computing coverage for samples")
-  mplot_df <- NULL
-  vx <- c(1, cumsum(scaled_bins[1:(length(scaled_bins)-1)])+1) ## x axis points for vlines that demarcate the genomic features
-  names(vx) <- featureNames
-
-  bedInputs <- handle_input(bedfiles, CLIP_reads=CLIP_reads, extend_reads=extend_reads, useScore=TRUE, outRle=TRUE, norm=norm, genome=genome)
-  for(bedfile in bedfiles){
-
-    if(0)bedfile <- bedfiles[1]
-    bedlabel <- bedlabels[bedfile]
-
-    myInput <- bedInputs[[bedfile]]
+    myInput <- bedInputs[[queryfile]]
     libsize <- myInput$size
     queryRegions <- myInput$query
     fileType <- myInput$type
     weight_col <- myInput$weight
-
-    if(0){
-      cl <- start_parallel(length(featureNames))
-      cov_lst <- parLapply(cl, featureNames, apply_scoreMatrixBin, windowRs, queryRegions, scaled_bins, weight_col, stranded)
-      stop_parallel(cl)
-
-      names(cov_lst) <- featureNames
-      print(lapply(cov_lst, dim))
-    }
-
-
-    plot_df <- NULL
-
-    #feature_matrix <- NULL, for scaling across row, still not working, as the smc nrows vary between feature, and cbind fails
 
     for(w in featureNames){
       #w <- "utr5"
@@ -660,44 +865,42 @@ plot_3parts_metagene <- function(bedfiles=NULL, bedlabels=NULL, txdb=NULL, meta=
       bin_op <- "mean"
       fullmatrix <- parallel_scoreMatrixBin(queryRegions, windowR, bin_num, bin_op, weight_col, stranded)
 
-      fullmatrix[is.na(fullmatrix)] <- 0
+      fullmatrix <- process_scoreMatrix(fullmatrix, libsize=libsize, norm=norm, scale=scale, heatmap=heatmap, rm.outlier=is.null(inputfiles))
+      scoreMatrix_list[[querylabel]][[w]] <- fullmatrix
+    }
+  }
 
-      print(dim(fullmatrix))
-      ## rpm did not work for the RNAseq bam files, so normalization is performed here
-      if(norm && !is.null(libsize)){
-        fullmatrix <- fullmatrix/(libsize/1000000)
-      }
+  print("plotting coverage for queryfiles")
+  mplot_df <- NULL
+  vx <- c(1, cumsum(scaled_bins[1:(length(scaled_bins)-1)])+1) ## x axis points for vlines that demarcate the genomic features
+  names(vx) <- featureNames
 
-      if(ratioOverInput){
-        fullmatrix <- (fullmatrix + 0.01)/(InputMatrix_list[[bedlabel]][[w]] + 0.01)
-        fullmatrix[is.na(fullmatrix)] <- 0
-      }
+  for(queryfile in queryfiles){
 
-      ## remove outliers (highest score) from reference regions, using Hampel filter with 10mad instead of 3mad.
-      ## if outliers are detected, remove the top outliers only
-      rowm <- apply(fullmatrix, 1, max)
-      up_bound <- median(rowm) + 10*mad(rowm)
-      if(length(which(rowm > up_bound)) > 0){
-        print("Outlier detected:")
-        outliers <- fullmatrix[which.max(rowm),]
-        print(outliers)
+    if(0)queryfile <- queryfiles[1]
+    querylabel <- querylabels[queryfile]
 
-        fullmatrix <- fullmatrix[-which.max(rowm),]
-      }
+    plot_df <- NULL
+
+    for(w in featureNames){
+      #w <- "utr5"
+      print(w)
+
+      bin_num <- scaled_bins[w]
+
+      fullmatrix <- scoreMatrix_list[[querylabel]][[w]]
 
       colm <- apply(fullmatrix, 2, mean)
       colsd <- apply(fullmatrix, 2, sd)
       colse <- colsd/sqrt(nrow(fullmatrix))
       collabel <- seq(vx[w], vx[w]+bin_num-1)
-      querybed <- rep(bedlabel, bin_num)
+      querybed <- rep(querylabel, bin_num)
       featuretype <- rep(w, bin_num)
 
       sub_df <- NULL
       sub_df <- data.frame("Intensity"=colm, "sd"=colsd, "se"=colse, "Position"=collabel, "Query"=querybed, "Feature"=featuretype)
       plot_df <- rbind(plot_df, sub_df)
     }
-
-
 
     if(smo){
       plot_df$Intensity <- as.vector(smooth.spline(plot_df$Intensity, df=as.integer(nbins/5))$y)
@@ -717,7 +920,7 @@ plot_3parts_metagene <- function(bedfiles=NULL, bedlabels=NULL, txdb=NULL, meta=
 
 
   ## plot multi-sample lines with error band
-  p <- ggplot(mplot_df, aes(x=Position, y=Intensity, color=Query)) + scale_fill_manual(values=color_store[1:length(bedfiles)]) +
+  p <- ggplot(mplot_df, aes(x=Position, y=Intensity, color=Query)) + scale_fill_manual(values=color_store[1:length(queryfiles)]) +
     geom_line(size=1) + #geom_point(color="grey30", size=2) +
     geom_vline(xintercept = vx[2:length(vx)], linetype="dotted", color = "blue", size=0.5) +
     geom_ribbon(aes(ymin=lower, ymax=upper, fill=Query), linetype=0, alpha=0.3) +
@@ -789,6 +992,86 @@ plot_3parts_metagene <- function(bedfiles=NULL, bedlabels=NULL, txdb=NULL, meta=
   outp <- plot_grid(p, pp, ppp, ncol = 1, align = 'v', axis="b", rel_heights = c(20,1,1))
   print(outp)
 
+  if(!is.null(inputfiles)){
+    print("computing coverage for ratio over input")
+    Ylab <- "Ratio-over-Input"
+    logYlab <- expression(paste(Log[10], " Ratio-over-Input"))
+    pseudo_count <- 0.1
+
+    inputMatrix_list <- scoreMatrix_list[inputlabels]
+    ratiofiles <- queryfiles[!queryfiles %in% inputfiles]
+    ratiolabels <- querylabels[!querylabels %in% inputlabels]
+    ratioMatrix_list <- scoreMatrix_list[ratiolabels]
+    for(w in featureNames){
+      for(i in seq_along(querylabels)){
+        fullmatrix <- (ratioMatrix_list[[ratiolabels[i]]][[w]] + pseudo_count)/(inputMatrix_list[[inputlabels[i]]][[w]] + pseudo_count)
+        fullmatrix[is.na(fullmatrix)] <- 0
+
+        if(rm.outlier){
+          fullmatrix <- rmOutlier(fullmatrix)
+        }
+
+        ratioMatrix_list[[ratiolabels[i]]][[w]] <- fullmatrix
+      }
+    }
+
+    print("plotting coverage for ratio over input")
+    mplot_df <- NULL
+    for(ratiofile in ratiofiles){
+
+      if(0)ratiofile <- ratiofiles[1]
+      ratiolabel <- ratiolabels[ratiofile]
+
+      plot_df <- NULL
+
+      for(w in featureNames){
+        #w <- "utr5"
+        print(w)
+
+        bin_num <- scaled_bins[w]
+
+        fullmatrix <- scoreMatrix_list[[ratiolabel]][[w]]
+
+        colm <- apply(fullmatrix, 2, mean)
+        colsd <- apply(fullmatrix, 2, sd)
+        colse <- colsd/sqrt(nrow(fullmatrix))
+        collabel <- seq(vx[w], vx[w]+bin_num-1)
+        querybed <- rep(querylabel, bin_num)
+        featuretype <- rep(w, bin_num)
+
+        sub_df <- NULL
+        sub_df <- data.frame("Intensity"=colm, "sd"=colsd, "se"=colse, "Position"=collabel, "Query"=querybed, "Feature"=featuretype)
+        plot_df <- rbind(plot_df, sub_df)
+      }
+
+      if(smo){
+        plot_df$Intensity <- as.vector(smooth.spline(plot_df$Intensity, df=as.integer(nbins/5))$y)
+        plot_df$se <- as.vector(smooth.spline(plot_df$se, df=as.integer(nbins/5))$y)
+      }
+
+      mplot_df <- rbind(mplot_df, plot_df)
+
+    }
+
+    mplot_df <- mutate(mplot_df, lower=Intensity-se, upper=Intensity+se)
+
+    ## plot multi-sample lines with error band
+    p <- ggplot(mplot_df, aes(x=Position, y=Intensity, color=Query)) + scale_fill_manual(values=color_store[1:length(ratiofiles)]) +
+      geom_line(size=1) + #geom_point(color="grey30", size=2) +
+      geom_vline(xintercept = vx[2:length(vx)], linetype="dotted", color = "blue", size=0.5) +
+      geom_ribbon(aes(ymin=lower, ymax=upper, fill=Query), linetype=0, alpha=0.3) +
+      theme_classic() +
+      theme(legend.position="top",
+            axis.title.x=element_blank(),
+            axis.ticks.x=element_blank(),
+            axis.text.x=element_blank()) +
+      ylab(Ylab)
+
+    outp <- plot_grid(p, pp, ppp, ncol = 1, align = 'v', axis="b", rel_heights = c(20,1,1))
+    print(outp)
+
+  }
+
   if(!is.null(outPrefix)){
     dev.off()
   }
@@ -799,7 +1082,7 @@ plot_3parts_metagene <- function(bedfiles=NULL, bedlabels=NULL, txdb=NULL, meta=
 
 ## plot scaled regions for centers given in bed format
 
-plot_reference_region <- function(bedfiles=NULL, bedlabels=NULL, centerfiles, centerlabels, nbins=100, norm=FALSE, extend_reads=0, CLIP_reads=FALSE, fiveP=1000, threeP=1000, smo=FALSE, stranded=TRUE, outPrefix=NULL, genome="hg19"){
+plot_reference_region <- function(queryfiles=NULL, querylabels=NULL, centerfiles, centerlabels, nbins=100, norm=FALSE, extend_reads=0, CLIP_reads=FALSE, fiveP=1000, threeP=1000, smo=FALSE, stranded=TRUE, outPrefix=NULL, genome="hg19"){
 
   if(0){
     nbins <- 100
@@ -820,7 +1103,7 @@ plot_reference_region <- function(bedfiles=NULL, bedlabels=NULL, centerfiles, ce
     pdf(paste(outPrefix, "pdf", sep="."), height=8, width=12)
   }
 
-  names(bedlabels) <- bedfiles
+  names(querylabels) <- queryfiles
   names(centerlabels) <- centerfiles
 
   ## prepare transcripts that are suitable for overlap
@@ -838,16 +1121,16 @@ plot_reference_region <- function(bedfiles=NULL, bedlabels=NULL, centerfiles, ce
   print("computing coverage for Sample")
   scoreMatrix_list <- list()
 
-  bedInputs <- handle_input(bedfiles, CLIP_reads=CLIP_reads, extend_reads=extend_reads, useScore=TRUE, outRle=TRUE, norm=norm, genome=genome)
+  bedInputs <- handle_input(queryfiles, CLIP_reads=CLIP_reads, extend_reads=extend_reads, useScore=TRUE, outRle=TRUE, norm=norm, genome=genome)
   centerInputs <- handle_input(centerfiles, CLIP_reads=FALSE, extend_reads=0, useScore=FALSE, outRle=FALSE, norm=FALSE, genome=genome)
 
-  for(bedfile in bedfiles){
+  for(queryfile in queryfiles){
 
-    if(0)bedfile <- bedfiles[1]
-    bedlabel <- bedlabels[bedfile]
-    print(bedlabel)
+    if(0)queryfile <- queryfiles[1]
+    querylabel <- querylabels[queryfile]
+    print(querylabel)
 
-    myInput <- bedInputs[[bedfile]]
+    myInput <- bedInputs[[queryfile]]
     libsize <- myInput$size
     queryRegions <- myInput$query
     fileType <- myInput$type
@@ -904,7 +1187,7 @@ plot_reference_region <- function(bedfiles=NULL, bedlabels=NULL, centerfiles, ce
         colsd <- apply(fullmatrix, 2, sd)
         colse <- colsd/sqrt(nrow(fullmatrix))
         collabel <- seq(from, to)
-        querybed <- rep(bedlabel, bin_num)
+        querybed <- rep(querylabel, bin_num)
         centerbed <- rep(centerlabel, bin_num)
         featuretype <- rep(w, bin_num)
 
@@ -986,8 +1269,8 @@ plot_reference_region <- function(bedfiles=NULL, bedlabels=NULL, centerfiles, ce
 
 
 
-  for(i in seq_along(bedlabels)){
-    for(beds in combn(bedlabels, i, simplify = F)){
+  for(i in seq_along(querylabels)){
+    for(beds in combn(querylabels, i, simplify = F)){
       for(j in seq_along(centerlabels)){
         for(centers in combn(centerlabels, j, simplify = F)){
           print(beds)
@@ -998,7 +1281,7 @@ plot_reference_region <- function(bedfiles=NULL, bedlabels=NULL, centerfiles, ce
             mutate(Group=paste(Query,Reference,sep=":"), .keep="all")
 
           ## plot multi-sample lines with error band
-          p <- ggplot(aplot_df, aes(x=Position, y=Intensity, color=Group)) + scale_fill_manual(values=color_store[1:length(bedfiles)]) +
+          p <- ggplot(aplot_df, aes(x=Position, y=Intensity, color=Group)) + scale_fill_manual(values=color_store[1:length(queryfiles)]) +
             geom_line(size=1) + #geom_point(color="grey30", size=2) +
             geom_vline(xintercept = vx[2:length(vx)], linetype="dotted", color = "blue", size=0.5) +
             geom_ribbon(aes(ymin=lower, ymax=upper, fill=Group), linetype=0, alpha=0.3) +
@@ -1024,38 +1307,53 @@ plot_reference_region <- function(bedfiles=NULL, bedlabels=NULL, centerfiles, ce
   return(mplot_df)
 }
 
-## bedfilse can be bed (for peaks, bed12 from gaped reads is not supported), or bam of gaped reads
-## txdb has to be gene model with utr and cds defined, only protein-coding genes are considered
-## sn is the sampling number for large bed files, so not supported for bam file
-## norm is for normalizing to sequence depth
-## longest indicate if only the longest transcript is considered for each gene
-## CLIP_reads indicate that only -1 position of 5' end of the reads are considered
+#' plot_5parts_metagene
+#
+#' Plot reads or peak signal intensity of samples in the query files around genes. The upstream and downstream windows flanking genes
+#' can be given separately, metagene plots are generated with 5'UTR, CDS and 3'UTR segments. The length of each segments are prorated
+#' according to the median length of each segments.
+#'
+#' @param queryfiles, a vector of sample file names. The file should be in .bam, .bed, .wig or .bw format, mixture of formats is allowed
+#' @param querylabels, a vector of character strings serving as short labels of the queryfiles, will be used as sample labels in the plots
+#' @param txdb, a TxDb object defined in GenomicFeatures package
+#' @param meta, a boolean object indicating whether metagene (intron excluded) or gene (intron included) plots should be produced
+#' @param inputfiles, a vector of input sample file names. The file should be in .bam, .bed, .wig or .bw format, mixture of formats is allowed
+#' @param inputlabels, a vector of character strings serving as short labels of the inputfiles, will be used as input labels in the plots
+#' @param CLIP_reads, a boolean object to indicate if the bam reads should be shifted to the -1 position at the 5' of the reads
+#' @param nbins, an integer defines the total number of bins
+#' @param fiveP, extension out of the 5' boundary of gene
+#' @param threeP, extension out of the 3' boundary of gene
+#' @param extend_reads, an integer defines how long should the reads should be extended to
+#' @param norm, an boolean indicates if the intensities should be normalized by the sample library sizes
+#' @param longest, a boolean object to indicate whether the output should be limited to the longest transcript of each gene
+#' @param stranded, a boolean indicate whether the strand of the feature should be considered
+#' @param scale, a boolean indicates whether the score matrix should be scaled to the range 0:1, so that samples with different baseline can be compared
+#' @param smo, a boolean indicates whether the line should smoothed with a spline smoothing algorithm
+#' @param heatmap, a boolean indicates whether a heatmap of the score matrix should be generated
+#' @param rm.outlier, a boolean indicates whether a row with abnormally high values in the score matrix should be removed
+#' @param genome, genome of the features, the program is mostly concerned with human, if non-human genome is used, certain features may not work
+#' @param outprefix, a character string specifying output file prefix for plots (outprefix.pdf)
+#'
+#' @return a list of two objects, the first is a GRanges object, the second is a GRangesList object
+#'
+#' @examples
+#'
+#'
+#' @export plot_5parts_metagene
 
-plot_5parts_metagene <- function(bedfiles=NULL, bedlabels=NULL, txdb=NULL, inputfiles=NULL, inputlabels=NULL, nbins=100, norm=FALSE, longest=TRUE, extend_reads=0, CLIP_reads=FALSE, fiveP=1000, threeP=1000, smo=FALSE, stranded=TRUE, outPrefix=NULL, genome="hg19", heatmap=F, rm.outlier=F){
 
-  if(0){
-    nbins <- 100
-    norm=TRUE
-    longest=TRUE
-    CLIP_reads=FALSE
-    smo=FALSE
-    fiveP <- 1000
-    threeP <- 1000
-    stranded=TRUE
-    outPrefix=op
-    extend_reads = 0
-    genome <- "hg19"
-  }
+plot_5parts_metagene <- function(queryfiles=NULL, querylabels=NULL, txdb=NULL, inputfiles=NULL, inputlabels=NULL, meta=TRUE, nbins=100, norm=FALSE,
+                                 longest=TRUE, extend_reads=0, CLIP_reads=FALSE, fiveP=1000, threeP=1000, smo=FALSE, scale=FALSE, stranded=TRUE,
+                                 outPrefix=NULL, genome="hg19", heatmap=F, rm.outlier=F){
 
-
-  names(bedlabels) <- bedfiles
+  names(querylabels) <- queryfiles
   if(!is.null(inputfiles)){
-    if(length(bedfiles) != length(inputfiles)){
-      stop("the number of bedfiles and inputfiles must be the same!")
+    if(length(queryfiles) != length(inputfiles)){
+      stop("the number of queryfiles and inputfiles must be the same!")
     }
     names(inputlabels) <- inputfiles
-    bedfiles <- c(bedfiles, inputfiles)
-    bedlabels <- c(bedlabels, inputlabels)
+    queryfiles <- c(queryfiles, inputfiles)
+    querylabels <- c(querylabels, inputlabels)
   }
 
   ## prepare transcripts that are suitable for overlap
@@ -1069,64 +1367,87 @@ plot_5parts_metagene <- function(bedfiles=NULL, bedlabels=NULL, txdb=NULL, input
     tl <- tl[tl$tx_name %in% longest_tx$tx_name, ]
   }
 
-  means <- c(promoter=fiveP, apply(tl[,c(7,6,8)], 2, median), TTS=threeP)
-  scaled_bins <- round(means*nbins/sum(means))
-  names(scaled_bins) <- featureNames
-
-  tl_selected <- tl[tl$utr5_len >= scaled_bins["utr5"] & tl$cds_len >= scaled_bins["cds"] & tl$utr3_len >= scaled_bins["utr3"], ]
-
-  print("median sizes for features")
-  print(means)
-  print("bin sizes for features")
-  print(scaled_bins)
-  print("Number of genes included in analysis")
-  print(nrow(tl_selected))
-
-
   utr5 <- gtf_to_bed_longest_tx(txdb, "utr5", longest=longest)
   utr3 <- gtf_to_bed_longest_tx(txdb, "utr3", longest=longest)
   cds <- gtf_to_bed_longest_tx(txdb, "cds", longest=longest)
 
-  gene <- genes(txdb)
-  gene <- gene[gene$gene_id %in% tl_selected$gene_id,]
+  if(meta){
+    means <- c(promoter=fiveP, apply(tl[,c(7,6,8)], 2, median), TTS=threeP)
+    scaled_bins <- round(means*nbins/sum(means))
+    names(scaled_bins) <- featureNames
 
-  promoter <- flank(gene, width=fiveP, both=F, start=T, ignore.strand=FALSE)
-  TTS <- flank(gene, width=threeP, both=F, start=F, ignore.strand=FALSE)
+    tl_selected <- tl[tl$utr5_len >= scaled_bins["utr5"] & tl$cds_len >= scaled_bins["cds"] & tl$utr3_len >= scaled_bins["utr3"], ]
 
+    print("median sizes for features")
+    print(means)
+    print("bin sizes for features")
+    print(scaled_bins)
+    print("Number of genes included in analysis")
+    print(nrow(tl_selected))
 
-  windowRs <- list("promoter"=split(promoter, as.factor(promoter$gene_id)),
-                  "utr5"=utr5$GRangesList[as.character(tl_selected$tx_id)],
-                  "cds"=cds$GRangesList[as.character(tl_selected$tx_id)],
-                  "utr3"=utr3$GRangesList[as.character(tl_selected$tx_id)],
-                  "TTS"=split(TTS, as.factor(TTS$gene_id)))
+    gene <- genes(txdb)
+    gene <- gene[gene$gene_id %in% tl_selected$gene_id,]
+
+    promoter <- flank(gene, width=fiveP, both=F, start=T, ignore.strand=FALSE)
+    TTS <- flank(gene, width=threeP, both=F, start=F, ignore.strand=FALSE)
+
+    windowRs <- list("promoter"=split(promoter, as.factor(promoter$gene_id)),
+                     "utr5"=utr5$GRangesList[as.character(tl_selected$tx_id)],
+                     "cds"=cds$GRangesList[as.character(tl_selected$tx_id)],
+                     "utr3"=utr3$GRangesList[as.character(tl_selected$tx_id)],
+                     "TTS"=split(TTS, as.factor(TTS$gene_id)))
+  }else{
+    utr5grl=lapply(utr5$GRangesList[names(utr5$GRangesList) %in% as.character(tl$tx_id)], range)
+    cdsgrl=lapply(cds$GRangesList[as.character(tl$tx_id)], range)
+    utr3grl=lapply(utr3$GRangesList[names(utr3$GRangesList) %in% as.character(tl$tx_id)], range)
+
+    l3 <- sapply(list(utr5grl, cdsgrl, utr3grl), function(x)median(sapply(x, width)))
+
+    means <- c(promoter=fiveP, l3, TTS=threeP)
+    scaled_bins <- round(means*nbins/sum(means))
+    names(scaled_bins) <- featureNames
+
+    grls <- list("utr5"=utr5grl, "cds"=cdsgrl, "utr3"=utr3grl)
+    selected_tx <- lapply(names(grs), function(x){
+      len <- sapply(grls[[x]], width) # len is named vector, where names are the tx_ids
+      nbin <- scaled_bins[x]
+      y <- names(len[which(len >= nbin)])
+    })
+
+    selected_tx <- Reduce(intersect, selected_tx)
+    selected_gene <- filter(tl, tx_id %in% selected_tx) %>% select(gene_id)
+
+    gene <- genes(txdb)
+    gene <- gene[gene$gene_id %in% selected_gene$gene_id,]
+
+    promoter <- flank(gene, width=fiveP, both=F, start=T, ignore.strand=FALSE)
+    TTS <- flank(gene, width=threeP, both=F, start=F, ignore.strand=FALSE)
+
+    windowRs <- list("promoter"=split(promoter, as.factor(promoter$gene_id)),
+                     "utr5"=as(utr5grl[selected_tx], "GRangesList"),
+                     "cds"=as(cdsgrl[selected_tx], "GRangesList"),
+                     "utr3"=as(utr3grl[selected_tx], "GRangesList"),
+                     "TTS"=split(TTS, as.factor(TTS$gene_id)))
+  }
+
 
   print(lapply(windowRs, length))
   ## start overlapping
 
   scoreMatrix_list <- list()
 
-  bedInputs <- handle_input(inputFiles=bedfiles, CLIP_reads=CLIP_reads, extend_reads=extend_reads, useScore=TRUE, outRle=TRUE, norm=norm, genome=genome)
+  bedInputs <- handle_input(inputFiles=queryfiles, CLIP_reads=CLIP_reads, extend_reads=extend_reads, useScore=TRUE, outRle=TRUE, norm=norm, genome=genome)
 
   print("computing coverage for query files")
 
-  for(bedfile in bedfiles){
-    bedlabel <- bedlabels[bedfile]
-    print(bedfile)
-    bedInput <- bedInputs[[bedfile]]
+  for(queryfile in queryfiles){
+    querylabel <- querylabels[queryfile]
+    print(queryfile)
+    bedInput <- bedInputs[[queryfile]]
     libsize <- bedInput$size
     queryRegions <- bedInput$query
     fileType <- bedInput$type
     weight_col <- bedInput$weight
-
-
-    if(0){
-      cl <- start_parallel(length(featureNames))
-      cov_lst <- parLapply(cl, featureNames, apply_scoreMatrixBin, windowRs, queryRegions, scaled_bins, weight_col, stranded)
-      stop_parallel(cl)
-
-      names(cov_lst) <- featureNames
-      print(lapply(cov_lst, dim))
-    }
 
     for(w in featureNames){
       #w <- "utr5"
@@ -1136,36 +1457,9 @@ plot_5parts_metagene <- function(bedfiles=NULL, bedlabels=NULL, txdb=NULL, input
 
       bin_op <- "mean"
       fullmatrix <- parallel_scoreMatrixBin(queryRegions, windowR, bin_num, bin_op, weight_col, stranded)
+      fullmatrix <- process_scoreMatrix(fullmatrix, libsize=libsize, norm=norm, scale=scale, heatmap=heatmap, rm.outlier=is.null(inputfiles))
 
-      fullmatrix[is.na(fullmatrix)] <- 0
-      print(dim(fullmatrix))
-
-      if(norm && !is.null(libsize)){
-        fullmatrix <- fullmatrix/(libsize/1000000)
-      }
-
-      ## remove outliers (highest score) from reference regions, using Hampel filter with 10mad instead of 3mad.
-      ## if outliers are detected, remove the top outliers only
-      if(is.null(inputfiles) && rm.outlier){
-        rowm <- apply(fullmatrix, 1, max)
-        up_bound <- median(rowm) + 100*mad(rowm)
-        if(length(which(rowm > up_bound)) > 0){
-          print("Outlier detected:")
-          outliers <- fullmatrix[which.max(rowm),]
-
-          print(paste("median of row max", median(rowm), "up_bound", up_bound))
-          print(outliers)
-
-          fullmatrix <- fullmatrix[-which.max(rowm),]
-
-          if(heatmap){
-            fullmatrixm <- log10(fullmatrix+1)
-            print(pheatmap(fullmatrixm, cluster_rows = T, cluster_cols = F, fontsize_col=8, fontsize_row=8, labels_col=colLabel, angle_col=0, main=paste(bedlabel, centerlabel, "after removing outliers")))
-          }
-        }
-      }
-
-      scoreMatrix_list[[bedlabel]][[w]] <- fullmatrix
+      scoreMatrix_list[[querylabel]][[w]] <- fullmatrix
     }
   }
 
@@ -1177,14 +1471,14 @@ plot_5parts_metagene <- function(bedfiles=NULL, bedlabels=NULL, txdb=NULL, input
   names(vx) <- featureNames
 
   mplot_df <- NULL
-  for(bedlabel in bedlabels){
+  for(querylabel in querylabels){
     plot_df <- NULL
 
     for(w in featureNames){
       #w <- "utr5"
       print(w)
       bin_num <- scaled_bins[w]
-      fullmatrix <- scoreMatrix_list[[bedlabel]][[w]]
+      fullmatrix <- scoreMatrix_list[[querylabel]][[w]]
       fullmatrix[is.na(fullmatrix)] <- 0
 
       print(dim(fullmatrix))
@@ -1193,7 +1487,7 @@ plot_5parts_metagene <- function(bedfiles=NULL, bedlabels=NULL, txdb=NULL, input
       colsd <- apply(fullmatrix, 2, sd)
       colse <- colsd/sqrt(nrow(fullmatrix))
       collabel <- seq(vx[w], vx[w]+bin_num-1)
-      querybed <- rep(bedlabel, bin_num)
+      querybed <- rep(querylabel, bin_num)
       featuretype <- rep(w, bin_num)
 
       sub_df <- NULL
@@ -1276,8 +1570,8 @@ plot_5parts_metagene <- function(bedfiles=NULL, bedlabels=NULL, txdb=NULL, input
     pdf(paste(outPrefix, "pdf", sep="."), height=8, width=12)
   }
 
-  for(i in seq_along(bedlabels)){
-    for(beds in combn(bedlabels, i, simplify = F)){
+  for(i in seq_along(querylabels)){
+    for(beds in combn(querylabels, i, simplify = F)){
       print(beds)
 
       aplot_df <- mplot_df %>%
@@ -1307,33 +1601,16 @@ plot_5parts_metagene <- function(bedfiles=NULL, bedlabels=NULL, txdb=NULL, input
     pseudo_count <- 0.1
 
     inputMatrix_list <- scoreMatrix_list[inputlabels]
-    ratiofiles <- bedfiles[!bedfiles %in% inputfiles]
-    ratiolabels <- bedlabels[!bedlabels %in% inputlabels]
+    ratiofiles <- queryfiles[!queryfiles %in% inputfiles]
+    ratiolabels <- querylabels[!querylabels %in% inputlabels]
     ratioMatrix_list <- scoreMatrix_list[ratiolabels]
     for(w in featureNames){
 
       for(i in seq_along(ratiolabels)){
         fullmatrix <- (ratioMatrix_list[[ratiolabels[i]]][[w]] + pseudo_count)/(inputMatrix_list[[inputlabels[i]]][[w]] + pseudo_count)
-        fullmatrix[is.na(fullmatrix)] <- 0
 
         if(rm.outlier){
-          rowm <- apply(fullmatrix, 1, max)
-          up_bound <- median(rowm) + 100*mad(rowm)  # mad: median absolute deviation
-
-          if(length(which(rowm > up_bound)) > 0){
-            print("Outlier detected:")
-            outliers <- fullmatrix[which.max(rowm),]
-
-            print(paste("median of row max", median(rowm), "up_bound", up_bound))
-            print(outliers)
-
-            fullmatrix <- fullmatrix[-which.max(rowm),]
-
-            if(heatmap){
-              fullmatrixm <- log10(fullmatrix+1)
-              print(pheatmap(fullmatrixm, cluster_rows = T, cluster_cols = F, fontsize_col=8, fontsize_row=8, labels_col=colLabel, angle_col=0, main=paste(bedlabel, centerlabel, "after removing outliers")))
-            }
-          }
+          fullmatrix <- rmOutlier(fullmatrix)
         }
 
         ratioMatrix_list[[ratiolabels[i]]][[w]] <- fullmatrix
@@ -1412,11 +1689,11 @@ plot_5parts_metagene <- function(bedfiles=NULL, bedlabels=NULL, txdb=NULL, input
 ## center files must be bed6
 ## if CLIP_reads, use -1 position of 5 prime of the reads
 
-plot_reference_locus <- function(bedfiles=NULL,
+plot_reference_locus <- function(queryfiles=NULL,
                             centerfiles=NULL,
                             ext=c(0,0),
                             hl=c(0,0),
-                            bedlabels=NULL,
+                            querylabels=NULL,
                             centerlabels=NULL,
                             smo=FALSE,
                             CLIP_reads=FALSE,
@@ -1436,16 +1713,16 @@ plot_reference_locus <- function(bedfiles=NULL,
                             rm.outlier=F){
 
 
-  names(bedlabels) <- bedfiles
+  names(querylabels) <- queryfiles
   names(centerlabels) <- centerfiles
 
   if(!is.null(inputfiles)){
-    if(length(bedfiles) != length(inputfiles)){
-      stop("the number of bedfiles and inputfiles must be the same!")
+    if(length(queryfiles) != length(inputfiles)){
+      stop("the number of queryfiles and inputfiles must be the same!")
     }
     names(inputlabels) <- inputfiles
-    bedfiles <- c(bedfiles, inputfiles)
-    bedlabels <- c(bedlabels, inputlabels)
+    queryfiles <- c(queryfiles, inputfiles)
+    querylabels <- c(querylabels, inputlabels)
   }
 
   ext[2] <- ext[2] - (ext[2]-ext[1])%%binsize ## to avoid binsize inconsistency, as the final binsize is dictated by bin_num
@@ -1457,18 +1734,18 @@ plot_reference_locus <- function(bedfiles=NULL,
   print("computing coverage for Sample")
   scoreMatrix_list <- list()
 
-  bedInputs <- handle_input(bedfiles, CLIP_reads=CLIP_reads, extend_reads=extend_reads,  useScore=TRUE, outRle=TRUE, norm=norm, genome=genome)
+  bedInputs <- handle_input(queryfiles, CLIP_reads=CLIP_reads, extend_reads=extend_reads,  useScore=TRUE, outRle=TRUE, norm=norm, genome=genome)
   centerInputs <- handle_input(centerfiles, CLIP_reads=FALSE, extend_reads=0, useScore=FALSE, outRle=FALSE, norm=FALSE, genome=genome)
 
-  for(bedfile in bedfiles){
-    myInput <- bedInputs[[bedfile]]
+  for(queryfile in queryfiles){
+    myInput <- bedInputs[[queryfile]]
     libsize <- myInput$size
     queryRegions <- myInput$query
     fileType <- myInput$type
     weight_col <- myInput$weight
 
-    bedlabel <- bedlabels[bedfile]
-    print(bedlabel)
+    querylabel <- querylabels[queryfile]
+    print(querylabel)
 
     for(centerfile in centerfiles){
       centerlabel <- centerlabels[centerfile]
@@ -1499,7 +1776,7 @@ plot_reference_locus <- function(bedfiles=NULL,
 
       if(heatmap){
         fullmatrixm <- log10(fullmatrix+1)
-        print(pheatmap(fullmatrixm, cluster_rows = T, cluster_cols = F, fontsize_col=8, fontsize_row=8, labels_col=colLabel, angle_col=0, main=paste(bedlabel, centerlabel)))
+        print(pheatmap(fullmatrixm, cluster_rows = T, cluster_cols = F, fontsize_col=8, fontsize_row=8, labels_col=colLabel, angle_col=0, main=paste(querylabel, centerlabel)))
       }
 
 
@@ -1519,11 +1796,11 @@ plot_reference_locus <- function(bedfiles=NULL,
 
           if(heatmap){
             fullmatrixm <- log10(fullmatrix+1)
-            print(pheatmap(fullmatrixm, cluster_rows = T, cluster_cols = F, fontsize_col=8, fontsize_row=8, labels_col=colLabel, angle_col=0, main=paste(bedlabel, centerlabel, "after removing outliers")))
+            print(pheatmap(fullmatrixm, cluster_rows = T, cluster_cols = F, fontsize_col=8, fontsize_row=8, labels_col=colLabel, angle_col=0, main=paste(querylabel, centerlabel, "after removing outliers")))
           }
         }
       }
-      scoreMatrix_list[[bedlabel]][[centerlabel]] <- fullmatrix
+      scoreMatrix_list[[querylabel]][[centerlabel]] <- fullmatrix
     }
   }
 
@@ -1535,23 +1812,23 @@ plot_reference_locus <- function(bedfiles=NULL,
   print("collecting coverage data") ## plot multiple bed files on each center
 
 
-  for(bedfile in bedfiles){
+  for(queryfile in queryfiles){
 
-    bedlabel <- bedlabels[bedfile]
-    print(bedlabel)
+    querylabel <- querylabels[queryfile]
+    print(querylabel)
     for(centerfile in centerfiles){
 
       if(0) centerfile <- centerfiles[1]
       centerlabel <- centerlabels[centerfile]
       print(centerlabel)
 
-      fullmatrix <- scoreMatrix_list[[bedlabel]][[centerlabel]]
+      fullmatrix <- scoreMatrix_list[[querylabel]][[centerlabel]]
 
       colm <- apply(fullmatrix, 2, mean)
       colsd <- apply(fullmatrix, 2, sd)
       colse <- colsd/sqrt(apply(fullmatrix, 2, length))
       collabel <- colLabel
-      querybed <- as.factor(rep(bedlabel, length(colm)))
+      querybed <- as.factor(rep(querylabel, length(colm)))
       refbed <- as.factor(rep(centerlabel, length(colm)))
 
 
@@ -1563,7 +1840,7 @@ plot_reference_locus <- function(bedfiles=NULL,
         sub_df$se <- as.vector(smooth.spline(sub_df$se, df=as.integer(bin_num/5))$y)
       }
 
-      plot_df[[paste(bedlabel,centerlabel,sep=":")]] <- sub_df
+      plot_df[[paste(querylabel,centerlabel,sep=":")]] <- sub_df
 
 
       xmin <- which(colLabel == hl[1])
@@ -1572,10 +1849,10 @@ plot_reference_locus <- function(bedfiles=NULL,
       submatrix[is.na(submatrix)] <- 0
       Intensity <- as.numeric(rowMeans(submatrix)) + 0.001 ## add 0.001 to allow log transformation of y-axis
 
-      Query <- as.factor(rep(bedlabel, length(Intensity)))
+      Query <- as.factor(rep(querylabel, length(Intensity)))
       Reference <- as.factor(rep(centerlabel, length(Intensity)))
       subdf <- data.frame(Intensity, Query, Reference)
-      stat_df[[paste(bedlabel,centerlabel,sep=":")]] <- subdf
+      stat_df[[paste(querylabel,centerlabel,sep=":")]] <- subdf
 
     }
   }
@@ -1596,8 +1873,8 @@ plot_reference_locus <- function(bedfiles=NULL,
     write.table(mplot_dt, paste(outPrefix, "_multiRef_bin.tsv", sep=""), sep="\t", col.names=T, row.names=F, quote=F)
   }
 
-  for(i in seq_along(bedlabels)){
-    for(beds in combn(bedlabels, i, simplify = F)){
+  for(i in seq_along(querylabels)){
+    for(beds in combn(querylabels, i, simplify = F)){
       for(j in seq_along(centerlabels)){
         for(centers in combn(centerlabels, j, simplify = F)){
           print(beds)
@@ -1649,7 +1926,7 @@ plot_reference_locus <- function(bedfiles=NULL,
 
 
             print(plot_grid(p, ps1, ncol = 2, rel_widths = c(3,2)))
-          }else if((i == 1 && j == 1) || (i == length(bedlabels) && j == length(centerlabels))){
+          }else if((i == 1 && j == 1) || (i == length(querylabels) && j == length(centerlabels))){
             print(p)
           }
 
@@ -1664,12 +1941,12 @@ plot_reference_locus <- function(bedfiles=NULL,
     pseudo_count <- 0.1
 
     inputMatrix_list <- scoreMatrix_list[inputlabels]
-    ratiofiles <- bedfiles[!bedfiles %in% inputfiles]
-    ratiolabels <- bedlabels[!bedlabels %in% inputlabels]
+    ratiofiles <- queryfiles[!queryfiles %in% inputfiles]
+    ratiolabels <- querylabels[!querylabels %in% inputlabels]
     ratioMatrix_list <- scoreMatrix_list[ratiolabels]
     for(centerfile in centerfiles){
       centerlabel <- centerlabels[centerfile]
-      for(i in seq_along(bedlabels)){
+      for(i in seq_along(querylabels)){
         fullmatrix <- (ratioMatrix_list[[ratiolabels[i]]][[centerlabel]] + pseudo_count)/(inputMatrix_list[[inputlabels[i]]][[centerlabel]] + pseudo_count)
         fullmatrix[is.na(fullmatrix)] <- 0
 
@@ -1688,7 +1965,7 @@ plot_reference_locus <- function(bedfiles=NULL,
 
             if(heatmap){
               fullmatrixm <- log10(fullmatrix+1)
-              print(pheatmap(fullmatrixm, cluster_rows = T, cluster_cols = F, fontsize_col=8, fontsize_row=8, labels_col=colLabel, angle_col=0, main=paste(bedlabel, centerlabel, "after removing outliers")))
+              print(pheatmap(fullmatrixm, cluster_rows = T, cluster_cols = F, fontsize_col=8, fontsize_row=8, labels_col=colLabel, angle_col=0, main=paste(querylabel, centerlabel, "after removing outliers")))
             }
           }
         }
@@ -1827,314 +2104,14 @@ plot_reference_locus <- function(bedfiles=NULL,
   return(list("plot"=mplot_dt, "stat"=mstat_dt))
 }
 
-## bed files can be reads (bam) of peaks (bed6 only)
-## center files must be bed6
-## if CLIP_reads, use -1 position of the reads
-## add a random center for each center, but cannot plot multiple centerfiles for each data bed
+
+
 plot_reference_locus_with_random <- function(txdb=NULL,
-                                             bedfiles=NULL,
-                                             centerfiles=NULL,
-                                             ext=0, hl=c(0,0),
-                                             bedlabels=NULL,
-                                             centerlabels=NULL,
-                                             binsize=10,
-                                             refPoint="center",
-                                             CLIP_reads=FALSE,
-                                             stranded=TRUE){
-
-  names(bedlabels) <- bedfiles
-  names(centerlabels) <- centerfiles
-
-  ## ranges for overlap count
-  rb <- ext #broad
-  rn <- hl[2]  #narrow
-
-  color_store <- c("#00AFBB", "#E7B800", "#A0BDE0", "#0020C2", "#64E986", "#F5DEB3", "#C19A6B", "#E8A317", "#8E7618", "#A0522D", "#990012", "#CB6D51")
-
-  ## get protein-coding genes exons
-
-  exons <- gtf_to_bed_longest_tx(txdb, "exon", longest=TRUE)
-  utr5 <- gtf_to_bed_longest_tx(txdb, "utr5", longest=TRUE)
-  utr3 <- gtf_to_bed_longest_tx(txdb, "utr3", longest=TRUE)
-  cds <- gtf_to_bed_longest_tx(txdb, "cds", longest=TRUE)
-  gene <- gtf_to_bed_longest_tx(txdb, "transcript", longest=TRUE)
-
-
-  region_list <- list("Transcript" = exons$GRanges,
-                      "5'UTR" = utr5$GRanges,
-                      "CDS" = cds$GRanges,
-                      "3'UTR" = utr3$GRanges,
-                      "Gene" = gene$GRanges,
-                      "unrestricted" = NULL)
-
-
-  ## plot multiple centers for each bed
-
-  bin_num <- round(2*ext/binsize)
-  Ylab <- "Signal intensity"
-  logYlab <- expression(paste(Log[10], " Signal intensity"))
-
-  for(bedfile in bedfiles){
-   # bedfile <- bedfiles[1]
-    print(paste("Processing bed", bedfile))
-
-    myInput <- handle_input(bedfile, CLIP_reads)
-    libsize <- myInput$size
-    queryRegions <- myInput$query
-    fileType <- myInput$type
-    weight_col <- myInput$weight
-
-
-    bedlabel <- bedlabels[bedfile]
-    for(centerfile in centerfiles){
-    #  centerfile <- centerfiles[1]
-      print(paste("Processing reference", centerfile))
-      centerlabel <- centerlabels[centerfile]
-      centerInput <- handle_input(centerfile)
-      windowRegionsALL <- centerInput$query
-
-
-      for(regionName in names(region_list)){
-     #   regionName <- names(region_list)[3]
-        print(paste("Processing genomic region", regionName))
-        plot_df <- NULL
-        stat_df <- NULL
-        countOverlap_df <- NULL
-
-        if(regionName == "unrestricted"){
-          windowRegions <- windowRegionsALL
-        }else{
-          region <- region_list[[regionName]]
-          windowRegions <- filter_by_overlaps(windowRegionsALL, region)
-        }
-
-        windowRs <- resize(windowRegions, width = 2*ext, fix = refPoint)
-
-        windowsbroad <- resize(windowRegions, width = 2*rb, fix = refPoint)
-        windowsnarrow <- resize(windowRegions, width = 2*rn, fix = refPoint)
-
-        broad <- countOverlaps(windowsbroad, queryRegions)
-        qbroad <- quantile(broad, probs=seq(0,1, 0.01))
-
-        narrow <- countOverlaps(windowsnarrow, queryRegions)
-        qnarrow <- quantile(narrow, probs=seq(0,1, 0.01))
-
-        refsize <- length(windowRs)
-
-        smc = ScoreMatrixBin(target = queryRegions, windows = windowRs, bin.num=bin_num, bin.op="mean", weight.col=weight_col, strand.aware = stranded)
-
-
-        fullmatrix <- smc@.Data
-
-        xmin <- round(c(hl[1]+ext)/binsize)
-        xmax <- round(c(hl[2]+ext)/binsize)
-
-        colm <- apply(fullmatrix, 2, mean)
-        colsd <- apply(fullmatrix, 2, sd)
-        colse <- colsd/sqrt(nrow(fullmatrix))
-        collabel <- seq(-ext, (ext-binsize), binsize)
-        refbed <- rep(centerlabel, ncol(fullmatrix))
-
-        sub_df <- data.frame("Intensity"=colm, "sd"=colsd, "se"=colse, "Position"=collabel, "Reference"=as.factor(refbed)) %>%
-          mutate(lower=Intensity-se, upper=Intensity+se)
-
-        plot_df <- rbind(plot_df, sub_df)
-
-        submatrix <- (fullmatrix[, xmin:xmax])
-        submatrix[is.na(submatrix)] <- 0
-        Intensity <- apply(submatrix, 1, mean) + 1  ## 1 is added to allow log transformation of y-axis in ggplot
-        Group <- as.factor(rep(centerlabel, length(Intensity)))
-        subdf <- data.frame(Intensity, Group)
-        stat_df <- rbind(stat_df, subdf)
-
-        ## create randomized center, repeat 25 times
-        fullmatrix <- NULL
-        random_broad <- NULL
-        random_narrow <- NULL
-        random_broad_count <- NULL
-        random_narrow_count <- NULL
-        iter <- 25
-        for (i in 1:iter){
-          random_points <- sample(-ext:ext, length(windowRegions), replace=T)
-          rwindowRegions <- shift(windowRegions, shift=random_points)
-          windowRs <- resize(rwindowRegions, width = 2*ext, fix = refPoint)
-
-          windowsbroad <- resize(rwindowRegions, width = 2*rb, fix = refPoint)
-          windowsnarrow <- resize(rwindowRegions, width = 2*rn, fix = refPoint)
-
-          rbroad <- countOverlaps(windowsbroad, queryRegions)
-          rqbroad <- quantile(rbroad, probs=seq(0,1, 0.01))
-
-          rnarrow <- countOverlaps(windowsnarrow, queryRegions)
-          rqnarrow <- quantile(rnarrow, probs=seq(0,1, 0.01))
-
-          smc = ScoreMatrixBin(target = queryRegions, windows = windowRs, bin.num=bin_num, bin.op="mean", weight.col=weight_col, strand.aware = stranded)
-
-
-          fullmatrixi <- smc@.Data
-
-          try(ifelse(i == 1, fullmatrix <- fullmatrixi, fullmatrix <- fullmatrix + fullmatrixi))
-          try(ifelse(i == 1, random_broad <- rqbroad, random_broad <- cbind(random_broad, rqbroad)))
-          try(ifelse(i == 1, random_narrow <- rqnarrow, random_narrow <- cbind(random_narrow,rqnarrow)))
-          try(ifelse(i == 1, random_broad_count <- rbroad, random_broad_count <- cbind(random_broad_count, rbroad)))
-          try(ifelse(i == 1, random_narrow_count <- rnarrow, random_narrow_count <- cbind(random_narrow_count,rnarrow)))
-        }
-
-        fullmatrix <- fullmatrix/iter
-        random_broad_m <- apply(random_broad, 1, mean)
-        random_narrow_m <- apply(random_narrow, 1, mean)
-        random_broad_se <- apply(random_broad, 1, sd)/sqrt(iter)
-        random_narrow_se <- apply(random_narrow, 1, sd)/sqrt(iter)
-
-        random_broad_count_m <- apply(random_broad_count, 1, mean)
-        random_narrow_count_m <- apply(random_narrow_count, 1, mean)
-        random_broad_count_se <- apply(random_broad_count, 1, sd)/sqrt(iter)
-        random_broad_count_se <- random_broad_count_se[order(random_broad_count_m)]
-        random_narrow_count_se <- apply(random_narrow_count, 1, sd)/sqrt(iter)
-        random_narrow_count_se <- random_narrow_count_se[order(random_narrow_count_m)]
-        random_broad_count_m <- sort(random_broad_count_m)
-        random_narrow_count_m <- sort(random_narrow_count_m)
-
-        xmin <- round(c(hl+ext)/binsize)[1]
-        xmax <- round(c(hl+ext)/binsize)[2]
-
-        colm <- apply(fullmatrix, 2, mean)
-        colsd <- apply(fullmatrix, 2, sd)
-        colse <- colsd/sqrt(nrow(fullmatrix))
-        collabel <- seq(-ext, (ext-binsize), binsize)
-        refbed <- rep("Random", ncol(fullmatrix))
-
-        sub_df <- data.frame("Intensity"=colm, "sd"=colsd, "se"=colse, "Position"=collabel, "Reference"=as.factor(refbed)) %>%
-          mutate(lower=Intensity-se, upper=Intensity+se)
-
-        plot_df <- rbind(plot_df, sub_df)
-
-        submatrix <- (fullmatrix[, xmin:xmax])
-        submatrix[is.na(submatrix)] <- 0
-        Intensity <- apply(submatrix, 1, mean) + 1 ## 1 is added to allow log transformation of y-axis by ggplot
-        Group <- as.factor(rep("Random", length(Intensity)))
-        subdf <- data.frame(Intensity, Group)
-        stat_df <- rbind(stat_df, subdf)
-
-        percent <- seq(100,0,-1)
-        qcountOverlap_df <- data.frame(Percentage=rep(percent,4),
-                                      Group=as.factor(c(rep(paste("-",rb,":",rb,sep=""), length(qbroad)), rep(paste("-",rn,":",rn,sep=""), length(qnarrow)), rep(paste("random-",rb,":",rb,sep=""), length(qbroad)), rep(paste("random-",rn,":",rn,sep=""), length(qnarrow)))),
-                                      OverlapCount=c(qbroad, qnarrow, random_broad_m, random_narrow_m),
-                                      se=c(rep(0, length(qbroad)), rep(0, length(qnarrow)), random_broad_se, random_narrow_se)) %>%
-                                      mutate(lower=OverlapCount-se, upper=OverlapCount+se)
-
-        countOverlap_df <- data.frame(Rank=c(seq_along(broad), seq_along(narrow), seq_along(random_broad_count_m), seq_along(random_narrow_count_m)),
-                                       Group=as.factor(c(rep(paste("-",rb,":",rb,sep=""), length(broad)), rep(paste("-",rn,":",rn,sep=""), length(narrow)), rep(paste("random-",rb,":",rb,sep=""), length(random_broad_count_m)), rep(paste("random-",rn,":",rn,sep=""), length(random_narrow_count_m)))),
-                                       OverlapCount=c(sort(broad), sort(narrow), random_broad_count_m, random_narrow_count_m),
-                                       se=c(rep(0, length(broad)*2), random_broad_count_se, random_narrow_count_se)) %>%
-                                      mutate(lower=OverlapCount-se, upper=OverlapCount+se)
-
-
-        p <- ggplot(plot_df, aes(x=Position, y=Intensity, color=Reference)) + scale_fill_manual(values=c("#00AFBB", "#E7B800")) +
-          geom_line(size=1) + geom_point(color="grey30", size=2) +
-          geom_vline(xintercept = 0, linetype="dotted", color = "blue", size=0.5) +
-          geom_ribbon(aes(ymin=lower, ymax=upper, fill=Reference), linetype=0, alpha=0.3) +
-          annotate("rect", xmin=hl[1], xmax=hl[2], ymin=-Inf, ymax=Inf, fill="grey", color="grey", alpha=0.3) +
-          theme_classic() + theme(legend.position="bottom") + xlab(refPoint) + ylab("Signal intensity") +
-          theme(axis.title.x = element_text(face="bold", size=10), axis.title.y = element_text(face="bold", size=10)) +
-          ggtitle(paste("Feature:", regionName, "\nReference size:", refsize, "\nSample name:", bedlabel))
-
-
-        ps1 <- ggplot(stat_df, aes(x=Group, y=Intensity, fill=Group)) + scale_fill_manual(values=c("#00AFBB", "#E7B800")) +
-          geom_boxplot(notch=TRUE) +
-          theme_classic() +
-          theme(axis.text.x = element_text(face="bold", size=10, color="black")) +
-          theme(axis.title.x = element_blank(), axis.title.y = element_text(face="bold", size=10)) +
-          theme(legend.position = "none") +
-          labs(y="Signal intensity") + #expression(paste(Log[10], "(Signal intensity)"))) +
-          scale_x_discrete(limits=c("Random", centerlabel)) + # labels=c("TSN" = expression(paste(m^6,"Am")), featureName = expression(paste("5'-UTR ", m^6, "A"))))
-          stat_summary(fun=mean, geom="point", shape=23, size=4, fill="black") +
-          geom_signif(comparisons = list(c(1, 2)), test='wilcox.test', map_signif_level=TRUE) +
-          scale_y_continuous(trans='log10')
-          #scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x))
-
-        ps2 <- ggplot(qcountOverlap_df, aes(x=Percentage, y=OverlapCount, color=Group)) + scale_fill_manual(values=color_store[1:4]) +
-          geom_line(size=1) +
-          geom_ribbon(aes(ymin=lower, ymax=upper, fill=Group), linetype=0, alpha=0.3) +
-          theme_classic() + theme(legend.position="bottom") + ylab("Overlap count") + xlab("Percentage") +
-          geom_hline(yintercept = 1, linetype="dotted", color = "blue", size=0.5) +
-          theme(axis.title.x = element_text(face="bold", size=10), axis.title.y = element_text(face="bold", size=10)) +
-          scale_y_continuous(trans='log10')
-        #scale_y_log10(breaks = trans_breaks("log10", function(x) 10^x)) +
-
-
-        ps3 <- ggplot(countOverlap_df, aes(x=Rank, y=OverlapCount, color=Group)) + scale_fill_manual(values=color_store[1:4]) +
-          geom_line(size=1) +
-          geom_ribbon(aes(ymin=lower, ymax=upper, fill=Group), linetype=0, alpha=0.3) +
-          theme_classic() + theme(legend.position="bottom") + ylab("Overlap count") + xlab("Rank") +
-          theme(axis.title.x = element_text(face="bold", size=10), axis.title.y = element_text(face="bold", size=10))
-
-
-        print(plot_grid(p, ps1, ps2, ps3, ncol = 2, rel_widths = c(1,1)))
-
-
-        ## the rest of the code is not used
-        #ps2 <- add_pval(ps1, pairs = list(c(1, 2)), test='wilcox.test', heights=max(stat_df$Intensity), pval_star=TRUE)
-
-        if(0){
-        stat_df <- mutate(stat_df, Ranks=rank(Intensity))
-        levels(stat_df$Group)
-        RANDOM <- sum(stat_df[stat_df$Group == "Random", "Ranks"])
-        CENTER <- sum(stat_df[stat_df$Group != "Random", "Ranks"])
-        w <- wilcox.test(Intensity ~ Group, data=stat_df)
-        t <- t.test(Intensity ~ Group, data=stat_df)
-        k <- kruskal.test(Intensity ~ Group, data=stat_df)
-        a <- aov(Intensity ~ Group, data=stat_df)
-        h <- TukeyHSD(a)
-
-        px <- ggbarplot(stat_df, x="Group", y="Intensity", add="mean_se", fill="Group", palette = c("#00AFBB", "#E7B800"),
-                        position = position_dodge()) +
-          stat_compare_means(label.y=mean(stat_df$Intensity)*3)
-        #print(psx)
-        #ps <- ggboxplot(stat_df, x="Group", y="Intensity", xlab=FALSE, ylab="Signal intensity", notch=TRUE, outlier.shape = 16) +
-        #   stat_compare_means(label = "p.signif", method="wilcox.test", comparisons=list(c("random", centerlabel)), hide.ns = FALSE)
-
-
-        stat_df_SE <- ddply(stat_df, c("Group"), summarise,
-                            N    = length(Intensity),
-                            mean = mean(Intensity),
-                            median = median(Intensity),
-                            sd   = sd(Intensity),
-                            se   = sd / sqrt(N))
-
-        print(stat_df_SE)
-        print(paste("Rank sum Center bed", CENTER, "Random", RANDOM))
-        print(k)
-
-        ps4 <- ggplot(stat_df, aes(x=Group, y=Intensity, fill=Group)) +
-          geom_bar(position=position_dodge(), stat="summary", fun="mean") +
-          theme_classic() +
-          theme(axis.title.x = element_blank(), axis.title.y = element_text(face="bold", size=14)) +
-          theme(legend.position = "none") +
-          labs(y="Signal intensity") + #expression(paste(Log[10], "(Signal intensity)"))) +
-          scale_x_discrete(limits=c("Random", centerlabel)) + # labels=c("TSN" = expression(paste(m^6,"Am")), featureName = expression(paste("5'-UTR ", m^6, "A")))) +
-          theme(axis.text.x = element_text(face="bold", size=14, color="black")) +
-          stat_compare_means(comparisons = list(c(1, 2))) +
-          scale_y_continuous(trans='log10')
-
-
-        #print(plot_grid(p, ps3, ncol = 2, rel_widths = c(2,1)))
-        }
-      }
-
-    }
-  }
-
-
-}
-
-
-plot_reference_locus_with_random1 <- function(txdb=NULL,
-                                              bedfiles=NULL,
+                                              queryfiles=NULL,
                                               centerfiles=NULL,
                                               ext=c(0,0),
                                               hl=c(0,0),
-                                              bedlabels=NULL,
+                                              querylabels=NULL,
                                               centerlabels=NULL,
                                               smo=FALSE,
                                               CLIP_reads=FALSE,
@@ -2172,16 +2149,16 @@ plot_reference_locus_with_random1 <- function(txdb=NULL,
   }
 
 
-  names(bedlabels) <- bedfiles
+  names(querylabels) <- queryfiles
   names(centerlabels) <- centerfiles
 
   if(!is.null(inputfiles)){
-    if(length(bedfiles) != length(inputfiles)){
-      stop("the number of bedfiles and inputfiles must be the same!")
+    if(length(queryfiles) != length(inputfiles)){
+      stop("the number of queryfiles and inputfiles must be the same!")
     }
     names(inputlabels) <- inputfiles
-    bedfiles <- c(bedfiles, inputfiles)
-    bedlabels <- c(bedlabels, inputlabels)
+    queryfiles <- c(queryfiles, inputfiles)
+    querylabels <- c(querylabels, inputlabels)
   }
 
   ext[2] <- ext[2] - (ext[2]-ext[1])%%binsize ## to avoid binsize inconsistency, as the final binsize is dictated by bin_num
@@ -2221,21 +2198,21 @@ plot_reference_locus_with_random1 <- function(txdb=NULL,
   scoreMatrix_list_random <- list()
   quantile_list_random <- list()
 
-  bedInputs <- handle_input(bedfiles, CLIP_reads=CLIP_reads, extend_reads=extend_reads,  useScore=TRUE, outRle=FALSE, norm=norm, genome=genome)
+  bedInputs <- handle_input(queryfiles, CLIP_reads=CLIP_reads, extend_reads=extend_reads,  useScore=TRUE, outRle=FALSE, norm=norm, genome=genome)
   centerInputs <- handle_input(centerfiles, CLIP_reads=FALSE, extend_reads=0, useScore=FALSE, outRle=FALSE, norm=FALSE, genome=genome)
 
-  for(bedfile in bedfiles){
+  for(queryfile in queryfiles){
     if(0){
-      bedfile <- bedfiles[1]
+      queryfile <- queryfiles[1]
     }
-    myInput <- bedInputs[[bedfile]]
+    myInput <- bedInputs[[queryfile]]
     libsize <- myInput$size
     queryRegions <- myInput$query
     fileType <- myInput$type
     weight_col <- myInput$weight
 
-    bedlabel <- bedlabels[bedfile]
-    print(bedlabel)
+    querylabel <- querylabels[queryfile]
+    print(querylabel)
     print(libsize)
 
     for(centerfile in centerfiles){
@@ -2279,7 +2256,7 @@ plot_reference_locus_with_random1 <- function(txdb=NULL,
           qnarrow <- quantile(narrow, probs=seq(0,1, 0.01))
 
 
-          quantile_list[[bedlabel]][[centerlabel]][[regionName]] <- list("broad"=broad,
+          quantile_list[[querylabel]][[centerlabel]][[regionName]] <- list("broad"=broad,
                                                                          "narrow"=narrow,
                                                                          "qbroad"=qbroad,
                                                                          "qnarrow"=qnarrow,
@@ -2288,10 +2265,10 @@ plot_reference_locus_with_random1 <- function(txdb=NULL,
           stop("invalid reference point!")
         }
 
-
+        queryRegionsRle <- coverage(queryRegions, weight=weight_col)
         windowRs <- split(windowRs, f=factor(seq(1:length(windowRs))))
 
-        fullmatrix <- parallel_scoreMatrixBin(queryRegions, windowRs, bin_num, bin_op, weight_col, stranded)
+        fullmatrix <- parallel_scoreMatrixBin(queryRegionsRle, windowRs, bin_num, bin_op, weight_col, stranded)
         fullmatrix[is.na(fullmatrix)] <- 0
 
         if(norm && !is.null(libsize)){
@@ -2305,7 +2282,7 @@ plot_reference_locus_with_random1 <- function(txdb=NULL,
 
         if(heatmap){
           fullmatrixm <- log10(fullmatrix+1)
-          print(pheatmap(fullmatrixm, cluster_rows = T, cluster_cols = F, fontsize_col=8, fontsize_row=8, labels_col=colLabel, angle_col=0, main=paste(bedlabel, centerlabel)))
+          print(pheatmap(fullmatrixm, cluster_rows = T, cluster_cols = F, fontsize_col=8, fontsize_row=8, labels_col=colLabel, angle_col=0, main=paste(querylabel, centerlabel)))
         }
 
 
@@ -2325,11 +2302,11 @@ plot_reference_locus_with_random1 <- function(txdb=NULL,
 
             if(heatmap){
               fullmatrixm <- log10(fullmatrix+1)
-              print(pheatmap(fullmatrixm, cluster_rows = T, cluster_cols = F, fontsize_col=8, fontsize_row=8, labels_col=colLabel, angle_col=0, main=paste(bedlabel, centerlabel, "after removing outliers")))
+              print(pheatmap(fullmatrixm, cluster_rows = T, cluster_cols = F, fontsize_col=8, fontsize_row=8, labels_col=colLabel, angle_col=0, main=paste(querylabel, centerlabel, "after removing outliers")))
             }
           }
         }
-        scoreMatrix_list[[bedlabel]][[centerlabel]][[regionName]] <- fullmatrix
+        scoreMatrix_list[[querylabel]][[centerlabel]][[regionName]] <- fullmatrix
 
         ## create randomized centers, repeat n_random times
         random_results <- lapply(seq(1, n_random), function(i){
@@ -2385,20 +2362,21 @@ plot_reference_locus_with_random1 <- function(txdb=NULL,
           fullmatrix <- as.data.frame(smc)
         }
 
-        scoreMatrix_list_random[[bedlabel]][[centerlabel]][[regionName]] <- fullmatrix
+        scoreMatrix_list_random[[querylabel]][[centerlabel]][[regionName]] <- fullmatrix
 
         random_count_list <- lapply(c("broad", "qbroad", "narrow", "qnarrow"), function(v){
           alist <- lapply(random_results, function(x) x[[v]])
           amatrix <- do.call(cbind, alist)
           amatrix_m <- apply(amatrix, 1, mean)
           amatrix_se <- apply(amatrix, 1, sd)/sqrt(n_random)
-          amatrix_se <- amatrix_se[order(amatrix_m)]
-          amatrix_m <- sort(amatrix_m)
-          return(list("mean"=amatrix_m, "se"=amatrix_se))
+          adf <- data.frame("mean"=amatrix_m, "se"=amatrix_se) %>%
+            arrange(mean)
+
+          return(as.list(adf))
         })
 
         names(random_count_list) <- c("broad", "qbroad", "narrow", "qnarrow")
-        quantile_list_random[[bedlabel]][[centerlabel]][[regionName]] <- random_count_list
+        quantile_list_random[[querylabel]][[centerlabel]][[regionName]] <- random_count_list
       }
     }
   }
@@ -2412,12 +2390,12 @@ plot_reference_locus_with_random1 <- function(txdb=NULL,
     pdf(paste(outPrefix, "pdf", sep="."), height=8, width=12)
   }
 
-  for(bedfile in bedfiles){
+  for(queryfile in queryfiles){
     if(0){
-      bedfile <- bedfiles[1]
+      queryfile <- queryfiles[1]
     }
-    print(paste("Processing bed", bedfile))
-    bedlabel <- bedlabels[bedfile]
+    print(paste("Processing bed", queryfile))
+    querylabel <- querylabels[queryfile]
 
     for(centerfile in centerfiles){
       if(0){
@@ -2435,8 +2413,8 @@ plot_reference_locus_with_random1 <- function(txdb=NULL,
         stat_df <- NULL
         countOverlap_df <- NULL
 
-        fullmatrix_list <- list(scoreMatrix_list[[bedlabel]][[centerlabel]][[regionName]],
-                                scoreMatrix_list_random[[bedlabel]][[centerlabel]][[regionName]])
+        fullmatrix_list <- list(scoreMatrix_list[[querylabel]][[centerlabel]][[regionName]],
+                                scoreMatrix_list_random[[querylabel]][[centerlabel]][[regionName]])
         names(fullmatrix_list) <- c(centerlabel, "Random")
 
         for(alabel in c(centerlabel, "Random")){
@@ -2445,17 +2423,18 @@ plot_reference_locus_with_random1 <- function(txdb=NULL,
           colsd <- apply(fullmatrix, 2, sd)
           colse <- colsd/sqrt(apply(fullmatrix, 2, length))
           collabel <- colLabel
-          querybed <- as.factor(rep(bedlabel, length(colm)))
+          querybed <- as.factor(rep(querylabel, length(colm)))
           refbed <- as.factor(rep(alabel, length(colm)))
 
           sub_df <- data.frame(colm, colsd, colse, collabel, querybed, refbed)
           colnames(sub_df) <- c("Intensity", "sd", "se", "Position", "Query", "Reference")
-          sub_df <- mutate(sub_df, lower=Intensity-se, upper=Intensity+se)
 
           if(smo){
             sub_df$Intensity <- as.vector(smooth.spline(sub_df$Intensity, df=as.integer(bin_num/5))$y)
             sub_df$se <- as.vector(smooth.spline(sub_df$se, df=as.integer(bin_num/5))$y)
           }
+
+          sub_df <- mutate(sub_df, lower=Intensity-se, upper=Intensity+se)
 
           xmin <- which(colLabel == hl[1])
           xmax <- which(colLabel == hl[2])
@@ -2463,7 +2442,7 @@ plot_reference_locus_with_random1 <- function(txdb=NULL,
           submatrix[is.na(submatrix)] <- 0
           Intensity <- as.numeric(rowMeans(submatrix)) + 0.001 ## add 0.001 to allow log transformation of y-axis
 
-          Query <- as.factor(rep(bedlabel, length(Intensity)))
+          Query <- as.factor(rep(querylabel, length(Intensity)))
           Reference <- as.factor(rep(alabel, length(Intensity)))
           subdf <- data.frame(Intensity, Query, Reference)
 
@@ -2471,14 +2450,14 @@ plot_reference_locus_with_random1 <- function(txdb=NULL,
           stat_df <- rbind(stat_df, subdf)
         }
 
-        refsize <- quantile_list[[bedlabel]][[centerlabel]][[regionName]]$refsize
+        refsize <- quantile_list[[querylabel]][[centerlabel]][[regionName]]$refsize
 
-        qbroad <- quantile_list[[bedlabel]][[centerlabel]][[regionName]]$qbroad
-        qnarrow <-quantile_list[[bedlabel]][[centerlabel]][[regionName]]$qnarrow
-        random_qbroad_m <- quantile_list_random[[bedlabel]][[centerlabel]][[regionName]]$qbroad$mean
-        random_qnarrow_m <- quantile_list_random[[bedlabel]][[centerlabel]][[regionName]]$qnarrow$mean
-        random_qbroad_se <- quantile_list_random[[bedlabel]][[centerlabel]][[regionName]]$qbroad$se
-        random_qnarrow_se <- quantile_list_random[[bedlabel]][[centerlabel]][[regionName]]$qnarrow$se
+        qbroad <- quantile_list[[querylabel]][[centerlabel]][[regionName]]$qbroad
+        qnarrow <-quantile_list[[querylabel]][[centerlabel]][[regionName]]$qnarrow
+        random_qbroad_m <- quantile_list_random[[querylabel]][[centerlabel]][[regionName]]$qbroad$mean
+        random_qnarrow_m <- quantile_list_random[[querylabel]][[centerlabel]][[regionName]]$qnarrow$mean
+        random_qbroad_se <- quantile_list_random[[querylabel]][[centerlabel]][[regionName]]$qbroad$se
+        random_qnarrow_se <- quantile_list_random[[querylabel]][[centerlabel]][[regionName]]$qnarrow$se
 
         percent <- seq(100,0,-1)
         quantileOverlap_df <- data.frame(Percentage=rep(percent,4),
@@ -2487,12 +2466,12 @@ plot_reference_locus_with_random1 <- function(txdb=NULL,
                                        se=c(rep(0, length(qbroad)), rep(0, length(qnarrow)), random_qbroad_se, random_qnarrow_se)) %>%
           mutate(lower=OverlapCount-se, upper=OverlapCount+se)
 
-        broad <- quantile_list[[bedlabel]][[centerlabel]][[regionName]]$broad
-        narrow <-quantile_list[[bedlabel]][[centerlabel]][[regionName]]$narrow
-        random_broad_m <- quantile_list_random[[bedlabel]][[centerlabel]][[regionName]]$broad$mean
-        random_narrow_m <- quantile_list_random[[bedlabel]][[centerlabel]][[regionName]]$narrow$mean
-        random_broad_se <- quantile_list_random[[bedlabel]][[centerlabel]][[regionName]]$broad$se
-        random_narrow_se <- quantile_list_random[[bedlabel]][[centerlabel]][[regionName]]$narrow$se
+        broad <- quantile_list[[querylabel]][[centerlabel]][[regionName]]$broad
+        narrow <-quantile_list[[querylabel]][[centerlabel]][[regionName]]$narrow
+        random_broad_m <- quantile_list_random[[querylabel]][[centerlabel]][[regionName]]$broad$mean
+        random_narrow_m <- quantile_list_random[[querylabel]][[centerlabel]][[regionName]]$narrow$mean
+        random_broad_se <- quantile_list_random[[querylabel]][[centerlabel]][[regionName]]$broad$se
+        random_narrow_se <- quantile_list_random[[querylabel]][[centerlabel]][[regionName]]$narrow$se
 
         countOverlap_df <- data.frame(Rank=c(seq_along(broad), seq_along(narrow), seq_along(random_broad_m), seq_along(random_narrow_m)),
                                       Group=as.factor(c(rep(paste("-",rb,":",rb,sep=""), length(broad)), rep(paste("-",rn,":",rn,sep=""), length(narrow)), rep(paste("random-",rb,":",rb,sep=""), length(random_broad_m)), rep(paste("random-",rn,":",rn,sep=""), length(random_narrow_m)))),
@@ -2508,7 +2487,7 @@ plot_reference_locus_with_random1 <- function(txdb=NULL,
           annotate("rect", xmin=hl[1], xmax=hl[2], ymin=-Inf, ymax=Inf, fill="grey", color="grey", alpha=0.3) +
           theme_classic() + theme(legend.position="bottom") + xlab(Xlab) + ylab(Ylab) +
           theme(axis.title.x = element_text(face="bold", size=10), axis.title.y = element_text(face="bold", size=10)) +
-          ggtitle(paste("Feature:", regionName, "\nReference size:", refsize, "\nSample name:", bedlabel))
+          ggtitle(paste("Feature:", regionName, "\nReference size:", refsize, "\nSample name:", querylabel))
 
 
         ps1 <- ggplot(stat_df, aes(x=Reference, y=Intensity, fill=Reference)) + scale_fill_manual(values=c("#00AFBB", "#E7B800")) +
@@ -2601,8 +2580,8 @@ plot_reference_locus_with_random1 <- function(txdb=NULL,
     logYlab <- expression(paste(Log[10], " Ratio-over-Input"))
     pseudo_count <- 0.1
 
-    ratiofiles <- bedfiles[!bedfiles %in% inputfiles]
-    ratiolabels <- bedlabels[!bedlabels %in% inputlabels]
+    ratiofiles <- queryfiles[!queryfiles %in% inputfiles]
+    ratiolabels <- querylabels[!querylabels %in% inputlabels]
     inputMatrix_list <- scoreMatrix_list[inputlabels]
     ratioMatrix_list <- scoreMatrix_list[ratiolabels]
 
@@ -2612,7 +2591,7 @@ plot_reference_locus_with_random1 <- function(txdb=NULL,
     for(centerfile in centerfiles){
       centerlabel <- centerlabels[centerfile]
       for(regionName in names(region_list)){
-        for(i in seq_along(bedlabels)){
+        for(i in seq_along(ratiolabels)){
           rm <- ratioMatrix_list[[ratiolabels[i]]][[centerlabel]][[regionName]]
           im <- inputMatrix_list[[inputlabels[i]]][[centerlabel]][[regionName]]
           minrow <- min(nrow(rm), nrow(im))
@@ -2635,20 +2614,24 @@ plot_reference_locus_with_random1 <- function(txdb=NULL,
 
               if(heatmap){
                 fullmatrixm <- log10(fullmatrix+1)
-                print(pheatmap(fullmatrixm, cluster_rows = T, cluster_cols = F, fontsize_col=8, fontsize_row=8, labels_col=colLabel, angle_col=0, main=paste(bedlabel, centerlabel, "after removing outliers")))
+                print(pheatmap(fullmatrixm, cluster_rows = T, cluster_cols = F, fontsize_col=8, fontsize_row=8, labels_col=colLabel, angle_col=0, main=paste(querylabel, centerlabel, "after removing outliers")))
               }
             }
           }
+
+          ## scaled to the range of 0:1 to allow comparison with random ratio
+          smc <- t(apply(fullmatrix, 1, scales::rescale)) ## rescale to 0:1 range
+          fullmatrix <- as.data.frame(smc)
 
           ratioMatrix_list[[ratiolabels[i]]][[centerlabel]][[regionName]] <- fullmatrix
 
 
           ## for random centers
-          rm <- ratioMatrix_list_random[[ratiolabels[i]]][[centerlabel]][[regionName]]
-          im <- inputMatrix_list_random[[inputlabels[i]]][[centerlabel]][[regionName]]
-          minrowr <- min(nrow(rm), nrow(im))
+          rmr <- ratioMatrix_list_random[[ratiolabels[i]]][[centerlabel]][[regionName]]
+          imr <- inputMatrix_list_random[[inputlabels[i]]][[centerlabel]][[regionName]]
+          minrowr <- min(nrow(rmr), nrow(imr))
 
-          fullmatrix <- (rm[1:minrowr,] + pseudo_count)/(im[1:minrowr,] + pseudo_count)
+          fullmatrix <- (rmr[1:minrowr,] + pseudo_count)/(imr[1:minrowr,] + pseudo_count)
           fullmatrix[is.na(fullmatrix)] <- 0
 
           if(rm.outlier){
@@ -2666,62 +2649,67 @@ plot_reference_locus_with_random1 <- function(txdb=NULL,
 
               if(heatmap){
                 fullmatrixm <- log10(fullmatrix+1)
-                print(pheatmap(fullmatrixm, cluster_rows = T, cluster_cols = F, fontsize_col=8, fontsize_row=8, labels_col=colLabel, angle_col=0, main=paste(bedlabel, centerlabel, "after removing outliers")))
+                print(pheatmap(fullmatrixm, cluster_rows = T, cluster_cols = F, fontsize_col=8, fontsize_row=8, labels_col=colLabel, angle_col=0, main=paste(querylabel, centerlabel, "after removing outliers")))
               }
             }
           }
 
+          ## scaled to the range of 0:1 to allow comparison with random ratio
+          smc <- t(apply(fullmatrix, 1, scales::rescale)) ## rescale to 0:1 range
+          fullmatrix <- as.data.frame(smc)
           ratioMatrix_list_random[[ratiolabels[i]]][[centerlabel]][[regionName]] <- fullmatrix
         }
       }
     }
 
-    for(bedfile in bedfiles){
+    for(ratiofile in ratiofiles){
       if(0){
-        bedfile <- bedfiles[1]
+        ratiofile <- ratiofiles[1]
       }
-      print(paste("Processing bed", bedfile))
-      bedlabel <- bedlabels[bedfile]
+      print(paste("Processing ratio for query", ratiofile))
+      ratiolabel <- ratiolabels[ratiofile]
 
       for(centerfile in centerfiles){
         if(0){
           centerfile <- centerfiles[1]
         }
-        print(paste("Processing reference", centerfile))
+        print(paste("Processing ratio for reference", centerfile))
         centerlabel <- centerlabels[centerfile]
 
         for(regionName in names(region_list)){
           if(0){
             regionName <- names(region_list)[3]
           }
-          print(paste("Processing genomic region", regionName))
+          print(paste("Processing ratio for genomic region", regionName))
           plot_df <- NULL
           stat_df <- NULL
           countOverlap_df <- NULL
           refsize <- NULL
 
-          fullmatrix_list <- list(ratioMatrix_list[[bedlabel]][[centerlabel]][[regionName]],
-                                  ratioMatrix_list_random[[bedlabel]][[centerlabel]][[regionName]])
+          fullmatrix_list <- list(ratioMatrix_list[[ratiolabel]][[centerlabel]][[regionName]],
+                                  ratioMatrix_list_random[[ratiolabel]][[centerlabel]][[regionName]])
           names(fullmatrix_list) <- c(centerlabel, "Random")
 
           for(alabel in c(centerlabel, "Random")){
+
             fullmatrix <- fullmatrix_list[[alabel]]
             refsize <- nrow(fullmatrix)
             colm <- apply(fullmatrix, 2, mean)
             colsd <- apply(fullmatrix, 2, sd)
             colse <- colsd/sqrt(apply(fullmatrix, 2, length))
             collabel <- colLabel
-            querybed <- as.factor(rep(bedlabel, length(colm)))
+            querybed <- as.factor(rep(querylabel, length(colm)))
             refbed <- as.factor(rep(alabel, length(colm)))
 
             sub_df <- data.frame(colm, colsd, colse, collabel, querybed, refbed)
             colnames(sub_df) <- c("Intensity", "sd", "se", "Position", "Query", "Reference")
-            sub_df <- mutate(sub_df, lower=Intensity-se, upper=Intensity+se)
 
             if(smo){
               sub_df$Intensity <- as.vector(smooth.spline(sub_df$Intensity, df=as.integer(bin_num/5))$y)
               sub_df$se <- as.vector(smooth.spline(sub_df$se, df=as.integer(bin_num/5))$y)
             }
+
+            sub_df <- mutate(sub_df, lower=Intensity-se, upper=Intensity+se)
 
             xmin <- which(colLabel == hl[1])
             xmax <- which(colLabel == hl[2])
@@ -2729,7 +2717,7 @@ plot_reference_locus_with_random1 <- function(txdb=NULL,
             submatrix[is.na(submatrix)] <- 0
             Intensity <- as.numeric(rowMeans(submatrix)) + 0.001 ## add 0.001 to allow log transformation of y-axis
 
-            Query <- as.factor(rep(bedlabel, length(Intensity)))
+            Query <- as.factor(rep(querylabel, length(Intensity)))
             Reference <- as.factor(rep(alabel, length(Intensity)))
             subdf <- data.frame(Intensity, Query, Reference)
 
@@ -2745,11 +2733,11 @@ plot_reference_locus_with_random1 <- function(txdb=NULL,
             annotate("rect", xmin=hl[1], xmax=hl[2], ymin=-Inf, ymax=Inf, fill="grey", color="grey", alpha=0.3) +
             theme_classic() + theme(legend.position="bottom") + xlab(Xlab) + ylab(Ylab) +
             theme(axis.title.x = element_text(face="bold", size=10), axis.title.y = element_text(face="bold", size=10)) +
-            ggtitle(paste("Feature:", regionName, "\nReference size:", refsize, "\nSample name:", bedlabel))
+            ggtitle(paste("Feature:", regionName, "\nReference size:", refsize, "\nSample name:", ratiolabel))
 
 
           ps1 <- ggplot(stat_df, aes(x=Reference, y=Intensity, fill=Reference)) + scale_fill_manual(values=c("#00AFBB", "#E7B800")) +
-            geom_boxplot(notch=TRUE) +
+            geom_boxplot(notch=FALSE) +
             theme_classic() +
             theme(axis.text.x = element_text(face="bold", size=10, color="black")) +
             theme(axis.title.x = element_blank(), axis.title.y = element_text(face="bold", size=10)) +
@@ -2794,11 +2782,11 @@ get_grWithA_at_TSS <- function(txdb, longest=TRUE){
   }
 }
 
-count_overlap_at_TSS <- function(bedfiles, bedlabels, txdb, ext=0, longest=TRUE){
+count_overlap_at_TSS <- function(queryfiles, querylabels, txdb, ext=0, longest=TRUE){
 
-  names(bedlabels) <- bedfiles
+  names(querylabels) <- queryfiles
   fileType <- "bed"
-  if(grepl("\\.bam", bedfiles[1])){fileType <- "bam"}
+  if(grepl("\\.bam", queryfiles[1])){fileType <- "bam"}
 
   print(paste("The input type is", fileType, "file"))
 
@@ -2807,17 +2795,17 @@ count_overlap_at_TSS <- function(bedfiles, bedlabels, txdb, ext=0, longest=TRUE)
 
   count_df <- NULL
 
-  for(bedfile in bedfiles){
-    #bedfile <- bedfiles[1]
-    bedlabel <- bedlabels[bedfile]
+  for(queryfile in queryfiles){
+    #queryfile <- queryfiles[1]
+    querylabel <- querylabels[queryfile]
     libsize <- NULL
     if(fileType == "bed"){
-      queryRegions <- read_bed(bedfile)
-      libsize <- countLines(bedfile)
+      queryRegions <- read_bed(queryfile)
+      libsize <- countLines(queryfile)
     }else{
 
       ## get the 5'-end -1 position of the reads, which is the crosslink sites for iCLIP reads
-      bamGR <- readBamFileAsGRanges(bedfile, min.mapq = 10)
+      bamGR <- readBamFileAsGRanges(queryfile, min.mapq = 10)
       l <- end(bamGR) - start(bamGR)
       summary(l)
       queryRegions =flank(bamGR, width=1, both=F, start=T, ignore.strand=FALSE)
@@ -2831,32 +2819,32 @@ count_overlap_at_TSS <- function(bedfiles, bedlabels, txdb, ext=0, longest=TRUE)
 
   }
 
-  colnames(count_df) <- bedlabels
+  colnames(count_df) <- querylabels
 
   return(count_df)
 }
 
-count_overlap_in_features <- function(bedfiles, bedlabels, txdb, longest=T, CLIP_reads=T){
+count_overlap_in_features <- function(queryfiles, querylabels, txdb, longest=T, CLIP_reads=T){
 
-  names(bedlabels) <- bedfiles
+  names(querylabels) <- queryfiles
   fileType <- "bed"
-  if(grepl("\\.bam", bedfiles[1])){fileType <- "bam"}
+  if(grepl("\\.bam", queryfiles[1])){fileType <- "bam"}
 
   print(paste("The input type is", fileType, "file"))
 
   input_list <- list()
 
-  for(bedfile in bedfiles){
-    #bedfile <- bedfiles[1]
-    bedlabel <- bedlabels[bedfile]
+  for(queryfile in queryfiles){
+    #queryfile <- queryfiles[1]
+    querylabel <- querylabels[queryfile]
     libsize <- NULL
     if(fileType == "bed"){
-      bedGR <- read_bed(bedfile)
+      bedGR <- read_bed(queryfile)
       queryRegions =flank(bedGR, width=1, both=F, start=T, ignore.strand=FALSE)
       queryRegions <- ifelse(CLIP_reads, queryRegions, bedGR)
-      libsize <- countLines(bedfile)
+      libsize <- countLines(queryfile)
     }else{
-      ga <- readGAlignments(bedfile, use.names=T, param=ScanBamParam(mapqFilter=10))
+      ga <- readGAlignments(queryfile, use.names=T, param=ScanBamParam(mapqFilter=10))
       libsize <- length(ga)
       if(CLIP_reads){
         ## get the 5'-end -1 position of the reads, which is the crosslink sites for iCLIP reads
@@ -2866,7 +2854,7 @@ count_overlap_in_features <- function(bedfiles, bedlabels, txdb, longest=T, CLIP
       }
 
     }
-    input_list[[bedlabel]] <- queryRegions
+    input_list[[querylabel]] <- queryRegions
   }
 
   feature_count_list <- list()
@@ -2885,18 +2873,18 @@ count_overlap_in_features <- function(bedfiles, bedlabels, txdb, longest=T, CLIP
 
     featureCount_df <- NULL
 
-    for(bedfile in bedfiles){
-      #bedfile <- bedfiles[1]
-      print(bedfile)
-      bedlabel <- bedlabels[bedfile]
-      queryRegions <- input_list[[bedlabel]]
+    for(queryfile in queryfiles){
+      #queryfile <- queryfiles[1]
+      print(queryfile)
+      querylabel <- querylabels[queryfile]
+      queryRegions <- input_list[[querylabel]]
 
       overlap_count <- countOverlaps(feature_grl, queryRegions, type="any")
 
       featureCount_df <- cbind(featureCount_df, overlap_count)
     }
 
-    colnames(featureCount_df) <- bedlabels
+    colnames(featureCount_df) <- querylabels
 
     feature_count_list[[featureName]] <- featureCount_df
   }
@@ -2961,10 +2949,10 @@ run_DESeq2 <- function(data_table, s2c, project, contrasts){
 }
 
 
-liftOverBed <- function(chainFile, bedFile){
-  outFile <- gsub("\\.bed", "_liftOver\\.bed", bedFile)
+liftOverBed <- function(chainFile, queryfile){
+  outFile <- gsub("\\.bed", "_liftOver\\.bed", queryfile)
   chain <- import.chain(chainFile)
-  bedGr <- import.bed(bedFile)
+  bedGr <- import.bed(queryfile)
   lifted <- stack(liftOver(bedGr, chain))
   mcols(lifted) <- mcols(lifted)[,2:3] ## remove the name column of numbers
   write_bed(lifted, outFile)
@@ -3025,7 +3013,7 @@ sub_sample <- function(v1, v2, pv){
 handle_input <- function(inputFiles, CLIP_reads=FALSE, extend_reads=0, useScore=FALSE, outRle=TRUE, norm=FALSE, genome="hg19"){
 
   if(0){
-    inputFiles <- bedfile
+    inputFiles <- queryfiles
     CLIP_reads=FALSE
     extend_reads=0
     useScore=FALSE
@@ -3185,7 +3173,7 @@ handle_bam <- function(inputFile, CLIP_reads=FALSE, extend_reads=0, outRle=TRUE,
 
 
 handle_bw <- function(inputFile, outRle=TRUE, genome="hg19"){
-  if(0)inputFile <- bedfiles[1]
+  if(0)inputFile <- queryfiles[1]
   weight_col <- "score"
   libsize <- NULL
   regular_chr <- paste0("chr", c(seq(1,22), c("X", "Y", "M")))
@@ -3602,4 +3590,50 @@ annotate_peaks <- function(peakfile, peaklabel, gtffile, genome="hg19", fiveP=10
       theme_void()
     }
   }
+}
+
+process_scoreMatrix <- function(fullmatrix, libsize=1000000, norm=F, scale=F, heatmap=F, rm.outlier=F){
+  fullmatrix[is.na(fullmatrix)] <- 0
+
+  if(norm && !is.null(libsize)){
+    fullmatrix <- fullmatrix*1000000/libsize
+  }
+  if(scale){
+    smc <- t(apply(fullmatrix, 1, scales::rescale)) ## rescale to 0:1 range
+    fullmatrix <- as.data.frame(smc)
+  }
+
+  if(heatmap){
+    fullmatrixm <- log10(fullmatrix+1)
+    print(pheatmap(fullmatrixm, cluster_rows = T, cluster_cols = F, fontsize_col=8, fontsize_row=8, labels_col=colLabel, angle_col=0, main=paste(querylabel, centerlabel)))
+  }
+
+
+  ## remove outliers (highest score) from reference regions, using Hampel filter with 10mad instead of 3mad.
+  ## if outliers are detected, remove the top outliers only
+  if(rm.outlier){
+    fullmatrix <- rmOutlier(fullmatrix)
+    if(heatmap){
+      fullmatrixm <- log10(fullmatrix+1)
+      print(pheatmap(fullmatrixm, cluster_rows = T, cluster_cols = F, fontsize_col=8, fontsize_row=8, labels_col=colLabel, angle_col=0, main=paste(querylabel, centerlabel, "after removing outliers")))
+    }
+
+  }
+  return(fullmatrix)
+}
+
+rmOutlier <- function(fullmatrix){
+  fullmatrix[is.na(fullmatrix)] <- 0
+  rowm <- apply(fullmatrix, 1, max)
+  up_bound <- median(rowm) + 100*mad(rowm)
+  if(length(which(rowm > up_bound)) > 0){
+    print("Outlier detected:")
+    outliers <- fullmatrix[which.max(rowm),]
+
+    print(paste("median of row max", median(rowm), "up_bound", up_bound))
+    print(outliers)
+
+    fullmatrix <- fullmatrix[-which.max(rowm),]
+  }
+  return(fullmatrix)
 }
