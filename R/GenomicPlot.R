@@ -1463,6 +1463,7 @@ plot_reference_region <- function(queryfiles=NULL, querylabels=NULL, centerfiles
 #' @param rm.outlier, a boolean indicates whether a row with abnormally high values in the score matrix should be removed
 #' @param genome, genome of the features, the program is mostly concerned with human, if non-human genome is used, certain features may not work
 #' @param outprefix, a character string specifying output file prefix for plots (outprefix.pdf)
+#' @param useIntron, a boolean indicates whether intron instead of TTS should be plotted
 #'
 #' @return a dataframe containing the data used for plotting
 #'
@@ -1474,7 +1475,7 @@ plot_reference_region <- function(queryfiles=NULL, querylabels=NULL, centerfiles
 
 plot_5parts_metagene <- function(queryfiles=NULL, querylabels=NULL, txdb=NULL, inputfiles=NULL, inputlabels=NULL, meta=TRUE, nbins=100, norm=FALSE,
                                  longest=TRUE, extend_reads=0, CLIP_reads=FALSE, fiveP=1000, threeP=1000, smo=FALSE, scale=FALSE, stranded=TRUE,
-                                 outPrefix=NULL, genome="hg19", heatmap=F, rm.outlier=F){
+                                 outPrefix=NULL, genome="hg19", heatmap=F, rm.outlier=F, useIntron=FALSE){
 
   names(querylabels) <- queryfiles
   if(!is.null(inputfiles)){
@@ -1488,6 +1489,7 @@ plot_5parts_metagene <- function(queryfiles=NULL, querylabels=NULL, txdb=NULL, i
 
   ## prepare transcripts that are suitable for overlap
   featureNames <-  c("promoter", "utr5", "cds", "utr3", "TTS")
+  if(useIntron) featureNames <-  c("promoter", "utr5", "cds", "utr3", "Intron")
   tl <- transcriptLengths(txdb, with.utr5_len = T, with.cds_len = T, with.utr3_len = T)
   tl <- tl[tl$cds_len > 0,]  ## choose protein coding genes only
 
@@ -1500,6 +1502,7 @@ plot_5parts_metagene <- function(queryfiles=NULL, querylabels=NULL, txdb=NULL, i
   utr5 <- gtf_to_bed_longest_tx(txdb, "utr5", longest=longest)
   utr3 <- gtf_to_bed_longest_tx(txdb, "utr3", longest=longest)
   cds <- gtf_to_bed_longest_tx(txdb, "cds", longest=longest)
+  if(useIntron) intron <- gtf_to_bed_longest_tx(txdb, "intron", longest=longest)
 
   if(meta){
     means <- c(promoter=fiveP, apply(tl[,c(7,6,8)], 2, median), TTS=threeP)
@@ -1526,6 +1529,14 @@ plot_5parts_metagene <- function(queryfiles=NULL, querylabels=NULL, txdb=NULL, i
                      "cds"=cds$GRangesList[as.character(tl_selected$tx_id)],
                      "utr3"=utr3$GRangesList[as.character(tl_selected$tx_id)],
                      "TTS"=split(TTS, as.factor(TTS$gene_id)))
+    if(useIntron){
+      intronGr <- intron$GRanges[width(intron$GRanges) >= scaled_bins["Intron"]]
+      windowRs <- list("promoter"=split(promoter, as.factor(promoter$gene_id)),
+                                "utr5"=utr5$GRangesList[as.character(tl_selected$tx_id)],
+                                "cds"=cds$GRangesList[as.character(tl_selected$tx_id)],
+                                "utr3"=utr3$GRangesList[as.character(tl_selected$tx_id)],
+                                "intron"=split(intronGr, as.factor(seq_along(intronGr))))
+    }
   }else{
     cl <- start_parallel(nc=20)
     print("getting utr5 GRanges")
@@ -2736,257 +2747,26 @@ plot_reference_locus_with_random <- function(txdb=NULL, queryfiles=NULL, centerf
 }
 
 
-
-get_grWithA_at_TSS <- function(txdb, longest=TRUE){
-
-  if(longest){
-    tl_longest_tx <- extract_longest_tx(txdb)
-    tx_longest <- transcripts(txdb, filter=list(tx_name=tl_longest_tx$tx_name), use.name=T)
-    tss_tx_longest <- resize(tx_longest, width=1, fix="start", use.names=TRUE, ignore.strand=FALSE)
-    seq_tss_tx_longest <- BSgenome::getSeq(BSgenome.Hsapiens.UCSC.hg19, tss_tx_longest)
-    seq_df_longest <- as.data.frame(seq_tss_tx_longest)
-    A_seq_longest <- rownames(seq_df_longest)[seq_df_longest$x == "A"]
-    A_tss_tx_longest <- tss_tx_longest[tss_tx_longest$tx_name %in% A_seq_longest]
-    return(A_tss_tx_longest)
-  }else{
-    tl <- transcriptLengths(txdb, with.utr5_len = T, with.cds_len = T, with.utr3_len = T)
-    tl_protein_coding <- tl[tl$cds_len > 0, ]
-    tx_protein_coding <- transcripts(txdb, filter=list(tx_name=tl_protein_coding$tx_name), use.name=T)
-    tss_tx_protein_coding <- resize(tx_protein_coding, width=1, fix="start", use.names=TRUE, ignore.strand=FALSE)
-    seq_tss_tx_protein_coding <- BSgenome::getSeq(BSgenome.Hsapiens.UCSC.hg19, tss_tx_protein_coding)
-    seq_df_protein_coding <- as.data.frame(seq_tss_tx_protein_coding)
-    A_seq_protein_coding <- rownames(seq_df_protein_coding)[seq_df_protein_coding$x == "A"]
-    A_tss_tx_protein_coding <- tss_tx_protein_coding[tss_tx_protein_coding$tx_name %in% A_seq_protein_coding]
-  }
-}
-
-count_overlap_at_TSS <- function(queryfiles, querylabels, txdb, ext=0, longest=TRUE){
-
-  names(querylabels) <- queryfiles
-  fileType <- "bed"
-  if(grepl("\\.bam", queryfiles[1])){fileType <- "bam"}
-
-  print(paste("The input type is", fileType, "file"))
-
-  A_tss <- get_grWithA_at_TSS(txdb, longest=longest)
-  gr <- flank(A_tss, width = ext, both=T)
-
-  count_df <- NULL
-
-  for(queryfile in queryfiles){
-    #queryfile <- queryfiles[1]
-    querylabel <- querylabels[queryfile]
-    libsize <- NULL
-    if(fileType == "bed"){
-      queryRegions <- read_bed(queryfile)
-      libsize <- countLines(queryfile)
-    }else{
-
-      ## get the 5'-end -1 position of the reads, which is the crosslink sites for iCLIP reads
-      bamGR <- readBamFileAsGRanges(queryfile, min.mapq = 10)
-      l <- end(bamGR) - start(bamGR)
-      summary(l)
-      queryRegions =flank(bamGR, width=1, both=F, start=T, ignore.strand=FALSE)
-      libsize <- length(queryRegions)
-
-    }
-
-    overlap_count <- countOverlaps(gr, queryRegions, type="any")
-
-    count_df <- cbind(count_df, overlap_count)
-
-  }
-
-  colnames(count_df) <- querylabels
-
-  return(count_df)
-}
-
-count_overlap_in_features <- function(queryfiles, querylabels, txdb, longest=T, CLIP_reads=T){
-
-  names(querylabels) <- queryfiles
-  fileType <- "bed"
-  if(grepl("\\.bam", queryfiles[1])){fileType <- "bam"}
-
-  print(paste("The input type is", fileType, "file"))
-
-  input_list <- list()
-
-  for(queryfile in queryfiles){
-    #queryfile <- queryfiles[1]
-    querylabel <- querylabels[queryfile]
-    libsize <- NULL
-    if(fileType == "bed"){
-      bedGR <- read_bed(queryfile)
-      queryRegions =flank(bedGR, width=1, both=F, start=T, ignore.strand=FALSE)
-      queryRegions <- ifelse(CLIP_reads, queryRegions, bedGR)
-      libsize <- countLines(queryfile)
-    }else{
-      ga <- readGAlignments(queryfile, use.names=T, param=ScanBamParam(mapqFilter=10))
-      libsize <- length(ga)
-      if(CLIP_reads){
-        ## get the 5'-end -1 position of the reads, which is the crosslink sites for iCLIP reads
-        queryRegions =flank(granges(ga), width=1, both=F, start=T, ignore.strand=FALSE)
-      }else{
-        queryRegions <- stack(grglist(ga))
-      }
-
-    }
-    input_list[[querylabel]] <- queryRegions
-  }
-
-  feature_count_list <- list()
-
-  for(featureName in c("utr5", "cds", "utr3", "exon")){
-    print(featureName)
-    #featureName <- "utr5"
-    alist <- gtf_to_bed_longest_tx(txdb, featureName, longest=longest)
-    original_grl <- alist$GRangesList
-    if(featureName %in% c("utr5", "exon")){
-      trimmed <- trimTranscripts(original_grl, start=1, end=0)
-      feature_grl <- trimmed
-    }else{
-      feature_grl <- original_grl
-    }
-
-    featureCount_df <- NULL
-
-    for(queryfile in queryfiles){
-      #queryfile <- queryfiles[1]
-      print(queryfile)
-      querylabel <- querylabels[queryfile]
-      queryRegions <- input_list[[querylabel]]
-
-      overlap_count <- countOverlaps(feature_grl, queryRegions, type="any")
-
-      featureCount_df <- cbind(featureCount_df, overlap_count)
-    }
-
-    colnames(featureCount_df) <- querylabels
-
-    feature_count_list[[featureName]] <- featureCount_df
-  }
-  return(feature_count_list)
-}
-
-run_DESeq2 <- function(data_table, s2c, project, contrasts){
-
-  ddsMatrix <- DESeqDataSetFromMatrix(round(data_table),
-                                      colData = s2c,
-                                      design = ~ groups)
-  class(ddsMatrix)
-
-  #sizeFactors(ddsMatrix) <- guide_stat_sum/guide_gomean
-  dds <- DESeq(ddsMatrix, fitType = "local") #  , sfType = "iterate"
-  #rnames <- resultsNames(dds)
-  #rnames
-
-  #normalized_counts <- counts(dds, normalized=TRUE)
-  #lfcShrinked <- lfcShrink(dds=dds, coef=3, type="apeglm")
-  #lfcShrinked <- lfcShrinked[order(lfcShrinked$padj), ]
-  #plotMDS(normalized_counts)
-  #pheatmap(cor(normalized_counts))
-  print(paste(project, "size factors"))
-  print(sizeFactors(dds))
-
-  X <- try(rld <- vst(dds))
-  if(class(X) != "try-error"){
-    pdf(paste(project, "PCA_plot.pdf", sep="_"))
-    print(plotPCA(rld, intgroup=c("groups")))
-    dev.off()
-  }
-
-  res_list <- NULL
-
-  for(i in 1:nrow(contrasts)){
-    #i <- 1
-    contrast <- as.vector(as.character(contrasts[i,]))
-    print(paste("Processing ", paste(contrast, collapse=" ")))
-    res <- results(dds, contrast=contrast, independentFiltering = TRUE, pAdjustMethod = "BH")
-    treatSF <- paste(project, contrast[2], "vs", contrast[3], sep="_")
-
-    summary(res)
-    res <- na.omit(res)
-
-    mcols(res)
-
-    res <- res[order(-res$stat),]
-    res_list[[treatSF]] <- res
-
-    filename <- paste(treatSF, "DESeq2_results_table.tab", sep="_")
-    write.table(res, filename, row.names=T, col.names=NA, quote=F, sep="\t")
-
-    pdf(paste(treatSF, "MA_plot.pdf", sep="_"))
-    #plotMA(res, ylim=c(-5,5))
-    plot(log2(res$baseMean), res$log2FoldChange, ylim=c(-5,5))
-    abline(h=0)
-    dev.off()
-
-  }
-  return(res_list)
-}
-
-
-liftOverBed <- function(chainFile, queryfile){
-  outFile <- gsub("\\.bed", "_liftOver\\.bed", queryfile)
-  chain <- import.chain(chainFile)
-  bedGr <- import.bed(queryfile)
-  lifted <- stack(liftOver(bedGr, chain))
-  mcols(lifted) <- mcols(lifted)[,2:3] ## remove the name column of numbers
-  write_bed(lifted, outFile)
-  return(outFile)
-}
-
-## v1: large vector to be sub-sampled
-## v2: small vector to provide density distribution
-## wpv: wilcox.test p-value to indicate similarity between sub-sample and v2
-sub_sample <- function(v1, v2, pv){
-  #v1 <- out_lens[["_unregulated"]]
-  #v2 <- c(out_lens[["_up"]],out_lens[["_down"]])
-  #pv <- 0.1
-
-
-  n = 0
-  vsub <- NULL
-  ds <- density(v2)
-  dv1 <- approx(x=ds$x, y=ds$y, xout=v1, rule=1)
-  probs <- dv1$y
-  probs[is.na(probs)] <- 0
-  summary(probs)
-
-  success <- FALSE
-  wtest <- NULL
-
-  ## find subset of vi that has the same distribution as v2
-  while(!success){
-    n <- n + 1
-    vsub <- sample(v1, round(length(probs[probs>0])*0.99), replace=F, prob=probs)
-    #vsub <- sample(v1, length(v2), replace=F, prob=probs)
-    wtest <- wilcox.test(vsub, v2)
-    ktest <- ks.test(vsub, v2)
-
-    print(paste(n, wtest$p.value, ktest$p.value))
-    if(wtest$p.value > pv){
-    #if(lr < 1){
-      success <- TRUE
-      print("density distribution of v2")
-      print(summary(v2))
-      print("subsampling of v1 based on density distribution of v2")
-      print(summary(vsub))
-    }
-    v1 <- vsub
-    dv1 <- approx(x=ds$x, y=ds$y, xout=v1, rule=1)
-    probs <- dv1$y
-    probs[is.na(probs)] <- 0
-
-  }
-
-  ## produce the final subset of v1 that have the same length as v2
-  vsub <- sample(v1, length(v2), replace=F, prob=probs)
-
-  return(vsub)
-}
-
+#' @title handle_input
+#'
+#' @descirption This is a wrapper function for read NGS data in different file formats, store the input data in a list of GRanges objects or RleList objects.
+#' File names end in bed|bam|bw|bigwig|bigWig|BigWig|BW|BIGWIG are recognized, and a list of files with mixed formats are allowed.
+#'
+#' @param inputFiles, a vector of strings denoting file names
+#' @param CLIP_reads, a boolean object to indicate if the bam reads should be shifted to the -1 position at the 5' of the reads
+#' @param extend_reads, an integer defines how long should the reads should be extended to
+#' @param useScore, a boolean object indicating whether the 'score' column of the bed file should be used in the output data structure
+#' @param outRle, a boolean object indicating whether the output should be a list of RleList objects or GRanges objects
+#' @param norm, a boolean object indicating whether the library size should be adjusted with a size factor
+#' @param genome, a string denoting the genome version
+#'
+#' @return a list object with four elements, 'query' is a list GRanges objects or RleList objects, 'size' is the library size, 'type' is the input file type,
+#' 'weight' is the name of the metadata column to be used as weight for coverage calculation
+#'
+#' @author Shuye Pu
+#' @examples
+#'
+#' @export handle_input
 
 handle_input <- function(inputFiles, CLIP_reads=FALSE, extend_reads=0, useScore=FALSE, outRle=TRUE, norm=FALSE, genome="hg19"){
 
@@ -3033,8 +2813,24 @@ handle_input <- function(inputFiles, CLIP_reads=FALSE, extend_reads=0, useScore=
   return(outlist)
 }
 
-## outlist is the ouput of handle_input, use DESeq2 estimate size factor, which is used to multiply with libsize
-## this fuction works for human only so far
+
+#' @title effectiveSize
+#'
+#' @descirption This is a helper function for handle_input. DESeq2::estimateSizeFactorsForMatrix function used to estimate size factor,
+#' which is used to multiply library sizes. The function only works for human genome only so far.
+#'
+#' @param outlist, a list object with four elements, 'query' is a list GRanges objects or RleList objects, 'size' is the library size, 'type' is the input file type,
+#' 'weight' is the name of the metadata column
+#' @param outRle, a boolean object indicating whether the output is a list of RleList objects or GRanges objects
+#' @param genome, a string denoting the genome version
+#'
+#' @return a list object with four elements, with the 'size' element modified.
+#'
+#' @author Shuye Pu
+#' @examples
+#'
+#' @export effectiveSize
+#'
 effectiveSize <- function(outlist, outRle, genome="hg19"){
   print("Estimating size factor")
   ## find common chromosomes
@@ -3088,6 +2884,29 @@ effectiveSize <- function(outlist, outRle, genome="hg19"){
   outlist
 }
 
+#' @title handle_bed
+#'
+#' @descirption This is a function for read peaks data in bed format, store the input data in a list of GRanges objects or RleList objects.
+#'
+#' @param inputFile, a string denoting the bed file name
+#' @param extend_reads, an integer defines how long should the peaks should be extended to
+#' @param useScore, a boolean object indicating whether the 'score' column of the bed file should be used in the output data structure
+#' @param outRle, a boolean object indicating whether the output should be a list of RleList objects or GRanges objects
+#' @param genome, a string denoting the genome version
+#'
+#' @details when useScore is TRUE, the score column of the bed file will be used in the metadata column 'score' of the GRanges object,
+#' or the 'Values' field of the RleList object. Otherwise the value 1 will be used instead. When the intended use of the input bed is a
+#' reference feature, both useScore and outRle should be set to FALSE.
+#'
+#'
+#' @return a list object with four elements, 'query' is a list GRanges objects or RleList objects, 'size' is the library size, 'type' is the input file type,
+#' 'weight' is the name of the metadata column to be used as weight for coverage calculation
+#'
+#' @author Shuye Pu
+#' @examples
+#'
+#' @export handle_bed
+
 handle_bed <- function(inputFile, extend_reads=0, useScore=FALSE, outRle=TRUE, genome="hg19"){
 
   beddata <- read.delim2(inputFile, header=F)
@@ -3110,11 +2929,32 @@ handle_bed <- function(inputFile, extend_reads=0, useScore=FALSE, outRle=TRUE, g
 
   if(extend_reads > 0) queryRegions <- resize(queryRegions, width=extend_reads, fix="start", ignore.strand=FALSE)
 
-  if(outRle) queryRegions <- coverage(queryRegions, weight= weight_col)  ## when bed is used is windows in ScoreMatrix, do not covert to Rle
+  if(outRle) queryRegions <- coverage(queryRegions, weight=weight_col)  ## when bed is used is windows in ScoreMatrix, do not covert to Rle
 
   return(list("query"=queryRegions, "size"=libsize, "type"="bed", "weight"=weight_col))
 }
 
+#' @title handle_bam
+#'
+#' @descirption This is a function for read NGS reads data in bam format, store the input data in a list of GRanges objects or RleList objects.
+#'
+#' @param inputFile, a string denoting the bed file name
+#' @param CLIP_reads, a boolean object to indicate if the reads should be shifted to their -1 position at the 5' end and shrink to length 1
+#' @param extend_reads, an integer defines how long should the reads should be extended to
+#' @param outRle, a boolean object indicating whether the output should be a list of RleList objects or GRanges objects
+#' @param genome, a string denoting the genome version
+#'
+#' @details The reads are filtered use mapq score >= 10 by default, only mapped reads are counted towards library size.
+#'
+#'
+#' @return a list object with four elements, 'query' is a list GRanges objects or RleList objects, 'size' is the library size, 'type' is the input file type,
+#' 'weight' is the name of the metadata column to be used as weight for coverage calculation
+#'
+#' @author Shuye Pu
+#' @examples
+#'
+#' @export handle_bam
+#'
 handle_bam <- function(inputFile, CLIP_reads=FALSE, extend_reads=0, outRle=TRUE, genome="hg19"){
 
   if(0){
@@ -3149,7 +2989,28 @@ handle_bam <- function(inputFile, CLIP_reads=FALSE, extend_reads=0, outRle=TRUE,
 }
 
 
-
+#' @title handle_bw
+#'
+#' @descirption This is a function for read NGS coverage data in bigwig format, store the input data in a list of GRanges objects or RleList objects. The input bw
+#' file can be stranded or non-stranded. Library size is calculate as the sum of all coverage.
+#'
+#'
+#' @param inputFile, a string denoting the bw file name
+#' @param outRle, a boolean object indicating whether the output should be a list of RleList objects or GRanges objects
+#' @param genome, a string denoting the genome version
+#'
+#' @details For stranded files, forward and reverse strands are stored in separate files, with '+' or 'p' in the forward strand file name and '-' or 'm' in the reverse
+#' strand  file name.
+#'
+#'
+#' @return a list object with four elements, 'query' is a list GRanges objects or RleList objects, 'size' is the library size, 'type' is the input file type,
+#' 'weight' is the name of the metadata column to be used as weight for coverage calculation
+#'
+#' @author Shuye Pu
+#' @examples
+#'
+#' @export handle_bw
+#'
 handle_bw <- function(inputFile, outRle=TRUE, genome="hg19"){
   if(0)inputFile <- queryfiles[1]
   weight_col <- "score"
@@ -3200,7 +3061,29 @@ handle_bw <- function(inputFile, outRle=TRUE, genome="hg19"){
 
 }
 
-handle_wig <- function(inputFile, outRle=TRUE, norm=TRUE, genome="hg19"){
+#' @title handle_wig
+#'
+#' @descirption This is a function for read NGS coverage data in wig format, store the input data in a list of GRanges objects or RleList objects. The input wig
+#' file can be stranded or non-stranded. Library size is calculate as the sum of all coverage.
+#'
+#'
+#' @param inputFile, a string denoting the wig file name
+#' @param outRle, a boolean object indicating whether the output should be a list of RleList objects or GRanges objects
+#' @param genome, a string denoting the genome version
+#'
+#' @details For stranded files, forward and reverse strands are stored in separate files, with '+' or 'p' in the forward strand file name and '-' or 'm' in the reverse
+#' strand  file name.
+#'
+#'
+#' @return a list object with four elements, 'query' is a list GRanges objects or RleList objects, 'size' is the library size, 'type' is the input file type,
+#' 'weight' is the name of the metadata column to be used as weight for coverage calculation
+#'
+#' @author Shuye Pu
+#' @examples
+#'
+#' @export handle_wig
+#'
+handle_wig <- function(inputFile, outRle=TRUE, genome="hg19"){
 
   stranded <- FALSE
   if(grepl("_\\+_", inputFile)){
@@ -3217,100 +3100,16 @@ handle_wig <- function(inputFile, outRle=TRUE, norm=TRUE, genome="hg19"){
   }
   bwfile <- gsub("\\.wig", "\\.bw", inputFile)
 
-  out <- handle_bw(bwfile, outRle, norm, genome)
+  out <- handle_bw(bwfile, outRle, genome)
   out
 }
 
 
 
-## find the transcript that a utr3 belongs to
-utr3_to_transcript <- function(utr3File, txdb){
-  #utr3File <- centerfiles[1]
 
-  transcriptFile <- gsub("\\.bed", "_TSS\\.bed", utr3File)
-
-  longest_tx <- extract_longest_tx(txdb)
-  utrInput <- handle_input(utr3File)
-  utrGR <- utrInput$query
-
-  w <- width(utrGR)
-
-  feature <- transcripts(txdb, use.name=T)
-  feature_longest <- feature[names(feature) %in% longest_tx$tx_name]
-
-  feature_overlap <- subsetByOverlaps(feature_longest, utrGR, type="any", minoverlap=min(w))
-
-  export.bed(feature_overlap, transcriptFile)
-
-  return(transcriptFile)
-}
-
-extract_intron_VAST <- function(inputfile, length_filter=NULL){
-  inputfile <- "C:/GREENBLATT/Nabeel/VAST-TOOLS/ZBTB7A/Intron_retention_regulated_events.tab"
-
-  in_df <- read.delim(inputfile, header=TRUE)
-  outfiles <- list()
-  out_beds <- list()
-  out_lens <- list()
-
-  for(change in c("_up", "_down", "_unregulated")){
-    #change <- "_unregulated"
-    print(change)
-
-
-    outfiles[[change]] <- gsub("\\.tab", paste0(change,"\\.bed"), inputfile)
-
-    sub_df <- filter(in_df, grepl(change, GROUP))
-
-    fullcoor <- lapply(as.list(sub_df$FullCO), function(x){unlist(strsplit(x, split=":", fixed=T))})
-    fullcoor_strand <- unlist(lapply(fullcoor, function(x)x[3]))
-
-    introncoor <- lapply(as.list(sub_df$COORD), function(x){unlist(strsplit(x, split=":|-", fixed=F))})
-    introncoor_chr <- unlist(lapply(introncoor, function(x)x[1]))
-    introncoor_start <- unlist(lapply(introncoor, function(x)x[2]))
-    introncoor_end <- unlist(lapply(introncoor, function(x)x[3]))
-
-
-    out_bed <- data.frame("chr"=introncoor_chr, "start"=as.integer(introncoor_start), "end"=as.integer(introncoor_end), "id"=sub_df$EVENT, "score"=sub_df$MV.dPsi._at_0.95, "strand"=fullcoor_strand)
-    #write.table(out_bed, outputfile, row.names=F, col.names=F, sep="\t", quote=F)
-    out_beds[[change]] <- out_bed
-    out_lens[[change]] <- out_bed$end - out_bed$start + 1
-  }
-
-  ## test if up and down have different intron length distribution from the unregulated
-  k <- ks.test(out_lens[["_unregulated"]], c(out_lens[["_up"]],out_lens[["_down"]]))
-
-  print(k$p.value)
-  print("Performing sub-sampling to match length distribution")
-  sub <- sub_sample(out_lens[["_unregulated"]], c(out_lens[["_up"]],out_lens[["_down"]]), 0.9)
-  k <- ks.test(sub, c(out_lens[["_up"]],out_lens[["_down"]]))
-  print(k$p.value)
-  print(summary(sub))
-
-  plot(quantile(c(out_lens[["_unregulated"]]), probs = seq(0, 1, 0.01)), col="cyan")
-  points(quantile(c(out_lens[["_up"]], out_lens[["_down"]]), probs = seq(0, 1, 0.01)), col="blue")
-  points(quantile(sub, probs = seq(0, 1, 0.01)), col="red")
-
-  qqplot(x=log(sub), y=log(c(out_lens[["_up"]], out_lens[["_down"]])))
-
-  sub_index <- match(sub, out_lens[["_unregulated"]])
-
-  out_beds[["_unregulated"]] <- data.frame(out_beds[["_unregulated"]])[sub_index,]
-
-  ## filter final output using length_filter
-  for(change in c("_up", "_down", "_unregulated")){
-    if(is.integer(length_filter)){
-      out_beds[[change]] <- data.frame(out_beds[[change]]) %>% filter((end-start+1) > length_filter)
-    }
-    write.table(out_beds[[change]], outfiles[[change]], row.names=F, col.names=F, sep="\t", quote=F)
-  }
-
-  unlist(outfiles)
-}
-
-#' plot_bam_correlation
+#' @title plot_bam_correlation
 #'
-#' plot correlation in reads coverage distributions along the genome for bam files
+#' @descirption plot correlation in reads coverage distributions along the genome for bam files
 #'
 #' @param bamfiles, a vector of strings denoting file names
 #' @param bamlabels, a vector of strings denoting short labels to appeare in the plot
