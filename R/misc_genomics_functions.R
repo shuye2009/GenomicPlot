@@ -1,4 +1,44 @@
 
+
+setup <- function(){
+   list.of.packages <- c(
+    "factR",
+    "chromstaR",
+    "ggpval",
+    "Repitools"
+   )
+   if (!require("BiocManager", quietly = TRUE))
+      install.packages("BiocManager")
+
+
+   for(package.i in list.of.packages){
+      if(require(package.i, character.only=T, quietly=T)){
+         print(paste(package.i, "installed and loaded"))
+      }else {
+         print(paste("trying to install", package.i))
+         install.packages(as.character(package.i))
+         if(!require(package.i, character.only=T, quietly=T)){
+            BiocManager::install(package.i)
+         }
+
+         if(require(package.i, character.only=T, quietly=T)){
+            print(paste(package.i, "installed and loaded"))
+         }else {
+            warning(paste("could not install", package.i))
+         }
+      }
+
+
+      #suppressPackageStartupMessages(
+      #library(package.i, character.only = TRUE)
+      #)
+   }
+}
+
+setup()
+
+script.dir <- dirname(sys.frame(1)$ofile)
+source(file.path(script.dir, "GenomicPlot.R"))
 ## find the transcript that a utr3 belongs to
 utr3_to_transcript <- function(utr3File, txdb){
    #utr3File <- centerfiles[1]
@@ -90,56 +130,40 @@ get_grWithA_at_TSS <- function(txdb, longest=TRUE){
 
    if(longest){
       tl_longest_tx <- extract_longest_tx(txdb)
-      tx_longest <- transcripts(txdb, filter=list(tx_name=tl_longest_tx$tx_name), use.name=T)
-      tss_tx_longest <- resize(tx_longest, width=1, fix="start", use.names=TRUE, ignore.strand=FALSE)
+      tx_longest <- transcripts(txdb, filter=list(tx_name=tl_longest_tx$tx_name), use.name=F)
+      tss_tx_longest <- resize(tx_longest, width=1, fix="start", use.names=FALSE, ignore.strand=FALSE)
       seq_tss_tx_longest <- BSgenome::getSeq(BSgenome.Hsapiens.UCSC.hg19, tss_tx_longest)
       seq_df_longest <- as.data.frame(seq_tss_tx_longest)
       A_seq_longest <- rownames(seq_df_longest)[seq_df_longest$x == "A"]
-      A_tss_tx_longest <- tss_tx_longest[tss_tx_longest$tx_name %in% A_seq_longest]
+      A_tss_tx_longest <- tss_tx_longest[tss_tx_longest$tx_id %in% A_seq_longest]
       return(A_tss_tx_longest)
    }else{
       tl <- transcriptLengths(txdb, with.utr5_len = T, with.cds_len = T, with.utr3_len = T)
       tl_protein_coding <- tl[tl$cds_len > 0, ]
-      tx_protein_coding <- transcripts(txdb, filter=list(tx_name=tl_protein_coding$tx_name), use.name=T)
-      tss_tx_protein_coding <- resize(tx_protein_coding, width=1, fix="start", use.names=TRUE, ignore.strand=FALSE)
+      tx_protein_coding <- transcripts(txdb, filter=list(tx_name=tl_protein_coding$tx_name), use.name=F)
+      tss_tx_protein_coding <- resize(tx_protein_coding, width=1, fix="start", use.names=FALSE, ignore.strand=FALSE)
       seq_tss_tx_protein_coding <- BSgenome::getSeq(BSgenome.Hsapiens.UCSC.hg19, tss_tx_protein_coding)
       seq_df_protein_coding <- as.data.frame(seq_tss_tx_protein_coding)
       A_seq_protein_coding <- rownames(seq_df_protein_coding)[seq_df_protein_coding$x == "A"]
-      A_tss_tx_protein_coding <- tss_tx_protein_coding[tss_tx_protein_coding$tx_name %in% A_seq_protein_coding]
+      A_tss_tx_protein_coding <- tss_tx_protein_coding[tss_tx_protein_coding$tx_id %in% A_seq_protein_coding]
+      return(A_tss_tx_protein_coding)
    }
 }
 
-count_overlap_at_TSS <- function(queryfiles, querylabels, txdb, ext=0, longest=TRUE){
-
+count_overlap_at_TSS <- function(queryfiles, txdb, TSSflank=0, CLIP_reads=FALSE, longest=TRUE){
+   querylabels <- names(queryfiles)
    names(querylabels) <- queryfiles
-   fileType <- "bed"
-   if(grepl("\\.bam", queryfiles[1])){fileType <- "bam"}
 
-   print(paste("The input type is", fileType, "file"))
+   input_list <- handle_input(inputFiles=queryfiles, CLIP_reads=CLIP_reads, fix_width=0, useScore=F, outRle=F, useSizeFactor=F, genome="hg19")
 
    A_tss <- get_grWithA_at_TSS(txdb, longest=longest)
-   gr <- flank(A_tss, width = ext, both=T)
+   gr <- flank(A_tss, width = TSSflank, both=T)
 
    count_df <- NULL
 
    for(queryfile in queryfiles){
       #queryfile <- queryfiles[1]
-      querylabel <- querylabels[queryfile]
-      libsize <- NULL
-      if(fileType == "bed"){
-         queryRegions <- read_bed(queryfile)
-         libsize <- countLines(queryfile)
-      }else{
-
-         ## get the 5'-end -1 position of the reads, which is the crosslink sites for iCLIP reads
-         bamGR <- readBamFileAsGRanges(queryfile, min.mapq = 10)
-         l <- end(bamGR) - start(bamGR)
-         summary(l)
-         queryRegions =flank(bamGR, width=1, both=F, start=T, ignore.strand=FALSE)
-         libsize <- length(queryRegions)
-
-      }
-
+      queryRegions <- input_list[[queryfile]]$query
       overlap_count <- countOverlaps(gr, queryRegions, type="any")
 
       count_df <- cbind(count_df, overlap_count)
@@ -147,65 +171,42 @@ count_overlap_at_TSS <- function(queryfiles, querylabels, txdb, ext=0, longest=T
    }
 
    colnames(count_df) <- querylabels
+   rownames(count_df) <- get_genomicCoordinates(gr)
 
    return(count_df)
 }
 
-count_overlap_in_features <- function(queryfiles, querylabels, txdb, longest=T, CLIP_reads=T){
-
+count_overlap_in_features1 <- function(queryfiles, txdb, longest=T, CLIP_reads=T, TSSflank=2){
+   querylabels <- names(queryfiles)
    names(querylabels) <- queryfiles
-   fileType <- "bed"
-   if(grepl("\\.bam", queryfiles[1])){fileType <- "bam"}
 
-   print(paste("The input type is", fileType, "file"))
-
-   input_list <- list()
-
-   for(queryfile in queryfiles){
-      #queryfile <- queryfiles[1]
-      querylabel <- querylabels[queryfile]
-      libsize <- NULL
-      if(fileType == "bed"){
-         bedGR <- read_bed(queryfile)
-         queryRegions =flank(bedGR, width=1, both=F, start=T, ignore.strand=FALSE)
-         queryRegions <- ifelse(CLIP_reads, queryRegions, bedGR)
-         libsize <- countLines(queryfile)
-      }else{
-         ga <- readGAlignments(queryfile, use.names=T, param=ScanBamParam(mapqFilter=10))
-         libsize <- length(ga)
-         if(CLIP_reads){
-            ## get the 5'-end -1 position of the reads, which is the crosslink sites for iCLIP reads
-            queryRegions =flank(granges(ga), width=1, both=F, start=T, ignore.strand=FALSE)
-         }else{
-            queryRegions <- stack(grglist(ga))
-         }
-
-      }
-      input_list[[querylabel]] <- queryRegions
-   }
+   input_list <- handle_input(inputFiles=queryfiles, CLIP_reads=CLIP_reads, fix_width=0, useScore=F, outRle=F, useSizeFactor=F, genome="hg19")
 
    feature_count_list <- list()
 
-   for(featureName in c("utr5", "cds", "utr3", "exon")){
-      print(featureName)
+   for(featureName in c("utr5", "cds", "utr3", "transcript", "TSN")){
       #featureName <- "utr5"
-      alist <- gtf_to_bed_longest_tx(txdb, featureName, longest=longest)
-      original_grl <- alist$GRangesList
-      if(featureName %in% c("utr5", "exon")){
-         trimmed <- trimTranscripts(original_grl, start=1, end=0)
-         feature_grl <- trimmed
+      if(featureName == "TSN"){
+         ## process transcription start sites with 'A'
+         A_tss <- get_grWithA_at_TSS(txdb, longest=longest)
+         feature_grl <- flank(A_tss, width=TSSflank, both=T)
       }else{
-         feature_grl <- original_grl
+         alist <- gtf_to_bed_longest_tx(txdb, featureName, longest=longest)
+         original_grl <- alist$GRangesList
+         if(featureName %in% c("transcript")){
+            trimmed <- trimTranscripts(original_grl, start=TSSflank, end=0)
+            feature_grl <- trimmed
+         }else{
+            feature_grl <- original_grl
+         }
       }
 
       featureCount_df <- NULL
 
       for(queryfile in queryfiles){
          #queryfile <- queryfiles[1]
-         print(queryfile)
-         querylabel <- querylabels[queryfile]
-         queryRegions <- input_list[[querylabel]]
-
+         #print(queryfile)
+         queryRegions <- input_list[[queryfile]]$query
          overlap_count <- countOverlaps(feature_grl, queryRegions, type="any")
 
          featureCount_df <- cbind(featureCount_df, overlap_count)
@@ -213,33 +214,31 @@ count_overlap_in_features <- function(queryfiles, querylabels, txdb, longest=T, 
 
       colnames(featureCount_df) <- querylabels
 
-      feature_count_list[[featureName]] <- featureCount_df
+      feature_count_list[[featureName]] <- as.data.frame(featureCount_df)
    }
-   return(feature_count_list)
+
+   sizes <- sapply(input_list, function(x)x$size)
+   return(list("count"=feature_count_list, "size"=sizes))
 }
 
-run_DESeq2 <- function(data_table, s2c, project, contrasts){
+run_DESeq2 <- function(data_table, s2c, project, contrasts, plot=FALSE, useSizeFactor=TRUE){
 
    ddsMatrix <- DESeqDataSetFromMatrix(round(data_table),
                                        colData = s2c,
                                        design = ~ groups)
    class(ddsMatrix)
 
-   #sizeFactors(ddsMatrix) <- guide_stat_sum/guide_gomean
-   dds <- DESeq(ddsMatrix, fitType = "local") #  , sfType = "iterate"
-   #rnames <- resultsNames(dds)
-   #rnames
+   if(!useSizeFactor){
+      sizeFactors(ddsMatrix) <- rep(1, ncol(data_table))
+   }
 
-   #normalized_counts <- counts(dds, normalized=TRUE)
-   #lfcShrinked <- lfcShrink(dds=dds, coef=3, type="apeglm")
-   #lfcShrinked <- lfcShrinked[order(lfcShrinked$padj), ]
-   #plotMDS(normalized_counts)
-   #pheatmap(cor(normalized_counts))
+   dds <- DESeq(ddsMatrix, fitType = "local")
+
    print(paste(project, "size factors"))
    print(sizeFactors(dds))
 
    X <- try(rld <- vst(dds))
-   if(class(X) != "try-error"){
+   if(class(X) != "try-error" && plot){
       pdf(paste(project, "PCA_plot.pdf", sep="_"))
       print(plotPCA(rld, intgroup=c("groups")))
       dev.off()
@@ -265,12 +264,12 @@ run_DESeq2 <- function(data_table, s2c, project, contrasts){
       filename <- paste(treatSF, "DESeq2_results_table.tab", sep="_")
       write.table(res, filename, row.names=T, col.names=NA, quote=F, sep="\t")
 
-      pdf(paste(treatSF, "MA_plot.pdf", sep="_"))
-      #plotMA(res, ylim=c(-5,5))
-      plot(log2(res$baseMean), res$log2FoldChange, ylim=c(-5,5))
-      abline(h=0)
-      dev.off()
-
+      if(plot){
+         pdf(paste(treatSF, "MA_plot.pdf", sep="_"))
+         plot(log2(res$baseMean), res$log2FoldChange, ylim=c(-5,5))
+         abline(h=0)
+         dev.off()
+      }
    }
    return(res_list)
 }
@@ -336,3 +335,229 @@ sub_sample <- function(v1, v2, pv){
    return(vsub)
 }
 
+plot_feature_overlap_count <- function(queryfiles, peakfile=NULL, txdb, sampleNames, longest=T, CLIP_reads=T, flank=0, norm=T, subsets=NULL, input_type="reads"){
+
+   peaklabel <- ifelse(is.null(peakfile), "genomic_features", names(peakfile))
+   input_type <- paste0(input_type,"_in_", peaklabel)
+
+   feature_count_list <- count_overlap_in_features(queryfiles, peakfile, txdb, longest=longest, CLIP_reads=CLIP_reads, TSSflank=flank)
+   if(norm){
+      rpm <- feature_count_list[["inputsize"]]/median(feature_count_list[["inputsize"]])
+   }else{
+      rpm <- rep(1, length(feature_count_list[["inputsize"]]))
+   }
+   names(rpm) <- names(queryfiles)
+
+   print("plot counts in features")
+   pdf(paste("overlap_count_in_genomic_features_", input_type, ".pdf",sep=""), height=8, width=12)
+   for(featureName in names(feature_count_list$count)){
+      #featureName <- "transcript"
+      if(!is.null(peakfile)){
+         count_table_feature <- feature_count_list[["count"]][[featureName]][[peakfile]]
+      }else{
+         count_table_feature <- feature_count_list[["count"]][[featureName]]
+      }
+
+      if(nrow(count_table_feature) == 0) next
+      count_table_feature <- count_table_feature[apply(count_table_feature,1,sum)>0,]
+      count_table_feature <- t(t(count_table_feature)/rpm)
+
+      sum_table_feature <- sapply(sampleNames, function(sampleN){
+         sub_df <- as.data.frame(count_table_feature[, grepl(sampleN, colnames(count_table_feature))])
+         asum <- apply(sub_df, 1, sum)
+      })
+      sum_table_feature <- as.data.frame(log2(sum_table_feature+1))
+
+      sum_df <- tidyr::pivot_longer(sum_table_feature, cols=colnames(sum_table_feature), names_to="Group", values_to="Count") %>%
+         mutate(Group=as.factor(Group))
+      median_df <- aggregate(sum_df$Count, list(sum_df$Group), median)
+      colnames(median_df) <- c("Group", "median")
+
+      if(length(levels(sum_df$Group)) < 2) next
+
+      p <- ggplot(sum_df, aes(x=Group, y=Count, fill=Group)) +
+         geom_boxplot(notch=FALSE) +
+         theme_classic() + ggtitle(paste(featureName, "n =", nrow(count_table_feature))) +
+         theme(axis.title.x = element_blank(), axis.title.y = element_text(face="bold", size=14)) +
+         theme(legend.position = "none") +
+         labs(y=expression(paste(log[2], " (Count)"))) +
+         #scale_x_discrete(limits=c("GFP", featureName)) + # labels=c("TSN" = expression(paste(m^6,"Am")), featureName = expression(paste("5'-UTR ", m^6, "A")))) +
+         theme(axis.text.x = element_text(face="bold", size=14, color="black")) +
+         stat_summary(fun=mean, geom="point", shape=23, size=4, fill="black") +
+         geom_signif(comparisons = combn(levels(sum_df$Group), 2, simplify = F), test="wilcox.test", map_signif_level=TRUE, step_increase = 0.1)
+      #geom_text(data = _df, aes(x=feature, y = min(out_df$log2FoldChange)*1.1, label = paste("n=",count,sep="")))
+
+      d <- ggplot(sum_df, aes(x=Count, color=Group)) +
+         geom_density() +
+         labs(x=expression(paste(log[2], " (Count)"))) +
+         geom_vline(data=median_df, aes(xintercept=median, color=Group), linetype="dotted", size=1) +
+         theme_classic()
+
+      outp <- plot_grid(p, d, ncol = 2, rel_widths = c(1,1))
+      print(outp)
+   }
+   dev.off()
+
+
+   if(!is.null(subsets)){
+      print("plot lfc for feautures")
+      pdf(paste("lfc_at_TSNflank",flank, "_and_transcript_for_",input_type, ".pdf",sep=""), height=8, width=12)
+      for(featureName in names(feature_count_list$count)){
+         lfc_list <- list()
+         for (subject in names(subsets)){
+            subset <- subsets[[subject]]
+            s2c <- data.frame(samples=subset, groups=c(rep(c("GFP", subject), times=c(2,2))))
+            contrasts <- data.frame(groups=c(rep("groups", 1)), treat=subject, control=c(rep("GFP",1)))
+
+            project <- paste(input_type, flank, sep="")
+
+            if(!is.null(peakfile)){
+               data_table_feature <- feature_count_list[["count"]][[featureName]][[peakfile]][, subset]
+            }else{
+               data_table_feature <- feature_count_list[["count"]][[featureName]][, subset]
+            }
+
+            if(nrow(data_table_feature) == 0) next
+            data_table_feature <- data_table_feature[apply(data_table_feature,1,sum)>0,]
+
+            print(rpm[subset])
+            data_table_feature <- round(t(t(data_table_feature)/rpm[subset]))
+            print(head(data_table_feature))
+            data_table_feature[is.na(data_table_feature)] <- 0
+
+            res_feature <- NULL
+            X <- try(
+               res_feature <- run_DESeq2(data_table_feature, s2c, featureName, contrasts, plot=F, useSizeFactor = F)
+            )
+            if(class(X) != "try-error"){
+               lfc_df <- data.frame(Group=rep(subject, length(res_feature[[1]]$log2FoldChange)), log2FoldChange=res_feature[[1]]$log2FoldChange)
+               lfc_list[[subject]] <- lfc_df
+            }
+         }
+
+         out_df <- as.data.frame(Reduce(rbind, lfc_list))
+         if(nrow(out_df) == 0) next
+
+         colnames(out_df) <- c("Group", "log2FoldChange")
+         out_df <- mutate(out_df, Group=as.factor(Group))
+         if(length(levels(out_df$Group)) < 2) next
+
+         if(length(levels(out_df$Group)) > 1){
+            median_df <- aggregate(out_df$log2FoldChange, list(out_df$Group), median)
+            colnames(median_df) <- c("Group", "median")
+
+            count_df <- aggregate(out_df$log2FoldChange, list(out_df$Group), length)
+            colnames(count_df) <- c("Group", "count")
+            p <- ggplot(out_df, aes(x=Group, y=log2FoldChange, fill=Group)) +
+               geom_boxplot(notch=FALSE) +
+               theme_classic() + ggtitle(featureName) +
+               theme(axis.title.x = element_blank(), axis.title.y = element_text(face="bold", size=14)) +
+               theme(legend.position = "none") +
+               labs(y=expression(paste(log[2], " (treat/control signal intensity)"))) +
+               scale_x_discrete(limits=names(subsets)) + # labels=c("TSN" = expression(paste(m^6,"Am")), GroupName = expression(paste("5'-UTR ", m^6, "A")))) +
+               theme(axis.text.x = element_text(face="bold", size=14, color="black")) +
+               geom_text(data = count_df, aes(x=Group, y = min(out_df$log2FoldChange)*1.1, label = paste("n=",count,sep=""))) +
+               geom_signif(comparisons = combn(levels(out_df$Group), 2, simplify = F), test="t.test", map_signif_level=TRUE, step_increase = 0.1)
+
+            #p1 <- add_pval(p, pairs = list(c(1, 2)), test='t.test')
+
+            d <- ggplot(out_df, aes(x=log2FoldChange, color=Group)) +
+               geom_density() +
+               geom_vline(data=median_df, aes(xintercept=median, color=Group), linetype="dotted", size=1) +
+               theme_classic()
+
+            outp <- plot_grid(p, d, ncol = 2, rel_widths = c(1,1))
+            print(outp)
+         }
+      }
+      dev.off()
+   }
+}
+
+count_overlap_in_features <- function(queryfiles, peakfile=NULL, txdb, longest=T, CLIP_reads=T, TSSflank=2){
+   querylabels <- names(queryfiles)
+   names(querylabels) <- queryfiles
+   input_list <- handle_input(inputFiles=queryfiles, CLIP_reads=CLIP_reads, fix_width=0, useScore=F, outRle=F, useSizeFactor=F, genome="hg19")
+
+   if(!is.null(peakfile)){
+      peaklabel <- names(peakfile)
+      names(peaklabel) <- peakfile
+      peak_list <- handle_input(inputFiles=peakfile, CLIP_reads=F, fix_width=0, useScore=F, outRle=F, useSizeFactor=F, genome="hg19")
+   }
+
+   feature_count_list <- list()
+
+   for(featureName in c("utr5", "cds", "utr3", "transcript", "TSN")){
+      #featureName <- "utr5"
+      if(featureName == "TSN"){
+         ## process transcription start sites with 'A'
+         A_tss <- get_grWithA_at_TSS(txdb, longest=longest)
+         feature_grl <- flank(A_tss, width=TSSflank, both=T)
+      }else{
+         alist <- gtf_to_bed_longest_tx(txdb, featureName, longest=longest)
+         original_grl <- alist$GRangesList
+         if(featureName %in% c("transcript")){
+            trimmed <- trimTranscripts(original_grl, start=TSSflank, end=0)
+            feature_grl <- trimmed
+         }else{
+            feature_grl <- original_grl
+         }
+      }
+
+      if(!is.null(peakfile)){
+         peakRegions <- peak_list[[peakfile]]$query
+         feature_grl <- filter_by_overlaps_stranded(peakRegions, feature_grl) ## feature_grl becomes peaks overlapping with feature
+         feature_grl <- resize(feature_grl, fix="center", width=(TSSflank*2+1))
+      }
+
+      featureCount_df <- sapply(queryfiles, function(queryfile){
+         #queryfile <- queryfiles[1]
+         #print(queryfile)
+         queryRegions <- input_list[[queryfile]]$query
+         overlap_count <- countOverlaps(feature_grl, queryRegions, type="any")
+      })
+
+      if(!is.null(peakfile)){
+         feature_count_list[[featureName]][[peakfile]] <- as.data.frame(featureCount_df)
+      }else{
+         feature_count_list[[featureName]] <- as.data.frame(featureCount_df)
+      }
+   }
+
+   bamsizes <- sapply(input_list, function(x)x$size)
+
+   if(!is.null(peakfile)){
+      peaksizes <- sapply(peak_list, function(x)x$size)
+      return(list("count"=feature_count_list, "inputsize"=bamsizes, "peaksize"=peaksizes))
+   }else{
+      return(list("count"=feature_count_list, "inputsize"=bamsizes))
+   }
+}
+
+filter_bed_by_genomicFeature <- function(bedfile, featureName, txdb=NULL, resizeFraction=NULL, longest=FALSE, featureGr=NULL, featureBed=NULL, maxgap=-1L){
+
+   if(featureName %in% c("utr3", "utr5", "cds", "intron", "exon", "transcript", "gene")){
+      feature <- gtf_to_bed_longest_tx(txdb, featureName, longest=longest)
+      featureGr <- feature$GRanges
+   }else if(is.null(featureGr)){
+      if(!is.null(featureBed)){
+         featureGr <- import.bed(featureBed)
+      }else{
+         stop("Both featureGr and featureBed are null!")
+      }
+   }
+
+   if(!is.null(resizeFraction)){
+      new_w <- as.integer(width(featureGr)*resizeFraction)
+      featureGr <- resize(featureGr, width=new_w, fix="start", use.names=TRUE, ignore.strand=FALSE)
+   }
+
+   bedGr <- import.bed(bedfile)
+
+   #filtered <- filter_by_overlaps_stranded(bedGr, featureGr, maxgap=maxgap)
+   overlaps <- GenomicRanges::findOverlaps(bedGr, featureGr, maxgap=maxgap)
+
+   print(paste("from", length(unique(overlaps@from)), "to", length(unique(overlaps@to))))
+
+   return(list(bed=bedGr[unique(overlaps@from)], feature=featureGr[unique(overlaps@to)]))
+}
