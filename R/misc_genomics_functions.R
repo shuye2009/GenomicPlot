@@ -16,8 +16,10 @@ setup <- function(){
          print(paste(package.i, "installed and loaded"))
       }else {
          print(paste("trying to install", package.i))
-         install.packages(as.character(package.i))
+         try(install.packages(as.character(package.i)))
+
          if(!require(package.i, character.only=T, quietly=T)){
+            print("the package is not available on CRAN, trying with Bioconductor")
             BiocManager::install(package.i)
          }
 
@@ -35,10 +37,10 @@ setup <- function(){
    }
 }
 
-setup()
+#setup()
 
-script.dir <- dirname(sys.frame(1)$ofile)
-source(file.path(script.dir, "GenomicPlot.R"))
+#script.dir <- dirname(sys.frame(1)$ofile)
+#source(file.path(script.dir, "GenomicPlot.R"))
 ## find the transcript that a utr3 belongs to
 utr3_to_transcript <- function(utr3File, txdb){
    #utr3File <- centerfiles[1]
