@@ -8,7 +8,7 @@ NULL
 #'
 #' @param NULL
 #' @return NULL
-setup <- function(){
+setup <- function(install=FALSE){
   list.of.packages <- c(
     "parallel",
     "data.table",
@@ -39,25 +39,26 @@ setup <- function(){
     "tictoc",
     "gg.layers"
   )
-  if (!require("BiocManager", quietly = TRUE))
+  if (!requireNamespace("BiocManager", quietly = TRUE))
     install.packages("BiocManager")
 
 
-  for(package.i in list.of.packages){
-    if(require(package.i, character.only=T, quietly=T)){
-      print(paste(package.i, "installed and loaded"))
-    }else {
-      print(paste("trying to install", package.i))
-      try(install.packages(as.character(package.i)))
+  for(apackage in list.of.packages){
+     library(apackage, character.only=T)
+    if(requireNamespace(apackage, character.only=T, quietly=T)){
+      print(paste(apackage, "installed and loaded"))
+    }else if(install){
+      print(paste("trying to install", apackage))
+      try(install.packages(as.character(apackage)))
 
-      if(!require(package.i, character.only=T, quietly=T)){
-        BiocManager::install(package.i)
+      if(!requireNamespace(apackage, character.only=T, quietly=T)){
+        BiocManager::install(apackage)
       }
 
-      if(require(package.i, character.only=T, quietly=T)){
-        print(paste(package.i, "installed and loaded"))
+      if(requireNamespace(apackage, character.only=T, quietly=T)){
+        print(paste(apackage, "installed and loaded"))
       }else {
-        warning(paste("could not install", package.i))
+        warning(paste("could not install", apackage))
       }
     }
 

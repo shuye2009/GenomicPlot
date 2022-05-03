@@ -1,11 +1,16 @@
 Package: gProfilePlot
 Type: Package
-Title: What the Package Does (Title Case)
+Title: Plot genomic profiles of NGS data
 Version: 0.1.0
-Author: Who wrote it
-Maintainer: The package maintainer <yourself@somewhere.net>
-Description: More about what it does (maybe more than one line)
+Author: Shuye Pu
+Maintainer: The package maintainer <shuye2009@gmail.com>
+Description: Produce metagene plot of sequencing data or peak data
     Use four spaces when indenting paragraphs within the Description.
-License: What license is it under?
+License: GPL-2
 Encoding: UTF-8
 LazyData: true
+Collate: 
+    'GenomicPlot.R'
+    'misc_genomics_functions.R'
+Imports: methods
+
