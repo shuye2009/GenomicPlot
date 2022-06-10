@@ -1,4 +1,4 @@
-Package: gProfilePlot
+Package: GenomicPlot
 Type: Package
 Title: Plot genomic profiles of NGS data
 Version: 0.1.0
