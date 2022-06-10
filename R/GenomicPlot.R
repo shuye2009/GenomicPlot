@@ -2,74 +2,37 @@
 #' @import methods
 NULL
 
-#' setup
-#'
-#' Method for load all packages required by other methods
-#'
-#' @param NULL
-#' @return NULL
-setup <- function(install=FALSE){
-  list.of.packages <- c(
-    "parallel",
-    "data.table",
-    "MatrixGenerics",
-    "tidyr",
-    "dplyr",
-    "DESeq2",
-    "magrittr",
-    "cowplot",
-    "rtracklayer",
-    "TxDb.Hsapiens.UCSC.hg19.knownGene",
-    "BSgenome.Hsapiens.UCSC.hg19",
-    "genomation",
-    "GenomicRanges",
-    "plyranges",
-    "GenomicFeatures",
-    "GenomicAlignments",
-    "gridExtra",
-    "ggplot2",
-    "ggsignif",
-    "ggpubr",
-    "R.utils",
-    "hrbrthemes",
-    "pheatmap",
-    "scales",
-    "RMariaDB",
-    "RCAS",
-    "tictoc",
-    "gg.layers"
-  )
-  if (!requireNamespace("BiocManager", quietly = TRUE))
-    install.packages("BiocManager")
+#library(Matrix)
+library(parallel)
+library(data.table)
+#library(MatrixGenerics)
+library(tidyr)
+library(dplyr)
+library(DESeq2)
+library(magrittr)
+library(cowplot)
+library(rtracklayer)
+library(TxDb.Hsapiens.UCSC.hg19.knownGene)
+library(BSgenome.Hsapiens.UCSC.hg19)
+library(genomation)
+library(GenomicRanges)
+library(plyranges)
+library(GenomicFeatures)
+library(GenomicAlignments)
+library(gridExtra)
+library(ggplot2)
+library(ggsignif)
+library(ggpubr)
+library(R.utils)
+library(hrbrthemes)
+library(pheatmap)
+library(scales)
+library(RMariaDB)
+library(RCAS)
+library(tictoc)
+#library(gg.layers)
 
 
-  for(apackage in list.of.packages){
-     library(apackage, character.only=T)
-    if(requireNamespace(apackage, character.only=T, quietly=T)){
-      print(paste(apackage, "installed and loaded"))
-    }else if(install){
-      print(paste("trying to install", apackage))
-      try(install.packages(as.character(apackage)))
-
-      if(!requireNamespace(apackage, character.only=T, quietly=T)){
-        BiocManager::install(apackage)
-      }
-
-      if(requireNamespace(apackage, character.only=T, quietly=T)){
-        print(paste(apackage, "installed and loaded"))
-      }else {
-        warning(paste("could not install", apackage))
-      }
-    }
-
-
-    #suppressPackageStartupMessages(
-      #library(package.i, character.only = TRUE)
-    #)
-  }
-}
-
-try(setup())
 
 #' start_parallel
 #'
@@ -396,7 +359,7 @@ gtf_to_bed_longest_tx <- function(txdb, featureName, featureSource=NULL, export=
 #' @param heatmap, a boolean indicates whether a heatmap of the score matrix should be generated
 #' @param rm.outlier, a boolean indicates whether a row with abnormally high values in the score matrix should be removed
 #' @param genome, genome of the features, the program is mostly concerned with human, if non-human genome is used, certain features may not work
-#' @param outprefix, a character string specifying output file prefix for plots (outprefix.pdf)
+#' @param outPrefix, a character string specifying output file prefix for plots (outPrefix.pdf)
 #'
 #' @return a list of two objects, the first is a GRanges object, the second is a GRangesList object
 #'
@@ -411,7 +374,7 @@ gtf_to_bed_longest_tx <- function(txdb, featureName, featureSource=NULL, export=
 #' op <- "ratio_YTHDF2_merged_at_intron_boundary"
 #'
 #' plot_start_end_feature(queryfiles=queryfiles, querylabels=querylabels, inputfiles=inputfiles, inputlabels=inputlabels, txdb=txdb, featureName="intron", CLIP_read=F, binsize=10, fix_width=0,
-#' longest=T, ext=ext, hl=hl, randomize=T, stranded=T, norm=F, scale=F, smo=F, heatmap=F, rm.outlier=F, genome="hg19", outprefix=op)
+#' longest=T, ext=ext, hl=hl, randomize=T, stranded=T, norm=F, scale=F, smo=F, heatmap=F, rm.outlier=F, genome="hg19", outPrefix=op)
 #'
 #' @export plot_start_end_feature
 #'
@@ -419,7 +382,7 @@ gtf_to_bed_longest_tx <- function(txdb, featureName, featureSource=NULL, export=
 
 plot_start_end_feature <- function(queryfiles, inputfiles=NULL, txdb, featureName, CLIP_reads=F, binsize=10, fix_width=0,
                                longest=T, ext=c(-500, 200, -200, 500), hl=c(-50, 50, -50, 50), randomize=FALSE, stranded=T, norm=F, scale=F, smo=F, heatmap=F,
-                               rm.outlier=F, genome="hg19", outprefix="plots", useScore=FALSE, useSizeFactor=FALSE){
+                               rm.outlier=F, genome="hg19", outPrefix="plots", useScore=FALSE, useSizeFactor=FALSE){
 
   querylabels <- names(queryfiles)
   names(querylabels) <- queryfiles
@@ -438,6 +401,8 @@ plot_start_end_feature <- function(queryfiles, inputfiles=NULL, txdb, featureNam
   fs <- fe <- rfs <- rfe <- NULL
 
   feature <- gtf_to_bed_longest_tx(txdb, featureName, longest=longest)[["GRanges"]]
+  minimal_width <- ext[2]-ext[3]
+  feature <- feature[width(feature)>minimal_width]
   nf <- length(feature)
 
   print(paste("number of features: ", featureName, nf))
@@ -525,7 +490,7 @@ plot_start_end_feature <- function(queryfiles, inputfiles=NULL, txdb, featureNam
       levels(location) <- rev(levels(location))
 
       sub_df <- NULL
-      sub_df <- data.frame("Intensity"=colm, "sd"=colsd, "se"=colse, "Position"=collabel, "Query"=querybed, "Location"=location)
+      sub_df <- data.frame("Intensity"=colm, "sd"=colsd, "se"=colse, "Position"=collabel, "Query"=querybed, "Feature"=location)
       if(smo){
         sub_df$Intensity <- as.vector(smooth.spline(sub_df$Intensity, df=as.integer(bin_num/5))$y)
         sub_df$se <- as.vector(smooth.spline(sub_df$se, df=as.integer(bin_num/5))$y)
@@ -546,7 +511,7 @@ plot_start_end_feature <- function(queryfiles, inputfiles=NULL, txdb, featureNam
         levels(location) <- rev(levels(location))
 
         rsub_df <- NULL
-        rsub_df <- data.frame("Intensity"=rcolm, "sd"=rcolsd, "se"=rcolse, "Position"=rcollabel, "Query"=rquerybed, "Location"=location)
+        rsub_df <- data.frame("Intensity"=rcolm, "sd"=rcolsd, "se"=rcolse, "Position"=rcollabel, "Query"=rquerybed, "Feature"=location)
         if(smo){
           rsub_df$Intensity <- as.vector(smooth.spline(rsub_df$Intensity, df=as.integer(bin_num/5))$y)
           rsub_df$se <- as.vector(smooth.spline(rsub_df$se, df=as.integer(bin_num/5))$y)
@@ -559,11 +524,11 @@ plot_start_end_feature <- function(queryfiles, inputfiles=NULL, txdb, featureNam
     }
   }
 
-  if(!is.null(outprefix)){
+  if(!is.null(outPrefix)){
     while(!is.null(dev.list())){
       dev.off()
     }
-    pdf(paste0(outprefix, ".pdf"), width=10, height=8)
+    pdf(paste0(outPrefix, ".pdf"), width=10, height=8)
   }
   ## plot multi bed lines for one feature
   p <- ggplot(plot_df, aes(x=Position, y=Intensity, color=Query)) +
@@ -573,7 +538,7 @@ plot_start_end_feature <- function(queryfiles, inputfiles=NULL, txdb, featureNam
     annotate("rect", xmin=xmin, xmax=xmax, ymin=-Inf, ymax=Inf, fill="grey", color="grey", alpha=0.3) +
     theme_classic() + theme(legend.position="top") + xlab("") + ylab("Signal intensity") +
     ggtitle(featureName) +
-    facet_wrap(~Location, scales="free_x")
+    facet_wrap(~Feature, scales="free_x")
   print(p)
 
   if(!is.null(inputfiles)){
@@ -648,7 +613,7 @@ plot_start_end_feature <- function(queryfiles, inputfiles=NULL, txdb, featureNam
         levels(location) <- rev(levels(location))
 
         sub_df <- NULL
-        sub_df <- data.frame("Intensity"=colm, "sd"=colsd, "se"=colse, "Position"=collabel, "Query"=ratiobed, "Location"=location)
+        sub_df <- data.frame("Intensity"=colm, "sd"=colsd, "se"=colse, "Position"=collabel, "Query"=ratiobed, "Feature"=location)
         if(smo){
           sub_df$Intensity <- as.vector(smooth.spline(sub_df$Intensity, df=as.integer(bin_num/5))$y)
           sub_df$se <- as.vector(smooth.spline(sub_df$se, df=as.integer(bin_num/5))$y)
@@ -669,7 +634,7 @@ plot_start_end_feature <- function(queryfiles, inputfiles=NULL, txdb, featureNam
           levels(location) <- rev(levels(location))
 
           rsub_df <- NULL
-          rsub_df <- data.frame("Intensity"=rcolm, "sd"=rcolsd, "se"=rcolse, "Position"=rcollabel, "Query"=rratiobed, "Location"=location)
+          rsub_df <- data.frame("Intensity"=rcolm, "sd"=rcolsd, "se"=rcolse, "Position"=rcollabel, "Query"=rratiobed, "Feature"=location)
           if(smo){
             rsub_df$Intensity <- as.vector(smooth.spline(rsub_df$Intensity, df=as.integer(bin_num/5))$y)
             rsub_df$se <- as.vector(smooth.spline(rsub_df$se, df=as.integer(bin_num/5))$y)
@@ -689,12 +654,14 @@ plot_start_end_feature <- function(queryfiles, inputfiles=NULL, txdb, featureNam
       annotate("rect", xmin=xmin, xmax=xmax, ymin=-Inf, ymax=Inf, fill="grey", color="grey", alpha=0.3) +
       theme_classic() + theme(legend.position="top") + xlab("") + ylab(Ylab) +
       ggtitle(featureName) +
-      facet_wrap(~Location, scales="free_x")
+      facet_wrap(~Feature, scales="free_x")
     print(p)
   }
-  if(!is.null(outprefix)){
+  if(!is.null(outPrefix)){
     dev.off()
   }
+
+  return(plot_df)
 }
 
 #' parallel_apply_scoreMatrixBin
@@ -796,7 +763,7 @@ parallel_scoreMatrixBin <- function(queryRegions, windowRs, bin_num, bin_op, wei
 #' @param heatmap, a boolean indicates whether a heatmap of the score matrix should be generated
 #' @param rm.outlier, a boolean indicates whether a row with abnormally high values in the score matrix should be removed
 #' @param genome, genome of the features, the program is mostly concerned with human, if non-human genome is used, certain features may not work
-#' @param outprefix, a character string specifying output file prefix for plots (outprefix.pdf)
+#' @param outPrefix, a character string specifying output file prefix for plots (outPrefix.pdf)
 #'
 #' @return a dataframe containing the data used for plotting
 #'
@@ -809,20 +776,6 @@ parallel_scoreMatrixBin <- function(queryRegions, windowRs, bin_num, bin_op, wei
 plot_3parts_metagene <- function(queryfiles, txdb, meta=T, inputfiles=NULL, nbins=100, norm=FALSE, longest=TRUE, scale=FALSE,
                                  fix_width=0, CLIP_reads=FALSE, fiveP=1000, threeP=1000, smo=FALSE, stranded=TRUE, outPrefix="plots", genome="hg19", useScore=FALSE,
                                  heatmap=FALSE, rm.outlier=FALSE, useSizeFactor=FALSE){
-
-  if(0){
-    nbins <- 100
-    fiveP <- 500
-    threeP <- 500
-    norm=FALSE
-    longest=TRUE
-    CLIP_reads=FALSE
-    fix_width=0
-    smo=FALSE
-    stranded=TRUE
-    outPrefix=op
-    genome="tetrahymena"
-  }
 
 
   querylabels <- names(queryfiles)
@@ -1099,7 +1052,7 @@ plot_3parts_metagene <- function(queryfiles, txdb, meta=T, inputfiles=NULL, nbin
         colsd <- apply(fullmatrix, 2, sd)
         colse <- colsd/sqrt(nrow(fullmatrix))
         collabel <- seq(vx[w], vx[w]+bin_num-1)
-        querybed <- rep(querylabel, bin_num)
+        querybed <- rep(ratiolabel, bin_num)
         featuretype <- rep(w, bin_num)
 
         sub_df <- NULL
@@ -1166,7 +1119,7 @@ plot_3parts_metagene <- function(queryfiles, txdb, meta=T, inputfiles=NULL, nbin
 #' @param heatmap, a boolean indicates whether a heatmap of the score matrix should be generated
 #' @param rm.outlier, a boolean indicates whether a row with abnormally high values in the score matrix should be removed
 #' @param genome, genome of the features, the program is mostly concerned with human, if non-human genome is used, certain features may not work
-#' @param outprefix, a character string specifying output file prefix for plots (outprefix.pdf)
+#' @param outPrefix, a character string specifying output file prefix for plots (outPrefix.pdf)
 #'
 #' @return a dataframe containing the data used for plotting
 #'
@@ -1528,7 +1481,7 @@ plot_reference_region <- function(queryfiles, centerfiles, inputfiles=NULL, nbin
 #' @param heatmap, a boolean indicates whether a heatmap of the score matrix should be generated
 #' @param rm.outlier, a boolean indicates whether a row with abnormally high values in the score matrix should be removed
 #' @param genome, genome of the features, the program is mostly concerned with human, if non-human genome is used, certain features may not work
-#' @param outprefix, a character string specifying output file prefix for plots (outprefix.pdf)
+#' @param outPrefix, a character string specifying output file prefix for plots (outPrefix.pdf)
 #' @param useIntron, a boolean indicates whether intron instead of TTS should be plotted
 #' @param useScore, a boolean indicates whether to use score column of the bed file for computation of signal intensity
 #'
@@ -1541,7 +1494,7 @@ plot_reference_region <- function(queryfiles, centerfiles, inputfiles=NULL, nbin
 
 
 plot_5parts_metagene <- function(queryfiles, gFeatures, inputfiles=NULL, norm=FALSE,
-                                 fix_width=0, CLIP_reads=FALSE,
+                                 fix_width=0, CLIP_reads=FALSE, verbose=FALSE,
                                  smo=FALSE, scale=FALSE, stranded=TRUE, outPrefix=NULL, genome="hg19",
                                  heatmap=F, rm.outlier=F, useScore=FALSE, useSizeFactor=FALSE){
 
@@ -1654,95 +1607,97 @@ plot_5parts_metagene <- function(queryfiles, gFeatures, inputfiles=NULL, norm=FA
 
   mplot_df <- mutate(mplot_df, lower=Intensity-se, upper=Intensity+se)
 
-
-  print("Start plotting")
-  values <- data.frame(id=featureNames, value=c(1.75, 1.5, 1.25, 1.5, 1.75))
-  xmax <- max(mplot_df$Position)
-  positions <- data.frame(
-    id = rep(featureNames, each = 4),
-    x = c(vx[2], vx[1], vx[1], vx[2], vx[3], vx[2], vx[2], vx[3], vx[4], vx[3], vx[3], vx[4], vx[5], vx[4], vx[4], vx[5], xmax, vx[5], vx[5], xmax),
-    y = c(3, 3, 4, 4, 2.5, 2.5, 4.5, 4.5, 2, 2, 5, 5, 2.5, 2.5, 4.5, 4.5, 3, 3, 4, 4) - 2
-  )
-
-
-  datapoly <- merge(values, positions, by = c("id"))
-
-  pp <- ggplot(datapoly, aes(x = x, y = y)) +
-    geom_polygon(aes(fill = value, group = id)) +
-    theme(axis.line=element_blank(),
-          axis.text.x=element_blank(),
-          axis.text.y=element_blank(),
-          axis.ticks=element_blank(),
-          axis.title.x=element_blank(),
-          axis.title.y=element_blank(),
-          legend.position="none",
-          panel.background=element_blank(),
-          panel.border=element_blank(),
-          panel.grid.major=element_blank(),
-          panel.grid.minor=element_blank(),
-          plot.background=element_blank())
-
-  annotx <- scaled_bins/2
-  for(i in 2:length(scaled_bins)){
-    annotx[i] <- annotx[i] + sum(scaled_bins[1:(i-1)])
-  }
-
-  fiveP <- fiveP/1000
-  five <- paste0(fiveP, "kb")
-  if(fiveP<=0) five=""
-  threeP <- threeP/1000
-  three <- paste0(threeP, "kb")
-  if(threeP<=0) three=""
-  if(!meta) five <- three <- ""
-  if(useIntron){
-    three <- "Intron"
-  }
-  annot <- data.frame(
-    fn = c(five, "5'UTR", "CDS", "3'UTR", three),
-    x = annotx,
-    y = 0
-  )
-  ppp <- ggplot(annot, aes(x = x, y = y, label=fn)) +
-    geom_text(size=4) +
-    coord_cartesian(xlim = c(1, xmax)) +
-    theme(axis.line=element_blank(),
-          axis.text.x=element_blank(),
-          axis.text.y=element_blank(),
-          axis.ticks=element_blank(),
-          axis.title.x=element_blank(),
-          axis.title.y=element_blank(),
-          legend.position="none",
-          panel.background=element_blank(),
-          panel.border=element_blank(),
-          panel.grid.major=element_blank(),
-          panel.grid.minor=element_blank(),
-          plot.background=element_blank())
-
-  color_store <- c("#00AFBB", "#E7B800", "#A0BDE0", "#0020C2", "#64E986", "#F5DEB3", "#C19A6B", "#E8A317", "#8E7618", "#A0522D", "#990012", "#CB6D51")
-
   if(!is.null(outPrefix)){
+     print("Start plotting")
+     values <- data.frame(id=featureNames, value=c(1.75, 1.5, 1.25, 1.5, 1.75))
+     xmax <- max(mplot_df$Position)
+     positions <- data.frame(
+       id = rep(featureNames, each = 4),
+       x = c(vx[2], vx[1], vx[1], vx[2], vx[3], vx[2], vx[2], vx[3], vx[4], vx[3], vx[3], vx[4], vx[5], vx[4], vx[4], vx[5], xmax, vx[5], vx[5], xmax),
+       y = c(3, 3, 4, 4, 2.5, 2.5, 4.5, 4.5, 2, 2, 5, 5, 2.5, 2.5, 4.5, 4.5, 3, 3, 4, 4) - 2
+     )
+
+
+     datapoly <- merge(values, positions, by = c("id"))
+
+     pp <- ggplot(datapoly, aes(x = x, y = y)) +
+       geom_polygon(aes(fill = value, group = id)) +
+       theme(axis.line=element_blank(),
+             axis.text.x=element_blank(),
+             axis.text.y=element_blank(),
+             axis.ticks=element_blank(),
+             axis.title.x=element_blank(),
+             axis.title.y=element_blank(),
+             legend.position="none",
+             panel.background=element_blank(),
+             panel.border=element_blank(),
+             panel.grid.major=element_blank(),
+             panel.grid.minor=element_blank(),
+             plot.background=element_blank())
+
+     annotx <- scaled_bins/2
+     for(i in 2:length(scaled_bins)){
+       annotx[i] <- annotx[i] + sum(scaled_bins[1:(i-1)])
+     }
+
+     fiveP <- fiveP/1000
+     five <- paste0(fiveP, "kb")
+     if(fiveP==0) five=""
+     threeP <- threeP/1000
+     three <- paste0(threeP, "kb")
+     if(threeP==0) three=""
+     #if(!meta) five <- three <- ""
+     if(useIntron){
+       three <- "Intron"
+     }
+     annot <- data.frame(
+       fn = c(five, "5'UTR", "CDS", "3'UTR", three),
+       x = annotx,
+       y = 0
+     )
+     ppp <- ggplot(annot, aes(x = x, y = y, label=fn)) +
+       geom_text(size=4) +
+       coord_cartesian(xlim = c(1, xmax)) +
+       theme(axis.line=element_blank(),
+             axis.text.x=element_blank(),
+             axis.text.y=element_blank(),
+             axis.ticks=element_blank(),
+             axis.title.x=element_blank(),
+             axis.title.y=element_blank(),
+             legend.position="none",
+             panel.background=element_blank(),
+             panel.border=element_blank(),
+             panel.grid.major=element_blank(),
+             panel.grid.minor=element_blank(),
+             plot.background=element_blank())
+
+     color_store <- c("#00AFBB", "#E7B800", "#A0BDE0", "#0020C2", "#64E986", "#F5DEB3", "#C19A6B", "#E8A317", "#8E7618", "#A0522D", "#990012", "#CB6D51")
+
+
     pdf(paste(outPrefix, "pdf", sep="."), height=8, width=12)
 
      for(i in seq_along(querylabels)){
        for(beds in combn(querylabels, i, simplify = F)){
          print(beds)
+         if(verbose || i == length(querylabels)){
+            aplot_df <- mplot_df %>%
+                  filter(Query %in% beds)
+            ## plot multi-sample lines with error band
+            p <- ggplot(aplot_df, aes(x=Position, y=Intensity, color=Query)) + scale_fill_manual(values=color_store[1:length(beds)]) +
+              geom_line(size=1) + #geom_point(color="grey30", size=2) +
+              geom_vline(xintercept = vx[2:length(vx)], linetype="dotted", color = "blue", size=0.5) +
+              geom_ribbon(aes(ymin=lower, ymax=upper, fill=Query), linetype=0, alpha=0.3) +
+              theme_classic() +
+              theme(legend.position="top",
+                    axis.title.x=element_blank(),
+                    axis.ticks.x=element_blank(),
+                    axis.text.x=element_blank()) +
+              ylab("Signal intensity")
 
-         aplot_df <- mplot_df %>%
-               filter(Query %in% beds)
-         ## plot multi-sample lines with error band
-         p <- ggplot(aplot_df, aes(x=Position, y=Intensity, color=Query)) + scale_fill_manual(values=color_store[1:length(beds)]) +
-           geom_line(size=1) + #geom_point(color="grey30", size=2) +
-           geom_vline(xintercept = vx[2:length(vx)], linetype="dotted", color = "blue", size=0.5) +
-           geom_ribbon(aes(ymin=lower, ymax=upper, fill=Query), linetype=0, alpha=0.3) +
-           theme_classic() +
-           theme(legend.position="top",
-                 axis.title.x=element_blank(),
-                 axis.ticks.x=element_blank(),
-                 axis.text.x=element_blank()) +
-           ylab("Signal intensity")
+            outp <- plot_grid(p, pp, ppp, ncol = 1, align = 'v', axis="b", rel_heights = c(20,1,1))
+            print(outp)
+         }
 
-         outp <- plot_grid(p, pp, ppp, ncol = 1, align = 'v', axis="b", rel_heights = c(20,1,1))
-         print(outp)
        }
      }
   }
@@ -1810,28 +1765,30 @@ plot_5parts_metagene <- function(queryfiles, gFeatures, inputfiles=NULL, norm=FA
     }
 
     mplot_df <- mutate(mplot_df, lower=Intensity-se, upper=Intensity+se)
+
     if(!is.null(outPrefix)){
        for(i in seq_along(ratiolabels)){
          for(beds in combn(ratiolabels, i, simplify = F)){
            print(beds)
+           if(verbose || i == length(ratiolabels)){
+              aplot_df <- mplot_df %>%
+                filter(Query %in% beds)
 
-           aplot_df <- mplot_df %>%
-             filter(Query %in% beds)
+              ## plot multi-sample lines with error band
+              p <- ggplot(aplot_df, aes(x=Position, y=Intensity, color=Query)) + scale_fill_manual(values=color_store[1:length(beds)]) +
+                geom_line(size=1) + #geom_point(color="grey30", size=2) +
+                geom_vline(xintercept = vx[2:length(vx)], linetype="dotted", color = "blue", size=0.5) +
+                geom_ribbon(aes(ymin=lower, ymax=upper, fill=Query), linetype=0, alpha=0.3) +
+                theme_classic() +
+                theme(legend.position="top",
+                      axis.title.x=element_blank(),
+                      axis.ticks.x=element_blank(),
+                      axis.text.x=element_blank()) +
+                ylab("Ratio over input")
 
-           ## plot multi-sample lines with error band
-           p <- ggplot(aplot_df, aes(x=Position, y=Intensity, color=Query)) + scale_fill_manual(values=color_store[1:length(beds)]) +
-             geom_line(size=1) + #geom_point(color="grey30", size=2) +
-             geom_vline(xintercept = vx[2:length(vx)], linetype="dotted", color = "blue", size=0.5) +
-             geom_ribbon(aes(ymin=lower, ymax=upper, fill=Query), linetype=0, alpha=0.3) +
-             theme_classic() +
-             theme(legend.position="top",
-                   axis.title.x=element_blank(),
-                   axis.ticks.x=element_blank(),
-                   axis.text.x=element_blank()) +
-             ylab("Ratio over input")
-
-           outp <- plot_grid(p, pp, ppp, ncol = 1, align = 'v', axis="b", rel_heights = c(20,1,1))
-           print(outp)
+              outp <- plot_grid(p, pp, ppp, ncol = 1, align = 'v', axis="b", rel_heights = c(20,1,1))
+              print(outp)
+           }
          }
        }
     }
@@ -1841,6 +1798,7 @@ plot_5parts_metagene <- function(queryfiles, gFeatures, inputfiles=NULL, norm=FA
     dev.off()
   }
 
+  print("plot_5parts_metagene runs successfully!")
   return(mplot_df)
 }
 
@@ -1870,7 +1828,7 @@ plot_5parts_metagene <- function(queryfiles, gFeatures, inputfiles=NULL, norm=FA
 #' @param heatmap, a boolean indicates whether a heatmap of the score matrix should be generated
 #' @param rm.outlier, a boolean indicates whether a row with abnormally high values in the score matrix should be removed
 #' @param genome, genome of the features, the program is mostly concerned with human, if non-human genome is used, certain features may not work
-#' @param outprefix, a character string specifying output file prefix for plots (outprefix.pdf)
+#' @param outPrefix, a character string specifying output file prefix for plots (outPrefix.pdf)
 #' @param refPoint, a sting in c("start", "center", "end")
 #' @param Xlab, a string denotes the label on x-axis
 #' @param useScore, a boolean indicates whether to use score column of the bed file for computation of signal intensity
@@ -2485,7 +2443,7 @@ plot_reference_locus <- function(queryfiles, centerfiles, ext=c(0,0), hl=c(0,0),
 #' @param heatmap, a boolean indicates whether a heatmap of the score matrix should be generated
 #' @param rm.outlier, a boolean indicates whether a row with abnormally high values in the score matrix should be removed
 #' @param genome, genome of the features, the program is mostly concerned with human, if non-human genome is used, certain features may not work
-#' @param outprefix, a character string specifying output file prefix for plots (outprefix.pdf)
+#' @param outPrefix, a character string specifying output file prefix for plots (outPrefix.pdf)
 #' @param refPoint, a sting in c("start", "center", "end")
 #' @param Xlab, a string denotes the label on x-axis
 #' @param n_random, an integer denotes the number of randomization should be formed
@@ -3226,7 +3184,7 @@ handle_bed <- function(inputFile, fix_width=0, useScore=FALSE, outRle=TRUE, fixP
   beddata <- beddata[, 1:min(6,ncol(beddata))]  ## ignore extra columns, which cause problem in import.bed()
   colnames(beddata) <- c("chr", "start", "end", "id", "score", "strand")[1:min(6,ncol(beddata))]
   queryRegions <- makeGRangesFromDataFrame(beddata, keep.extra.columns=TRUE, starts.in.df.are.0based=TRUE)
-  queryRegions$score <- as.numeric(queryRegions$score)
+  queryRegions$score <- ifelse(ncol(beddata)==6, as.numeric(queryRegions$score), 1)
 
   if(genome %in% c("hg19", "hg38")){
     regular_chr <- paste0("chr", c(seq(1,22), c("X", "Y", "M")))
@@ -3435,7 +3393,8 @@ handle_wig <- function(inputFile, outRle=TRUE, genome="hg19"){
 #' @examples
 #' bamfiles <- queryfiles
 #' genome <- "hg19"
-#' binsize <- 1000000
+#' binsize <- 10000
+#' outPrefix="Bam_correlation"
 #' @export plot_bam_correlation
 #'
 plot_bam_correlation <- function(bamfiles, binsize=1000000, outPrefix="Bam_correlation", genome="hg19"){
@@ -3454,28 +3413,46 @@ plot_bam_correlation <- function(bamfiles, binsize=1000000, outPrefix="Bam_corre
   seqi <- Seqinfo(genome=genome)
 
   cl <- start_parallel(length(outlist))
-  parallel::clusterExport(cl, c("tileGenome", "binnedAverage"))
-  parallel::clusterExport(cl, c("seqi", "binsize", "comchr"), envir=environment())
+  parallel::clusterExport(cl, c("binnedAverage"))
+  tileBins <- tileGenome(seqi[comchr], tilewidth=binsize, cut.last.tile.in.chrom=TRUE)
+  parallel::clusterExport(cl, c("seqi", "binsize", "comchr", "tileBins"), envir=environment())
   score_list <- parLapply(cl, outlist, function(x){
-
-    tileBins <- tileGenome(seqi[comchr], tilewidth=binsize, cut.last.tile.in.chrom=TRUE)
     binAverage <- binnedAverage(tileBins, x$query[comchr], varname="binned_score", na.rm=F)
     binAverage$binned_score
   })
   stop_parallel(cl)
-
+  bins_df <- data.frame(chr=seqnames(tileBins), start=start(tileBins),end=end(tileBins),strand=strand(tileBins))
+  bins <- do.call(paste, c(bins_df, sep="_"))
   mat <- matrix(unlist(score_list), ncol=length(score_list), byrow=F)
+  rownames(mat) <- bins
   mat[is.na(mat)] <- 0
-  df <- as.data.frame(round(mat * binsize) + 1)
+  mat <- mat[apply(mat, 1, sum)>0,]
+
+  norm_factor <- sapply(outlist, function(x) x$size/1000000)
+
+  df <- round(mat * binsize) + 1
+  df <- as.data.frame(t(t(df)/norm_factor)) ## convert to counts per million (CPM)
 
   colnames(df) <- bamlabels
 
-  long_df <- tidyr::pivot_longer(log2(df), cols=colnames(df), names_to="Sample", values_to="Count") %>%
-    mutate(Sample=as.factor(Sample))
+  long_df <- tidyr::pivot_longer(df, cols=colnames(df), names_to="Sample", values_to="Count") %>%
+    mutate(Sample=as.factor(Sample)) %>%
+     group_by(Sample) %>%
+     arrange(Count) %>%
+     filter(Count < 10000) %>%
+     mutate(Rank=order(Count)) %>%
+     mutate(Fraction=Count/max(Count), Rank=Rank/max(Rank))
 
-  pdf(paste0(op, ".pdf"), width=10, height=8)
-  p <- ggplot(data=long_df, aes(x=Count, color=Sample)) +
-    stat_ecdf() + ggtitle(paste("Binned read counts distribution: bin size =", binsize)) +
+  pdf(paste0(outPrefix, ".pdf"), width=10, height=8)
+  p <- ggplot(data=long_df, aes(x=Rank, y=(Fraction), color=Sample)) +
+     geom_line() +
+     ggtitle(paste("Binned read counts distribution: bin size =", binsize)) +
+     labs(x="Rank(Count)", y=paste("Fraction over highest coverage"))
+  print(p)
+
+  p <- ggplot(data=long_df, aes(x=(Count), color=Sample)) +
+    stat_ecdf() +
+    ggtitle(paste("Binned read counts distribution: bin size =", binsize)) +
     labs(x=expression(paste(log[2], " (Count)")), y=paste("Pencentage"))
   print(p)
 
@@ -3510,6 +3487,8 @@ plot_bam_correlation <- function(bamfiles, binsize=1000000, outPrefix="Bam_corre
   if(length(bamfiles)>3) pheatmap(cor(log(df+1)), display_numbers = T)
   pairs(log(df+1), lower.panel = panel.smooth, upper.panel=panel.cor, diag.panel = panel.hist, main=paste("log (reads/bin)\nbin size =", binsize))
   dev.off()
+
+  return(df)
 
 }
 
@@ -4013,7 +3992,7 @@ prepare_5parts_genomic_features <- function(txdb, longest=TRUE, meta=TRUE, nbins
       print("Number of genes included in analysis")
       print(nrow(tl_selected))
 
-      gene <- genes(txdb)
+      gene <- GenomicFeatures::genes(txdb)
       gene <- gene[gene$gene_id %in% tl_selected$gene_id,]
 
       promoter <- flank(gene, width=fiveP, both=F, start=T, ignore.strand=FALSE)
@@ -4182,6 +4161,80 @@ peak_targeted_gene <- function(peakfile, gtffile, genome="hg19", filterfile=NULL
 
    return_table <- bind_rows(return_list)
    write.table(return_table, paste(peaklabel, "overlap", filterlabel, "targeted_gene.tab", sep="_"), sep="\t", row.names=F, quote=F)
+
+   return(return_table)
+}
+
+
+peak_targeted_enhancer <- function(peakfile, enhancerfile, enhancerGenefile, maxg=-1L, genome="hg19"){
+   if(0){
+      peakfile <- queryfiles
+      enhancerfile <- "C:/GREENBLATT/resource/EnhancerAtlas2.0/HEK293.bed"
+      enhancerGenefile <- "C:/GREENBLATT/resource/EnhancerAtlas2.0/HEK293_EP.txt"
+      maxg <- -1L
+      genome <- "hg19"
+   }
+
+   EG <- read.delim(enhancerGenefile, header=F)
+   EG_list <- lapply(EG[,1], function(x){
+      str1 <- unlist(strsplit(x, split=":|_|\\$"))
+      return(c(str1[1], unlist(strsplit(str1[2], split="-")), str1[3:7]))
+   })
+   names(EG_list) <- paste0("EG", seq_along(EG_list))
+   EG_df <- as.data.frame(do.call(rbind, EG_list))
+   colnames(EG_df) <- c("chrEnhancer", "startEnhancer", "endEnhancer", "geneId", "geneName", "chrGene", "coordGene", "strandGene")
+
+   return_table <- NULL
+   peaklabel <- names(peakfile)
+   peak <- handle_bed(inputFile=peakfile, fix_width=0, useScore=FALSE, outRle=FALSE, genome=genome)$query
+   enhancer <- handle_bed(inputFile=enhancerfile, fix_width=0, useScore=FALSE, outRle=FALSE, genome=genome)$query
+
+   print(length(peak))
+   print(length(enhancer))
+   Overlaps <- GenomicRanges::findOverlaps(peak, enhancer)
+   peak_gr <- peak[Overlaps@from]
+   peak_df <- annoGR2DF(peak_gr) %>%
+      mutate(chrPeak=as.character(chr),
+             startPeak=as.integer(start)-1,
+             endPeak=as.integer(end),
+             widthPeak=as.integer(width),
+             strandPeak="*",
+             .keep="unused")
+   enhancer_gr <- enhancer[Overlaps@to]
+   names(enhancer_gr) <- seq_along(enhancer_gr)
+   enhancer_df <- annoGR2DF(enhancer_gr) %>%
+      mutate(chrEnhancer=as.character(chr),
+             startEnhancer=as.integer(start)-1,
+             endEnhancer=as.integer(end),
+             widthEnhancer=as.integer(width),
+             strandEnhancer="*",
+             .keep="unused")
+
+   ot <- cbind(peak_df, enhancer_df) %>%
+      select(chrPeak, startPeak, endPeak, widthPeak, strandPeak, chrEnhancer, startEnhancer, endEnhancer, widthEnhancer, strandEnhancer)
+
+   return_table <- merge(ot, EG_df)
+   return_table <- return_table[,colnames(return_table)[c(4:8, 1:3, 9:15)]]
+   uni_peaks <- unique(return_table[, 1:5])
+   uni_enhancers <- unique(return_table[, 6:10])
+   uni_genes <- unique(return_table[11:15])
+
+   fraction_peaks <- nrow(uni_peaks)/length(peak)
+   fraction_enhancers <- nrow(uni_enhancers)/length(enhancer)
+
+   sink(paste(peaklabel, "targeted_enhancer_gene_stats.tab", sep="_"))
+   cat(paste0("GenomicPlot.R::peak_targeted_enhancer()\t",date()))
+   cat(paste0("\nSummary stats for\t", peaklabel, "_targeted_enhancer_gene.tab"))
+   cat(paste0("\nTotal number of summit peaks\t", length(peak)))
+   cat(paste0("\nTotal number of enhancers in HEK293\t", length(enhancer)))
+   cat(paste0("\nNumber of peaks targeting enhancer\t", nrow(uni_peaks)))
+   cat(paste0("\nFraction of peaks targeting enhancer\t", fraction_peaks))
+   cat(paste0("\nNumber of enhancers targeted by peaks\t", nrow(uni_enhancers)))
+   cat(paste0("\nFraction of enhancer targeted by peaks\t", fraction_enhancers))
+   cat(paste0("\nNumber of genes associated with targeted enhancer\t", nrow(uni_genes)))
+   sink()
+
+   write.table(return_table, paste(peaklabel, "targeted_enhancer_gene.tab", sep="_"), sep="\t", row.names=F, quote=F)
 
    return(return_table)
 }

@@ -1,43 +1,9 @@
+library(factR)
+library(chromstaR)
+library(ggpval)
+library(Repitools)
 
 
-setup <- function(){
-   list.of.packages <- c(
-    "factR",
-    "chromstaR",
-    "ggpval",
-    "Repitools"
-   )
-   if (!require("BiocManager", quietly = TRUE))
-      install.packages("BiocManager")
-
-
-   for(package.i in list.of.packages){
-      if(require(package.i, character.only=T, quietly=T)){
-         print(paste(package.i, "installed and loaded"))
-      }else {
-         print(paste("trying to install", package.i))
-         try(install.packages(as.character(package.i)))
-
-         if(!require(package.i, character.only=T, quietly=T)){
-            print("the package is not available on CRAN, trying with Bioconductor")
-            BiocManager::install(package.i)
-         }
-
-         if(require(package.i, character.only=T, quietly=T)){
-            print(paste(package.i, "installed and loaded"))
-         }else {
-            warning(paste("could not install", package.i))
-         }
-      }
-
-
-      #suppressPackageStartupMessages(
-      #library(package.i, character.only = TRUE)
-      #)
-   }
-}
-
-#setup()
 
 #script.dir <- dirname(sys.frame(1)$ofile)
 #source(file.path(script.dir, "GenomicPlot.R"))
