@@ -4,7 +4,7 @@ library(ggpval)
 library(Repitools)
 
 
-
+source("C:/GREENBLATT/Rscripts/GenomicPlot/R/GenomicPlot.R")
 #script.dir <- dirname(sys.frame(1)$ofile)
 #source(file.path(script.dir, "GenomicPlot.R"))
 ## find the transcript that a utr3 belongs to
@@ -317,7 +317,7 @@ plot_feature_overlap_count <- function(queryfiles, peakfile=NULL, txdb, sampleNa
    names(rpm) <- names(queryfiles)
 
    print("plot counts in features")
-   pdf(paste("overlap_count_in_genomic_features_", input_type, ".pdf",sep=""), height=8, width=12)
+   pdf(paste("overlap_count_of_", input_type, ".pdf",sep=""), height=8, width=12)
    for(featureName in names(feature_count_list$count)){
       #featureName <- "transcript"
       if(!is.null(peakfile)){
@@ -442,25 +442,27 @@ plot_feature_overlap_count <- function(queryfiles, peakfile=NULL, txdb, sampleNa
    }
 }
 
-count_overlap_in_features <- function(queryfiles, peakfile=NULL, txdb, longest=T, CLIP_reads=T, TSSflank=2){
+count_overlap_in_features <- function(queryfiles, peakfile=NULL, txdb, longest=T, fix_width=0, CLIP_reads=T, TSSflank=2){
    querylabels <- names(queryfiles)
    names(querylabels) <- queryfiles
-   input_list <- handle_input(inputFiles=queryfiles, CLIP_reads=CLIP_reads, fix_width=0, useScore=F, outRle=F, useSizeFactor=F, genome="hg19")
+   input_list <- handle_input(inputFiles=queryfiles, CLIP_reads=CLIP_reads, fix_width=fix_width, useScore=F, outRle=F, useSizeFactor=F, genome="hg19")
 
    if(!is.null(peakfile)){
       peaklabel <- names(peakfile)
       names(peaklabel) <- peakfile
-      peak_list <- handle_input(inputFiles=peakfile, CLIP_reads=F, fix_width=0, useScore=F, outRle=F, useSizeFactor=F, genome="hg19")
+      peak_list <- handle_input(inputFiles=peakfile, CLIP_reads=F, fix_width=fix_width, useScore=F, outRle=F, useSizeFactor=F, genome="hg19")
    }
 
    feature_count_list <- list()
 
-   for(featureName in c("utr5", "cds", "utr3", "transcript", "TSN")){
+   for(featureName in c("utr5", "cds", "utr3", "transcript", "TSN", "unrestricted")){
       #featureName <- "utr5"
       if(featureName == "TSN"){
          ## process transcription start sites with 'A'
          A_tss <- get_grWithA_at_TSS(txdb, longest=longest)
          feature_grl <- flank(A_tss, width=TSSflank, both=T)
+      }else if(featureName == "unrestricted"){
+         feature_grl <- ifelse(!is.null(peakfile), peak_list[[peakfile]]$query, NULL)
       }else{
          alist <- gtf_to_bed_longest_tx(txdb, featureName, longest=longest)
          original_grl <- alist$GRangesList
@@ -474,22 +476,29 @@ count_overlap_in_features <- function(queryfiles, peakfile=NULL, txdb, longest=T
 
       if(!is.null(peakfile)){
          peakRegions <- peak_list[[peakfile]]$query
-         feature_grl <- filter_by_overlaps_stranded(peakRegions, feature_grl) ## feature_grl becomes peaks overlapping with feature
-         feature_grl <- resize(feature_grl, fix="center", width=(TSSflank*2+1))
+         if(unique(runValue(strand(peakRegions))) %in% c("*", ".", "")){
+            feature_grl <- filter_by_overlaps(peakRegions, feature_grl) ## feature_grl becomes peaks overlapping with feature
+         }else{
+            feature_grl <- filter_by_overlaps_stranded(peakRegions, feature_grl)
+         }
+         #feature_grl <- resize(feature_grl, fix="center", width=(TSSflank*2+1))
       }
 
-      featureCount_df <- sapply(queryfiles, function(queryfile){
-         #queryfile <- queryfiles[1]
-         #print(queryfile)
-         queryRegions <- input_list[[queryfile]]$query
-         overlap_count <- countOverlaps(feature_grl, queryRegions, type="any")
-      })
+      if(!is.null(feature_grl)){
+         featureCount_df <- sapply(queryfiles, function(queryfile){
+            #queryfile <- queryfiles[1]
+            #print(queryfile)
+            queryRegions <- input_list[[queryfile]]$query
+            overlap_count <- countOverlaps(feature_grl, queryRegions, type="any")
+         })
 
-      if(!is.null(peakfile)){
-         feature_count_list[[featureName]][[peakfile]] <- as.data.frame(featureCount_df)
-      }else{
-         feature_count_list[[featureName]] <- as.data.frame(featureCount_df)
+         if(!is.null(peakfile)){
+            feature_count_list[[featureName]][[peakfile]] <- as.data.frame(featureCount_df)
+         }else{
+            feature_count_list[[featureName]] <- as.data.frame(featureCount_df)
+         }
       }
+
    }
 
    bamsizes <- sapply(input_list, function(x)x$size)
@@ -529,3 +538,20 @@ filter_bed_by_genomicFeature <- function(bedfile, featureName, txdb=NULL, resize
 
    return(list(bed=bedGr[unique(overlaps@from)], feature=featureGr[unique(overlaps@to)]))
 }
+
+## bedfile is the "A" containing miCLIP peaks file
+derive_m6Am_sites <- function(bedfile, m6Afile, txdb, m6Amfile){
+   ## get "A" containing peaks in 5' UTR
+   utr5_filtered <- filter_bed_by_genomicFeature(bedfile, featureName="utr5", txdb=txdb, resizeFraction=0.25, longest=TRUE)
+   m6A <- import.bed(m6Afile)
+   ## remove peaks that are overlapping with m6A sites
+   m6Am <- filter_by_nonoverlaps_stranded(utr5_filtered$bed, m6A)
+   ## convert to 6-column bed format
+   utr5_filtered_bed <- annoGR2DF(m6Am) %>%
+      select(c(chr, start, end, name, score, strand)) %>%
+      mutate(start=as.integer(start)-1) %>%
+      mutate(chr=as.character(chr))
+   print(dim(utr5_filtered_bed))
+   write.table(utr5_filtered_bed, m6Amfile, col.names=F, row.names = F, sep="\t", quote=F)
+}
+

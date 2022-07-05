@@ -2,10 +2,10 @@
 #' @import methods
 NULL
 
-#library(Matrix)
+#library(Matrix) # not available on BC cluster
 library(parallel)
 library(data.table)
-#library(MatrixGenerics)
+#library(MatrixGenerics) # not available on BC cluster
 library(tidyr)
 library(dplyr)
 library(DESeq2)
@@ -30,13 +30,13 @@ library(scales)
 library(RMariaDB)
 library(RCAS)
 library(tictoc)
-#library(gg.layers)
+#library(gg.layers) # not available on BC cluster
 
 
 
-#' start_parallel
+#' @title start_parallel
 #'
-#' Method for starting a virtual cluster needed for parallel processing
+#' @description Method for starting a virtual cluster needed for parallel processing
 #'
 #' @param nc, a positive integer greater than 1
 #' @return an object of class c("SOCKcluster", "cluster"), depending on platform
@@ -61,9 +61,9 @@ start_parallel <- function(nc){
   my.cluster
 }
 
-#' stop_parallel
+#' @title stop_parallel
 #
-#' Method for stopping a virtual cluster needed for parallel processing
+#' @description Method for stopping a virtual cluster needed for parallel processing
 #'
 #' @param cl, a cluster or SOCKcluster object depending on platform
 #' @return NULL
@@ -80,9 +80,9 @@ stop_parallel <- function(cl){
 }
 
 
-#' extract_longest_tx
+#' @title extract_longest_tx
 #
-#' Gene level computations require selecting one transcript per gene to avoid bias by genes with multiple isoforms.
+#' @description Gene level computations require selecting one transcript per gene to avoid bias by genes with multiple isoforms.
 #' In ideal case, the most abundant transcript (principal or canonical isoform) should be chosen. However, the
 #' most abundant isoform may vary depending on tissue type or physiological condition, the longest transcript is usually
 #' the principal isoform, and alternatively spliced isoforms are not. This method get the longest transcript for each
@@ -236,9 +236,9 @@ extract_longest_tx <- function(txdb, plot=FALSE){
 }
 
 
-#' gtf_to_bed_longest_tx
+#' @title gtf_to_bed_longest_tx
 #
-#' Make bed and bed 12 files from gtf file for protein coding genes. For "utr3", "utr5", "cds" and "transcript",  the output granges object
+#' @description Make bed and bed 12 files from gtf file for protein coding genes. For "utr3", "utr5", "cds" and "transcript",  the output granges object
 #' gives start and end of the entire feature, while the grangslist object gives start and end of each exonic segment. For "exon"
 #' and "intron", the output granges object gives start and end of each feature, while the grangslist object also provides
 #' transcript ID in addition to these information. For "gene", the granges object and the grangeslist object are equivalent.
@@ -250,6 +250,15 @@ extract_longest_tx <- function(txdb, plot=FALSE){
 #' @param featureSource, the name of the gtf/gff3 file or the online database from which txdb is derived, used as name of output file
 #' @param export, a boolean object to indicate if the bed file should be produced
 #' @param longest, a boolean object to indicate whether the output should be limited to the longest transcript of each gene
+#' @param protein_coding, a boolean to indicate whether to limit to protein_coding genes
+#' @details The output of this function is a list. The first element of the list is a GRanges object that provide the start and end information.
+#' The second element is a GRangesList providing information for subcomponents. For "utr3", "utr5", "cds" and "transcript", the returned GRanges
+#' object has only one range for each feature, denoting the start and end of the feature in one transcript, and the range may contain introns; the returned GrangesList object is a list of exons,
+#' belonging to one transcript and indexed on transcript id.
+#' For "exon" and "intron", the GRanges object denotes ranges of individual exon or intron, and the GrangesList object is a list of exons or
+#' introns belonging to one transcript and indexed on transcript id.
+#' For "gene", the Granges and GRangesList objects have the same information in different format. If longest is TRUE, only protein-coding
+#' genes are included (equivlent to setting proteinc_coding to TRUE), otherwise, all genes will be included.
 #' @return a list of two objects, the first is a GRanges object, the second is a GRangesList object
 #'
 #' @examples
@@ -258,11 +267,15 @@ extract_longest_tx <- function(txdb, plot=FALSE){
 #' @export gtf_to_bed_longest_tx
 #'
 #'
-gtf_to_bed_longest_tx <- function(txdb, featureName, featureSource=NULL, export=FALSE, longest=TRUE){
+gtf_to_bed_longest_tx <- function(txdb, featureName, featureSource=NULL, export=FALSE, longest=FALSE, protein_coding=FALSE){
 
  # featureName <- "transcript"
   longest_tx <- extract_longest_tx(txdb)
   if(!is.null(featureSource)){featureSource <- gsub("\\.gtf", "", featureSource)}
+
+  tl <- transcriptLengths(txdb, with.utr5_len = T, with.cds_len = T, with.utr3_len = T)
+  tl_protein_coding <- tl[tl$cds_len > 0, ]
+
   feature <- NULL
 
   if(featureName == "utr3"){
@@ -271,34 +284,26 @@ gtf_to_bed_longest_tx <- function(txdb, featureName, featureSource=NULL, export=
     feature <- fiveUTRsByTranscript(txdb, use.name=F) # grl
   }else if(featureName == "intron"){
     feature <- intronsByTranscript(txdb, use.name=F) #grl
-    tl <- transcriptLengths(txdb, with.utr5_len = T, with.cds_len = T, with.utr3_len = T)
-    tl_protein_coding <- tl[tl$cds_len > 0, ]
-    feature <- feature[tl_protein_coding$tx_id]
+    if(protein_coding) feature <- feature[tl_protein_coding$tx_id]
   }else if(featureName == "exon"){
     feature <- exonsBy(txdb, by="tx", use.name=F) #grl
-    tl <- transcriptLengths(txdb, with.utr5_len = T, with.cds_len = T, with.utr3_len = T)
-    tl_protein_coding <- tl[tl$cds_len > 0, ]
-    feature <- feature[tl_protein_coding$tx_id]
+    if(protein_coding) feature <- feature[tl_protein_coding$tx_id]
   }else if(featureName == "cds"){
     feature <- cdsBy(txdb, by="tx", use.name=F) # grl
   }else if(featureName == "transcript"){
     feature <- exonsBy(txdb, by="tx", use.name=F) #grl
-    tl <- transcriptLengths(txdb, with.utr5_len = T, with.cds_len = T, with.utr3_len = T)
-    tl_protein_coding <- tl[tl$cds_len > 0, ]
-    feature <- feature[tl_protein_coding$tx_id]
+    if(protein_coding) feature <- feature[tl_protein_coding$tx_id]
   }else if(featureName == "gene"){
     feature <- genes(txdb)                       # gr
-    feature <- split(feature, f=feature$gene_id)
-    tl <- transcriptLengths(txdb, with.utr5_len = T, with.cds_len = T, with.utr3_len = T)
-    tl_protein_coding <- tl[tl$cds_len > 0, ]
-    feature <- feature[unique(tl_protein_coding$gene_id)]
+    feature <- split(feature, f=feature$gene_id) # grl
+    if(protein_coding) feature <- feature[unique(tl_protein_coding$gene_id)]
   }else {
     stop("Feature is not defined!")
   }
 
   if(longest){
     if(featureName == "gene"){
-      feature_longest <- feature[names(feature) %in% longest_tx$gene_id]
+      feature_longest <- feature[names(feature) %in% longest_tx$gene_id] # protein-coding genes only
     }else{
       feature_longest <- feature[names(feature) %in% longest_tx$tx_id]
     }
@@ -324,7 +329,7 @@ gtf_to_bed_longest_tx <- function(txdb, featureName, featureSource=NULL, export=
       }
     }
     if(featureName %in% c("gene", "intron", "exon")){
-      gr_feature <- stack(feature) ## convert each element of Grangeslist to multiple Granges
+      gr_feature <- stack(feature) ## convert each element of Grangeslist to one Grange
       if(export){
         export.bed(gr_feature, paste(featureSource, "_", featureName, ".bed", sep=""))
       }
@@ -380,7 +385,7 @@ gtf_to_bed_longest_tx <- function(txdb, featureName, featureSource=NULL, export=
 #'
 #'
 
-plot_start_end_feature <- function(queryfiles, inputfiles=NULL, txdb, featureName, CLIP_reads=F, binsize=10, fix_width=0,
+plot_start_end_feature <- function(queryfiles, inputfiles=NULL, txdb, featureName, CLIP_reads=F, binsize=10, fix_width=0, insert=0,
                                longest=T, ext=c(-500, 200, -200, 500), hl=c(-50, 50, -50, 50), randomize=FALSE, stranded=T, norm=F, scale=F, smo=F, heatmap=F,
                                rm.outlier=F, genome="hg19", outPrefix="plots", useScore=FALSE, useSizeFactor=FALSE){
 
@@ -398,10 +403,10 @@ plot_start_end_feature <- function(queryfiles, inputfiles=NULL, txdb, featureNam
   }
 
   feature <- rfeature <- NULL
-  fs <- fe <- rfs <- rfe <- NULL
+  fs <- fe <- rfs <- rfe <- fc <- rfc <- NULL
 
   feature <- gtf_to_bed_longest_tx(txdb, featureName, longest=longest)[["GRanges"]]
-  minimal_width <- ext[2]-ext[3]
+  minimal_width <- ext[2] - ext[3] + insert
   feature <- feature[width(feature)>minimal_width]
   nf <- length(feature)
 
@@ -409,23 +414,27 @@ plot_start_end_feature <- function(queryfiles, inputfiles=NULL, txdb, featureNam
 
   fs <- promoters(resize(feature,width=1,fix="start"), upstream=-ext[1],downstream=ext[2])
   fe <- promoters(resize(feature,width=1,fix="end"), upstream=-ext[3],downstream=ext[4])
-
+  fc <- promoters(resize(feature,width=1,fix="center"), upstream=round(insert/2),downstream=round(insert/2))
   if(randomize){
     #rfeature <- randomizeFeature(disjoin(feature))
     random_points <- sample(ext[1]:ext[4], length(feature), replace=T)
     rfeature <- shift(feature, shift=random_points)
     rfs <- promoters(resize(rfeature,width=1,fix="start"), upstream=-ext[1],downstream=ext[2])
     rfe <- promoters(resize(rfeature,width=1,fix="end"), upstream=-ext[3],downstream=ext[4])
+    rfc <- promoters(resize(rfeature,width=1,fix="center"), upstream=round(insert/2),downstream=round(insert/2))
   }
 
   ext[2] <- ext[2] - (ext[2]-ext[1])%%binsize ## to avoid binsize inconsistency, as the final binsize is dictated by bin_num
   bin_num_s <- round((ext[2]-ext[1])/binsize)
   ext[4] <- ext[4] - (ext[4]-ext[3])%%binsize ## to avoid binsize inconsistency, as the final binsize is dictated by bin_num
   bin_num_e <- round((ext[4]-ext[3])/binsize)
+  bin_num_c <- round(insert/binsize)
 
   mat_list <- NULL
   mat_list[[paste("Start of", featureName)]] <- list("window"=fs, "rwindow"=rfs, s=ext[1], e=ext[2], "xmin"=hl[1], "xmax"=hl[2], "bin_num"=bin_num_s)
+  mat_list[[paste("Center of", featureName)]] <- list("window"=fc, "rwindow"=rfc,  s=-round(insert/2), e=round(insert/2), "xmin"=0, "xmax"=0, "bin_num"=bin_num_c)
   mat_list[[paste("End of", featureName)]] <- list("window"=fe, "rwindow"=rfe,  s=ext[3], e=ext[4], "xmin"=hl[3], "xmax"=hl[4], "bin_num"=bin_num_e)
+
 
 
   bedInputs <- handle_input(queryfiles, CLIP_reads=CLIP_reads, fix_width=fix_width,  useScore=useScore, outRle=TRUE, useSizeFactor=useSizeFactor, genome=genome)
@@ -441,6 +450,7 @@ plot_start_end_feature <- function(queryfiles, inputfiles=NULL, txdb, featureNam
     start <- mat_list[[locus]]$s
     end <- mat_list[[locus]]$e
 
+    if(bin_num <= 0) next
     for(queryfile in queryfiles){
 
       querylabel <- querylabels[queryfile]
@@ -474,6 +484,7 @@ plot_start_end_feature <- function(queryfiles, inputfiles=NULL, txdb, featureNam
     start <- mat_list[[locus]]$s
     end <- mat_list[[locus]]$e
 
+    if(bin_num <= 0) next
     for(queryfile in queryfiles){
 
       querylabel <- querylabels[queryfile]
@@ -530,16 +541,33 @@ plot_start_end_feature <- function(queryfiles, inputfiles=NULL, txdb, featureNam
     }
     pdf(paste0(outPrefix, ".pdf"), width=10, height=8)
   }
+
+  ## plot individual bed line for one feature
+  for (query in unique(plot_df$Query)){
+     aplot_df <- plot_df %>%
+        filter(Query == query)
+     p <- ggplot(aplot_df, aes(x=Position, y=Intensity, color=Query)) +
+        geom_line(size=1) + #geom_point(color="grey30", size=2) +
+        geom_vline(xintercept = 0, linetype="dotted", color = "blue", size=1) +
+        geom_ribbon(aes(ymin=lower, ymax=upper, fill=Query), linetype=0, alpha=0.3) +
+        annotate("rect", xmin=xmin, xmax=xmax, ymin=-Inf, ymax=Inf, fill="grey", color="grey", alpha=0.3) +
+        theme_classic() + theme(legend.position="top") + xlab("") + ylab("Signal intensity") +
+        ggtitle(featureName) +
+        facet_wrap(~Feature, scales="free_x")
+     print(p)
+  }
   ## plot multi bed lines for one feature
-  p <- ggplot(plot_df, aes(x=Position, y=Intensity, color=Query)) +
-    geom_line(size=1) + #geom_point(color="grey30", size=2) +
-    geom_vline(xintercept = 0, linetype="dotted", color = "blue", size=1) +
-    geom_ribbon(aes(ymin=lower, ymax=upper, fill=Query), linetype=0, alpha=0.3) +
-    annotate("rect", xmin=xmin, xmax=xmax, ymin=-Inf, ymax=Inf, fill="grey", color="grey", alpha=0.3) +
-    theme_classic() + theme(legend.position="top") + xlab("") + ylab("Signal intensity") +
-    ggtitle(featureName) +
-    facet_wrap(~Feature, scales="free_x")
-  print(p)
+  if(length(unique(plot_df$Query))>1){
+     p <- ggplot(plot_df, aes(x=Position, y=Intensity, color=Query)) +
+       geom_line(size=1) + #geom_point(color="grey30", size=2) +
+       geom_vline(xintercept = 0, linetype="dotted", color = "blue", size=1) +
+       geom_ribbon(aes(ymin=lower, ymax=upper, fill=Query), linetype=0, alpha=0.3) +
+       annotate("rect", xmin=xmin, xmax=xmax, ymin=-Inf, ymax=Inf, fill="grey", color="grey", alpha=0.3) +
+       theme_classic() + theme(legend.position="top") + xlab("") + ylab("Signal intensity") +
+       ggtitle(featureName) +
+       facet_wrap(~Feature, scales="free_x")
+     print(p)
+  }
 
   if(!is.null(inputfiles)){
     Ylab <- "Ratio-over-Input"
@@ -597,6 +625,7 @@ plot_start_end_feature <- function(queryfiles, inputfiles=NULL, txdb, featureNam
       start <- mat_list[[locus]]$s
       end <- mat_list[[locus]]$e
 
+      if(bin_num <= 0) next
       for(ratiofile in ratiofiles){
 
         ratiolabel <- ratiolabels[ratiofile]
@@ -646,16 +675,33 @@ plot_start_end_feature <- function(queryfiles, inputfiles=NULL, txdb, featureNam
       }
     }
 
+    ## plot individual bed line for one feature
+    for (query in unique(plot_df$Query)){
+       aplot_df <- plot_df %>%
+          filter(Query == query)
+       p <- ggplot(aplot_df, aes(x=Position, y=Intensity, color=Query)) +
+          geom_line(size=1) + #geom_point(color="grey30", size=2) +
+          geom_vline(xintercept = 0, linetype="dotted", color = "blue", size=1) +
+          geom_ribbon(aes(ymin=lower, ymax=upper, fill=Query), linetype=0, alpha=0.3) +
+          annotate("rect", xmin=xmin, xmax=xmax, ymin=-Inf, ymax=Inf, fill="grey", color="grey", alpha=0.3) +
+          theme_classic() + theme(legend.position="top") + xlab("") + ylab(Ylab) +
+          ggtitle(featureName) +
+          facet_wrap(~Feature, scales="free_x")
+       print(p)
+    }
+
     ## plot multi bed lines for one feature
-    p <- ggplot(plot_df, aes(x=Position, y=Intensity, color=Query)) +
-      geom_line(size=1) + #geom_point(color="grey30", size=2) +
-      geom_vline(xintercept = 0, linetype="dotted", color = "blue", size=1) +
-      geom_ribbon(aes(ymin=lower, ymax=upper, fill=Query), linetype=0, alpha=0.3) +
-      annotate("rect", xmin=xmin, xmax=xmax, ymin=-Inf, ymax=Inf, fill="grey", color="grey", alpha=0.3) +
-      theme_classic() + theme(legend.position="top") + xlab("") + ylab(Ylab) +
-      ggtitle(featureName) +
-      facet_wrap(~Feature, scales="free_x")
-    print(p)
+    if(length(unique(plot_df$Query))>1){
+       p <- ggplot(plot_df, aes(x=Position, y=Intensity, color=Query)) +
+         geom_line(size=1) + #geom_point(color="grey30", size=2) +
+         geom_vline(xintercept = 0, linetype="dotted", color = "blue", size=1) +
+         geom_ribbon(aes(ymin=lower, ymax=upper, fill=Query), linetype=0, alpha=0.3) +
+         annotate("rect", xmin=xmin, xmax=xmax, ymin=-Inf, ymax=Inf, fill="grey", color="grey", alpha=0.3) +
+         theme_classic() + theme(legend.position="top") + xlab("") + ylab(Ylab) +
+         ggtitle(featureName) +
+         facet_wrap(~Feature, scales="free_x")
+       print(p)
+    }
   }
   if(!is.null(outPrefix)){
     dev.off()
@@ -1804,12 +1850,10 @@ plot_5parts_metagene <- function(queryfiles, gFeatures, inputfiles=NULL, norm=FA
 
 
 #' plot_reference_locus
-#
-#' Plot reads or peak signal intensity of samples in the query files around reference locus defined in the centerfiles. The upstream and downstream windows
+#' @title plot_reference_locus
+#' @description  Plot reads or peak signal intensity of samples in the query files around reference locus defined in the centerfiles. The upstream and downstream windows
 #' flanking genes can be given separately, a smaller window can be defined to allow statistical comparisons between samples for the same reference,
 #' or between references for a given sample.
-#'
-#'
 #' @param queryfiles, a vector of sample file names. The file should be in .bam, .bed, .wig or .bw format, mixture of formats is allowed
 #' @param querylabels, a vector of character strings serving as short labels of the queryfiles, will be used as sample labels in the plots
 #' @param centerfiles, a vector of reference file names. The file should be .bed format only
@@ -1835,7 +1879,7 @@ plot_5parts_metagene <- function(queryfiles, gFeatures, inputfiles=NULL, norm=FA
 #' @param stats.method, a string in c("wilcox.test", "t.test"), for pair-wise groups comparisons
 #'
 #' @return a list of two dataframes containing the data used for plotting and tht used for statistical testing
-#'
+#' @author Shuye Pu
 #' @examples
 #'
 #'
@@ -1868,6 +1912,13 @@ plot_reference_locus <- function(queryfiles, centerfiles, ext=c(0,0), hl=c(0,0),
   colLabel <- seq(ext[1], (ext[2]-binsize), binsize)
   Ylab <- "Signal intensity"
   logYlab <- expression(paste(Log[10], " Signal intensity"))
+
+  if(!is.null(outPrefix)){
+     while(!is.null(dev.list())){
+        dev.off()
+     }
+     pdf(paste(outPrefix, "pdf", sep="."), height=8, width=12)
+  }
 
   print("computing coverage for Sample")
   scoreMatrix_list <- list()
@@ -1902,7 +1953,9 @@ plot_reference_locus <- function(queryfiles, centerfiles, ext=c(0,0), hl=c(0,0),
 
       fullmatrix <- parallel_scoreMatrixBin(queryRegions, windowRs, bin_num, bin_op, weight_col, stranded)
 
-      fullmatrix <- process_scoreMatrix(fullmatrix, libsize=libsize, norm=norm, scale=scale, heatmap=heatmap, rm.outlier=(rm.outlier&&is.null(inputfiles)))
+      fullmatrix <- process_scoreMatrix(fullmatrix, libsize=libsize, norm=norm, scale=scale, heatmap=heatmap,
+                                        rm.outlier=(rm.outlier&&is.null(inputfiles)), querylabel=querylabel,
+                                        centerlabel=centerlabel, collabel=colLabel)
       scoreMatrix_list[[querylabel]][[centerlabel]] <- fullmatrix
 
       if(verbose){
@@ -1999,23 +2052,21 @@ plot_reference_locus <- function(queryfiles, centerfiles, ext=c(0,0), hl=c(0,0),
        mutate(Group=as.factor(paste0(Query, ":", Reference)), .keep="all")
   }
 
-  if(!is.null(outPrefix)){
-    while(!is.null(dev.list())){
-      dev.off()
+
+ if(verbose){
+    if(hl[2] > hl[1]){
+       write.table(mstat_dt, paste(outPrefix, "_multiRef.tsv", sep=""), sep="\t", col.names=T, row.names=F, quote=F)
+       sink(paste0(outPrefix, "_TukeyHSD.txt"))
     }
-    pdf(paste(outPrefix, "pdf", sep="."), height=8, width=12)
-    if(verbose){
-       if(hl[2] > hl[1]){
-          write.table(mstat_dt, paste(outPrefix, "_multiRef.tsv", sep=""), sep="\t", col.names=T, row.names=F, quote=F)
-          sink(paste0(outPrefix, "_TukeyHSD.txt"))
-       }
-       write.table(mplot_dt, paste(outPrefix, "_multiRef_bin.tsv", sep=""), sep="\t", col.names=T, row.names=F, quote=F)
-    }
-  }
+    write.table(mplot_dt, paste(outPrefix, "_multiRef_bin.tsv", sep=""), sep="\t", col.names=T, row.names=F, quote=F)
+ }
+
 
   print("Plotting profile and boxplot")
-  for(i in seq_along(querylabels)){
-    for(beds in combn(querylabels, i, simplify = F)){
+
+  CLIPlabels <- querylabels[!querylabels %in% inputlabels]
+  for(i in seq_along(CLIPlabels)){
+    for(beds in combn(CLIPlabels, i, simplify = F)){
       for(j in seq_along(centerlabels)){
         for(centers in combn(centerlabels, j, simplify = F)){
           print(beds)
@@ -2025,7 +2076,7 @@ plot_reference_locus <- function(queryfiles, centerfiles, ext=c(0,0), hl=c(0,0),
             filter(Query %in% beds & Reference %in% centers)
 
           p <- ggplot(aplot_df, aes(x=Position, y=Intensity, color=Group)) + scale_fill_manual(values=color_store[1:(i*j)]) +
-            geom_line(size=2) + geom_point(color="grey30", size=1) +
+            geom_line(size=2) + #geom_point(color="grey30", size=1) +
             geom_vline(xintercept = 0, linetype="dotted", color = "blue", size=0.5) +
             geom_ribbon(aes(ymin=lower, ymax=upper, fill=Group), linetype=0, alpha=0.3) +
             theme_classic() + theme(legend.position="top") + xlab(Xlab) + ylab(Ylab) +
@@ -2062,15 +2113,16 @@ plot_reference_locus <- function(queryfiles, centerfiles, ext=c(0,0), hl=c(0,0),
                   }
 
                  ps1 <- ggplot(astat_df, aes(x=Reference, y=Intensity, fill=Reference)) + scale_fill_manual(values=color_store[1:j]) +
-                    geom_boxplot(notch=TRUE) +
+                    geom_boxplot(notch=FALSE) +
                     theme_classic() +
                     theme(axis.text.x = element_text(face="bold", size=10, color="black")) +
                     theme(axis.title.x = element_blank(), axis.title.y = element_text(face="bold", size=10)) +
                     theme(legend.position = "none") +
                     labs(y=Ylab) + #expression(paste(Log[10], "(Signal intensity)"))) +
-                    stat_summary(fun=mean, geom="point", shape=23, size=4, fill="black") +
-                    geom_signif(comparisons = comp, test=stats.method, map_signif_level=TRUE) +
-                    scale_y_continuous(trans='log10')
+                    #stat_summary(fun=mean, geom="point", shape=23, size=4, fill="black") +
+                    geom_signif(comparisons = comp, test=stats.method, map_signif_level=TRUE, step_increase = 0.1) +
+                    scale_y_continuous(trans='log10') +
+                    ggtitle("Boxplot with log scale y-axis")
 
                  ps1_wo_outlier <- ggplot(astat_df, aes(x=Reference, y=Intensity, fill=Reference)) + scale_fill_manual(values=color_store[1:j]) +
                     geom_boxplot2(width = 0.8, width.errorbar = 0.5) +
@@ -2079,8 +2131,9 @@ plot_reference_locus <- function(queryfiles, centerfiles, ext=c(0,0), hl=c(0,0),
                     theme(axis.text.x = element_text(face="bold", size=10, color="black")) +
                     theme(legend.position = "none") +
                     labs(y=Ylab) +
-                    stat_summary(fun=mean, geom="point", shape=23, size=4, fill="black")
-                 #geom_signif(comparisons = comp, test=stats.method, map_signif_level=TRUE, step_increase = 0.1) +
+                    ggtitle("Boxplot without outliers")
+                    #stat_summary(fun=mean, geom="point", shape=23, size=4, fill="black")
+                    #geom_signif(comparisons = comp, test=stats.method, map_signif_level=TRUE, step_increase = 0.1)
                  #scale_y_continuous(trans='log10')
 
                  means_se <- astat_df %>%
@@ -2091,31 +2144,35 @@ plot_reference_locus <- function(queryfiles, centerfiles, ext=c(0,0), hl=c(0,0),
                               se=sd_Intensity/sqrt(N_Intensity),
                               upper_limit=mean_Intensity+se,
                               lower_limit=mean_Intensity-se
-                    )
+                    ) %>%
+                    mutate(label=paste("n =", N_Intensity)) %>%
+                    mutate(labelx=paste(Reference, "\n", label))
 
-                 ps1_mean_se <- ggplot(means_se, aes(x=Reference, y=mean_Intensity, fill=Reference)) + scale_fill_manual(values=color_store[1:j]) +
+                 ps1_mean_se <- ggplot(means_se, aes(x=labelx, y=mean_Intensity, fill=Reference)) + scale_fill_manual(values=color_store[1:j]) +
                     geom_bar(stat="identity") +
-                    geom_errorbar(aes(ymin=mean_Intensity, ymax=upper_limit)) +
+                    geom_errorbar(aes(ymin=lower_limit, ymax=upper_limit), position=position_dodge(width = 0.2),width=0.2) +
                     theme_classic() +
                     theme(axis.title.x = element_blank(), axis.title.y = element_text(face="bold", size=10)) +
                     theme(axis.text.x = element_text(face="bold", size=10, color="black")) +
                     theme(legend.position = "none") +
-                    labs(y=Ylab)
+                    labs(y=Ylab) +
+                    ggtitle("Mean + SE")
 
 
                }else{
                  comp <- combn(seq_along(beds),2, simplify=F)
 
                  ps1 <- ggplot(astat_df, aes(x=Query, y=Intensity, fill=Query)) + scale_fill_manual(values=color_store[1:i]) +
-                    geom_boxplot(notch=TRUE) +
+                    geom_boxplot(notch=FALSE) +
                     theme_classic() +
                     theme(axis.text.x = element_text(face="bold", size=10, color="black")) +
                     theme(axis.title.x = element_blank(), axis.title.y = element_text(face="bold", size=10)) +
                     theme(legend.position = "none") +
                     labs(y=Ylab) + #expression(paste(Log[10], "(Signal intensity)"))) +
-                    stat_summary(fun=mean, geom="point", shape=23, size=4, fill="black") +
-                    geom_signif(comparisons = comp, test=stats.method, map_signif_level=TRUE) +
-                    scale_y_continuous(trans='log10')
+                    #stat_summary(fun=mean, geom="point", shape=23, size=4, fill="black") +
+                    geom_signif(comparisons = comp, test=stats.method, map_signif_level=TRUE, step_increase = 0.1) +
+                    scale_y_continuous(trans='log10') +
+                    ggtitle("Boxplot with log scale y-axis")
 
                  ps1_wo_outlier <- ggplot(astat_df, aes(x=Query, y=Intensity, fill=Query)) + scale_fill_manual(values=color_store[1:i]) +
                     geom_boxplot2(width = 0.8, width.errorbar = 0.5) +
@@ -2124,8 +2181,9 @@ plot_reference_locus <- function(queryfiles, centerfiles, ext=c(0,0), hl=c(0,0),
                     theme(axis.text.x = element_text(face="bold", size=10, color="black")) +
                     theme(legend.position = "none") +
                     labs(y=Ylab) +
-                    stat_summary(fun=mean, geom="point", shape=23, size=4, fill="black")
-                 #geom_signif(comparisons = comp, test=stats.method, map_signif_level=TRUE, step_increase = 0.1) +
+                    ggtitle("Boxplot without outliers")
+                    #stat_summary(fun=mean, geom="point", shape=23, size=4, fill="black")
+                    #geom_signif(comparisons = comp, test=stats.method, map_signif_level=TRUE, step_increase = 0.1)
                  #scale_y_continuous(trans='log10')
 
                  means_se <- astat_df %>%
@@ -2136,26 +2194,32 @@ plot_reference_locus <- function(queryfiles, centerfiles, ext=c(0,0), hl=c(0,0),
                               se=sd_Intensity/sqrt(N_Intensity),
                               upper_limit=mean_Intensity+se,
                               lower_limit=mean_Intensity-se
-                    )
+                    ) %>%
+                    mutate(label=paste("n =", N_Intensity)) %>%
+                    mutate(labelx=paste(Query, "\n", label))
 
-                 ps1_mean_se <- ggplot(means_se, aes(x=Query, y=mean_Intensity, fill=Query)) + scale_fill_manual(values=color_store[1:i]) +
+                 ps1_mean_se <- ggplot(means_se, aes(x=labelx, y=mean_Intensity, fill=Query)) + scale_fill_manual(values=color_store[1:i]) +
                     geom_bar(stat="identity") +
-                    geom_errorbar(aes(ymin=mean_Intensity, ymax=upper_limit)) +
+                    geom_errorbar(aes(ymin=lower_limit, ymax=upper_limit), position=position_dodge(width = 0.2),width=0.2) +
                     theme_classic() +
                     theme(axis.title.x = element_blank(), axis.title.y = element_text(face="bold", size=10)) +
                     theme(axis.text.x = element_text(face="bold", size=10, color="black")) +
                     theme(legend.position = "none") +
-                    labs(y=Ylab)
-
+                    labs(y=Ylab) +
+                    ggtitle("Mean + SE")
 
                }
 
 
-               print(plot_grid(p, ps1, ps1_wo_outlier, ps1_mean_se, ncol = 2, rel_widths = c(1,1)))
+               #print(plot_grid(p, ps1, ps1_wo_outlier, ps1_mean_se, ncol = 2, rel_widths = c(1,1)))
+               print(p)
+               print(ps1)
+               print(ps1_wo_outlier)
+               print(ps1_mean_se)
             }else{
                print(p)
             }
-          }else if((i == 1 && j == 1) || (i == length(querylabels) && j == length(centerlabels))){
+          }else if((i == 1 && j == 1) || (i == length(CLIPlabels) && j == length(centerlabels))){
             print(p)
           }
 
@@ -2165,6 +2229,172 @@ plot_reference_locus <- function(queryfiles, centerfiles, ext=c(0,0), hl=c(0,0),
   }
 
   if(!is.null(inputfiles)){
+     for(i in seq_along(inputlabels)){
+        for(beds in combn(inputlabels, i, simplify = F)){
+           for(j in seq_along(centerlabels)){
+              for(centers in combn(centerlabels, j, simplify = F)){
+                 print(beds)
+                 print(centers)
+
+                 aplot_df <- mplot_dt %>%
+                    filter(Query %in% beds & Reference %in% centers)
+
+                 p <- ggplot(aplot_df, aes(x=Position, y=Intensity, color=Group)) + scale_fill_manual(values=color_store[1:(i*j)]) +
+                    geom_line(size=2) + #geom_point(color="grey30", size=1) +
+                    geom_vline(xintercept = 0, linetype="dotted", color = "blue", size=0.5) +
+                    geom_ribbon(aes(ymin=lower, ymax=upper, fill=Group), linetype=0, alpha=0.3) +
+                    theme_classic() + theme(legend.position="top") + xlab(Xlab) + ylab(Ylab) +
+                    theme(axis.title.x = element_text(face="bold", size=10), axis.title.y = element_text(face="bold", size=10))
+
+                 if(shade) p <- p + annotate("rect", xmin=hl[1], xmax=hl[2], ymin=-Inf, ymax=Inf, fill="grey", color="grey", alpha=0.3)
+
+                 if((i == 1 && j > 1) || (i > 1 && j == 1)){
+                    if(hl[2] > hl[1]){
+                       astat_df <- mstat_dt %>%
+                          filter(Query %in% beds & Reference %in% centers)
+
+                       if(verbose){
+                          atwoFactor_df <- mtwoFactor_dt %>%
+                             filter(Query %in% beds & Reference %in% centers)
+                          aovTukeyHSD(df=atwoFactor_df)
+                       }
+
+                       if(j > 1){
+                          comp <- combn(seq_along(centers),2, simplify=F)
+                          if(0){
+                             ps1old <- ggplot(astat_df, aes(x=Reference, y=Intensity, fill=Reference)) + scale_fill_manual(values=color_store[1:j]) +
+                                geom_boxplot2(width = 0.8, width.errorbar = 0.5) +
+                                theme_classic() +
+                                theme(axis.title.x = element_blank(), axis.title.y = element_text(face="bold", size=10)) +
+                                theme(legend.position = "none") +
+                                labs(y=Ylab) +
+                                theme(axis.text.x = element_text(face="bold", size=10, color="black")) +
+                                stat_summary(fun=mean, geom="point", shape=23, size=4, fill="black") +
+                                #geom_signif(comparisons = comp, test=stats.method, map_signif_level=TRUE, step_increase = 0.1) +
+                                scale_y_continuous(trans='log10')
+
+
+                          }
+
+                          ps1 <- ggplot(astat_df, aes(x=Reference, y=Intensity, fill=Reference)) + scale_fill_manual(values=color_store[1:j]) +
+                             geom_boxplot(notch=FALSE) +
+                             theme_classic() +
+                             theme(axis.text.x = element_text(face="bold", size=10, color="black")) +
+                             theme(axis.title.x = element_blank(), axis.title.y = element_text(face="bold", size=10)) +
+                             theme(legend.position = "none") +
+                             labs(y=Ylab) + #expression(paste(Log[10], "(Signal intensity)"))) +
+                             #stat_summary(fun=mean, geom="point", shape=23, size=4, fill="black") +
+                             geom_signif(comparisons = comp, test=stats.method, map_signif_level=TRUE, step_increase = 0.1) +
+                             scale_y_continuous(trans='log10') +
+                             ggtitle("Boxplot with log scale y-axis")
+
+
+                          ps1_wo_outlier <- ggplot(astat_df, aes(x=Reference, y=Intensity, fill=Reference)) + scale_fill_manual(values=color_store[1:j]) +
+                             geom_boxplot2(width = 0.8, width.errorbar = 0.5) +
+                             theme_classic() +
+                             theme(axis.title.x = element_blank(), axis.title.y = element_text(face="bold", size=10)) +
+                             theme(axis.text.x = element_text(face="bold", size=10, color="black")) +
+                             theme(legend.position = "none") +
+                             labs(y=Ylab) +
+                             ggtitle("Boxplot without outliers")
+                             #stat_summary(fun=mean, geom="point", shape=23, size=4, fill="black")
+                             #geom_signif(comparisons = comp, test=stats.method, map_signif_level=TRUE, step_increase = 0.1)
+                          #scale_y_continuous(trans='log10')
+
+                          means_se <- astat_df %>%
+                             group_by(Reference) %>%
+                             summarize(mean_Intensity=mean(Intensity),
+                                       sd_Intensity=sd(Intensity),
+                                       N_Intensity=length(Intensity),
+                                       se=sd_Intensity/sqrt(N_Intensity),
+                                       upper_limit=mean_Intensity+se,
+                                       lower_limit=mean_Intensity-se
+                             )%>%
+                             mutate(label=paste("n =", N_Intensity)) %>%
+                             mutate(labelx=paste(Reference, "\n", label))
+
+                          ps1_mean_se <- ggplot(means_se, aes(x=labelx, y=mean_Intensity, fill=Reference)) + scale_fill_manual(values=color_store[1:j]) +
+                             geom_bar(stat="identity") +
+                             geom_errorbar(aes(ymin=lower_limit, ymax=upper_limit), position=position_dodge(width = 0.2),width=0.2) +
+                             theme_classic() +
+                             theme(axis.title.x = element_blank(), axis.title.y = element_text(face="bold", size=10)) +
+                             theme(axis.text.x = element_text(face="bold", size=10, color="black")) +
+                             theme(legend.position = "none") +
+                             labs(y=Ylab) +
+                             ggtitle("Mean + SE")
+
+
+
+                       }else{
+                          comp <- combn(seq_along(beds),2, simplify=F)
+
+                          ps1 <- ggplot(astat_df, aes(x=Query, y=Intensity, fill=Query)) + scale_fill_manual(values=color_store[1:i]) +
+                             geom_boxplot(notch=FALSE) +
+                             theme_classic() +
+                             theme(axis.text.x = element_text(face="bold", size=10, color="black")) +
+                             theme(axis.title.x = element_blank(), axis.title.y = element_text(face="bold", size=10)) +
+                             theme(legend.position = "none") +
+                             labs(y=Ylab) + #expression(paste(Log[10], "(Signal intensity)"))) +
+                             #stat_summary(fun=mean, geom="point", shape=23, size=4, fill="black") +
+                             geom_signif(comparisons = comp, test=stats.method, map_signif_level=TRUE, step_increase = 0.1) +
+                             scale_y_continuous(trans='log10') +
+                             ggtitle("Boxplot with log scale y-axis")
+
+                          ps1_wo_outlier <- ggplot(astat_df, aes(x=Query, y=Intensity, fill=Query)) + scale_fill_manual(values=color_store[1:i]) +
+                             geom_boxplot2(width = 0.8, width.errorbar = 0.5) +
+                             theme_classic() +
+                             theme(axis.title.x = element_blank(), axis.title.y = element_text(face="bold", size=10)) +
+                             theme(axis.text.x = element_text(face="bold", size=10, color="black")) +
+                             theme(legend.position = "none") +
+                             labs(y=Ylab) +
+                             ggtitle("Boxplot without outliers")
+                             #stat_summary(fun=mean, geom="point", shape=23, size=4, fill="black")
+                             #geom_signif(comparisons = comp, test=stats.method, map_signif_level=TRUE, step_increase = 0.1)
+                          #scale_y_continuous(trans='log10')
+
+                          means_se <- astat_df %>%
+                             group_by(Query) %>%
+                             summarize(mean_Intensity=mean(Intensity),
+                                       sd_Intensity=sd(Intensity),
+                                       N_Intensity=length(Intensity),
+                                       se=sd_Intensity/sqrt(N_Intensity),
+                                       upper_limit=mean_Intensity+se,
+                                       lower_limit=mean_Intensity-se
+                             ) %>%
+                             mutate(label=paste("n =", N_Intensity)) %>%
+                             mutate(labelx=paste(Query, "\n", label))
+
+                          ps1_mean_se <- ggplot(means_se, aes(x=labelx, y=mean_Intensity, fill=Query)) + scale_fill_manual(values=color_store[1:i]) +
+                             geom_bar(stat="identity") +
+                             geom_errorbar(aes(ymin=lower_limit, ymax=upper_limit), position=position_dodge(width = 0.2),width=0.2) +
+                             theme_classic() +
+                             theme(axis.title.x = element_blank(), axis.title.y = element_text(face="bold", size=10)) +
+                             theme(axis.text.x = element_text(face="bold", size=10, color="black")) +
+                             theme(legend.position = "none") +
+                             labs(y=Ylab) +
+                             ggtitle("Mean + SE")
+
+                       }
+
+
+                       #print(plot_grid(p, ps1, ps1_wo_outlier, ps1_mean_se, ncol = 2, rel_widths = c(1,1)))
+                       print(p)
+                       print(ps1)
+                       print(ps1_wo_outlier)
+                       print(ps1_mean_se)
+                    }else{
+                       print(p)
+                    }
+                 }else if((i == 1 && j == 1) || (i == length(inputlabels) && j == length(centerlabels))){
+                    print(p)
+                 }
+
+              }
+           }
+        }
+     }
+
+
     print("Computing Ratio over input")
     Ylab <- "Ratio-over-Input"
     logYlab <- expression(paste(Log[10], " Ratio-over-Input"))
@@ -2285,12 +2515,14 @@ plot_reference_locus <- function(queryfiles, centerfiles, ext=c(0,0), hl=c(0,0),
               filter(Query %in% beds & Reference %in% centers)
 
             p <- ggplot(aplot_df, aes(x=Position, y=Intensity, color=Group)) + scale_fill_manual(values=color_store[1:(i*j)]) +
-              geom_line(size=2) + geom_point(color="grey30", size=1) +
+              geom_line(size=2) + #geom_point(color="grey30", size=1) +
               geom_vline(xintercept = 0, linetype="dotted", color = "blue", size=0.5) +
               geom_ribbon(aes(ymin=lower, ymax=upper, fill=Group), linetype=0, alpha=0.3) +
-              annotate("rect", xmin=hl[1], xmax=hl[2], ymin=-Inf, ymax=Inf, fill="grey", color="grey", alpha=0.3) +
+              #annotate("rect", xmin=hl[1], xmax=hl[2], ymin=-Inf, ymax=Inf, fill="grey", color="grey", alpha=0.3) +
               theme_classic() + theme(legend.position="top") + xlab(Xlab) + ylab(Ylab) +
               theme(axis.title.x = element_text(face="bold", size=10), axis.title.y = element_text(face="bold", size=10))
+
+            if(shade) p <- p + annotate("rect", xmin=hl[1], xmax=hl[2], ymin=-Inf, ymax=Inf, fill="grey", color="grey", alpha=0.3)
 
             if((i == 1 && j > 1) || (i > 1 && j == 1)){
                if(hl[2] > hl[1]){
@@ -2308,15 +2540,16 @@ plot_reference_locus <- function(queryfiles, centerfiles, ext=c(0,0), hl=c(0,0),
                     comp <- combn(seq_along(centers),2, simplify=F)
 
                     ps1 <- ggplot(astat_df, aes(x=Reference, y=Intensity, fill=Reference)) + scale_fill_manual(values=color_store[1:j]) +
-                       geom_boxplot(notch=TRUE) +
+                       geom_boxplot(notch=FALSE) +
                        theme_classic() +
                        theme(axis.text.x = element_text(face="bold", size=10, color="black")) +
                        theme(axis.title.x = element_blank(), axis.title.y = element_text(face="bold", size=10)) +
                        theme(legend.position = "none") +
                        labs(y=Ylab) + #expression(paste(Log[10], "(Signal intensity)"))) +
-                       stat_summary(fun=mean, geom="point", shape=23, size=4, fill="black") +
-                       geom_signif(comparisons = comp, test=stats.method, map_signif_level=TRUE) +
-                       scale_y_continuous(trans='log10')
+                       #stat_summary(fun=mean, geom="point", shape=23, size=4, fill="black") +
+                       geom_signif(comparisons = comp, test=stats.method, map_signif_level=TRUE, step_increase = 0.1) +
+                       scale_y_continuous(trans='log10') +
+                       ggtitle("Boxplot with log scale y-axis")
 
                     ps1_wo_outlier <- ggplot(astat_df, aes(x=Reference, y=Intensity, fill=Reference)) + scale_fill_manual(values=color_store[1:j]) +
                        geom_boxplot2(width = 0.8, width.errorbar = 0.5) +
@@ -2324,8 +2557,9 @@ plot_reference_locus <- function(queryfiles, centerfiles, ext=c(0,0), hl=c(0,0),
                        theme(axis.title.x = element_blank(), axis.title.y = element_text(face="bold", size=10)) +
                        theme(axis.text.x = element_text(face="bold", size=10, color="black")) +
                        theme(legend.position = "none") +
-                       labs(y=Ylab) +
-                       stat_summary(fun=mean, geom="point", shape=23, size=4, fill="black")
+                       labs(y=Ylab)+
+                       ggtitle("Boxplot without outliers")
+                       #stat_summary(fun=mean, geom="point", shape=23, size=4, fill="black")
                     #geom_signif(comparisons = comp, test=stats.method, map_signif_level=TRUE, step_increase = 0.1) +
                     #scale_y_continuous(trans='log10')
 
@@ -2337,16 +2571,20 @@ plot_reference_locus <- function(queryfiles, centerfiles, ext=c(0,0), hl=c(0,0),
                                  se=sd_Intensity/sqrt(N_Intensity),
                                  upper_limit=mean_Intensity+se,
                                  lower_limit=mean_Intensity-se
-                       )
+                       ) %>%
+                       mutate(label=paste("n =", N_Intensity)) %>%
+                       mutate(labelx=paste(Reference, "\n", label))
 
-                    ps1_mean_se <- ggplot(means_se, aes(x=Reference, y=mean_Intensity, fill=Reference)) + scale_fill_manual(values=color_store[1:j]) +
+                    ps1_mean_se <- ggplot(means_se, aes(x=labelx, y=mean_Intensity, fill=Reference)) + scale_fill_manual(values=color_store[1:j]) +
                        geom_bar(stat="identity") +
-                       geom_errorbar(aes(ymin=mean_Intensity, ymax=upper_limit)) +
+                       geom_errorbar(aes(ymin=lower_limit, ymax=upper_limit), position=position_dodge(width = 0.2),width=0.2) +
                        theme_classic() +
                        theme(axis.title.x = element_blank(), axis.title.y = element_text(face="bold", size=10)) +
                        theme(axis.text.x = element_text(face="bold", size=10, color="black")) +
                        theme(legend.position = "none") +
-                       labs(y=Ylab)
+                       labs(y=Ylab) +
+                       ggtitle("Mean + SE")
+
 
 
 
@@ -2354,15 +2592,16 @@ plot_reference_locus <- function(queryfiles, centerfiles, ext=c(0,0), hl=c(0,0),
                     comp <- combn(seq_along(beds),2, simplify=F)
 
                     ps1 <- ggplot(astat_df, aes(x=Query, y=Intensity, fill=Query)) + scale_fill_manual(values=color_store[1:i]) +
-                       geom_boxplot(notch=TRUE) +
+                       geom_boxplot(notch=FALSE) +
                        theme_classic() +
                        theme(axis.text.x = element_text(face="bold", size=10, color="black")) +
                        theme(axis.title.x = element_blank(), axis.title.y = element_text(face="bold", size=10)) +
                        theme(legend.position = "none") +
                        labs(y=Ylab) + #expression(paste(Log[10], "(Signal intensity)"))) +
-                       stat_summary(fun=mean, geom="point", shape=23, size=4, fill="black") +
-                       geom_signif(comparisons = comp, test=stats.method, map_signif_level=TRUE) +
-                       scale_y_continuous(trans='log10')
+                       #stat_summary(fun=mean, geom="point", shape=23, size=4, fill="black") +
+                       geom_signif(comparisons = comp, test=stats.method, map_signif_level=TRUE, step_increase = 0.1) +
+                       scale_y_continuous(trans='log10') +
+                       ggtitle("Boxplot with log scale y-axis")
 
                     ps1_wo_outlier <- ggplot(astat_df, aes(x=Query, y=Intensity, fill=Query)) + scale_fill_manual(values=color_store[1:i]) +
                        geom_boxplot2(width = 0.8, width.errorbar = 0.5) +
@@ -2371,7 +2610,8 @@ plot_reference_locus <- function(queryfiles, centerfiles, ext=c(0,0), hl=c(0,0),
                        theme(axis.text.x = element_text(face="bold", size=10, color="black")) +
                        theme(legend.position = "none") +
                        labs(y=Ylab) +
-                       stat_summary(fun=mean, geom="point", shape=23, size=4, fill="black")
+                       ggtitle("Boxplot without outliers")
+                       #stat_summary(fun=mean, geom="point", shape=23, size=4, fill="black")
                     #geom_signif(comparisons = comp, test=stats.method, map_signif_level=TRUE, step_increase = 0.1) +
                     #scale_y_continuous(trans='log10')
 
@@ -2383,21 +2623,28 @@ plot_reference_locus <- function(queryfiles, centerfiles, ext=c(0,0), hl=c(0,0),
                                  se=sd_Intensity/sqrt(N_Intensity),
                                  upper_limit=mean_Intensity+se,
                                  lower_limit=mean_Intensity-se
-                       )
+                       ) %>%
+                       mutate(label=paste("n =", N_Intensity)) %>%
+                       mutate(labelx=paste(Query, "\n", label))
 
-                    ps1_mean_se <- ggplot(means_se, aes(x=Query, y=mean_Intensity, fill=Query)) + scale_fill_manual(values=color_store[1:i]) +
+                    ps1_mean_se <- ggplot(means_se, aes(x=labelx, y=mean_Intensity, fill=Query)) + scale_fill_manual(values=color_store[1:i]) +
                        geom_bar(stat="identity") +
-                       geom_errorbar(aes(ymin=mean_Intensity, ymax=upper_limit)) +
+                       geom_errorbar(aes(ymin=lower_limit, ymax=upper_limit), position=position_dodge(width = 0.2),width=0.2) +
                        theme_classic() +
                        theme(axis.title.x = element_blank(), axis.title.y = element_text(face="bold", size=10)) +
                        theme(axis.text.x = element_text(face="bold", size=10, color="black")) +
                        theme(legend.position = "none") +
-                       labs(y=Ylab)
+                       labs(y=Ylab) +
+                       ggtitle("Mean + SE")
 
                  }
 
 
-                 print(plot_grid(p, ps1, ps1_wo_outlier, ps1_mean_se, ncol = 2, rel_widths = c(1,1)))
+                 #print(plot_grid(p, ps1, ps1_wo_outlier, ps1_mean_se, ncol = 2, rel_widths = c(1,1)))
+                 print(p)
+                 print(ps1)
+                 print(ps1_wo_outlier)
+                 print(ps1_mean_se)
                }else{
                   print(p)
                }
@@ -2457,7 +2704,7 @@ plot_reference_locus <- function(queryfiles, centerfiles, ext=c(0,0), hl=c(0,0),
 #' @export plot_reference_locus_random
 
 plot_reference_locus_with_random <- function(queryfiles, centerfiles, txdb, ext=c(0,0), hl=c(0,0), shade=F, useSizeFactor=FALSE,
-                                              smo=FALSE,  CLIP_reads=FALSE,  fix_width=0, norm=FALSE, binsize=10, refPoint="center", Xlab="Center",
+                                              smo=FALSE,  CLIP_reads=FALSE,  fix_width=0, fix_point="center", norm=FALSE, binsize=10, refPoint="center", Xlab="Center",
                                               inputfiles=NULL, stranded=TRUE, heatmap=FALSE, scale=FALSE, outPrefix=NULL, genome="hg19",
                                               rm.outlier=F, n_random=1, stats.method="wilcox.test", useScore=FALSE){
 
@@ -2516,7 +2763,7 @@ plot_reference_locus_with_random <- function(queryfiles, centerfiles, txdb, ext=
   scoreMatrix_list_random <- list()
   quantile_list_random <- list()
 
-  bedInputs <- handle_input(queryfiles, CLIP_reads=CLIP_reads, fix_width=fix_width,  useScore=useScore, outRle=FALSE, useSizeFactor=useSizeFactor, genome=genome)
+  bedInputs <- handle_input(queryfiles, CLIP_reads=CLIP_reads, fix_width=fix_width,  fix_point=fix_point, useScore=useScore, outRle=FALSE, useSizeFactor=useSizeFactor, genome=genome)
   centerInputs <- handle_input(centerfiles, CLIP_reads=FALSE, fix_width=0, useScore=FALSE, outRle=FALSE, useSizeFactor=FALSE, genome=genome)
 
   for(queryfile in queryfiles){
@@ -2556,7 +2803,14 @@ plot_reference_locus_with_random <- function(queryfiles, centerfiles, txdb, ext=
           windowRegions <- windowRegionsALL
         }else{
           region <- region_list[[regionName]]
-          windowRegions <- filter_by_overlaps_stranded(windowRegionsALL, region)
+          if(unique(runValue(strand(windowRegionsALL))) %in% c("*", ".", "")){
+             windowRegions <- filter_by_overlaps(windowRegionsALL, region)
+             print("the center file is Unstranded")
+          }else{
+             windowRegions <- filter_by_overlaps(windowRegionsALL, region)
+             print("the center file is stranded")
+          }
+
         }
         refsize <- length(windowRegions)
 
@@ -2787,7 +3041,7 @@ plot_reference_locus_with_random <- function(queryfiles, centerfiles, txdb, ext=
              labs(y="Signal intensity") + #expression(paste(Log[10], "(Signal intensity)"))) +
              scale_x_discrete(limits=c("Random", centerlabel)) + # labels=c("TSN" = expression(paste(m^6,"Am")), featureName = expression(paste("5'-UTR ", m^6, "A"))))
              stat_summary(fun=mean, geom="point", shape=23, size=4, fill="black") +
-             geom_signif(comparisons = list(c(1, 2)), test=stats.method, map_signif_level=TRUE) +
+             geom_signif(comparisons = list(c(1, 2)), test=stats.method, map_signif_level=TRUE, step_increase = 0.1) +
              scale_y_continuous(trans='log10')
 
            ps1_wo_outlier <- ggplot(stat_df, aes(x=Reference, y=Intensity, fill=Reference)) + scale_fill_manual(values=c("#00AFBB", "#E7B800")) +
@@ -2971,7 +3225,7 @@ plot_reference_locus_with_random <- function(queryfiles, centerfiles, txdb, ext=
                labs(y=Ylab) + #expression(paste(Log[10], "(Signal intensity)"))) +
                scale_x_discrete(limits=c("Random", centerlabel)) + # labels=c("TSN" = expression(paste(m^6,"Am")), featureName = expression(paste("5'-UTR ", m^6, "A"))))
                stat_summary(fun=mean, geom="point", shape=23, size=4, fill="black") +
-               geom_signif(comparisons = list(c(1, 2)), test=stats.method, map_signif_level=TRUE) +
+               geom_signif(comparisons = list(c(1, 2)), test=stats.method, map_signif_level=TRUE, step_increase = 0.1) +
                scale_y_continuous(trans='log10')
 
              ps1_wo_outlier <- ggplot(stat_df, aes(x=Reference, y=Intensity, fill=Reference)) + scale_fill_manual(values=c("#00AFBB", "#E7B800")) +
@@ -3039,7 +3293,7 @@ plot_reference_locus_with_random <- function(queryfiles, centerfiles, txdb, ext=
 #'
 #' @export handle_input
 
-handle_input <- function(inputFiles, CLIP_reads=FALSE, fix_width=0, useScore=FALSE, outRle=TRUE, useSizeFactor=FALSE, genome="hg19"){
+handle_input <- function(inputFiles, CLIP_reads=FALSE, fix_width=0, fix_point="center", useScore=FALSE, outRle=TRUE, useSizeFactor=FALSE, genome="hg19"){
 
   if(0){
     inputFiles <- queryfiles
@@ -3058,7 +3312,7 @@ handle_input <- function(inputFiles, CLIP_reads=FALSE, fix_width=0, useScore=FAL
 
     if(grepl("\\.bed$", inputFile)){
       fileType <- "bed"
-      out <- handle_bed(inputFile, fix_width, useScore, outRle, genome)
+      out <- handle_bed(inputFile=inputFile, fix_width=fix_width, fix_point=fix_point, useScore=useScore, outRle=outRle, genome="hg19")
     }else if(grepl("\\.bam$", inputFile)){
       fileType <- "bam"
       out <- handle_bam(inputFile, CLIP_reads, fix_width, outRle, genome)
@@ -3139,13 +3393,15 @@ effectiveSize <- function(outlist, outRle, genome="hg19"){
 
   mat <- matrix(unlist(score_list), ncol=length(score_list), byrow=F)
   mat[is.na(mat)] <- 0
-  mat <- round(mat * tilewidth) + 1
-  sizeFactor <- DESeq2::estimateSizeFactorsForMatrix(mat)
-
-  print(sizeFactor)
+  mat <- round(mat * tilewidth)
+  mat <- mat[apply(mat, 1, sum)>0,]
+  #sizeFactor <- DESeq2::estimateSizeFactorsForMatrix(mat)
+  lib.size <- sapply(score_list, function(x)x$size)
+  normFactor <- edgeR::calcNormFactors(mat, lib.size=lib.size)
+  print(normFactor)
 
   ## update library size with sizeFactor
-  outlist <- mapply(x=outlist, y=sizeFactor, function(x,y){
+  outlist <- mapply(x=outlist, y=normFactor, function(x,y){
     x$size <- x$size*y
     x
   }, SIMPLIFY=FALSE, USE.NAMES = TRUE)
@@ -3178,13 +3434,13 @@ effectiveSize <- function(outlist, outRle, genome="hg19"){
 #'
 #' @export handle_bed
 
-handle_bed <- function(inputFile, fix_width=0, useScore=FALSE, outRle=TRUE, fixPoint="center", genome="hg19"){
+handle_bed <- function(inputFile, fix_width=0, fix_point="center", useScore=FALSE, outRle=TRUE, genome="hg19"){
 
   beddata <- read.delim2(inputFile, header=F)
-  beddata <- beddata[, 1:min(6,ncol(beddata))]  ## ignore extra columns, which cause problem in import.bed()
+  beddata <- type.convert(beddata[, 1:min(6,ncol(beddata))], as.is=T)  ## ignore extra columns, which cause problem in import.bed()
   colnames(beddata) <- c("chr", "start", "end", "id", "score", "strand")[1:min(6,ncol(beddata))]
   queryRegions <- makeGRangesFromDataFrame(beddata, keep.extra.columns=TRUE, starts.in.df.are.0based=TRUE)
-  queryRegions$score <- ifelse(ncol(beddata)==6, as.numeric(queryRegions$score), 1)
+  if(ncol(beddata)<6) strand(queryRegions) <- "*"
 
   if(genome %in% c("hg19", "hg38")){
     regular_chr <- paste0("chr", c(seq(1,22), c("X", "Y", "M")))
@@ -3192,13 +3448,13 @@ handle_bed <- function(inputFile, fix_width=0, useScore=FALSE, outRle=TRUE, fixP
     seqlevels(queryRegions) <- regular_chr
   }
 
-  if(!useScore){
+  if(!useScore || ncol(beddata)<5){
     score(queryRegions) <- 1
   }
   libsize <- sum(queryRegions$score, na.rm=T)
   weight_col <- "score"
 
-  if(fix_width > 0) queryRegions <- resize(queryRegions, width=fix_width, fix=fixPoint, ignore.strand=FALSE)
+  if(fix_width > 0) queryRegions <- resize(queryRegions, width=fix_width, fix=rep(fix_point, length(queryRegions)), ignore.strand=FALSE)
 
   if(outRle) queryRegions <- coverage(queryRegions, weight=weight_col)  ## when bed is used is windows in ScoreMatrix, do not covert to Rle
 
@@ -3243,8 +3499,9 @@ handle_bam <- function(inputFile, CLIP_reads=FALSE, fix_width=0, outRle=TRUE, ge
     queryRegions <- flank(granges(ga), width=1, both=F, start=T, ignore.strand=FALSE)
     score(queryRegions) <- 1
   }else if(fix_width > 0){
-    queryRegions <- resize(granges(ga), width=fix_width, fix="start", ignore.strand=FALSE)
-  }else{
+    queryRegions <- resize(granges(ga), width=fix_width, fix=rep("start", length(granges(ga))), ignore.strand=FALSE)
+    score(queryRegions) <- 1
+   }else{
     queryRegions <- stack(grglist(ga))
     score(queryRegions) <- 1
   }
@@ -3391,7 +3648,7 @@ handle_wig <- function(inputFile, outRle=TRUE, genome="hg19"){
 #' @return NULL
 #'
 #' @examples
-#' bamfiles <- queryfiles
+#' bamfiles <- c(queryfiles1[1:2], queryfiles2[1:4])
 #' genome <- "hg19"
 #' binsize <- 10000
 #' outPrefix="Bam_correlation"
@@ -3402,9 +3659,9 @@ plot_bam_correlation <- function(bamfiles, binsize=1000000, outPrefix="Bam_corre
   bamlabels <- names(bamfiles)
 
   print("Computing bam correlation")
-  outlist <- handle_input(inputFiles=bamfiles, CLIP_reads=FALSE, fix_width=0, useScore=FALSE, outRle=TRUE, useSizeFactor=FALSE, genome=genome)
+  outlist <- handle_input(inputFiles=bamfiles, CLIP_reads=FALSE, fix_width=0, useScore=FALSE, outRle=FALSE, useSizeFactor=FALSE, genome=genome)
   ## find common chromosomes
-  chr_list <- lapply(outlist, function(x) names(x$query))
+  chr_list <- lapply(outlist, function(x) runValue(seqnames(x$query)))
   if(genome %in% c("hg19", "hg38")){
     chr_list[["regular_chr"]] <- paste0("chr", c(seq(1,22), c("X", "Y", "M")))
   }
@@ -3412,49 +3669,53 @@ plot_bam_correlation <- function(bamfiles, binsize=1000000, outPrefix="Bam_corre
 
   seqi <- Seqinfo(genome=genome)
 
-  cl <- start_parallel(length(outlist))
-  parallel::clusterExport(cl, c("binnedAverage"))
   tileBins <- tileGenome(seqi[comchr], tilewidth=binsize, cut.last.tile.in.chrom=TRUE)
-  parallel::clusterExport(cl, c("seqi", "binsize", "comchr", "tileBins"), envir=environment())
+
+  cl <- start_parallel(min(5,length(outlist)))
+  #parallel::clusterExport(cl, c("binnedAverage"))
+  parallel::clusterExport(cl, c("countOverlaps"))
+  parallel::clusterExport(cl, c("tileBins"), envir=environment())
   score_list <- parLapply(cl, outlist, function(x){
-    binAverage <- binnedAverage(tileBins, x$query[comchr], varname="binned_score", na.rm=F)
-    binAverage$binned_score
+    #binAverage <- binnedAverage(tileBins, x$query[comchr], varname="binned_score", na.rm=F)
+    #binAverage$binned_score
+     binned_count <- countOverlaps(tileBins, x$query)
+     binned_count
   })
   stop_parallel(cl)
   bins_df <- data.frame(chr=seqnames(tileBins), start=start(tileBins),end=end(tileBins),strand=strand(tileBins))
   bins <- do.call(paste, c(bins_df, sep="_"))
-  mat <- matrix(unlist(score_list), ncol=length(score_list), byrow=F)
-  rownames(mat) <- bins
-  mat[is.na(mat)] <- 0
-  mat <- mat[apply(mat, 1, sum)>0,]
+
+  count_mat <- do.call(cbind, score_list)
+  rownames(count_mat) <- bins
+  count_mat[is.na(count_mat)] <- 0
+  count_mat <- count_mat[apply(count_mat, 1, sum)>0,]
 
   norm_factor <- sapply(outlist, function(x) x$size/1000000)
 
-  df <- round(mat * binsize) + 1
-  df <- as.data.frame(t(t(df)/norm_factor)) ## convert to counts per million (CPM)
-
+  df <- as.data.frame(t(t(count_mat)/norm_factor)) ## convert to counts per million (CPM)
   colnames(df) <- bamlabels
 
   long_df <- tidyr::pivot_longer(df, cols=colnames(df), names_to="Sample", values_to="Count") %>%
     mutate(Sample=as.factor(Sample)) %>%
      group_by(Sample) %>%
      arrange(Count) %>%
-     filter(Count < 10000) %>%
-     mutate(Rank=order(Count)) %>%
-     mutate(Fraction=Count/max(Count), Rank=Rank/max(Rank))
+     mutate(cumCount=cumsum(Count)) %>%
+     mutate(Rank=order(cumCount)) %>%
+     mutate(Fraction=cumCount/max(cumCount), Rank=Rank/max(Rank))
 
   pdf(paste0(outPrefix, ".pdf"), width=10, height=8)
-  p <- ggplot(data=long_df, aes(x=Rank, y=(Fraction), color=Sample)) +
+
+  p1 <- ggplot(data=long_df, aes(x=Rank, y=Fraction, color=Sample)) +
      geom_line() +
      ggtitle(paste("Binned read counts distribution: bin size =", binsize)) +
      labs(x="Rank(Count)", y=paste("Fraction over highest coverage"))
-  print(p)
+  print(p1)
 
-  p <- ggplot(data=long_df, aes(x=(Count), color=Sample)) +
+  p2 <- ggplot(data=long_df, aes(x=Count, color=Sample)) +
     stat_ecdf() +
     ggtitle(paste("Binned read counts distribution: bin size =", binsize)) +
     labs(x=expression(paste(log[2], " (Count)")), y=paste("Pencentage"))
-  print(p)
+  #print(p2)
 
 
   ## code from pairs example
@@ -3484,8 +3745,8 @@ plot_bam_correlation <- function(bamfiles, binsize=1000000, outPrefix="Bam_corre
 
   ## END code from pairs example
 
-  if(length(bamfiles)>3) pheatmap(cor(log(df+1)), display_numbers = T)
-  pairs(log(df+1), lower.panel = panel.smooth, upper.panel=panel.cor, diag.panel = panel.hist, main=paste("log (reads/bin)\nbin size =", binsize))
+  if(length(bamfiles)>2) pheatmap(cor(log2(df+1)), display_numbers = T)
+  if(length(bamfiles)>1 && length(bamfiles)<6) pairs(log2(df+1), lower.panel = panel.smooth, upper.panel=panel.cor, diag.panel = panel.hist, main=paste("log2(CPM/bin)\nbin size =", binsize))
   dev.off()
 
   return(df)
@@ -3510,16 +3771,18 @@ plot_bam_correlation <- function(bamfiles, binsize=1000000, outPrefix="Bam_corre
 #'
 #' @export annotate_peaks
 #'
-annotate_peaks <- function(peakfile, gtffile, genome="hg19", fiveP=1000, threeP=1000, simple=FALSE, RNA=TRUE){
+annotate_peaks <- function(peakfile, gtffile, fix_width=0, fix_point="center", genome="hg19", fiveP=1000, threeP=1000, simple=FALSE, RNA=TRUE){
   if(0){
-    peakfile <- "m6A_Hek_merged.thUni.crossLink_site.0.05.bed"
+    peakfile <- "combined_CITS_0.01_FTO.merged.bed"
     genome <- "hg19"
     gtffile <- "C:/GREENBLATT/genomic_feature/gencode.v19.annotation.gtf"
-    peaklabel <- "m6A_Hek_cits"
+    peaklabel <- "FTO_cits"
     fiveP <- 1000
     threeP <- 1000
     simple <- FALSE
-    RNA <- T
+    RNA <- FALSE
+    fix_width <- 21
+    fix_point <- "center"
 
     peakfile <- "Tetrahymena_ChIPseq_summits.bed"
     gtffile <- "C:/GREENBLATT/Nabeel/Tetrahymena/2-Genome_GFF3.gff3"
@@ -3531,17 +3794,27 @@ annotate_peaks <- function(peakfile, gtffile, genome="hg19", fiveP=1000, threeP=
     peaklabel <- "Tetrahymena_ChIPseq_summits"
   }
 
-   return_table <- NULL
   peaklabel <- names(peakfile)
-  peak <- handle_bed(inputFile=peakfile, fix_width=0, useScore=FALSE, outRle=FALSE, genome=genome)$query
+  peak <- handle_bed(inputFile=peakfile, fix_width=fix_width, fix_point=fix_point, useScore=TRUE, outRle=FALSE, genome=genome)$query
+  if(file.exists(file.path(dirname(gtffile),"txdb.sql"))){
+     txdb <- AnnotationDbi::loadDb(file.path(dirname(gtffile),"txdb.sql"))
+     print(class(txdb))
+  }else{
+     txdb <-  makeTxDbFromGFF(gtffile)
+     AnnotationDbi::saveDb(txdb, file=file.path(dirname(gtffile),"txdb.sql"))
+  }
 
   if(simple){
-    txdb <-  makeTxDbFromGFF(gtffile)
-    gene <- gtf_to_bed_longest_tx(txdb, "transcript", longest=F)$GRanges
+
+    #gene <- gtf_to_bed_longest_tx(txdb, "transcript", longest=F)$GRanges
     exon <- gtf_to_bed_longest_tx(txdb, "exon", longest=F)
     intron <- gtf_to_bed_longest_tx(txdb, "intron", longest=F)
-    promoter <- promoters(txdb, upstream=fiveP, downstream=100, use.names=FALSE)
-    TTS <- promoters(txdb, upstream=100, downstream=threeP, use.names=FALSE)
+    gene <- gtf_to_bed_longest_tx(txdb, "gene", longest=F)$GRanges
+
+    promoter <- flank(gene, width=fiveP, both=F, start=T, ignore.strand=FALSE)
+    names(promoter) <- seq_along(promoter)
+    TTS <- flank(gene, width=threeP, both=F, start=F, ignore.strand=FALSE)
+    names(TTS) <- seq_along(TTS)
 
     targeted_gene <- as.data.frame(mergeByOverlaps(peak, gene)) %>%
       select(colnames(.)[grepl("\\.", colnames(.))])
@@ -3558,7 +3831,6 @@ annotate_peaks <- function(peakfile, gtffile, genome="hg19", fiveP=1000, threeP=
     summary_table <- full_join(targeted_gene_count, targeted_promoter_count, by=c("gene.tx_name"="promoter.tx_name")) %>%
       arrange(desc(Peak_in_promoter))
 
-    return_table <- targeted_gene
     write.table(targeted_gene, paste(peaklabel, "_targeted_gene.tab", sep=""), sep="\t", row.names=F, quote=F)
     write.table(targeted_promoter, paste(peaklabel, "_targeted_promoter.tab", sep=""), sep="\t", row.names=F, quote=F)
     write.table(summary_table, paste(peaklabel, "_target_summary.tab", sep=""), sep="\t", row.names=F, quote=F)
@@ -3583,61 +3855,83 @@ annotate_peaks <- function(peakfile, gtffile, genome="hg19", fiveP=1000, threeP=
     p <- ggpie(df, x="percent", label="labels", lab.pos="out", fill="feature", color="white", palette="ucscgb")
     print(p)
     dev.off()
+    return(summary_table)
 
   }else{
+
+    print("Collecting gene info")
 
     gff <- importGtf(filePath = gtffile)
 
     overlaps <- as.data.table(queryGff(queryRegions=peak, gffData=gff))
 
-    gene_info_table <- overlaps[, c("transcript_id", "gene_id", "gene_name", "gene_biotype")]
+    gene_info_table <- unique(overlaps[, c("transcript_id", "gene_id", "gene_name", "gene_biotype")])
 
     ## get targeted genes table,
     ## beware that utr5, utr3 and cds in txdbFeatures DO contain introns
-    if(0){ #obsolete
-       txdbFeatures <- getTxdbFeaturesFromGRanges(gff)
 
-       dt <- getTargetedGenesTable(queryRegions = peak, txdbFeatures = txdbFeatures)
-       dt <- dt[order(transcripts, decreasing = TRUE)]
+    txdbFeatures <- getTxdbFeaturesFromGRanges(gff)
+    wide <- txdbFeatures$promoters ## original -2000TSS200
+    resized <- resize(wide, width=200, fix="end", use.names=TRUE, ignore.strand=FALSE) ## take 200nt of the 3' end
+    narrow <- promoters(resized, upstream=1000, downstream=100, use.names=TRUE) ## modified -1000TSS100
+    txdbFeatures$promoters <- narrow
 
-       dt_gene <- unique(merge(dt, gene_info_table, by.x="tx_name", by.y="transcript_id", all.x=T))
-       dt_gene <- dt_gene[order(transcripts, decreasing = TRUE)]
-       dt_gene <- dt_gene[!is.na(gene_biotype)]
-       dim(dt_gene)
-       head(dt_gene)
-       tail(dt_gene)
+    dt <- getTargetedGenesTable(queryRegions = peak, txdbFeatures = txdbFeatures)
+
+    dt_gene <- unique(left_join(dt, gene_info_table, by=c("tx_name" = "transcript_id"))) %>%
+       filter(gene_biotype == "protein_coding")
+    dim(dt_gene)
+    head(dt_gene)
+    tail(dt_gene)
+
+    ## filter based on peak type, for ChIPseq peak, only output genes targeted in promoters,
+    ## for CLIPseq peaks only output genes targeted in transcripts(5'UTR, CDS, 3'UTR, intron)
+    if(runValue(strand(peak)) == "*"){
+       dt_gene <- dt_gene %>%
+          filter(promoters >1) %>%
+          arrange(desc(promoters))
+    }else{
+       dt_gene <- dt_gene %>%
+          filter(transcripts >1) %>%
+          arrange(desc(transcripts))
     }
 
-    gene <- gtf_to_bed_longest_tx(txdb, "gene", longest=FALSE)
-    geneGr <- stack(gene$GRangesList)
-    geneOverlaps <- GenomicRanges::findOverlaps(peak, geneGr)
-    peak_df <- annoGR2DF(peak[geneOverlaps@from]) %>%
-       mutate(chrPeak=as.character(chr),
-              startPeak=as.integer(start)-1,
-              endPeak=as.integer(end),
-              widthPeak=as.integer(width),
-              strandPeak=as.character(strand),
-              .keep="unused")
-    gene_df <- geneGr[geneOverlaps@to]
-    names(gene_df) <- seq_along(gene_df)
-    gene_df <- annoGR2DF(gene_df) %>%
-       mutate(chrGene=as.character(chr),
-              startGene=as.integer(start)-1,
-              endGene=as.integer(end),
-              widthGene=as.integer(width),
-              strandGene=as.character(strand),
-              .keep="unused")
 
-    ot <- cbind(peak_df, gene_df) %>%
-       select(chrPeak, startPeak, endPeak, id, widthPeak, strandPeak, chrGene, startGene, endGene, gene_id, widthGene, strandGene)
-    ot_gene <- merge(ot, gene_info_table, by.x="gene_id", by.y="gene_id", all.x=T) %>%
-       select(chrPeak, startPeak, endPeak, id, widthPeak, strandPeak, chrGene, startGene, endGene, gene_id, widthGene, strandGene, gene_name, gene_biotype) %>%
-       unique()
+    if(0){#obsolete, as promoter is not handled which is important for ChIP peaks
+       print("Overlap peaks with features")
+       gene <- gtf_to_bed_longest_tx(txdb, "gene", longest=FALSE)
+       geneGr <- gene$GRanges
+       print(length(geneGr))
+       geneOverlaps <- GenomicRanges::findOverlaps(peak, geneGr)
+       peak_df <- annoGR2DF(peak[geneOverlaps@from])
+       peak_df <- peak_df %>%
+          mutate(chrPeak=as.character(chr),
+                 startPeak=as.integer(start)-1,
+                 endPeak=as.integer(end),
+                 widthPeak=as.integer(width),
+                 strandPeak=ifelse("strand" %in% colnames(peak_df), as.character(strand), "*"),
+                 .keep="unused")
+       gene_df <- geneGr[geneOverlaps@to]
+       names(gene_df) <- seq_along(gene_df)
+       gene_df <- annoGR2DF(gene_df) %>%
+          mutate(chrGene=as.character(chr),
+                 startGene=as.integer(start)-1,
+                 endGene=as.integer(end),
+                 widthGene=as.integer(width),
+                 strandGene=as.character(strand),
+                 .keep="unused")
 
-    return_table <- ot_gene
-    write.table(ot_gene, paste(peaklabel, "_targeted_gene.tab", sep=""), sep="\t", row.names=F, quote=F)
+       ot <- cbind(peak_df, gene_df) %>%
+          select(chrPeak, startPeak, endPeak, id, widthPeak, strandPeak, chrGene, startGene, endGene, gene_id, widthGene, strandGene)
+       ot_gene <- left_join(ot, gene_info_table, by="gene_id") %>%
+          select(chrPeak, startPeak, endPeak, id, widthPeak, strandPeak, chrGene, startGene, endGene, gene_id, widthGene, strandGene, gene_name, gene_biotype) %>%
+          unique()
+    }
+
+    write.table(dt_gene, paste(peaklabel, "_targeted_gene.tab", sep=""), sep="\t", row.names=F, quote=F)
 
     # To find out the distribution of the query regions across gene types:
+    print("Plot barchart of gene types")
     biotype_col <- grep('gene_biotype', colnames(overlaps), value = T)
     df <- overlaps[,length(unique(queryIndex)), by = biotype_col] %>%
       rename_with(~ c("gene_type", "count"))
@@ -3670,29 +3964,37 @@ annotate_peaks <- function(peakfile, gtffile, genome="hg19", fiveP=1000, threeP=
 
     # Plotting overlap counts between query regions and transcript features
     # here utr5, utr3 and cds do not contain introns
+
+    print("Computing annotation")
     protein_coding_gff <- gff[gff$gene_biotype == "protein_coding",]
-    txdb <- makeTxDbFromGRanges(protein_coding_gff)
+    ptxdb <- makeTxDbFromGRanges(protein_coding_gff)
 
+    utr5 <- gtf_to_bed_longest_tx(ptxdb, "utr5", longest=T)
+    utr3 <- gtf_to_bed_longest_tx(ptxdb, "utr3", longest=T)
+    cds <- gtf_to_bed_longest_tx(ptxdb, "cds", longest=T)
+    intron <- gtf_to_bed_longest_tx(ptxdb, "intron", longest=T)
+    gene <- gtf_to_bed_longest_tx(ptxdb, "gene", longest=T)$GRanges
 
-    utr5 <- gtf_to_bed_longest_tx(txdb, "utr5", longest=F)
-    utr3 <- gtf_to_bed_longest_tx(txdb, "utr3", longest=F)
-    cds <- gtf_to_bed_longest_tx(txdb, "cds", longest=F)
-    intron <- gtf_to_bed_longest_tx(txdb, "intron", longest=F)
-
-    promoter <- promoters(txdb, upstream=fiveP, downstream=100, use.names=FALSE)
-    TTS <- promoters(txdb, upstream=100, downstream=threeP, use.names=FALSE)
+    promoter <- flank(gene, width=fiveP, both=F, start=T, ignore.strand=FALSE)
+    names(promoter) <- NULL
+    TTS <- flank(gene, width=threeP, both=F, start=F, ignore.strand=FALSE)
+    names(TTS) <- NULL
+    #promoter <- promoters(ptxdb, upstream=fiveP, downstream=0, use.names=FALSE)
+    #TES <- promoters(ptxdb, upstream=0, downstream=threeP, use.names=FALSE)
 
     features <- GRangesList("Promoter"=promoter,
                             "TTS"=TTS,
                             "5'UTR"=stack(utr5$GRangesList),
                             "3'UTR"=stack(utr3$GRangesList),
                             "CDS"=stack(cds$GRangesList),
-                            "Intron"=intron$GRanges, compress=F)
+                            "Intron"=intron$GRanges,
+                            compress=F)
     if(RNA){
       features <- GRangesList("5'UTR"=stack(utr5$GRangesList),
                               "3'UTR"=stack(utr3$GRangesList),
                               "CDS"=stack(cds$GRangesList),
-                              "Intron"=intron$GRanges, compress=F)
+                              "Intron"=intron$GRanges,
+                              compress=F)
     }
 
     annot = annotateWithFeatures(peak, features, strand.aware=TRUE, intersect.chr=FALSE)
@@ -3701,7 +4003,9 @@ annotate_peaks <- function(peakfile, gtffile, genome="hg19", fiveP=1000, threeP=
 
     #plotTargetAnnotation(annot)
     #summary <- summarizeQueryRegions(queryRegions = peak,
-    #                                txdbFeatures = features)
+    #   txdbFeatures = features)
+
+    print("plot piechart")
 
     df <- data.frame(precedence_count) %>%
       mutate(feature = rownames(.)) %>%
@@ -3745,7 +4049,7 @@ annotate_peaks <- function(peakfile, gtffile, genome="hg19", fiveP=1000, threeP=
     }
   }
 
-  return(return_table)
+  return(dt_gene)
 }
 
 
@@ -3767,7 +4071,7 @@ annotate_peaks <- function(peakfile, gtffile, genome="hg19", fiveP=1000, threeP=
 #' @export process_scoreMatrix
 #'
 #'
-process_scoreMatrix <- function(fullmatrix, libsize=1000000, norm=F, scale=F, heatmap=F, rm.outlier=F){
+process_scoreMatrix <- function(fullmatrix, libsize=1000000, norm=F, scale=F, heatmap=F, rm.outlier=F, querylabel, centerlabel, collabel){
   fullmatrix[is.na(fullmatrix)] <- 0
 
   if(norm && !is.null(libsize)){
@@ -3780,7 +4084,7 @@ process_scoreMatrix <- function(fullmatrix, libsize=1000000, norm=F, scale=F, he
 
   if(heatmap){
     fullmatrixm <- log10(fullmatrix+1)
-    print(pheatmap(fullmatrixm, cluster_rows = T, cluster_cols = F, fontsize_col=8, fontsize_row=8, labels_col=colLabel, angle_col=0, main=paste(querylabel, centerlabel)))
+    print(pheatmap(fullmatrixm, cluster_rows = T, cluster_cols = F, fontsize_col=8, fontsize_row=8, labels_col=collabel, angle_col=0, main=paste(querylabel, centerlabel)))
   }
 
 
@@ -3790,7 +4094,7 @@ process_scoreMatrix <- function(fullmatrix, libsize=1000000, norm=F, scale=F, he
     fullmatrix <- rmOutlier(fullmatrix)
     if(heatmap){
       fullmatrixm <- log10(fullmatrix+1)
-      print(pheatmap(fullmatrixm, cluster_rows = T, cluster_cols = F, fontsize_col=8, fontsize_row=8, labels_col=colLabel, angle_col=0, main=paste(querylabel, centerlabel, "after removing outliers")))
+      print(pheatmap(fullmatrixm, cluster_rows = T, cluster_cols = F, fontsize_col=8, fontsize_row=8, labels_col=collabel, angle_col=0, main=paste(querylabel, centerlabel, "after removing outliers")))
     }
 
   }
@@ -3840,6 +4144,62 @@ aovTukeyHSD <- function(df){
 
 }
 
+## define helper functions for venn plot
+
+overlap_pair <- function(apair, overlap_fun){
+   sizes <- sapply(apair, length)
+   overlap <- length(Reduce(overlap_fun, apair))
+   jaccard <- round(overlap/(sum(sizes)-overlap), digits=5)
+   venn.plot <- VennDiagram::draw.pairwise.venn(sizes[1], sizes[2], overlap, category=names(apair), lty=rep("blank",2), fill=c("#0020C2", "#64E986"),
+                                                cat.just = rep(list(c(0.5, 0)),2), cex = rep(2, 3), cat.pos = c(0, 0))
+
+   grid.draw(venn.plot)
+   grid.text(paste("Jaccard:", jaccard), unit(0.2, "npc"), unit(0.9, "npc"), draw = TRUE)
+   grid.newpage()
+}
+
+overlap_triple <- function(atriple, overlap_fun){
+   sizes <- sort(sapply(atriple, length), decreasing=T)
+   atriple <- atriple[names(sizes)] ## sort the gr by decreasing size to avoid n13 < n123
+
+   overlap12 <- length(Reduce(overlap_fun, atriple[c(1,2)]))
+   overlap13 <- length(Reduce(overlap_fun, atriple[c(1,3)]))
+   overlap23 <- length(Reduce(overlap_fun, atriple[c(2,3)]))
+   overlap123 <- length(Reduce(overlap_fun, atriple))
+
+   venn.plot <- VennDiagram::draw.triple.venn(sizes[1], sizes[2], sizes[3], overlap12, overlap23, overlap13, overlap123, category=names(atriple),
+                                              lty=rep("blank",3), fill=c("#0020C2", "#64E986", "#990012"),
+                                              cat.just = rep(list(c(0.5, 0)),3), cex = rep(2, 7), cat.pos = c(0, 0, 180))
+
+   grid.draw(venn.plot)
+   grid.newpage()
+}
+
+overlap_quad <- function(aquad, overlap_fun){
+   sizes <- sort(sapply(aquad, length), decreasing=T)
+   aquad <- aquad[names(sizes)] ## sort the gr by decreasing size to avoid n13 < n123
+
+   overlap12 <- length(Reduce(overlap_fun, aquad[c(1,2)]))
+   overlap13 <- length(Reduce(overlap_fun, aquad[c(1,3)]))
+   overlap14 <- length(Reduce(overlap_fun, aquad[c(1,4)]))
+   overlap23 <- length(Reduce(overlap_fun, aquad[c(2,3)]))
+   overlap24 <- length(Reduce(overlap_fun, aquad[c(2,4)]))
+   overlap34 <- length(Reduce(overlap_fun, aquad[c(3,4)]))
+   overlap123 <- length(Reduce(overlap_fun, aquad[c(1,2,3)]))
+   overlap124 <- length(Reduce(overlap_fun, aquad[c(1,2,4)]))
+   overlap134 <- length(Reduce(overlap_fun, aquad[c(1,3,4)]))
+   overlap234 <- length(Reduce(overlap_fun, aquad[c(2,3,4)]))
+   overlap1234 <- length(Reduce(overlap_fun, aquad))
+
+   venn.plot <- VennDiagram::draw.quad.venn(sizes[1], sizes[2], sizes[3], sizes[4], overlap12, overlap13, overlap14, overlap23, overlap24,
+                                            overlap34, overlap123, overlap124, overlap134, overlap234, overlap1234, category=names(aquad),
+                                            lty=rep("blank",4), fill=c("#0020C2", "#64E986", "#990012", "#c6dcff"),
+                                            cat.just = rep(list(c(0.5, 0)),4), cex = rep(2, 15), cat.pos = c(0, 0, 0, 0))
+
+   grid.draw(venn.plot)
+   grid.newpage()
+}
+
 
 #' @param bedList, a named list of bed files, with length = 2 or 3
 #' @param outPrefix, a string for plot file name
@@ -3850,88 +4210,77 @@ aovTukeyHSD <- function(df){
 #' names(bedList) <- c("CIMS_YTHDF2", "CITS_YTHDF2", "CITS_ZNF121")
 #' outPrefix <- "test"
 #'
-overlapBed <- function(bedList, outPrefix=NULL, fix_width=0L, fixPoint="center", pairOnly=TRUE, genome="hg19"){
+overlapBed <- function(bedList, outPrefix=NULL, fix_width=0L, fix_point="center", pairOnly=TRUE, stranded=TRUE, genome="hg19"){
 
-  inputList <- lapply(bedList, handle_bed, fix_width=fix_width, fixPoint=fixPoint, useScore=FALSE, outRle=FALSE, genome=genome)
+  inputList <- lapply(bedList, handle_bed, fix_width=fix_width, fix_point=fix_point, useScore=FALSE, outRle=FALSE, genome=genome)
   grList <- lapply(inputList, function(x)x$query)
   sizeList <- lapply(inputList, function(x)x$size)
-
-  overlap_pair <- function(apair){
-    sizes <- sapply(apair, length)
-    overlap <- length(Reduce(filter_by_overlaps_stranded, apair))
-    venn.plot <- VennDiagram::draw.pairwise.venn(sizes[1], sizes[2], overlap, category=names(apair), lty=rep("blank",2), fill=c("#0020C2", "#64E986"),
-                                    cat.just = rep(list(c(0.5, 0)),2), cex = rep(2, 3), cat.pos = c(0, 0))
-
-    grid.draw(venn.plot)
-    grid.newpage()
-  }
-
-  overlap_triple <- function(atriple){
-    sizes <- sort(sapply(atriple, length), decreasing=T)
-    atriple <- atriple[names(sizes)] ## sort the gr by decreasing size to avoid n13 < n123
-
-    overlap12 <- length(filter_by_overlaps_stranded(atriple[[1]], atriple[[2]]))
-    overlap13 <- length(filter_by_overlaps_stranded(atriple[[1]], atriple[[3]]))
-    overlap23 <- length(filter_by_overlaps_stranded(atriple[[2]], atriple[[3]]))
-    overlap123 <- length(filter_by_overlaps_stranded(filter_by_overlaps_stranded(atriple[[1]], atriple[[3]]), atriple[[2]]))
-
-    venn.plot <- VennDiagram::draw.triple.venn(sizes[1], sizes[2], sizes[3], overlap12, overlap23, overlap13, overlap123, category=names(atriple),
-                                               lty=rep("blank",3), fill=c("#0020C2", "#64E986", "#990012"),
-                                                 cat.just = rep(list(c(0.5, 0)),3), cex = rep(2, 7), cat.pos = c(180, 180, 0))
-
-    grid.draw(venn.plot)
-    grid.newpage()
-  }
-
+  print(sizeList)
 
   pairs <- combn(grList, 2, simplify = F)
 
   if(!is.null(outPrefix)){
     pdf(paste0(outPrefix, ".pdf"), width=8, height=8)
-
-    lapply(pairs, overlap_pair)
-    if(!pairOnly){
-       triples <- combn(grList, 3, simplify = F)
-       lapply(triples, overlap_triple)
-    }
+     if(stranded){
+        lapply(pairs, overlap_pair, filter_by_overlaps_stranded)
+        if(!pairOnly){
+           if(length(grList)>2){
+              triples <- combn(grList, 3, simplify = F)
+              lapply(triples, overlap_triple, filter_by_overlaps_stranded)
+              if(length(grList)>3){
+                 quads <- combn(grList, 4, simplify = F)
+                 lapply(quads, overlap_quad, filter_by_overlaps_stranded)
+              }
+           }
+        }
+     }else{
+        lapply(pairs, overlap_pair, filter_by_overlaps)
+        if(!pairOnly){
+           if(length(grList)>2){
+              triples <- combn(grList, 3, simplify = F)
+              lapply(triples, overlap_triple, filter_by_overlaps)
+              if(length(grList)>3){
+                 quads <- combn(grList, 4, simplify = F)
+                 lapply(quads, overlap_quad, filter_by_overlaps)
+              }
+           }
+        }
+     }
     dev.off()
   }
 }
 
-if(0){
+overlapGenes <- function(fileList, columnList, pairOnly=TRUE, outPrefix=NULL){
 
-#' @param
-#' @exmaples
-#'
+   geneList <- mapply(x=fileList, y=columnList, function(x, y){
+      df <- read.delim(x, header=T, sep="\t")
+      genes <- unique(df[, y])
+      genes
+   })
 
-countFile <- "all_factor.CITS_count.bed"
-pcutoff <- 1e-10
 
-system.time(count_table <- data.table::fread(countFile))
-system.time(count_table <- as.data.frame(read.delim2(countFile, header=F)))
-counts <- count_table[,5]
-uniq_counts <- sort(unique(counts))
+   if(!is.null(outPrefix)){
+      pdf(paste0(outPrefix, ".pdf"), width=8, height=8)
+      pairs <- combn(geneList, 2, simplify = F)
 
-para_Poisson <- MASS::fitdistr(counts, "Poisson")
-#para_NB <- MASS::fitdistr(counts, "negative binomial")
+      lapply(pairs, overlap_pair, intersect)
+      if(!pairOnly){
+         if(length(geneList)>2){
+            triples <- combn(geneList, 3, simplify = F)
+            lapply(triples, overlap_triple, intersect)
+            if(length(geneList)>3){
+               quads <- combn(geneList, 4, simplify = F)
+               lapply(quads, overlap_quad, intersect)
+            }
+         }
+      }
 
-dpois(x=0, lambda=para_Poisson$estimate, log = F)
-ppois(0.5, lambda=para_Poisson$estimate, lower.tail=T)
-qpois(1e-10, lambda=para_Poisson$estimate, lower.tail=F)
-
-dt <- data.frame(uniq_counts, dPoisson)
-cv <- dt[dt[,2] <= pcutoff, ]
-cv <- qpois(pcutoff, lambda=para_Poisson$estimate, lower.tail=F)
-car::densityPlot(counts)
-cv
-hotspot <- count_table[count_table[,5] > cv,]
-
-write.table(hotspot, "crosslink_hotspot.bed", col.names=F, row.names=F, sep="\t", quote=F)
-write.table(dt,  "Poisson_fitted_pvalue.tab", col.names=T, row.names=F, sep="\t", quote=F)
-
+      dev.off()
+   }
+   geneList
 }
 
-filter_by_overlaps_stranded <- function(query, subject, maxgap=-1L){
+filter_by_overlaps <- function(query, subject, maxgap=-1L){
 
   plus_query <- query[strand(query)=="+"]
   minus_query <- query[strand(query)=="-"]
@@ -3949,9 +4298,9 @@ filter_by_overlaps_stranded <- function(query, subject, maxgap=-1L){
   overlaps
 }
 
-filter_by_nonoverlaps_stranded <- function(query, subject, maxgap=-1L){
+filter_by_nonoverlaps <- function(query, subject, maxgap=-1L){
 
-  overlaps <- filter_by_overlaps_stranded(query, subject, maxgap=-1L)
+  overlaps <- filter_by_overlaps(query, subject, maxgap=-1L)
   if(length(overlaps) > min(length(query), length(subject))){
      warning("Size of overlap is greater than min(sizeOfQuery, sizeOfSubject!")
   }
@@ -4117,8 +4466,8 @@ peak_targeted_gene <- function(peakfile, gtffile, genome="hg19", filterfile=NULL
 
    peak_list <- list()
    if(!is.null(filterfile)){
-      overlapped_peak <- filter_by_overlaps_stranded(peak, filter, maxgap=maxg)
-      nonoverlapped_peak <- filter_by_nonoverlaps_stranded(peak, filter, maxgap=maxg)
+      overlapped_peak <- filter_by_overlaps(peak, filter, maxgap=maxg)
+      nonoverlapped_peak <- filter_by_nonoverlaps(peak, filter, maxgap=maxg)
       peak_list[[paste(filterlabel,"overlapped", peaklabel, sep="_")]] <- overlapped_peak
       peak_list[[paste(filterlabel,"nonoverlapped", peaklabel, sep="_")]] <- nonoverlapped_peak
    }else{
@@ -4238,3 +4587,75 @@ peak_targeted_enhancer <- function(peakfile, enhancerfile, enhancerGenefile, max
 
    return(return_table)
 }
+
+filter_peaks_by_differential <- function(peakFile, treatBam,  refBam, treatName=NULL, refName=NULL, refDir=NULL, fix_width=0, genome="hg19", pcutoff=0.5, verbose=FALSE){
+
+   if(!is.null(refDir)){
+      if(file.exists(file.path(refDir,"refBams.rds"))){
+         refBams <- readRDS(file.path(refDir, "refBams.rds"))
+      }else{
+         refBams <- handle_input(refBam, CLIP_reads=FALSE, fix_width=0, useScore=FALSE, outRle=FALSE, useSizeFactor=FALSE, genome=genome)
+         saveRDS(refBams, file=file.path(refDir, "refBams.rds"))
+      }
+   }else{
+      refBams <- handle_input(refBam, CLIP_reads=FALSE, fix_width=0, useScore=FALSE, outRle=FALSE, useSizeFactor=FALSE, genome=genome)
+   }
+
+
+   treatBams <- handle_input(treatBam, CLIP_reads=FALSE, fix_width=0, useScore=FALSE, outRle=FALSE, useSizeFactor=FALSE, genome=genome)
+
+   peak <- handle_input(peakFile, CLIP_reads=FALSE, fix_width=fix_width, useScore=FALSE, outRle=FALSE, useSizeFactor=FALSE, genome=genome)
+
+   overlap_list <- lapply(c(treatBams, refBams), function(x){
+      ol <- countOverlaps(peak[[1]]$query, x$query, type="any", maxgap=-1L)
+   })
+
+   overlap_mat <- do.call(cbind, overlap_list)
+
+   head(overlap_mat)
+
+   samples <- c(treatBam, refBam)
+   groups <- factor(c(rep("Treat", length(treatBam)), rep("Reference", length(refBam))))
+   s2c <- data.frame(samples, groups)
+   rownames(s2c) <- samples
+   ddsMatrix <- DESeqDataSetFromMatrix(overlap_mat,
+                                       colData = s2c,
+                                       design = ~ groups)
+
+   dds <- DESeq(ddsMatrix, fitType = "local")
+   count_table <- DESeq2::counts(dds, normalized=TRUE)
+
+   sf <- sizeFactors(dds)
+   print(sf)
+
+   ## Treat is the numerator, Reference is the denominator in the fold change
+   res <- DESeq2::results(dds, contrast=c("groups", "Treat", "Reference"), independentFiltering = TRUE, pAdjustMethod = "BH")
+   rownames(res) <- seq_along(res$pvalue)
+   pos <- rownames(res)[!is.na(res$pvalue) & res$pvalue < pcutoff & sign(res$log2FoldChange)==1]
+   neg <- rownames(res)[!is.na(res$pvalue) & res$pvalue < pcutoff & sign(res$log2FoldChange)==-1]
+   noChange <- rownames(res)[!rownames(res) %in% c(pos, neg)]
+   nonpos <- rownames(res)[!rownames(res) %in% pos]
+
+   out_table <- cbind(as.data.frame(res), as.data.frame(count_table))
+
+   if(verbose){
+      res_list <- list("above"=pos, "below"=neg, "noChange"=noChange, "notAbove"=nonpos)
+
+      peakbed <- read.delim(peakFile, header=F, sep="\t")
+
+      print(dim(peakbed))
+      lapply(names(res_list), function(x){
+         ind <- res_list[[x]]
+         bed <- peakbed[ind,]
+         print(dim(bed))
+         outfile <- file.path(dirname(peakFile), paste0(treatName,"_",x,"_", refName, ".bed"))
+         write.table(bed, outfile, sep="\t", col.names=F, row.names=F, quote=F)
+      })
+
+      outfile <- file.path(dirname(peakFile), paste0(treatName,"_against_", refName, "_differential_results.tab"))
+      write.table(out_table, outfile, sep="\t", col.names=T, row.names=F, quote=F)
+   }
+
+   return(list("pos"=pos, "neg"=neg, "res"=out_table))  # return the order of significant peaks
+}
+
