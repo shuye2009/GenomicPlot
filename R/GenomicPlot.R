@@ -3,9 +3,8 @@
 
 #' @title  Plot signals around the start and the end of genomic features
 #'
-#' @description   Plot reads or peak signal intensity of samples in the query files around stat and end of genomic features. The upstream and downstream windows
-#' can be given separately, within the window, a smaller window can be defined to test statistical difference between the signal intensity
-#' among samples. A line plot and a boxplot are displayed side by side for both start and end of feature. If Input files are provided, ratio over Input is
+#' @description   Plot reads or peak signal intensity of samples in the query files around stat, end and center of genomic 
+#' features. The upstream and downstream windows can be given separately. If Input files are provided, ratio over Input is
 #' computed and displayed as well. A random feature can be generated to serve as a background.
 #'
 #' @param queryfiles a vector of sample file names. The file should be in .bam, .bed, .wig or .bw format, mixture of formats is allowed

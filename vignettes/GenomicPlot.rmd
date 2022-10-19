@@ -96,6 +96,21 @@ centerfiles <- system.file("data", "test_chip_peak_chr19.narrowPeak", package="G
  plot_reference_region(queryfiles, centerfiles, inputfiles, nbins=100, handleInputParams=handleInputParams,
   verbose=FALSE, scale=FALSE, heatmap=TRUE, regionName="narrowPeak", fiveP=500, threeP=500, smooth=TRUE,
   transform=FALSE, stranded=TRUE, outPrefix=NULL, rmOutlier=FALSE, nc=5)
+```
+## plot start and end of a genomic feature
+When the intron splicing sites are focus of studies, we want to inspect signals at both 5' splicing sites and 3' splicing sites, perhaps want to contrast with the center of introns as well, then displaying all 3 pieces of information in the same panel would be desirable.
+```{r, eval=FALSE, fig.show='hold', fig.keep='last', fig.align='center', fig.dim=c(7,7)}
+txdb <- AnnotationDbi::loadDb(system.file("data", "txdb_chr19.sql", package="GenomicPlotData"))
+queryfiles <- system.file("data", "test_clip_chr19.bam", package="GenomicPlotData")
+names(queryfiles) <- "query"
+inputfiles <- system.file("data", "test_clip_input_chr19.bam", package="GenomicPlotData")
+names(inputfiles) <- "input"
+ext <- c(-500, 200, -200, 500)
+hl <- c(-50, 50, -50, 50)
 
-
+handleInputParams <- list(CLIP_reads=FALSE, fix_width=150, fix_point="start", norm=TRUE, useScore=FALSE, outRle=TRUE,
+                          useSizeFactor=TRUE, genome="hg19")
+plot_start_end_feature(queryfiles=queryfiles, inputfiles=inputfiles, txdb=txdb, featureName="intron", binsize=10,
+                       handleInputParams=handleInputParams, longest=TRUE, ext=ext, hl=hl, randomize=TRUE, insert=100,
+                       stranded=TRUE, scale=FALSE, smooth=TRUE, outPrefix=NULL, nc=5)
 ```
