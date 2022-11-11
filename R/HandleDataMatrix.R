@@ -244,8 +244,10 @@ gr2df <- function(gr){
    width <- width(gr)
    strand <- as.vector(strand(gr))
    meta <- mcols(gr, us.names=TRUE)
+   id <- seq_along(gr)
+   if(!is.null(names(gr))) id <- names(gr)
 
-   df <- as.data.frame(cbind(chr, start, end, width, strand, meta))
+   df <- as.data.frame(cbind(chr, start, end, id, width, strand, meta))
 
    return(df)
 }

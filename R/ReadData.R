@@ -184,6 +184,7 @@ handle_bed <- function(inputFile, handleInputParams=NULL){
 
    ## make input comply with GenomeInfoDb
    seqInfo <- Seqinfo(genome=handleInputParams$genome)
+   seqInfo <- keepStandardChromosomes(seqInfo)
    queryRegions <- queryRegions[as.vector(seqnames(queryRegions)) %in% seqnames(seqInfo)]
    seqlevels(queryRegions) <- seqlevels(seqInfo)
    seqinfo(queryRegions) <- seqInfo
@@ -242,6 +243,7 @@ handle_bam <- function(inputFile, handleInputParams=NULL){
 
    ## make input comply with GenomeInfoDb
    seqInfo <- Seqinfo(genome=handleInputParams$genome)
+   seqInfo <- keepStandardChromosomes(seqInfo)
    queryRegions <- queryRegions[as.vector(seqnames(queryRegions)) %in% seqnames(seqInfo)]
    seqlevels(queryRegions) <- seqlevels(seqInfo)
    seqinfo(queryRegions) <- seqInfo
@@ -296,6 +298,7 @@ handle_bw <- function(inputFile, handleInputParams){
 
    ## make input comply with GenomeInfoDb
    seqInfo <- Seqinfo(genome=handleInputParams$genome)
+   seqInfo <- keepStandardChromosomes(seqInfo)
    queryRegions <- queryRegions[as.vector(seqnames(queryRegions)) %in% seqnames(seqInfo)]
    seqlevels(queryRegions) <- seqlevels(seqInfo)
    seqinfo(queryRegions) <- seqInfo
