@@ -15,7 +15,7 @@
 start_parallel <- function(nc=2){
 
    n.cores <- detectCores()
-   fnc <- min(nc, as.integer(n.cores/2))
+   fnc <- min(nc, as.integer(n.cores-1))
 
    switch(Sys.info()[['sysname']],
           Windows = {my.cluster <- makeCluster(fnc, type = "PSOCK")},
@@ -159,6 +159,7 @@ parallel_binnedAverage <- function(Rle_list, tileBins, nc=2){
 #'
 #' @param grange_list a list of GRanges objects.
 #' @param tileBins, a GRanges object of tiled genome
+#' @param switch, logical, switch the order of query and feature
 #' @param nc integer, number of cores for parallel processing
 #'
 #' @return a list of numeric vectors
@@ -168,14 +169,19 @@ parallel_binnedAverage <- function(Rle_list, tileBins, nc=2){
 #' @export parallel_countOverlaps
 #'
 #'
-parallel_countOverlaps <- function(grange_list, tileBins, nc=2){
+parallel_countOverlaps <- function(grange_list, tileBins, nc=2, switch=FALSE){
 
    #print(system.time({
       cl <- start_parallel(min(nc,length(grange_list)))
 
-      clusterExport(cl, c("countOverlaps", "tileBins"), envir=environment())
+      clusterExport(cl, c("countOverlaps", "tileBins", "switch"), envir=environment())
       score_list <- parLapply(cl, grange_list, function(x){
-         binned_count <- GenomicRanges::countOverlaps(tileBins, x)
+         if(switch){
+            binned_count <- GenomicRanges::countOverlaps(x, tileBins)
+         }else{
+            binned_count <- GenomicRanges::countOverlaps(tileBins, x)
+         }
+        
          binned_count
       })
       stop_parallel(cl)

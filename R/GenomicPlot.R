@@ -2766,82 +2766,97 @@ plot_peak_annotation <- function(peakfile, gtfFile, handleInputParams=NULL, five
 
   if(simple){
       ## the 5'UTR and 3'UTR are not annotted
-    txdb <- makeTxDbFromGFF(gtfFile)
-    #gene <- get_genomic_feature_coordinates(txdb, "transcript", longest=FALSE)$GRanges
+     suppressWarnings(suppressMessages(txdb <- makeTxDbFromGFF(gtfFile)))
+    
     exon <- get_genomic_feature_coordinates(txdb, "exon", longest=FALSE)
     intron <- get_genomic_feature_coordinates(txdb, "intron", longest=FALSE)
     gene <- get_genomic_feature_coordinates(txdb, "gene", longest=FALSE)$GRanges
 
-    promoter <- flank(gene, width=fiveP, both=FALSE, start=TRUE, ignore.strand=FALSE)
-    names(promoter) <- seq_along(promoter)
+    promoter <- promoters(gene, upstream=fiveP, downstream=300, use.names=FALSE)
+    names(promoter) <- NULL
     TTS <- flank(gene, width=threeP, both=FALSE, start=FALSE, ignore.strand=FALSE)
-    names(TTS) <- seq_along(TTS)
+    names(TTS) <- NULL
 
-    targeted_gene <- as.data.frame(mergeByOverlaps(peak, gene)) %>%
-      select(colnames(.)[grepl("\\.", colnames(.))])
-    targeted_gene_count <- targeted_gene %>%
-      filter(!is.na(gene.tx_name)) %>%
-      count(gene.tx_name, name="Peak_in_geneBody")
+    pg <- mergeByOverlaps(peak, gene)
+    targeted_gene <- cbind(gr2df(pg$peak), gr2df(pg$gene))
 
-    targeted_promoter <- as.data.frame(mergeByOverlaps(peak, promoter)) %>%
-      select(colnames(.)[grepl("\\.", colnames(.))])
-    targeted_promoter_count <- targeted_promoter %>%
-      filter(!is.na(promoter.tx_name)) %>%
-      count(promoter.tx_name, name="Peak_in_promoter")
-
-    summary_table <- full_join(targeted_gene_count, targeted_promoter_count, by=c("gene.tx_name"="promoter.tx_name")) %>%
-      arrange(desc(Peak_in_promoter))
+    pp <- mergeByOverlaps(peak, promoter)
+    targeted_promoter <- cbind(gr2df(pp$peak), gr2df(pp$promoter))
+    
 
     if(verbose){
        write.table(targeted_gene, paste(peaklabel, "_targeted_annotated_gene.tab", sep=""), sep="\t", row.names=FALSE, quote=FALSE)
        write.table(targeted_promoter, paste(peaklabel, "_targeted_promoter.tab", sep=""), sep="\t", row.names=FALSE, quote=FALSE)
-       write.table(summary_table, paste(peaklabel, "_target_summary.tab", sep=""), sep="\t", row.names=FALSE, quote=FALSE)
     }
 
     features <- GRangesList("Promoter"=promoter,
                             "TTS"=TTS,
-                            "Exon"=exon$GRanges,
-                            "Intron"=intron$GRanges,
+                            "Exon"=unlist(exon$GRangesList, use.names=FALSE),
+                            "Intron"=unlist(intron$GRangesList, use.names=FALSE),
                             compress=FALSE)
 
     if(!is.null(outPrefix)) pdf(paste0(outPrefix, ".pdf"), height=8, width=12)
 
-    annot = annotateWithFeatures(peak, features, strand.aware=TRUE, intersect.chr=FALSE)
+    suppressWarnings(annot <- annotateWithFeatures(peak, features, strand.aware=TRUE, intersect.chr=FALSE))
+    print(annot)
     precedence_count <- annot@num.precedence
-    precedence_count["NoFeature"] <- length(peak) - sum(precedence_count)
+    lengths <- vapply(features, FUN=function(x)sum(width(x)), FUN.VALUE=numeric(1))
 
-    df <- data.frame(precedence_count) %>%
-      mutate(percent = precedence_count / sum(precedence_count)) %>%
+    df <- data.frame(count=precedence_count, len=lengths) %>%
+      mutate(percent = count / sum(count)) %>%
       mutate(feature = rownames(.)) %>%
-      mutate(labels = percent(percent, accuracy = 0.1))
+      mutate(labels = percent(percent, accuracy = 0.1)) %>%
+      mutate(percent = round(percent*100, digits=1))%>%
+      mutate(norm_count=round(count*1000/len, digits=3)) %>%
+      mutate(norm_percent = norm_count / sum(norm_count)) %>%
+      mutate(norm_labels = percent(norm_percent, accuracy = 0.1)) %>%
+      mutate(norm_percent = round(norm_percent*100, digits=1)) %>%
+      mutate(feature = forcats::fct_inorder(feature))
 
     df2 <- df %>%
        mutate(csum = rev(cumsum(rev(percent))),
               pos = percent/2 + lead(csum, 1),
-              pos = ifelse(is.na(pos), percent/2, pos))
+              pos = ifelse(is.na(pos), percent/2, pos),
+              norm_csum = rev(cumsum(rev(norm_percent))),
+              norm_pos = norm_percent/2 + lead(norm_csum, 1),
+              norm_pos = ifelse(is.na(norm_pos), norm_percent/2, norm_pos))
+    print(df)
 
-    ap <- ggplot(df, aes(x = "", y = percent, fill = forcats::fct_inorder(feature))) +
+    ap1 <- ggplot(df, aes(x = "", y = percent, fill = feature)) +
        geom_col(color = "white") +
        scale_y_continuous(breaks = df2$pos, labels = df2$labels) +
-       guides(fill = guide_legend(title = "Feature")) +
+       guides(fill = guide_legend(title = "Feature", nrow=2)) +
        scale_fill_viridis(discrete=TRUE) +
        coord_polar(theta = "y") +
+       ggtitle("Absolute count") +
        theme(axis.ticks = element_blank(),
              axis.title = element_blank(),
              axis.text = element_text(size = 15),
              legend.position = "top",
              panel.background = element_rect(fill = "white"))
+    
+    ap2 <- ggplot(df, aes(x = "", y = norm_percent, fill = feature)) +
+       geom_col(color = "white") +
+       coord_polar(theta = "y") +
+       scale_y_continuous(breaks = df2$norm_pos, labels = df2$norm_labels) +
+       guides(fill = guide_legend(title = "Feature", nrow=2)) +
+       scale_fill_viridis(discrete=TRUE) +
+       ggtitle("Length-normalized count") +
+       theme(axis.ticks = element_blank(),
+             axis.title = element_blank(),
+             axis.text = element_text(size = 10),
+             legend.position = "top",
+             panel.background = element_rect(fill = "white"))
 
-    print(ap)
+    print(plot_grid(ap1, ap2))
     if(!is.null(outPrefix)) on.exit(dev.off(), add=TRUE)
-    invisible(summary_table)
-
+    invisible(list(annotation=NULL, stat=df, simplified=NULL))
   }else{
 
     print("Collecting gene info")
 
-    gff <- importGtf(saveObjectAsRds = TRUE, filePath = gtfFile)
-    overlaps <- gr2df(queryGff(queryRegions=peak, gffData=gff))
+     suppressWarnings(suppressMessages({gff <- importGtf(saveObjectAsRds = TRUE, filePath = gtfFile);
+                     overlaps <- gr2df(queryGff(queryRegions=peak, gffData=gff))}))
     geneType <- NULL
     if("gene_type" %in% colnames(overlaps)){
        geneType <- "gene_type"
@@ -2856,10 +2871,10 @@ plot_peak_annotation <- function(peakfile, gtfFile, handleInputParams=NULL, five
     ## get targeted genes table,
     ## beware that utr5, utr3 and cds in txdbFeatures DO contain introns
 
-    txdbFeatures <- getTxdbFeaturesFromGRanges(gff)
+    suppressWarnings(txdbFeatures <- getTxdbFeaturesFromGRanges(gff))
     wide <- txdbFeatures$promoters ## original -2000TSS200
     resized <- resize(wide, width=200, fix="end", use.names=TRUE, ignore.strand=FALSE) ## take 200nt of the 3' end
-    narrow <- promoters(resized, upstream=1000, downstream=100, use.names=TRUE) ## modified -1000TSS100
+    narrow <- promoters(resized, upstream=fiveP, downstream=0, use.names=TRUE) ## modified -fivePTSS0
     txdbFeatures$promoters <- narrow
 
     dt <- getTargetedGenesTable(queryRegions = peak, txdbFeatures = txdbFeatures)
@@ -2874,11 +2889,11 @@ plot_peak_annotation <- function(peakfile, gtfFile, handleInputParams=NULL, five
     ## for CLIPseq peaks only output genes targeted in transcripts(5'UTR, CDS, 3'UTR, intron)
     if(any(c("*", ".", "") %in% as.vector(strand(peak)))){
        dt_gene <- dt_gene %>%
-          filter(promoters >1) %>%
+          filter(promoters > 0) %>%
           arrange(desc(promoters))
     }else{
        dt_gene <- dt_gene %>%
-          filter(transcripts >1) %>%
+          filter(transcripts > 0) %>%
           arrange(desc(transcripts))
     }
 
@@ -2932,7 +2947,7 @@ plot_peak_annotation <- function(peakfile, gtfFile, handleInputParams=NULL, five
 
     print("Computing annotation")
     protein_coding_gff <- gff[mcols(gff)[[geneType]] == "protein_coding",]
-    ptxdb <- makeTxDbFromGRanges(protein_coding_gff)
+    suppressWarnings(ptxdb <- makeTxDbFromGRanges(protein_coding_gff))
 
     utr5 <- get_genomic_feature_coordinates(ptxdb, "utr5", longest=TRUE)
     utr3 <- get_genomic_feature_coordinates(ptxdb, "utr3", longest=TRUE)
@@ -2945,11 +2960,11 @@ plot_peak_annotation <- function(peakfile, gtfFile, handleInputParams=NULL, five
                               "CDS"=unlist(cds$GRangesList, use.names=FALSE),
                               "Intron"=intron$GRanges,
                               compress=FALSE)
-      annot = annotateWithFeatures(peak, features, strand.aware=TRUE, intersect.chr=FALSE)
+      suppressWarnings(annot <- annotateWithFeatures(peak, features, strand.aware=TRUE, intersect.chr=FALSE))
       lengths <- vapply(features, FUN=function(x)sum(width(x)), FUN.VALUE=numeric(1))
     }else{
        gene <- get_genomic_feature_coordinates(ptxdb, "gene", longest=TRUE)$GRanges
-       promoter <- flank(gene, width=fiveP, both=FALSE, start=TRUE, ignore.strand=FALSE)
+       promoter <- promoters(gene, upstream=fiveP, downstream=300, use.names=FALSE)
        names(promoter) <- NULL
        TTS <- flank(gene, width=threeP, both=FALSE, start=FALSE, ignore.strand=FALSE)
        names(TTS) <- NULL
@@ -2961,7 +2976,7 @@ plot_peak_annotation <- function(peakfile, gtfFile, handleInputParams=NULL, five
                                "CDS"=unlist(cds$GRangesList, use.names=FALSE),
                                "Intron"=intron$GRanges,
                                compress=FALSE)
-      annot = annotateWithFeatures(peak, features, strand.aware=FALSE, intersect.chr=FALSE)
+      suppressWarnings(annot <- annotateWithFeatures(peak, features, strand.aware=FALSE, intersect.chr=FALSE))
       lengths <- vapply(features, FUN=function(x)sum(width(x)), FUN.VALUE=numeric(1))
     }
 
@@ -2980,7 +2995,8 @@ plot_peak_annotation <- function(peakfile, gtfFile, handleInputParams=NULL, five
       mutate(norm_count=round(count*1000/len, digits=3)) %>%
       mutate(norm_percent = norm_count / sum(norm_count)) %>%
       mutate(norm_labels = percent(norm_percent, accuracy = 0.1)) %>%
-      mutate(norm_percent = round(norm_percent*100, digits=1))
+      mutate(norm_percent = round(norm_percent*100, digits=1)) %>%
+      mutate(feature = forcats::fct_inorder(feature))
 
 
     dfa2 <- dfa %>%
@@ -2992,7 +3008,7 @@ plot_peak_annotation <- function(peakfile, gtfFile, handleInputParams=NULL, five
               norm_pos = ifelse(is.na(norm_pos), norm_percent/2, norm_pos))
     print(dfa2)
 
-    apa1 <- ggplot(dfa, aes(x = "", y = percent, fill = forcats::fct_inorder(feature))) +
+    apa1 <- ggplot(dfa, aes(x = "", y = percent, fill = feature)) +
        geom_col(color = "white") +
        coord_polar(theta = "y") +
        scale_y_continuous(breaks = dfa2$pos, labels = dfa2$labels) +
@@ -3000,10 +3016,10 @@ plot_peak_annotation <- function(peakfile, gtfFile, handleInputParams=NULL, five
        scale_fill_viridis(discrete=TRUE) +
        theme(axis.ticks = element_blank(),
              axis.title = element_blank(),
-             axis.text = element_text(size = 15),
+             axis.text = element_text(size = 10),
              legend.position = "top",
              panel.background = element_rect(fill = "white"))
-    apa2 <- ggplot(dfa, aes(x = "", y = norm_percent, fill = forcats::fct_inorder(feature))) +
+    apa2 <- ggplot(dfa, aes(x = "", y = norm_percent, fill = feature)) +
        geom_col(color = "white") +
        coord_polar(theta = "y") +
        scale_y_continuous(breaks = dfa2$norm_pos, labels = dfa2$norm_labels) +
@@ -3011,7 +3027,7 @@ plot_peak_annotation <- function(peakfile, gtfFile, handleInputParams=NULL, five
        scale_fill_viridis(discrete=TRUE) +
        theme(axis.ticks = element_blank(),
              axis.title = element_blank(),
-             axis.text = element_text(size = 15),
+             axis.text = element_text(size = 10),
              legend.position = "top",
              panel.background = element_rect(fill = "white"))
 
@@ -3026,7 +3042,8 @@ plot_peak_annotation <- function(peakfile, gtfFile, handleInputParams=NULL, five
       mutate(norm_count=round(count*1000/len, digits=3)) %>%
       mutate(norm_percent = norm_count / sum(norm_count)) %>%
       mutate(norm_labels = percent(norm_percent, accuracy = 0.1)) %>%
-      mutate(norm_percent = round(norm_percent*100, digits=1))
+      mutate(norm_percent = round(norm_percent*100, digits=1)) %>%
+      mutate(feature = forcats::fct_inorder(feature))
 
     dfb2 <- dfb %>%
        mutate(csum = rev(cumsum(rev(percent))),
@@ -3036,36 +3053,37 @@ plot_peak_annotation <- function(peakfile, gtfFile, handleInputParams=NULL, five
               norm_pos = norm_percent/2 + lead(norm_csum, 1),
               norm_pos = ifelse(is.na(norm_pos), norm_percent/2, norm_pos))
 
-    apb1 <- ggplot(dfb, aes(x = "", y = percent, fill = forcats::fct_inorder(feature))) +
+    apb1 <- ggplot(dfb, aes(x = "", y = percent, fill = feature)) +
       geom_col(color = "white") +
       scale_y_continuous(breaks = dfb2$pos, labels = dfb2$labels) +
-      guides(fill = guide_legend(title = "Feature")) +
+      guides(fill = guide_legend(title = "Feature", nrow=2)) +
       scale_fill_viridis(discrete=TRUE) +
       coord_polar(theta = "y") +
       theme(axis.ticks = element_blank(),
              axis.title = element_blank(),
-             axis.text = element_text(size = 15),
+             axis.text = element_text(size = 10),
             legend.position = "top",
-             panel.background = element_rect(fill = "white"))
-    apb2 <- ggplot(dfb, aes(x = "", y = norm_percent, fill = forcats::fct_inorder(feature))) +
+             panel.background = element_rect(fill = "white")) 
+    
+    apb2 <- ggplot(dfb, aes(x = "", y = norm_percent, fill = feature)) +
        geom_col(color = "white") +
        scale_y_continuous(breaks = dfb2$norm_pos, labels = dfb2$norm_labels) +
-       guides(fill = guide_legend(title = "Feature")) +
+       guides(fill = guide_legend(title = "Feature", nrow=2)) +
        scale_fill_viridis(discrete=TRUE) +
        coord_polar(theta = "y") +
        theme(axis.ticks = element_blank(),
              axis.title = element_blank(),
-             axis.text = element_text(size = 15),
+             axis.text = element_text(size = 10),
              legend.position = "top",
-             panel.background = element_rect(fill = "white"))
+             panel.background = element_rect(fill = "white")) 
 
     print(pbar)
-    print(plot_grid(apa1, apb1, nrow=1))
-    print(plot_grid(apa2, apb2, nrow=1))
-
+    print(plot_grid(apa1, apb1, nrow=1, labels="Absolute counts", label_y=1))
+    print(plot_grid(apa2, apb2, nrow=1, labels="Length-normalized counts", label_y=1))
+    
+    if(!is.null(outPrefix)) on.exit(dev.off(), add=TRUE)
+    invisible(list(annotation=dfs, stat=dfa, simplified=dfb))
   }
-  if(!is.null(outPrefix)) on.exit(dev.off(), add=TRUE)
-  invisible(list(annotation=dfs, stat=dfa, simplified=dfb))
 }
 
 #' @title Plot two-sets Venn diagram

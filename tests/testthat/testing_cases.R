@@ -341,6 +341,8 @@ gz <- bfcrpath(bfc, url)
 gtffile <- gsub(".gz", "", gz)
 if(!file.exists(gtffile)) gtffile <- R.utils::gunzip(gz, remove=FALSE)
 
+gtffile <- system.file("data", "gencode.v19.annotation_chr19.gtf", package="GenomicPlotData")
+
 centerfile <- system.file("data", "test_chip_peak.narrowPeak", package="GenomicPlotData")
 names(centerfile) <- c("narrowPeak")
 op <- "test_plot_peak_annotation"
@@ -348,7 +350,9 @@ handleBedparams <- list(fix_width=0, fix_point="center", useScore=FALSE, outRle=
 norm=FALSE, useSizeFactor=FALSE, genome="hg19")
 
 pa <- plot_peak_annotation(peakfile=centerfile, gtfFile=gtffile, handleInputParams=handleBedparams, fiveP=2000,
-threeP=1000, simple=FALSE, RNA=FALSE, verbose=TRUE)
+threeP=1000, simple=FALSE, RNA=FALSE, verbose=TRUE, outPrefix=op)
+pb <- plot_peak_annotation(peakfile=centerfile, gtfFile=gtffile, handleInputParams=handleBedparams, fiveP=2000,
+                           threeP=1000, simple=TRUE, RNA=FALSE, verbose=TRUE, outPrefix=op)
 
 # plot_overlap_bed ####
 queryfiles <- c(system.file("data", "test_chip_peak_chr19.narrowPeak", package="GenomicPlotData"),

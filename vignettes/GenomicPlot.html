@@ -12,7 +12,7 @@
 
 <meta name="author" content="Shuye Pu" />
 
-<meta name="date" content="2022-10-17" />
+<meta name="date" content="2022-10-27" />
 
 <title>GenomicPlot: an R package for efficient and flexible visualization of NGS coverage profiles</title>
 
@@ -342,7 +342,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 <h1 class="title toc-ignore">GenomicPlot: an R package for efficient and
 flexible visualization of NGS coverage profiles</h1>
 <h4 class="author">Shuye Pu</h4>
-<h4 class="date">2022-10-17</h4>
+<h4 class="date">2022-10-27</h4>
 
 
 
@@ -436,7 +436,7 @@ specified number of bins.</p>
 or narrowPeak file along with heatmaps can be plotted. Multiple samples
 (.bam files) and multiple set of regions (.bed file) can over-layed on
 the same figure, or can be output as various combinations. When input
-files (for ChIPseq and CLIPseq) are availabe, ratio-over-input are
+files (for ChIPseq and CLIPseq) are available, ratio-over-input are
 displayed as well.</p>
 <div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>centerfiles <span class="ot">&lt;-</span> <span class="fu">system.file</span>(<span class="st">&quot;data&quot;</span>, <span class="st">&quot;test_chip_peak_chr19.narrowPeak&quot;</span>, <span class="at">package=</span><span class="st">&quot;GenomicPlotData&quot;</span>)</span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a> <span class="fu">names</span>(centerfiles) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">&quot;narrowpeak&quot;</span>)</span>
@@ -448,11 +448,110 @@ displayed as well.</p>
 <span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a> <span class="fu">names</span>(inputfiles) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">&quot;clip_input&quot;</span>, <span class="st">&quot;chip_input&quot;</span>)</span>
 <span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a> handleInputParams <span class="ot">&lt;-</span> <span class="fu">list</span>(<span class="at">CLIP_reads=</span><span class="cn">FALSE</span>, <span class="at">fix_width=</span><span class="dv">150</span>, <span class="at">fix_point=</span><span class="st">&quot;start&quot;</span>, <span class="at">norm=</span><span class="cn">TRUE</span>, <span class="at">useScore=</span><span class="cn">FALSE</span>,</span>
-<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">outRle=</span><span class="cn">TRUE</span>, <span class="at">useSizeFactor=</span><span class="cn">TRUE</span>, <span class="at">genome=</span><span class="st">&quot;hg19&quot;</span>)</span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>                           <span class="at">outRle=</span><span class="cn">TRUE</span>, <span class="at">useSizeFactor=</span><span class="cn">TRUE</span>, <span class="at">genome=</span><span class="st">&quot;hg19&quot;</span>)</span>
 <span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a> <span class="fu">plot_reference_region</span>(queryfiles, centerfiles, inputfiles, <span class="at">nbins=</span><span class="dv">100</span>, <span class="at">handleInputParams=</span>handleInputParams,</span>
-<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>  <span class="at">verbose=</span><span class="cn">FALSE</span>, <span class="at">scale=</span><span class="cn">FALSE</span>, <span class="at">heatmap=</span><span class="cn">TRUE</span>, <span class="at">regionName=</span><span class="st">&quot;narrowPeak&quot;</span>, <span class="at">fiveP=</span><span class="dv">500</span>, <span class="at">threeP=</span><span class="dv">500</span>, <span class="at">smooth=</span><span class="cn">TRUE</span>,</span>
-<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>  <span class="at">transform=</span><span class="cn">FALSE</span>, <span class="at">stranded=</span><span class="cn">TRUE</span>, <span class="at">outPrefix=</span><span class="cn">NULL</span>, <span class="at">rmOutlier=</span><span class="cn">FALSE</span>, <span class="at">nc=</span><span class="dv">5</span>)</span></code></pre></div>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a> <span class="fu">plot_reference_region</span>(queryfiles, centerfiles, inputfiles, <span class="at">nbins=</span><span class="dv">100</span>, <span class="at">heatmap=</span><span class="cn">TRUE</span>, <span class="at">scale=</span><span class="cn">FALSE</span>,  </span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>                       <span class="at">regionName=</span><span class="st">&quot;narrowPeak&quot;</span>, <span class="at">handleInputParams=</span>handleInputParams, <span class="at">verbose=</span><span class="cn">FALSE</span>, </span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>                       <span class="at">fiveP=</span><span class="dv">500</span>, <span class="at">threeP=</span><span class="dv">500</span>, <span class="at">smooth=</span><span class="cn">TRUE</span>, <span class="at">transform=</span><span class="cn">FALSE</span>, <span class="at">stranded=</span><span class="cn">TRUE</span>, <span class="at">outPrefix=</span><span class="cn">NULL</span>, </span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>                       <span class="at">rmOutlier=</span><span class="cn">FALSE</span>, <span class="at">nc=</span><span class="dv">5</span>)</span></code></pre></div>
+</div>
+<div id="plot-start-and-end-of-a-genomic-feature" class="section level2">
+<h2>Plot start and end of a genomic feature</h2>
+<p>When the intron splicing sites are focus of studies, we want to
+inspect signals at both 5’ splicing sites and 3’ splicing sites, perhaps
+want to contrast with the center of introns as well, then displaying all
+3 pieces of information in the same panel would be desirable.</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>txdb <span class="ot">&lt;-</span> AnnotationDbi<span class="sc">::</span><span class="fu">loadDb</span>(<span class="fu">system.file</span>(<span class="st">&quot;data&quot;</span>, <span class="st">&quot;txdb_chr19.sql&quot;</span>, <span class="at">package=</span><span class="st">&quot;GenomicPlotData&quot;</span>))</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>queryfiles <span class="ot">&lt;-</span> <span class="fu">system.file</span>(<span class="st">&quot;data&quot;</span>, <span class="st">&quot;test_clip_chr19.bam&quot;</span>, <span class="at">package=</span><span class="st">&quot;GenomicPlotData&quot;</span>)</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(queryfiles) <span class="ot">&lt;-</span> <span class="st">&quot;query&quot;</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>inputfiles <span class="ot">&lt;-</span> <span class="fu">system.file</span>(<span class="st">&quot;data&quot;</span>, <span class="st">&quot;test_clip_input_chr19.bam&quot;</span>, <span class="at">package=</span><span class="st">&quot;GenomicPlotData&quot;</span>)</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(inputfiles) <span class="ot">&lt;-</span> <span class="st">&quot;input&quot;</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>ext <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="sc">-</span><span class="dv">500</span>, <span class="dv">200</span>, <span class="sc">-</span><span class="dv">200</span>, <span class="dv">500</span>)</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>hl <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="sc">-</span><span class="dv">50</span>, <span class="dv">50</span>, <span class="sc">-</span><span class="dv">50</span>, <span class="dv">50</span>)</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>handleInputParams <span class="ot">&lt;-</span> <span class="fu">list</span>(<span class="at">CLIP_reads=</span><span class="cn">FALSE</span>, <span class="at">fix_width=</span><span class="dv">150</span>, <span class="at">fix_point=</span><span class="st">&quot;start&quot;</span>, <span class="at">norm=</span><span class="cn">TRUE</span>, <span class="at">useScore=</span><span class="cn">FALSE</span>, </span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>                          <span class="at">outRle=</span><span class="cn">TRUE</span>, <span class="at">useSizeFactor=</span><span class="cn">TRUE</span>, <span class="at">genome=</span><span class="st">&quot;hg19&quot;</span>)</span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a><span class="fu">plot_start_end_feature</span>(<span class="at">queryfiles=</span>queryfiles, <span class="at">inputfiles=</span>inputfiles, <span class="at">txdb=</span>txdb, <span class="at">featureName=</span><span class="st">&quot;intron&quot;</span>, </span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>                       <span class="at">binsize=</span><span class="dv">10</span>,<span class="at">handleInputParams=</span>handleInputParams, <span class="at">longest=</span><span class="cn">TRUE</span>, <span class="at">ext=</span>ext, <span class="at">hl=</span>hl, </span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>                       <span class="at">randomize=</span><span class="cn">TRUE</span>, <span class="at">insert=</span><span class="dv">100</span>, <span class="at">stranded=</span><span class="cn">TRUE</span>, <span class="at">scale=</span><span class="cn">FALSE</span>, <span class="at">smooth=</span><span class="cn">TRUE</span>, </span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>                       <span class="at">outPrefix=</span><span class="cn">NULL</span>, <span class="at">nc=</span><span class="dv">5</span>)</span></code></pre></div>
+</div>
+<div id="plot-reference-locus" class="section level2">
+<h2>Plot reference locus</h2>
+<p>Difference in signal intensity within specific regions around the
+reference loci can be tested, and the test statistics can be plotted as
+boxplot and barplot of mean +/- SE. The test can be done among loci or
+among samples.</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a> centerfiles <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="fu">system.file</span>(<span class="st">&quot;data&quot;</span>, <span class="st">&quot;test_clip_peak_chr19.bed&quot;</span>, <span class="at">package=</span><span class="st">&quot;GenomicPlotData&quot;</span>),</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>                  <span class="fu">system.file</span>(<span class="st">&quot;data&quot;</span>, <span class="st">&quot;test_chip_peak_chr19.bed&quot;</span>, <span class="at">package=</span><span class="st">&quot;GenomicPlotData&quot;</span>))</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a> <span class="fu">names</span>(centerfiles) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">&quot;clip_peak&quot;</span>, <span class="st">&quot;chip_peak&quot;</span>)</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a> queryfiles <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="fu">system.file</span>(<span class="st">&quot;data&quot;</span>, <span class="st">&quot;test_clip_chr19.bam&quot;</span>, <span class="at">package=</span><span class="st">&quot;GenomicPlotData&quot;</span>),</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>                 <span class="fu">system.file</span>(<span class="st">&quot;data&quot;</span>, <span class="st">&quot;test_chip_chr19.bam&quot;</span>, <span class="at">package=</span><span class="st">&quot;GenomicPlotData&quot;</span>))</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a> <span class="fu">names</span>(queryfiles) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">&quot;clip_bam&quot;</span>, <span class="st">&quot;chip_bam&quot;</span>)</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a> inputfiles <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="fu">system.file</span>(<span class="st">&quot;data&quot;</span>, <span class="st">&quot;test_clip_input_chr19.bam&quot;</span>, <span class="at">package=</span><span class="st">&quot;GenomicPlotData&quot;</span>),</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>                 <span class="fu">system.file</span>(<span class="st">&quot;data&quot;</span>, <span class="st">&quot;test_chip_input_chr19.bam&quot;</span>, <span class="at">package=</span><span class="st">&quot;GenomicPlotData&quot;</span>))</span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a> <span class="fu">names</span>(inputfiles) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">&quot;clip_input&quot;</span>, <span class="st">&quot;chip_input&quot;</span>)</span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a> handleInputParams <span class="ot">&lt;-</span> <span class="fu">list</span>(<span class="at">CLIP_reads=</span><span class="cn">FALSE</span>, <span class="at">fix_width=</span><span class="dv">150</span>, <span class="at">fix_point=</span><span class="st">&quot;start&quot;</span>, <span class="at">norm=</span><span class="cn">TRUE</span>, <span class="at">useScore=</span><span class="cn">FALSE</span>,</span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>                           <span class="at">outRle=</span><span class="cn">TRUE</span>, <span class="at">useSizeFactor=</span><span class="cn">TRUE</span>, <span class="at">genome=</span><span class="st">&quot;hg19&quot;</span>)</span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a> <span class="fu">plot_reference_locus</span>(queryfiles, centerfiles, <span class="at">ext=</span><span class="fu">c</span>(<span class="sc">-</span><span class="dv">500</span>,<span class="dv">500</span>), <span class="at">hl=</span><span class="fu">c</span>(<span class="sc">-</span><span class="dv">100</span>,<span class="dv">100</span>), <span class="at">shade=</span><span class="cn">TRUE</span>, <span class="at">smooth=</span><span class="cn">TRUE</span>,</span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>                     <span class="at">handleInputParams=</span>handleInputParams, <span class="at">binsize=</span><span class="dv">10</span>, <span class="at">refPoint=</span><span class="st">&quot;center&quot;</span>, <span class="at">Xlab=</span><span class="st">&quot;Center&quot;</span>,</span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>                     <span class="at">inputfiles=</span>inputfiles, <span class="at">stranded=</span><span class="cn">TRUE</span>, <span class="at">scale=</span><span class="cn">FALSE</span>, <span class="at">outPrefix=</span><span class="cn">NULL</span>, <span class="at">verbose=</span><span class="cn">FALSE</span>,</span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a>                     <span class="at">transform=</span><span class="cn">FALSE</span>, <span class="at">rmOutlier=</span><span class="cn">FALSE</span>, <span class="at">stats.method=</span><span class="st">&quot;wilcox.test&quot;</span>, <span class="at">heatmap=</span><span class="cn">TRUE</span>, <span class="at">nc=</span><span class="dv">5</span>)</span></code></pre></div>
+</div>
+<div id="plot-reference-loci-with-random-sites-as-contrast" class="section level2">
+<h2>Plot reference loci with random sites as contrast</h2>
+<p>Random sites that deviate from the reference loci within a specified
+maximum distance can be treated as a control, and the statistical tests
+will be performed between bona fide and the random sites. Here the
+reference sites located in different genomic features (5’UTR, CDS,
+3’UTR) can tested separately.</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>txdb <span class="ot">&lt;-</span> AnnotationDbi<span class="sc">::</span><span class="fu">loadDb</span>(<span class="fu">system.file</span>(<span class="st">&quot;data&quot;</span>, <span class="st">&quot;txdb_chr19.sql&quot;</span>, <span class="at">package=</span><span class="st">&quot;GenomicPlotData&quot;</span>))</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a> centerfiles <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="fu">system.file</span>(<span class="st">&quot;data&quot;</span>, <span class="st">&quot;test_clip_peak_chr19.bed&quot;</span>, <span class="at">package=</span><span class="st">&quot;GenomicPlotData&quot;</span>))</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a> <span class="fu">names</span>(centerfiles) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">&quot;clip_peak&quot;</span>)</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a> queryfiles <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="fu">system.file</span>(<span class="st">&quot;data&quot;</span>, <span class="st">&quot;test_clip_chr19.bam&quot;</span>, <span class="at">package=</span><span class="st">&quot;GenomicPlotData&quot;</span>))</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a> <span class="fu">names</span>(queryfiles) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">&quot;clip_bam&quot;</span>)</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a> inputfiles <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="fu">system.file</span>(<span class="st">&quot;data&quot;</span>, <span class="st">&quot;test_clip_input_chr19.bam&quot;</span>, <span class="at">package=</span><span class="st">&quot;GenomicPlotData&quot;</span>))</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a> <span class="fu">names</span>(inputfiles) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">&quot;clip_input&quot;</span>)</span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>handleInputParams <span class="ot">&lt;-</span> <span class="fu">list</span>(<span class="at">CLIP_reads=</span><span class="cn">FALSE</span>, <span class="at">fix_width=</span><span class="dv">150</span>, <span class="at">fix_point=</span><span class="st">&quot;start&quot;</span>, <span class="at">norm=</span><span class="cn">TRUE</span>, <span class="at">useScore=</span><span class="cn">FALSE</span>,</span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>                          <span class="at">outRle=</span><span class="cn">TRUE</span>, <span class="at">useSizeFactor=</span><span class="cn">TRUE</span>, <span class="at">genome=</span><span class="st">&quot;hg19&quot;</span>)</span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a><span class="fu">plot_reference_locus_with_random</span>(queryfiles, centerfiles, txdb, <span class="at">ext=</span><span class="fu">c</span>(<span class="sc">-</span><span class="dv">500</span>,<span class="dv">500</span>), <span class="at">hl=</span><span class="fu">c</span>(<span class="sc">-</span><span class="dv">100</span>,<span class="dv">100</span>), </span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>                                 <span class="at">shade=</span><span class="cn">TRUE</span>, <span class="at">handleInputParams=</span>handleInputParams, <span class="at">binsize=</span><span class="dv">10</span>, </span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>                                 <span class="at">refPoint=</span><span class="st">&quot;center&quot;</span>, <span class="at">Xlab=</span><span class="st">&quot;Center&quot;</span>, <span class="at">smooth=</span><span class="cn">TRUE</span>,<span class="at">inputfiles=</span>inputfiles, </span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a>                                 <span class="at">stranded=</span><span class="cn">TRUE</span>, <span class="at">scale=</span><span class="cn">FALSE</span>, <span class="at">outPrefix=</span><span class="cn">NULL</span>, <span class="at">verbose=</span><span class="cn">FALSE</span>, </span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a>                                 <span class="at">transform=</span><span class="cn">FALSE</span>, <span class="at">rmOutlier=</span><span class="cn">FALSE</span>, <span class="at">n_random=</span><span class="dv">1</span>, <span class="at">stats.method=</span><span class="st">&quot;wilcox.test&quot;</span>, </span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a>                                 <span class="at">nc=</span><span class="dv">5</span>)</span></code></pre></div>
+</div>
+<div id="plot-peak-annotation-statistics" class="section level2">
+<h2>Plot peak annotation statistics</h2>
+<p>Aside from reads coverage profiles, distribution of binding peaks in
+different gene types and genomic features is also important. Peak
+annotation statistics are plotted as bar chart for distribution in gene
+types, and as pie charts for distribution in genomic features. The pie
+charts are plotted in two different ways: either as percentage of
+absolute counts or as percentage of feature length-normalized counts in
+each features. For DNA binding samples, the features, in order of
+precedence, include “Promoter”, “TTS”, “5’UTR”, “CDS”, “3’UTR” and
+“Intron”; for RNA binding samples, “Promoter” and “TTS” are excluded.
+“Promoter” is defined as regions 2000 bp upstream of transcription start
+site (TSS), “TTS” is defined as the region 1000 bp downstream
+transcription termination sites by default, but these lengths can be
+adjusted.</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">suppressPackageStartupMessages</span>(<span class="fu">library</span>(GenomicPlot, <span class="at">quietly=</span><span class="cn">TRUE</span>))</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>gtffile <span class="ot">&lt;-</span> <span class="fu">system.file</span>(<span class="st">&quot;data&quot;</span>, <span class="st">&quot;gencode.v19.annotation_chr19.gtf&quot;</span>, <span class="at">package=</span><span class="st">&quot;GenomicPlotData&quot;</span>)</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>centerfile <span class="ot">&lt;-</span> <span class="fu">system.file</span>(<span class="st">&quot;data&quot;</span>, <span class="st">&quot;test_chip_peak.narrowPeak&quot;</span>, <span class="at">package=</span><span class="st">&quot;GenomicPlotData&quot;</span>)</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(centerfile) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">&quot;narrowPeak&quot;</span>)</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>handleBedparams <span class="ot">&lt;-</span> <span class="fu">list</span>(<span class="at">fix_width=</span><span class="dv">0</span>, <span class="at">fix_point=</span><span class="st">&quot;center&quot;</span>, <span class="at">useScore=</span><span class="cn">FALSE</span>, <span class="at">outRle=</span><span class="cn">FALSE</span>, <span class="at">CLIP_reads=</span><span class="cn">FALSE</span>,</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>                        <span class="at">norm=</span><span class="cn">FALSE</span>, <span class="at">useSizeFactor=</span><span class="cn">FALSE</span>, <span class="at">genome=</span><span class="st">&quot;hg19&quot;</span>)</span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>pa <span class="ot">&lt;-</span> <span class="fu">plot_peak_annotation</span>(<span class="at">peakfile=</span>centerfile, <span class="at">gtfFile=</span>gtffile, <span class="at">handleInputParams=</span>handleBedparams, </span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>                           <span class="at">fiveP=</span><span class="dv">2000</span>, <span class="at">threeP=</span><span class="dv">1000</span>, <span class="at">simple=</span><span class="cn">FALSE</span>, <span class="at">RNA=</span><span class="cn">FALSE</span>, <span class="at">verbose=</span><span class="cn">TRUE</span>, </span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>                           <span class="at">outPrefix=</span><span class="cn">NULL</span>)</span></code></pre></div>
 </div>
 
 
