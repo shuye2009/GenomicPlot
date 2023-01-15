@@ -44,13 +44,18 @@ extract_longest_tx <- function(txdb, plot=FALSE){
    summary(longest_cdstxid)
    head(longest_cdstxid)
 
-   npc <- tl[tl$cds_len == 0, ]  ## npc stands for non-protein-coding
+   npc <- tl %>% 
+      filter(!gene_id %in% longest_cdstxid$gene_id) ## npc stands for non-protein-coding
+   
    ## choose tx with longest length for each gene
    longest_npc <- aggregate(npc$tx_len, list(npc$gene_id), max)
    colnames(longest_npc) <- c("gene_id", "tx_len")
    tx_longest <- merge(npc, longest_npc)
+   tx_longest_id <- aggregate(tx_longest$tx_id, list(tx_longest$gene_id, tx_longest$tx_len), min)
+   colnames(tx_longest_id) <- c("gene_id", "tx_len", "tx_id")
+   tx_longestid <- merge(tx_longest, tx_longest_id)
 
-   longest_txid <- rbind(longest_cdstxid[, colnames(tl)], tx_longest[, colnames(tl)])
+   longest_txid <- rbind(longest_cdstxid[, colnames(tl)], tx_longestid[, colnames(tl)])
 
    if(plot){
 
@@ -444,4 +449,144 @@ prepare_5parts_genomic_features <- function(txdb, meta=TRUE, nbins=100, fiveP=10
    print(vapply(windowRs, length, numeric(1)))
 
    invisible(list("windowRs"=windowRs, "nbins"=nbins, "scaled_bins"=scaled_bins, "fiveP"=fiveP, "threeP"=threeP, "meta"=meta, "longest"=longest))
+}
+
+#' @title Get genomic coordinates of features of protein-coding genes
+#
+#' @description Get genomic coordinates of promoter, 5'UTR, CDS, 3'UTR, TTS and intron for the longest transcript of protein-coding genes. The range of promoter is defined by fiveP and dsTSS upstream and downstream TSS, respectively, the TTS ranges from the 3' end of the gene to threeP downstream.
+#'
+#' @param txdb a TxDb object defined in the GenomicFeatures package
+#' @param fiveP extension upstream of the 5' boundary of genes
+#' @param threeP extension downstream of the 3' boundary of genes
+#' @param dsTSS range of promoter extending downstream of TSS
+#'
+#' @return a GRangesList object
+#' @author Shuye Pu
+#'
+#' @examples
+#' txdb <- AnnotationDbi::loadDb(system.file("data", "txdb_chr19.sql", package="GenomicPlotData"))
+#'
+#' f <- get_txdb_features(txdb, dsTSS=100, fiveP=1000, threeP=1000)
+#'
+#' @export get_txdb_features
+#'
+get_txdb_features <- function(txdb, fiveP=1000, dsTSS=300, threeP=1000){
+   
+   utr5 <- get_genomic_feature_coordinates(txdb, "utr5", longest=TRUE, protein_coding=TRUE)
+   utr3 <- get_genomic_feature_coordinates(txdb, "utr3", longest=TRUE, protein_coding=TRUE)
+   cds <- get_genomic_feature_coordinates(txdb, "cds", longest=TRUE, protein_coding=TRUE)
+   intron <- get_genomic_feature_coordinates(txdb, "intron", longest=TRUE, protein_coding=TRUE)
+   
+   gene <- get_genomic_feature_coordinates(txdb, "transcript", longest=TRUE, protein_coding=TRUE)$GRanges
+   
+   promoter <- GenomicRanges::promoters(gene, upstream=fiveP, downstream=dsTSS, use.names=TRUE)
+   TTS <- GenomicRanges::flank(gene, width=threeP, both=FALSE, start=FALSE, ignore.strand=FALSE)
+   
+   features <- GRangesList("Promoter"=promoter,
+                           "TTS"=TTS,
+                           "5'UTR"=unlist(utr5$GRangesList, use.names=TRUE),
+                           "3'UTR"=unlist(utr3$GRangesList, use.names=TRUE),
+                           "CDS"=unlist(cds$GRangesList, use.names=TRUE),
+                           "Intron"=unlist(intron$GRangesList, use.names=TRUE),
+                           compress=FALSE)
+   tx <- transcripts(txdb)
+   txmap <- tx$tx_name
+   names(txmap) <- tx$tx_id
+   
+   for(aname in names(features)){
+      f <- features[[aname]]
+      mcols(f) <- NULL
+      f$tx_name <- txmap[names(f)]
+      features[[aname]] <- f
+   }
+   
+   invisible(features)
+}
+
+#' @title Get the number of peaks overlapping each feature of all protein-coding genes.
+#
+#' @description Annotate each peak with genomic features based on overlap, and produce summary statistics for distribution of peaks in features of protein-coding genes.
+#'
+#' @param peak a GRanges object defining query ranges
+#' @param features a GRangesList object representing genomic features
+#' @param stranded logical, indicating whether the overlap should be strand-specific
+#'
+#' @return a list object
+#' @author Shuye Pu
+#'
+#' @examples
+#' txdb <- AnnotationDbi::loadDb(system.file("data", "txdb_chr19.sql", package="GenomicPlotData"))
+#'
+#' f <- get_txdb_features(txdb, dsTSS=100, fiveP=1000, threeP=1000)
+#' p <- RCAS::importBed(system.file("data", "test_chip_peak_chr19.bed", package="GenomicPlotData"))
+#' 
+#' ann <- get_targeted_genes(peak=p, features=f, stranded=FALSE)
+#' 
+#' pp <- RCAS::importBed(system.file("data", "test_clip_peak_chr19.bed", package="GenomicPlotData"))
+#' ann <- get_targeted_genes(peak=pp, features=f, stranded=TRUE)
+#'
+#' @export get_targeted_genes
+
+get_targeted_genes <- function(peak, features, stranded=TRUE){
+   
+   num_peaks <- length(peak)
+   num_genes <- length(unique(features$Promoter$tx_name))
+   
+   annot_list <- lapply(names(features), function(feature){
+      featureGr <- features[[feature]]
+      featureOverlaps <- findOverlaps(peak, featureGr, ignore.strand=!stranded)
+      peak_df <- gr2df(peak[featureOverlaps@from])
+      if(is.null(peak_df$strand)) peak_df$strand <- rep("*", nrow(peak_df))
+      peak_df <- peak_df %>%
+         mutate(chrPeak=as.character(chr),
+                startPeak=as.integer(start)-1,
+                endPeak=as.integer(end),
+                idPeak=as.character(id),
+                widthPeak=as.integer(width),
+                strandPeak=as.character(strand),
+                .keep="unused")
+      feature_df <- featureGr[featureOverlaps@to]
+      names(feature_df) <- seq_along(feature_df)
+      feature_df <- gr2df(feature_df) %>%
+         mutate(chrfeature=as.character(chr),
+                startfeature=as.integer(start)-1,
+                endfeature=as.integer(end),
+                widthfeature=as.integer(width),
+                strandfeature=as.character(strand),
+                .keep="unused")
+      
+      ot <- cbind(peak_df, feature_df) %>%
+         select(chrPeak, startPeak, endPeak, idPeak, widthPeak, strandPeak, chrfeature, startfeature, endfeature, widthfeature, strandfeature, tx_name) %>%
+         mutate(feature_name=feature)
+      return(ot)
+   })
+   
+   annot_table <- bind_rows(annot_list)
+   
+   annot_count <- as.data.frame(annot_table %>%
+      group_by(tx_name) %>%
+      count(feature_name))
+   
+   overlap_genes <- length(unique(annot_table$tx_name))
+   overlap_peaks <- length(unique(annot_table$idPeak))
+   
+   
+   annot_df <- data.frame(tx_name=unique(features$Promoter$tx_name), Promoter=0, `5'UTR`=0, CDS=0, `3'UTR`=0, TTS=0, Intron=0) %>% rename("5'UTR" = "X5.UTR", "3'UTR" = "X3.UTR")
+   rownames(annot_df) <- annot_df$tx_name
+   
+   system.time(
+   for(i in 1:nrow(annot_count)){
+      txi <- annot_count[i,1]
+      fn <- annot_count[i,2]
+      count <- annot_count[i,3]
+      annot_df[txi, fn] <- count
+   })
+   
+   annot_df <- annot_df %>%
+      mutate(Exon = `5'UTR` + CDS + `3'UTR`) %>%
+      mutate(Transcript = Intron + Exon)
+   
+   feature_counts <- apply(annot_df[, c("Promoter", "5'UTR", "CDS", "3'UTR", "TTS", "Intron", "Exon", "Transcript")], 2, sum)
+   
+   invisible(list(gene_table=annot_df, peak_table=annot_table, num_peak=num_peaks, num_gene=num_genes, feature_count=feature_counts, overlap_peak=overlap_peaks, overlap_gene=overlap_genes))
 }

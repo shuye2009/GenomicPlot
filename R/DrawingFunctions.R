@@ -35,8 +35,8 @@ draw_matrix_heatmap <- function(fullmatrix, dataName="geneData", labels_col=NULL
    }
 
    if(verbose){
-      dataName <- gsub(":", "_", dataName, fixed=TRUE)
-      write.table(fullmatrix, paste(dataName, "_matrix.tab", sep=""), row.names=FALSE, sep="\t", quote=FALSE)
+      vdataName <- gsub(":", "_", dataName, fixed=TRUE)
+      write.table(fullmatrix, paste(vdataName, "_matrix.tab", sep=""), row.names=FALSE, sep="\t", quote=FALSE)
    }
 
    if(is.null(labels_col)){
@@ -62,7 +62,7 @@ draw_matrix_heatmap <- function(fullmatrix, dataName="geneData", labels_col=NULL
    }
 
    h <- Heatmap(fullmatrix,
-                name = dataName,
+                name = unlist(strsplit(dataName, split=":", fixed=TRUE))[1],
                 col = colorRamp2(ranges, viridis(2)),
                 bottom_annotation = ha,
                 heatmap_legend_param=list(legend_direction = "horizontal"),
@@ -242,7 +242,7 @@ draw_locus_profile <- function(plot_df, xc="Position", yc="Intensity", cn="Query
       geom_vline(xintercept = 0, linetype="dotted", color = "blue", size=0.5) +
       geom_ribbon(aes(ymin=lower, ymax=upper, fill=.data[[cn]]), linetype=0, alpha=0.3) +
       theme_classic() + xlab(Xlab) + ylab(Ylab) +
-      theme(legend.position="top",
+      theme(legend.position="top", legend.title=element_blank(),
             axis.title.x = element_text(face="bold", size=10),
             axis.title.y = element_text(face="bold", size=10)) +
       ggtitle(unique(plot_df[[sn]]))
@@ -270,20 +270,20 @@ draw_locus_profile <- function(plot_df, xc="Position", yc="Intensity", cn="Query
 #' @export draw_boxplot_logy
 #'
 
-draw_boxplot_logy <- function(stat_df, xc="Feature", yc="Intensity", comp=list(c(1,2)), stats="wilcox.test", Ylab="Signal Intensity", logy=FALSE){
+draw_boxplot_logy <- function(stat_df, xc="Feature", yc="Intensity", comp=list(c(1,2)), stats="wilcox.test", Xlab=xc, Ylab=yc, logy=FALSE){
    p <- ggplot(stat_df, aes(x=.data[[xc]], y=.data[[yc]], fill=.data[[xc]])) +
       scale_fill_npg() +
       scale_color_npg() +
       geom_boxplot(notch=FALSE) +
       theme_classic() +
-      theme(axis.text.x = element_text(face="bold", size=10, color="black"),
-            axis.title.x = element_blank(),
-            axis.title.y = element_text(face="bold", size=10),
+      theme(axis.text = element_text(face="plain", size=20, color="black"),
+            #axis.title.x = element_blank(),
+            axis.title = element_text(face="bold", size=20, color="black"),
             legend.position = "none") +
-      labs(y=Ylab) +
-      geom_signif(comparisons = comp, test=stats, map_signif_level=TRUE, step_increase = 0.1)
+      labs(y=Ylab, x=Xlab) +
+      geom_signif(comparisons = comp, test=stats, map_signif_level=FALSE, step_increase = 0.1)
    if(logy)(
-      p <- p + scale_y_continuous(trans='log2', labels = scales::scientific) +
+      p <- p + scale_y_continuous(trans='log10', labels = scales::scientific) +
          ggtitle("log scale")
    )else{
       p <- p + ggtitle("linear scale")
@@ -302,14 +302,33 @@ draw_boxplot_logy <- function(stat_df, xc="Feature", yc="Intensity", comp=list(c
 #'
 #' @return a ggplot object
 #' @export draw_boxplot_wo_outlier
-#'
-draw_boxplot_wo_outlier <- function(stat_df, xc="Feature", yc="Intensity", Ylab="Signal Intensity"){
+#' @examples 
+#' stat_df <- data.frame(Feature=rep(c("A", "B"), c(20, 30)), Intensity=rlnorm(50))
+#' p <- draw_boxplot_wo_outlier(stat_df, xc="Feature", yc="Intensity", Ylab="Signal Intensity")
+#' p
+#' 
+draw_boxplot_wo_outlier <- function(stat_df, xc="Feature", yc="Intensity", Xlab=xc, Ylab=yc){
    fomu <- as.formula(paste(yc, "~", xc))
-   list2env(list(plot_data=stat_df, fm=fomu, x=xc, Yl=Ylab), envir=.GlobalEnv)
-   p <- as.grob(~boxplot(fm, data=plot_data, ylab=Yl, outline=FALSE,
-                         col=ggsci::pal_npg("nrc")(length(levels(plot_data[[x]]))), xlab="",
-                         main="without outliers"))
-   rm(list=c("plot_data", "fm", "x", "Yl"), envir=.GlobalEnv)
+   bp <- boxplot(fomu, stat_df, plot=FALSE)
+   lim <- c(min(bp$stats)*0.9, max(bp$stats)*1.1)
+   p <- ggplot(stat_df, aes(x=.data[[xc]], y=.data[[yc]], fill=.data[[xc]])) +
+      scale_fill_npg() +
+      scale_color_npg() +
+      geom_boxplot(notch=FALSE, outlier.shape = NA) +
+      theme_classic() +
+      theme(axis.text = element_text(face="plain", size=20, color="black"),
+            #axis.title.x = element_blank(),
+            axis.title = element_text(face="bold", size=20, color="black", vjust=0.25),
+            legend.position = "none") +
+      labs(y=Ylab, x=Xlab) + 
+      coord_cartesian(ylim=lim) +
+      ggtitle("without outliers")
+   
+   #list2env(list(plot_data=stat_df, fm=fomu, x=xc, Yl=Ylab), envir=.GlobalEnv)
+   #p <- as.grob(~boxplot(fm, data=plot_data, ylab=Yl, outline=FALSE,
+   #                      col=ggsci::pal_npg("nrc")(length(levels(plot_data[[x]]))), xlab="",
+   #                      main="without outliers"))
+   #rm(list=c("plot_data", "fm", "x", "Yl"), envir=.GlobalEnv)
    return(p)
 }
 
@@ -328,7 +347,7 @@ draw_boxplot_wo_outlier <- function(stat_df, xc="Feature", yc="Intensity", Ylab=
 #' @export draw_mean_se_barplot
 #'
 
-draw_mean_se_barplot <- function(stat_df, xc="Feature", yc="Intensity", Ylab="Signal Intensity"){
+draw_mean_se_barplot <- function(stat_df, xc="Feature", yc="Intensity", Xlab=xc, Ylab=yc){
 
    means_se <- stat_df %>%
       group_by(.data[[xc]]) %>%
@@ -339,33 +358,33 @@ draw_mean_se_barplot <- function(stat_df, xc="Feature", yc="Intensity", Ylab="Si
                 upper_limit=mean_Intensity+se,
                 lower_limit=mean_Intensity-se
       )
-      means_se <- means_se %>%
-         mutate(label=paste("n =", N_Intensity)) %>%
-         mutate(labelx=paste(.data[[xc]], "\n", label)) ## now .data is means_se, not stat_df anymore
-      levels(means_se[[xc]]) <- levels(stat_df[[xc]])
+   means_se <- means_se %>%
+      mutate(label=paste("n =", N_Intensity)) %>%
+      mutate(labelx=paste(.data[[xc]], "\n", label)) ## now .data is means_se, not stat_df anymore
+   levels(means_se[[xc]]) <- levels(stat_df[[xc]])
 
-   p <- ggplot(means_se, aes(x=labelx, y=mean_Intensity, fill=.data[[xc]])) +
+   p <- ggplot(means_se, aes(x=.data[[xc]], y=mean_Intensity, fill=.data[[xc]])) +
       scale_fill_npg() + scale_color_npg() +
       geom_col(stat="identity") +
       geom_errorbar(aes(ymin=lower_limit, ymax=upper_limit), position=position_dodge(width = 0.2), width=0.2) +
       theme_classic() +
-      theme(axis.title.x = element_blank(),
-            axis.title.y = element_text(face="bold", size=10),
-            axis.text.x = element_text(face="bold", size=10, color="black"),
+      theme(axis.title = element_text(face="bold", size=20, color="black", vjust=0.25),
+            axis.text = element_text(face="plain", size=20, color="black"),
             legend.position = "none") +
-      labs(y=Ylab) +
+      labs(y=Ylab, x=Xlab) +
       ggtitle("Mean + SE")
 
    return(p)
 }
 
 #' @title Plot cumulative sum over rank
-#' @description Plot cumulative sum over rank as line plot, both cumulative sum and rand are scaled between 0 and 1. This is the same as the fingerprint plot of the deepTools.
+#' @description Plot cumulative sum over rank as line plot, both cumulative sum and rank are scaled between 0 and 1. This is the same as the fingerprint plot of the deepTools.
 #'
 #' @param stat_df a dataframe with column names c(xc, yc)
 #' @param xc a string denoting column name for grouping
 #' @param yc a string denoting column name for numeric data to be plotted
 #' @param Ylab a string for y-axis label
+#' @param ecdf logical, indicating using quantile instead of cumulative sum (when yc has many negative values)
 #'
 #' @return a ggplot object
 #' @note used by \code{plot_reference_locus}, \code{plot_reference_locus_with_random}
@@ -373,21 +392,52 @@ draw_mean_se_barplot <- function(stat_df, xc="Feature", yc="Intensity", Ylab="Si
 #'
 #' @export draw_rank_plot
 #'
-draw_rank_plot <- function(stat_df, xc="Feature", yc="Intensity", Ylab="Signal Intensity"){
-
-   long_df <- stat_df %>%
-      group_by(.data[[xc]]) %>%
-      arrange(.data[[yc]]) %>%
-      mutate(cumCount=cumsum(.data[[yc]])) %>%
-      mutate(Rank=order(cumCount)) %>%
-      mutate(Fraction=cumCount/max(cumCount), Rank=Rank/max(Rank))
-
-   p <- ggplot(data=long_df, aes(x=Rank, y=Fraction, color=.data[[xc]])) +
-      scale_color_npg() +
-      geom_line() +
-      theme_classic() +
-      ggtitle(paste("Cumulative", Ylab)) +
-      labs(x=paste0("Rank (",Ylab,")"), y=paste0("Fraction (", Ylab, ")"))
+#' @examples 
+#' stat_df <- data.frame(Feature=rep(c("A", "B"), c(20, 30)), Intensity=rlnorm(50))
+#' stat_df1 <- data.frame(Feature=rep(c("A", "B"), c(20, 30)), Intensity=rnorm(50))
+#' draw_rank_plot(stat_df, xc="Feature", yc="Intensity", Ylab="Signal Intensity")
+#' draw_rank_plot(stat_df1, xc="Feature", yc="Intensity", Ylab="Signal Intensity")
+#' 
+#' 
+draw_rank_plot <- function(stat_df, xc="Feature", yc="Intensity", Ylab="Signal Intensity", ecdf=FALSE){
+   if(ecdf){
+      long_df <- stat_df %>%
+         group_by(.data[[xc]]) %>%
+         arrange(.data[[yc]]) %>%
+         mutate(Rank=rank(.data[[yc]])) %>%
+         mutate(Fraction=ecdf(.data[[yc]])(.data[[yc]]), Rank=Rank/max(Rank))
+      
+      p <- ggplot(data=long_df, aes(x=.data[[yc]], y=Fraction, color=.data[[xc]])) +
+         scale_color_npg() +
+         geom_line(size=2) +
+         labs(x=Ylab, y="Cumulative fraction") +
+         theme_classic() +
+         theme(legend.position="top", 
+               legend.title=element_blank(),
+               axis.text=element_text(angle=0, size=20, vjust=0),
+               axis.title=element_text(face="bold", color="black", size=20, vjust=0.25) 
+               ) +
+         ggtitle(paste("Cumulative fraction of ", yc))
+   }else{
+      long_df <- stat_df %>%
+         group_by(.data[[xc]]) %>%
+         arrange(.data[[yc]]) %>%
+         mutate(cumCount=cumsum(.data[[yc]])) %>%
+         mutate(Rank=rank(cumCount)) %>%
+         mutate(Fraction=cumCount/max(cumCount), Rank=Rank/max(Rank))
+      
+      p <- ggplot(data=long_df, aes(x=Rank, y=Fraction, color=.data[[xc]])) +
+         scale_color_npg() +
+         geom_line(size=2) +
+         labs(x=paste0("Rank (",Ylab,")"), y=paste0("Fraction (", Ylab, ")")) +
+         theme_classic() +
+         theme(legend.position="top", 
+               legend.title=element_blank(),
+               axis.text=element_text(angle=0, size=20, vjust=0),
+               axis.title=element_text(face="bold", color="black", size=20, vjust=0.25)
+               ) +
+         ggtitle(paste("Cumulative", Ylab))  
+   }
 
    return(p)
 }

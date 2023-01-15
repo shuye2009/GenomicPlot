@@ -2763,11 +2763,11 @@ plot_peak_annotation <- function(peakfile, gtfFile, handleInputParams=NULL, five
   handleInputParams$outRle=FALSE
   bedin <- handle_input(inputFiles=peakfile, handleInputParams)
   peak <- bedin[[peakfile]]$query
+  
+  suppressWarnings(suppressMessages(txdb <- makeTxDbFromGFF(gtfFile)))
 
   if(simple){
       ## the 5'UTR and 3'UTR are not annotted
-     suppressWarnings(suppressMessages(txdb <- makeTxDbFromGFF(gtfFile)))
-    
     exon <- get_genomic_feature_coordinates(txdb, "exon", longest=FALSE)
     intron <- get_genomic_feature_coordinates(txdb, "intron", longest=FALSE)
     gene <- get_genomic_feature_coordinates(txdb, "gene", longest=FALSE)$GRanges
@@ -2855,8 +2855,8 @@ plot_peak_annotation <- function(peakfile, gtfFile, handleInputParams=NULL, five
 
     print("Collecting gene info")
 
-     suppressWarnings(suppressMessages({gff <- importGtf(saveObjectAsRds = TRUE, filePath = gtfFile);
-                     overlaps <- gr2df(queryGff(queryRegions=peak, gffData=gff))}))
+    suppressWarnings(suppressMessages({gff <- RCAS::importGtf(saveObjectAsRds = TRUE, filePath = gtfFile);
+                     overlaps <- gr2df(RCAS::queryGff(queryRegions=peak, gffData=gff))}))
     geneType <- NULL
     if("gene_type" %in% colnames(overlaps)){
        geneType <- "gene_type"
@@ -2866,43 +2866,15 @@ plot_peak_annotation <- function(peakfile, gtfFile, handleInputParams=NULL, five
     if(is.null(geneType)){
        stop("The annotation gtf file must have a field 'gene_type' or 'gene_biotype'")
     }
-    gene_info_table <- unique(overlaps[, c("transcript_id", "gene_id", "gene_name", geneType)])
-
-    ## get targeted genes table,
-    ## beware that utr5, utr3 and cds in txdbFeatures DO contain introns
-
-    suppressWarnings(txdbFeatures <- getTxdbFeaturesFromGRanges(gff))
-    wide <- txdbFeatures$promoters ## original -2000TSS200
-    resized <- resize(wide, width=200, fix="end", use.names=TRUE, ignore.strand=FALSE) ## take 200nt of the 3' end
-    narrow <- promoters(resized, upstream=fiveP, downstream=0, use.names=TRUE) ## modified -fivePTSS0
-    txdbFeatures$promoters <- narrow
-
-    dt <- getTargetedGenesTable(queryRegions = peak, txdbFeatures = txdbFeatures)
-
-    dt_gene <- unique(left_join(dt, gene_info_table, by=c("tx_name" = "transcript_id"))) %>%
-       filter(.data[[geneType]] == "protein_coding")
-    dim(dt_gene)
-    head(dt_gene)
-    tail(dt_gene)
-
-    ## filter based on peak type, for ChIPseq peak, only output genes targeted in promoters,
-    ## for CLIPseq peaks only output genes targeted in transcripts(5'UTR, CDS, 3'UTR, intron)
-    if(any(c("*", ".", "") %in% as.vector(strand(peak)))){
-       dt_gene <- dt_gene %>%
-          filter(promoters > 0) %>%
-          arrange(desc(promoters))
-    }else{
-       dt_gene <- dt_gene %>%
-          filter(transcripts > 0) %>%
-          arrange(desc(transcripts))
-    }
-
-    if(verbose) write.table(dt_gene, paste(peaklabel, "_targeted_annotated_gene.tab", sep=""), sep="\t", row.names=FALSE, quote=FALSE)
+    gene_info_table <- gr2df(gff) %>% 
+       filter(type == "transcript") %>%
+       select(chr, start, end, id, strand, transcript_id, gene_id, gene_name, all_of(geneType))
 
     # To find out the distribution of the query regions across gene types:
     print("Computing barchart of gene types")
 
     df <- overlaps %>%
+       filter(type == "gene") %>%
        group_by(.data[[geneType]]) %>%
        summarize(count=dplyr::n_distinct(queryIndex)) %>%
        rename_with(~ c("feature", "count"))
@@ -2941,48 +2913,45 @@ plot_peak_annotation <- function(peakfile, gtfFile, handleInputParams=NULL, five
       theme(axis.text.x = element_text(angle = 90), plot.title = element_text(hjust=0.5),
             plot.subtitle=element_text(hjust=0.5))
 
+    
+    ## get targeted genes table
+    
+    features <- get_txdb_features(txdb) # utr5, utr3 and cds here do not contain introns
+    dt <- get_targeted_genes(peak, features, stranded=RNA)
+
+    dt_gene <- left_join(dt$gene_table, gene_info_table, by=c("tx_name" = "transcript_id"))
+    
+    dim(dt_gene)
+    head(dt_gene)
+    tail(dt_gene)
+    
+    ## filter based on peak type, for ChIPseq peak, only output genes targeted in promoters,
+    ## for CLIPseq peaks only output genes targeted in transcripts(5'UTR, CDS, 3'UTR, intron)
+    if(any(c("*", ".", "") %in% as.vector(strand(peak)))){
+       dt_gene <- dt_gene %>%
+          #filter(Promoter > 0) %>%
+          arrange(desc(Promoter))
+    }else{
+       dt_gene <- dt_gene %>%
+          #filter(Transcript > 0) %>%
+          arrange(desc(Transcript))
+    }
+    
+    if(verbose) write.table(dt_gene, paste(peaklabel, "_targeted_annotated_gene.tab", sep=""), sep="\t", row.names=FALSE, quote=FALSE)
 
     # Plotting overlap counts between query regions and transcript features
     # here utr5, utr3 and cds do not contain introns
 
-    print("Computing annotation")
-    protein_coding_gff <- gff[mcols(gff)[[geneType]] == "protein_coding",]
-    suppressWarnings(ptxdb <- makeTxDbFromGRanges(protein_coding_gff))
-
-    utr5 <- get_genomic_feature_coordinates(ptxdb, "utr5", longest=TRUE)
-    utr3 <- get_genomic_feature_coordinates(ptxdb, "utr3", longest=TRUE)
-    cds <- get_genomic_feature_coordinates(ptxdb, "cds", longest=TRUE)
-    intron <- get_genomic_feature_coordinates(ptxdb, "intron", longest=TRUE)
-
-    if(RNA){
-      features <- GRangesList("5'UTR"=unlist(utr5$GRangesList, use.names=FALSE),
-                              "3'UTR"=unlist(utr3$GRangesList, use.names=FALSE),
-                              "CDS"=unlist(cds$GRangesList, use.names=FALSE),
-                              "Intron"=intron$GRanges,
-                              compress=FALSE)
-      suppressWarnings(annot <- annotateWithFeatures(peak, features, strand.aware=TRUE, intersect.chr=FALSE))
-      lengths <- vapply(features, FUN=function(x)sum(width(x)), FUN.VALUE=numeric(1))
-    }else{
-       gene <- get_genomic_feature_coordinates(ptxdb, "gene", longest=TRUE)$GRanges
-       promoter <- promoters(gene, upstream=fiveP, downstream=300, use.names=FALSE)
-       names(promoter) <- NULL
-       TTS <- flank(gene, width=threeP, both=FALSE, start=FALSE, ignore.strand=FALSE)
-       names(TTS) <- NULL
-
-      features <- GRangesList("Promoter"=promoter,
-                               "TTS"=TTS,
-                               "5'UTR"=unlist(utr5$GRangesList, use.names=FALSE),
-                               "3'UTR"=unlist(utr3$GRangesList, use.names=FALSE),
-                               "CDS"=unlist(cds$GRangesList, use.names=FALSE),
-                               "Intron"=intron$GRanges,
-                               compress=FALSE)
-      suppressWarnings(annot <- annotateWithFeatures(peak, features, strand.aware=FALSE, intersect.chr=FALSE))
-      lengths <- vapply(features, FUN=function(x)sum(width(x)), FUN.VALUE=numeric(1))
-    }
-
     print("Annotation stats:")
-    print(annot)
-    precedence_c <- annot@num.precedence
+    lengths <- vapply(features, FUN=function(x)sum(width(x)), FUN.VALUE=numeric(1))
+    feature_counts <- dt$feature_count
+    
+    if(RNA){
+       precedence_c <- feature_counts[c("5'UTR", "CDS", "3'UTR", "Intron")]
+    }else{
+       precedence_c <- feature_counts[c("Promoter", "5'UTR", "CDS", "3'UTR", "TTS", "Intron")]  
+    }
+   
     lengths <- lengths[names(precedence_c)]
 
     print("plot piechart")
@@ -2990,11 +2959,11 @@ plot_peak_annotation <- function(peakfile, gtfFile, handleInputParams=NULL, five
     dfa <- data.frame(count=precedence_c,len=lengths) %>%
       mutate(feature = rownames(.)) %>%
       mutate(percent = count / sum(count)) %>%
-      mutate(labels = percent(percent, accuracy = 0.1)) %>%
+      mutate(labels = scales::percent(percent, accuracy = 0.1)) %>%
       mutate(percent = round(percent*100, digits=1)) %>%
       mutate(norm_count=round(count*1000/len, digits=3)) %>%
       mutate(norm_percent = norm_count / sum(norm_count)) %>%
-      mutate(norm_labels = percent(norm_percent, accuracy = 0.1)) %>%
+      mutate(norm_labels = scales::percent(norm_percent, accuracy = 0.1)) %>%
       mutate(norm_percent = round(norm_percent*100, digits=1)) %>%
       mutate(feature = forcats::fct_inorder(feature))
 
@@ -3037,11 +3006,11 @@ plot_peak_annotation <- function(peakfile, gtfFile, handleInputParams=NULL, five
       mutate(feature = rownames(.)) %>%
       filter(!feature %in% c("Intron", "NoFeature")) %>%
       mutate(percent = count / sum(count)) %>%
-      mutate(labels = percent(percent, accuracy = 0.1)) %>%
+      mutate(labels = scales::percent(percent, accuracy = 0.1)) %>%
       mutate(percent = round(percent*100, digits=1))%>%
       mutate(norm_count=round(count*1000/len, digits=3)) %>%
       mutate(norm_percent = norm_count / sum(norm_count)) %>%
-      mutate(norm_labels = percent(norm_percent, accuracy = 0.1)) %>%
+      mutate(norm_labels = scales::percent(norm_percent, accuracy = 0.1)) %>%
       mutate(norm_percent = round(norm_percent*100, digits=1)) %>%
       mutate(feature = forcats::fct_inorder(feature))
 
@@ -3056,7 +3025,7 @@ plot_peak_annotation <- function(peakfile, gtfFile, handleInputParams=NULL, five
     apb1 <- ggplot(dfb, aes(x = "", y = percent, fill = feature)) +
       geom_col(color = "white") +
       scale_y_continuous(breaks = dfb2$pos, labels = dfb2$labels) +
-      guides(fill = guide_legend(title = "Feature", nrow=2)) +
+      guides(fill = guide_legend(title = "Feature")) +
       scale_fill_viridis(discrete=TRUE) +
       coord_polar(theta = "y") +
       theme(axis.ticks = element_blank(),
@@ -3068,7 +3037,7 @@ plot_peak_annotation <- function(peakfile, gtfFile, handleInputParams=NULL, five
     apb2 <- ggplot(dfb, aes(x = "", y = norm_percent, fill = feature)) +
        geom_col(color = "white") +
        scale_y_continuous(breaks = dfb2$norm_pos, labels = dfb2$norm_labels) +
-       guides(fill = guide_legend(title = "Feature", nrow=2)) +
+       guides(fill = guide_legend(title = "Feature")) +
        scale_fill_viridis(discrete=TRUE) +
        coord_polar(theta = "y") +
        theme(axis.ticks = element_blank(),
