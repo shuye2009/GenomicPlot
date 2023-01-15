@@ -202,7 +202,7 @@ handle_bed <- function(inputFile, handleInputParams=NULL){
 
 #' @title Handle files in bam format
 #'
-#' @description This is a function for read NGS reads data in bam format, store the input data in a list of GRanges objects or RleList objects.
+#' @description This is a function for read NGS reads data in bam format, store the input data in a list of GRanges objects or RleList objects. For paired-end reads, only take the second read in a pair, assuming which is the sense read for strand-specific RNAseq.
 #'
 #' @param inputFile a string denoting path to the input file
 #' @param handleInputParams a list of parameters for \code{handle_input}
@@ -219,7 +219,7 @@ handle_bam <- function(inputFile, handleInputParams=NULL){
 
    paired.end <- testPairedEndBam(inputFile)
    if(paired.end){
-      flag <- scanBamFlag(isPaired=TRUE, isProperPair=TRUE, isUnmappedQuery=FALSE, hasUnmappedMate=FALSE)
+      flag <- scanBamFlag(isPaired=TRUE, isProperPair=TRUE, isUnmappedQuery=FALSE, hasUnmappedMate=FALSE, isSecondMateRead=TRUE)  ## assume the second read in a pair is the sense read for strand-specific RNAseq
       param <- ScanBamParam(mapqFilter=10, flag=flag)
       message("Paired end bam file detected!")
    }else{
