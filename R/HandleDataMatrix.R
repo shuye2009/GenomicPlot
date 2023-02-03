@@ -40,6 +40,7 @@ rank_rows <- function(fullmatrix, ranking="Hierarchical"){
 
 inspect_matrix <- function(fullmatrix, verbose=FALSE){
 
+   message("Inspecting matrix")
    size <- nrow(fullmatrix)*ncol(fullmatrix)
    n_infinite <- sum(is.infinite(fullmatrix))
    n_NA <- sum(is.na(fullmatrix))
@@ -68,16 +69,17 @@ inspect_matrix <- function(fullmatrix, verbose=FALSE){
 
 impute_hm <- function(fullmatrix){
 
-   print("Imputing missing values. Matrix quartiles:")
+   message("Imputing missing values. Matrix quartiles:")
    print(quantile(fullmatrix))
 
-   minv <- min(fullmatrix[fullmatrix != 0])
+   #minv <- median(fullmatrix[fullmatrix != 0])
+   minv <- median(apply(fullmatrix, 2, mean))
    halfmin <- ifelse(minv>0, minv/2, minv*2)
    fullmatrix[fullmatrix == 0] <- halfmin ##  to avoid take log of zero and use of pseudo numbers
 
    cat(paste("Imputed value", halfmin, "\n\n"))
 
-   invisible(fullmatrix)
+   return(fullmatrix)
 }
 
 #' @title Preprocess scoreMatrix before plotting
@@ -105,6 +107,8 @@ process_scoreMatrix <- function(fullmatrix, scale=FALSE, rmOutlier=FALSE, transf
    fullmatrix[is.na(fullmatrix)] <- 0
 
    fullmatrix <- impute_hm(fullmatrix)
+   
+   inspect_matrix(fullmatrix, verbose=verbose)
 
    if(transform) {
       if(min(fullmatrix) < 0){
