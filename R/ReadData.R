@@ -160,7 +160,7 @@ effective_size <- function(outlist, outRle, genome="hg19", nc=2){
 
 handle_bed <- function(inputFile, handleInputParams=NULL){
 
-   beddata <- read.delim2(inputFile, header=FALSE)
+   beddata <- read.delim2(inputFile, header=FALSE, comment.char = "#")
 
    nco <- ncol(beddata)
    if(nco > 6){
@@ -185,6 +185,14 @@ handle_bed <- function(inputFile, handleInputParams=NULL){
    ## make input comply with GenomeInfoDb
    seqInfo <- Seqinfo(genome=handleInputParams$genome)
    seqInfo <- keepStandardChromosomes(seqInfo)
+   
+   if(c("chr1") %in% as.vector(seqnames(queryRegions)) && seqnames(seqInfo)[1] == "1"){
+      seqnames(seqInfo) <- paste0("chr", seqnames(seqInfo))
+      seqnames(seqInfo)[25] = "chrM"
+   }else if(c("1") %in% as.vector(seqnames(queryRegions)) && seqnames(seqInfo)[1] == "chr1"){
+      seqnames(seqInfo) <- gsub("chr", "", seqnames(seqInfo))
+      seqnames(seqInfo)[25] = "MT"
+   }  
    queryRegions <- queryRegions[as.vector(seqnames(queryRegions)) %in% seqnames(seqInfo)]
    seqlevels(queryRegions) <- seqlevels(seqInfo)
    seqinfo(queryRegions) <- seqInfo

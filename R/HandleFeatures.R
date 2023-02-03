@@ -372,6 +372,7 @@ prepare_3parts_genomic_features <- function(txdb, featureName="transcript", meta
 #' @param fiveP extension out of the 5' boundary of gene
 #' @param threeP extension out of the 3' boundary of gene
 #' @param longest logical, indicating whether the output should be limited to the longest transcript of each gene
+#' @param subsetTx a vector of transcript ids for subsetting the genome
 #'
 #' @return a named list with the elements c("windowRs", "nbins", "scaled_bins", "fiveP", "threeP", "meta", "longest")
 #' @author Shuye Pu
@@ -384,9 +385,9 @@ prepare_3parts_genomic_features <- function(txdb, featureName="transcript", meta
 #'
 #' @export prepare_5parts_genomic_features
 #'
-prepare_5parts_genomic_features <- function(txdb, meta=TRUE, nbins=100, fiveP=1000, threeP=1000, longest=TRUE){
+prepare_5parts_genomic_features <- function(txdb, meta=TRUE, nbins=100, fiveP=1000, threeP=1000, longest=TRUE, subsetTx=NULL){
    ## prepare transcripts
-
+   
    print("Preparing genomic features ... ")
    five <- -fiveP/1000
    five <- paste0(five, "K")
@@ -431,6 +432,14 @@ prepare_5parts_genomic_features <- function(txdb, meta=TRUE, nbins=100, fiveP=10
       y <- names(len)[which(len >= scaled_bins[x])]
    })
 
+   names(selected_tx) <- names(grls)
+   if(!is.null(subsetTx)){
+      tl <- transcriptLengths(txdb, with.utr5_len = TRUE, with.cds_len = TRUE, with.utr3_len = TRUE)
+      txids <- tl %>%
+         filter(tx_name %in% subsetTx) %>%
+         select(tx_id)
+      selected_tx[["custom"]] <- as.character(txids[,1])
+   }
    selected_tx <- Reduce(intersect, selected_tx)
 
    windowRs <- list(as(split(promoter, as.factor(names(promoter))), "GRangesList")[selected_tx],
@@ -466,7 +475,7 @@ prepare_5parts_genomic_features <- function(txdb, meta=TRUE, nbins=100, fiveP=10
 #' @examples
 #' txdb <- AnnotationDbi::loadDb(system.file("data", "txdb_chr19.sql", package="GenomicPlotData"))
 #'
-#' f <- get_txdb_features(txdb, dsTSS=100, fiveP=1000, threeP=1000)
+#' f <- get_txdb_features(txdb, dsTSS=100, fiveP=0, threeP=0)
 #'
 #' @export get_txdb_features
 #'
@@ -479,16 +488,25 @@ get_txdb_features <- function(txdb, fiveP=1000, dsTSS=300, threeP=1000){
    
    gene <- get_genomic_feature_coordinates(txdb, "transcript", longest=TRUE, protein_coding=TRUE)$GRanges
    
-   promoter <- GenomicRanges::promoters(gene, upstream=fiveP, downstream=dsTSS, use.names=TRUE)
-   TTS <- GenomicRanges::flank(gene, width=threeP, both=FALSE, start=FALSE, ignore.strand=FALSE)
-   
-   features <- GRangesList("Promoter"=promoter,
-                           "TTS"=TTS,
-                           "5'UTR"=unlist(utr5$GRangesList, use.names=TRUE),
+   features <- GRangesList("5'UTR"=unlist(utr5$GRangesList, use.names=TRUE),
                            "3'UTR"=unlist(utr3$GRangesList, use.names=TRUE),
                            "CDS"=unlist(cds$GRangesList, use.names=TRUE),
                            "Intron"=unlist(intron$GRangesList, use.names=TRUE),
                            compress=FALSE)
+   if(fiveP > 0){
+      promoter <- GenomicRanges::promoters(gene, upstream=fiveP, downstream=dsTSS, use.names=TRUE)
+      features[["Promoter"]] <- promoter
+   }else{
+      promoter <- NULL
+   }
+   
+   if(threeP > 0){
+      TTS <- GenomicRanges::flank(gene, width=threeP, both=FALSE, start=FALSE, ignore.strand=FALSE)
+      features[["TTS"]] <- TTS
+   }else{
+      TTS <- NULL
+   }
+   
    tx <- transcripts(txdb)
    txmap <- tx$tx_name
    names(txmap) <- tx$tx_id
@@ -517,7 +535,7 @@ get_txdb_features <- function(txdb, fiveP=1000, dsTSS=300, threeP=1000){
 #' @examples
 #' txdb <- AnnotationDbi::loadDb(system.file("data", "txdb_chr19.sql", package="GenomicPlotData"))
 #'
-#' f <- get_txdb_features(txdb, dsTSS=100, fiveP=1000, threeP=1000)
+#' f <- get_txdb_features(txdb, dsTSS=100, fiveP=0, threeP=1000)
 #' p <- RCAS::importBed(system.file("data", "test_chip_peak_chr19.bed", package="GenomicPlotData"))
 #' 
 #' ann <- get_targeted_genes(peak=p, features=f, stranded=FALSE)
@@ -530,7 +548,7 @@ get_txdb_features <- function(txdb, fiveP=1000, dsTSS=300, threeP=1000){
 get_targeted_genes <- function(peak, features, stranded=TRUE){
    
    num_peaks <- length(peak)
-   num_genes <- length(unique(features$Promoter$tx_name))
+   num_genes <- length(unique(features$CDS$tx_name))
    
    annot_list <- lapply(names(features), function(feature){
       featureGr <- features[[feature]]
@@ -571,7 +589,7 @@ get_targeted_genes <- function(peak, features, stranded=TRUE){
    overlap_peaks <- length(unique(annot_table$idPeak))
    
    
-   annot_df <- data.frame(tx_name=unique(features$Promoter$tx_name), Promoter=0, `5'UTR`=0, CDS=0, `3'UTR`=0, TTS=0, Intron=0) %>% rename("5'UTR" = "X5.UTR", "3'UTR" = "X3.UTR")
+   annot_df <- data.frame(tx_name=unique(features$CDS$tx_name), Promoter=0, `5'UTR`=0, CDS=0, `3'UTR`=0, TTS=0, Intron=0) %>% rename("5'UTR" = "X5.UTR", "3'UTR" = "X3.UTR")
    rownames(annot_df) <- annot_df$tx_name
    
    system.time(
@@ -590,3 +608,53 @@ get_targeted_genes <- function(peak, features, stranded=TRUE){
    
    invisible(list(gene_table=annot_df, peak_table=annot_table, num_peak=num_peaks, num_gene=num_genes, feature_count=feature_counts, overlap_peak=overlap_peaks, overlap_gene=overlap_genes))
 }
+
+#' @title Make TxDb object from a GTF file for a subset of genes.
+#
+#' @description Make a partial TxDb object given a GTF file and a list of gene names in a file or in a character vector.
+#'
+#' @param gtfFfile path to a GTF file
+#' @param geneList path to a line-delimited text file with one gene name on each line, or a character vector of gene names
+#'
+#' @return a TxDb object
+#' @author Shuye Pu
+#' 
+#' @export makeSubTxDbFromGtf
+
+makeSubTxDbFromGtf <- function(gtfFile, geneList, geneCol=1){
+   gff <- RCAS::importGtf(saveObjectAsRds = TRUE, filePath = gtfFile)
+   if(length(geneList == 1)){
+      aList <- read.delim2(geneList, comment.char = "#")
+      geneList <- as.character(aList[, geneCol])
+   }
+   subgff <- gff[gff$gene_name %in% geneList]
+   TxDb <- makeTxDbFromGRanges(subgff)
+   
+   return(TxDb)
+}
+
+#' @title Translate gene names to transcript ids using a GTF file for a subset of genes.
+#
+#' @description Given a list of gene names in a file or in a character vector, turn them into a vector of transcript ids
+#'
+#' @param gtfFfile path to a GTF file
+#' @param geneList path to a line-delimited text file with one gene name on each line, or a character vector of gene names
+#'
+#' @return a vector
+#' @author Shuye Pu
+#' 
+#' @export gene2tx
+
+gene2tx <- function(gtfFile, geneList, geneCol=1){
+   gff <- RCAS::importGtf(saveObjectAsRds = TRUE, filePath = gtfFile)
+   if(length(geneList == 1)){
+      aList <- read.delim2(geneList, comment.char = "#")
+      geneList <- as.character(aList[, geneCol])
+   }
+   subgff <- gff[gff$gene_name %in% geneList]
+   
+   tx <- as.character(unique(subgff$transcript_id))
+   
+   return(tx)
+}
+
