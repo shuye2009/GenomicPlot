@@ -294,7 +294,7 @@ draw_boxplot_logy <- function(stat_df, xc="Feature", yc="Intensity", fc=xc, comp
    
    if(fc == xc){
       p <- ggplot(stat_df, aes(x=.data[[xc]], y=.data[[yc]], fill=.data[[fc]])) +
-         geom_violin(width=1) +
+         geom_violin(width=0.5) +
          geom_boxplot(width=0.2, outlier.shape = outlier.shape) +
          scale_fill_npg() +
          scale_color_npg() +
@@ -317,7 +317,7 @@ draw_boxplot_logy <- function(stat_df, xc="Feature", yc="Intensity", fc=xc, comp
       stat_df <- stat_df %>%
          mutate(x2 = as.integer(interaction(.data[[fc]], .data[[xc]])))
       p <- ggplot(stat_df, aes(x=x2, y=.data[[yc]], group=x2, fill=.data[[fc]])) +
-         geom_violin(width=1) +
+         geom_violin(width=0.5) +
          geom_boxplot(width=0.2, outlier.shape = outlier.shape) +
          scale_fill_npg() +
          scale_color_npg() +
@@ -373,12 +373,13 @@ draw_boxplot_wo_outlier <- function(stat_df, xc="Feature", yc="Intensity", fc=xc
    bp <- boxplot(fomu, stat_df, plot=FALSE)
    lim <- c(min(bp$stats)*0.9, max(bp$stats)*1.1)
    ypos <- rep(max(lim[2]), length(comp))*seq(1, 1+(length(comp)-1)*0.1, 0.1)
-   lim[2] <- max(ypos)*2
+   lim[2] <- max(ypos)*1.2
    
    print(ypos)
    
    if(fc == xc){
       p <- ggplot(stat_df, aes(x=.data[[xc]], y=.data[[yc]], fill=.data[[fc]])) +
+         geom_violin(width=0.5) +
          geom_boxplot(width=0.2, outlier.shape = NA) +
          scale_fill_npg() +
          scale_color_npg() +
@@ -402,6 +403,7 @@ draw_boxplot_wo_outlier <- function(stat_df, xc="Feature", yc="Intensity", fc=xc
       stat_df <- stat_df %>%
          mutate(x2 = as.integer(interaction(.data[[fc]], .data[[xc]])))
       p <- ggplot(stat_df, aes(x=x2, y=.data[[yc]], group=x2, fill=.data[[fc]])) +
+         geom_violin(width=0.5) +
          geom_boxplot(width=0.2, outlier.shape = NA) +
          scale_fill_npg() +
          scale_color_npg() +

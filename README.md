@@ -43,6 +43,8 @@ handleInputParams <- list(CLIP_reads=FALSE, fix_width=150, fix_point="center", n
 
 plot_5parts_metagene(queryfiles, gFeatures=list(metaF=gf), inputfiles=NULL, handleInputParams=handleInputParams,
                      verbose=FALSE, smooth=TRUE, scale=FALSE, stranded=TRUE, outPrefix=op, transform=FALSE, heatmap=TRUE,
-                     rmOutlier=TRUE, nc=5)
+                     rmOutlier=TRUE, nc=4)
 ```
+
+The resulting figure is 'test_plot_5parts_metagene3.pdf'.
 
