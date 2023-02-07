@@ -25,9 +25,11 @@ This is a basic example which shows you how to visualize your ChIP-seq peaks in 
 
 ``` r
 library(GenomicPlot)
+
 ## basic example code
+
 txdb <- AnnotationDbi::loadDb(system.file("data", "txdb_chr19.sql", package="GenomicPlot"))
-gf <- prepare_5parts_genomic_features(txdb, meta=FALSE, nbins=100, fiveP=2000, threeP=2000, longest=TRUE)
+gf <- prepare_5parts_genomic_features(txdb, meta=TRUE, nbins=100, fiveP=1000, threeP=1000, longest=TRUE)
 
 queryfiles <- c(system.file("data", "test_chip_peak_chr19.narrowPeak", package="GenomicPlot"),
                 system.file("data", "test_chip_peak_chr19.bed", package="GenomicPlot"),
@@ -39,7 +41,7 @@ op <- "test_plot_5parts_metagene3"
 handleInputParams <- list(CLIP_reads=FALSE, fix_width=150, fix_point="center", norm=FALSE, useScore=FALSE,
                           outRle=TRUE, useSizeFactor=FALSE, genome="hg19")
 
-plot_5parts_metagene(queryfiles, gFeatures=gf, inputfiles=NULL, handleInputParams=handleInputParams,
+plot_5parts_metagene(queryfiles, gFeatures=list(metaF=gf), inputfiles=NULL, handleInputParams=handleInputParams,
                      verbose=FALSE, smooth=TRUE, scale=FALSE, stranded=TRUE, outPrefix=op, transform=FALSE, heatmap=TRUE,
                      rmOutlier=TRUE, nc=5)
 ```
