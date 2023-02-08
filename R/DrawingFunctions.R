@@ -286,8 +286,8 @@ draw_boxplot_logy <- function(stat_df, xc="Feature", yc="Intensity", fc=xc, comp
    if(logy == "wo"){
       fomu <- as.formula(paste(yc, "~", xc))
       bp <- boxplot(fomu, stat_df, plot=FALSE)
-      lim <- c(min(bp$stats)*0.75, max(bp$stats)*1.1)
-      ypos <- rep(max(lim[2]), length(comp))*seq(1, 1+(length(comp)-1)*0.1, 0.1)
+      lim <- c(min(bp$stats), max(bp$stats) + abs(max(bp$stats))*0.25)
+      ypos <- rep(lim[2], length(comp))*seq(1, 1+(length(comp)-1)*0.1, 0.1)
       lim[2] <- max(ypos)*1.25
       outlier.shape = NA
    }
@@ -371,9 +371,9 @@ draw_boxplot_wo_outlier <- function(stat_df, xc="Feature", yc="Intensity", fc=xc
    xlabs <- paste(levels(as.factor(stat_df[[xc]])),"\n(n=",table(stat_df[[xc]])/nf,")",sep="")
    fomu <- as.formula(paste(yc, "~", xc))
    bp <- boxplot(fomu, stat_df, plot=FALSE)
-   lim <- c(min(bp$stats)*0.9, max(bp$stats)*1.1)
-   ypos <- rep(max(lim[2]), length(comp))*seq(1, 1+(length(comp)-1)*0.1, 0.1)
-   lim[2] <- max(ypos)*1.2
+   lim <- c(min(bp$stats) - abs(min(bp$stats))*0.25, max(bp$stats) + abs(max(bp$stats))*0.25)
+   ypos <- rep(lim[2], length(comp))*seq(1, 1+(length(comp)-1)*0.1, 0.1)
+   lim[2] <- max(ypos)*1.5
    
    print(ypos)
    
@@ -423,11 +423,12 @@ draw_boxplot_wo_outlier <- function(stat_df, xc="Feature", yc="Intensity", fc=xc
    return(p)
 }
 #' @title Plot barplot for mean with standard error bars
-#' @description Plot barplot for mean with standard error bars, no p-value significance levels are displayed
+#' @description Plot barplot for mean with standard error bars, no p-value significance levels are displayed, but ANOVA p-value is provided as tag and TukeyHSD test are displayed as caption.
 #'
 #' @param stat_df a dataframe with column names c(xc, yc)
 #' @param xc a string denoting column name for grouping
 #' @param yc a string denoting column name for numeric data to be plotted
+#' @param comp a list of vectors denoting pair-wise comparisons to be performed between groups
 #' @param Ylab a string for y-axis label
 #'
 #' @return a ggplot object
@@ -437,7 +438,10 @@ draw_boxplot_wo_outlier <- function(stat_df, xc="Feature", yc="Intensity", fc=xc
 #' @export draw_mean_se_barplot
 #'
 
-draw_mean_se_barplot <- function(stat_df, xc="Feature", yc="Intensity", Xlab=xc, Ylab=yc){
+draw_mean_se_barplot <- function(stat_df, xc="Feature", yc="Intensity", comp=list(c(1,2)), Xlab=xc, Ylab=yc){
+   stat_df[[xc]] <- as.factor(stat_df[[xc]])
+   
+   stats <- aov_TukeyHSD(stat_df, xc, yc)
 
    means_se <- stat_df %>%
       group_by(.data[[xc]]) %>%
@@ -461,10 +465,19 @@ draw_mean_se_barplot <- function(stat_df, xc="Feature", yc="Intensity", Xlab=xc,
       theme(axis.title = element_text(face="bold", size=14, color="black", vjust=0.25),
             axis.text = element_text(face="plain", size=16, color="black"),
             legend.position = "none") +
-      labs(y=Ylab, x=Xlab) +
-      ggtitle("Mean + SE")
+      labs(y=Ylab, x=Xlab, caption="post hoc TukeyHSD test") +
+      ggtitle(label="Mean + SE" , subtitle=paste("ANOVA p-value =",format(stats$ANOVA, digits=3)))
+   
+   stats$HSD[,1:3] <- round(stats$HSD[,1:3], digits=3)
+   stats$HSD[,4] <- format(stats$HSD[,4], digits=3)
+   
+   comp_row <- sapply(comp, function(x){arow <- paste0(levels(stat_df[[xc]])[x[2]], "-", levels(stat_df[[xc]])[x[1]])})
+   
+   ptable <- ggtexttable(stats$HSD[comp_row,])
+   
+   outp <- cowplot::plot_grid(p, ptable, ncol=1, rel_heights = c(3,1))
 
-   return(p)
+   return(outp)
 }
 
 #' @title Plot cumulative sum or quantile over rank
@@ -530,7 +543,7 @@ draw_rank_plot <- function(stat_df, xc="Feature", yc="Intensity", Ylab="Signal I
             ) +
             ggtitle(paste("Cumulative fraction of ", Ylab))
          
-         if(max(stat_df[[yc]])/quantile(stat_df[[yc]], 0.9) > 10 ){
+         if(max(stat_df[[yc]])/quantile(stat_df[[yc]], 0.9) > 100 ){
             p <- p + coord_cartesian(xlim=quantile(stat_df[[yc]], c(0, 0.9)))
          }
       }
@@ -555,7 +568,7 @@ draw_rank_plot <- function(stat_df, xc="Feature", yc="Intensity", Ylab="Signal I
             ) +
             ggtitle(paste("Cumulative sum fraction of", Ylab)) 
          
-         if(max(stat_df[[yc]])/quantile(stat_df[[yc]], 0.9) > 10 ){
+         if(max(stat_df[[yc]])/quantile(stat_df[[yc]], 0.9) > 100 ){
             p <- p + coord_cartesian(xlim=c(0.9, 1))
          }
       }else{
@@ -571,7 +584,7 @@ draw_rank_plot <- function(stat_df, xc="Feature", yc="Intensity", Ylab="Signal I
             ) +
             ggtitle(paste("Cumulative sum fraction of", Ylab))
          
-         if(max(stat_df[[yc]])/quantile(stat_df[[yc]], 0.9) > 10 ){
+         if(max(stat_df[[yc]])/quantile(stat_df[[yc]], 0.9) > 100 ){
             p <- p + coord_cartesian(xlim=quantile(stat_df[[yc]], c(0.9, 1)))
          }
       }

@@ -27,7 +27,7 @@ prepare_5parts_genomic_features(
 
 \item{longest}{logical, indicating whether the output should be limited to the longest transcript of each gene}
 
-\item{subsetTx}{a vector of transcript ids for subsetting the genome}
+\item{subsetTx}{a vector of transcript ids for subseting the genome}
 }
 \value{
 a named list with the elements c("windowRs", "nbins", "scaled_bins", "fiveP", "threeP", "meta", "longest")

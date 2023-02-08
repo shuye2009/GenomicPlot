@@ -8,6 +8,7 @@ draw_mean_se_barplot(
   stat_df,
   xc = "Feature",
   yc = "Intensity",
+  comp = list(c(1, 2)),
   Xlab = xc,
   Ylab = yc
 )
@@ -19,13 +20,15 @@ draw_mean_se_barplot(
 
 \item{yc}{a string denoting column name for numeric data to be plotted}
 
+\item{comp}{a list of vectors denoting pair-wise comparisons to be performed between groups}
+
 \item{Ylab}{a string for y-axis label}
 }
 \value{
 a ggplot object
 }
 \description{
-Plot barplot for mean with standard error bars, no p-value significance levels are displayed
+Plot barplot for mean with standard error bars, no p-value significance levels are displayed, but ANOVA p-value is provided as tag and TukeyHSD test are displayed as caption.
 }
 \note{
 used by \code{plot_reference_locus}, \code{plot_reference_locus_with_random}
