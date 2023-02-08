@@ -202,7 +202,7 @@ rm_outlier <- function(fullmatrix, verbose=FALSE, multiplier=1000){
 #' @param op output prefix for statistical analysis results
 #' @param verbose logical, to indicate whether a file should be produced to save the test results
 #'
-#' @return a list of two matrices, the first is the summary of ANOVA test and the second is the output of TukeyHSD tests
+#' @return a list of two elements, the first is the p-value of ANOVA test and the second is a matrix of the output of TukeyHSD tests
 #' @author Shuye Pu
 #'
 #' @note used in \code{plot_reference_locus}
@@ -215,12 +215,13 @@ aov_TukeyHSD <- function(df, xc="Group", yc="Intensity", op=NULL, verbose=FALSE)
    formu <- as.formula(paste(yc, "~", xc))
    res.aov <- aov(formu, data = df)
    s <- summary(res.aov)
+   p <-  s[[1]][1, "Pr(>F)"]
    print(s) ## anova summary
    cat("\nPost hoc Tukey Honest Significant Differences test\n")
    v <- TukeyHSD(res.aov, which = xc)
    print(v)
    if(verbose) sink()
-   invisible(list("ANOVA"=s, "HSD"=v[[xc]]))
+   invisible(list("ANOVA"=p, "HSD"=v[[xc]]))
 }
 
 #' @title Convert GRanges to dataframe

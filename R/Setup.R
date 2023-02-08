@@ -12,7 +12,8 @@
 #' @importFrom GenomicAlignments readGAlignments
 #' @importFrom GenomeInfoDb Seqinfo seqinfo seqlevels seqnames seqinfo<- seqlevels<- seqnames<-
 #' @importFrom rtracklayer export.bed import.bw wigToBigWig asBED
-#' @importFrom RCAS importGtf queryGff getTxdbFeaturesFromGRanges getTargetedGenesTable
+#' @importFrom RCAS importGtf queryGff
+#' @importFrom ggpubr ggtexttable
 #' @importFrom ggplotify as.grob
 #' @importFrom ggsci pal_npg scale_color_npg scale_fill_npg
 #' @importFrom ggsignif geom_signif

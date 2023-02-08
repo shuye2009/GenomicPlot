@@ -372,7 +372,7 @@ prepare_3parts_genomic_features <- function(txdb, featureName="transcript", meta
 #' @param fiveP extension out of the 5' boundary of gene
 #' @param threeP extension out of the 3' boundary of gene
 #' @param longest logical, indicating whether the output should be limited to the longest transcript of each gene
-#' @param subsetTx a vector of transcript ids for subsetting the genome
+#' @param subsetTx a vector of transcript ids for subseting the genome
 #'
 #' @return a named list with the elements c("windowRs", "nbins", "scaled_bins", "fiveP", "threeP", "meta", "longest")
 #' @author Shuye Pu
@@ -647,7 +647,7 @@ makeSubTxDbFromGtf <- function(gtfFile, geneList, geneCol=1){
 
 gene2tx <- function(gtfFile, geneList, geneCol=1){
    gff <- RCAS::importGtf(saveObjectAsRds = TRUE, filePath = gtfFile)
-   if(length(geneList == 1)){
+   if(length(geneList) == 1){
       aList <- read.delim2(geneList, comment.char = "#")
       geneList <- as.character(aList[, geneCol])
    }
