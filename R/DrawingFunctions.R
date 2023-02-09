@@ -388,7 +388,7 @@ draw_boxplot_wo_outlier <- function(stat_df, xc="Feature", yc="Intensity", fc=xc
                axis.title = element_text(face="bold", size=16, color="black"),
                legend.position = "bottom") +
          labs(y=Ylab, x=Xlab) +
-         geom_signif(comparisons=comp, test=stats, map_signif_level=TRUE, y_position=ypos, tip_length=0.03) +
+         geom_signif(comparisons=comp, test=stats, map_signif_level=TRUE, y_position=ypos, tip_length=(lim[2]-lim[1])*0.03) +
          coord_cartesian(ylim=lim) +
          scale_x_discrete(labels = xlabs) 
       
@@ -412,7 +412,7 @@ draw_boxplot_wo_outlier <- function(stat_df, xc="Feature", yc="Intensity", fc=xc
                axis.title = element_text(face="bold", size=16, color="black"),
                legend.position = "bottom") +
          labs(y=Ylab, x=Xlab) +
-         geom_signif(comparisons=comp, test=stats, map_signif_level=TRUE, y_position=ypos, tip_length=0) +
+         geom_signif(comparisons=comp, test=stats, map_signif_level=TRUE, y_position=ypos, tip_length=(lim[2]-lim[1])*0.03) +
          scale_x_continuous(breaks = mid(sort(unique(stat_df$x2))), labels = xlabs) +
          coord_cartesian(ylim=lim) 
          

@@ -589,7 +589,8 @@ get_targeted_genes <- function(peak, features, stranded=TRUE){
    overlap_peaks <- length(unique(annot_table$idPeak))
    
    
-   annot_df <- data.frame(tx_name=unique(features$CDS$tx_name), Promoter=0, `5'UTR`=0, CDS=0, `3'UTR`=0, TTS=0, Intron=0) %>% rename("5'UTR" = "X5.UTR", "3'UTR" = "X3.UTR")
+   annot_df <- data.frame(tx_name=unique(features$CDS$tx_name), Promoter=0, `5'UTR`=0, CDS=0, `3'UTR`=0, TTS=0, Intron=0)
+   colnames(annot_df) <- c("tx_name", "Promoter", "5'UTR", "CDS", "3'UTR", "TTS", "Intron")
    rownames(annot_df) <- annot_df$tx_name
    
    system.time(
