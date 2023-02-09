@@ -11,8 +11,8 @@ cl <- start_parallel(5L)
 stop_parallel(cl)
 
 ## extract_longest_tx ####
-#gtffile <- "C:/GREENBLATT/Rscripts/GenomicPlotData/data/gencode.v19.annotation_chr19.gtf"
-#txdb_chr19 <-  makeTxDbFromGFF(gtffile)
+gtffile <- "C:/GREENBLATT/Rscripts/GenomicPlotData/data/gencode.v19.annotation_chr19.gtf"
+txdb_chr19 <-  makeTxDbFromGFF(gtffile)
 #AnnotationDbi::saveDb(txdb_chr19, file="C:/GREENBLATT/Rscripts/GenomicPlotData/data/txdb_chr19.sql")
 #txdb_chr19 <- AnnotationDbi::loadDb("C:/GREENBLATT/Rscripts/GenomicPlotData/data/txdb_chr19.sql")
 
