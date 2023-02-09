@@ -9,8 +9,8 @@ draw_rank_plot(
   xc = "Feature",
   yc = "Intensity",
   Ylab = "Signal Intensity",
-  ecdf = FALSE,
-  rank = TRUE
+  ecdf = TRUE,
+  rank = FALSE
 )
 }
 \arguments{

@@ -2331,10 +2331,10 @@ plot_reference_locus_with_random <- function(queryfiles, centerfiles, txdb, ext=
         }else{
           region <- region_list[[regionName]]
           if(any(unique(as.vector(strand(windowRegionsALL))) %in% c("*", ".", ""))){
-             windowRegions <- filter_by_overlaps(windowRegionsALL, region)
+             windowRegions <- plyranges::filter_by_overlaps(windowRegionsALL, region)
              print("the center file is Unstranded")
           }else{
-             windowRegions <- filter_by_overlaps(windowRegionsALL, region)
+             windowRegions <- filter_by_overlaps_stranded(windowRegionsALL, region)
              print("the center file is stranded")
           }
         }
@@ -2445,21 +2445,20 @@ plot_reference_locus_with_random <- function(queryfiles, centerfiles, txdb, ext=
         plot_df <- plot_df %>%  # unify order of factors to get consistent color mapping
            mutate(Query=factor(Query, levels=sort(unique(Query)))) %>%
            mutate(Reference=factor(Reference, levels=sort(unique(Reference))))
-        stat_df <- stat_df %>%  # unify order of factors to get consistent color mapping
-           mutate(Query=factor(Query, levels=sort(unique(Query)))) %>%
-           mutate(Reference=factor(Reference, levels=sort(unique(Reference))))
-
 
         p <- draw_locus_profile(plot_df, cn="Reference", sn="Query", Xlab=Xlab, Ylab=Ylab, shade=shade, hl=hl) +
           ggtitle(paste("Feature:", regionName, "\nReference size:", refsize, "\nSample name:", querylabel))
 
         if(hl[2] > hl[1]){
+           stat_df <- stat_df %>%  # unify order of factors to get consistent color mapping
+              mutate(Query=factor(Query, levels=sort(unique(Query)))) %>%
+              mutate(Reference=factor(Reference, levels=sort(unique(Reference))))
            comp <- list(c(1, 2))
 
-           ps1 <- draw_boxplot_logy(stat_df=stat_df, xc="Reference", yc="Intensity",  comp=comp, stats=stats.method, Ylab=Ylab, logy="linear") + scale_x_discrete(limits=c("Random", centerlabel))
-           ps2 <- draw_boxplot_logy(stat_df=stat_df, xc="Reference", yc="Intensity",  comp=comp, stats=stats.method, Ylab=Ylab, logy="logy") + scale_x_discrete(limits=c("Random", centerlabel))
+           ps1 <- draw_boxplot_logy(stat_df=stat_df, xc="Reference", yc="Intensity",  comp=comp, stats=stats.method, Ylab=Ylab, logy="linear")
+           ps2 <- draw_boxplot_logy(stat_df=stat_df, xc="Reference", yc="Intensity",  comp=comp, stats=stats.method, Ylab=Ylab, logy="logy")
            ps1_wo_outlier <- draw_boxplot_wo_outlier(stat_df=stat_df, xc="Reference", yc="Intensity", comp=comp, stats=stats.method, Ylab=Ylab)
-           ps1_mean_se <- draw_mean_se_barplot(stat_df=stat_df, xc="Reference", yc="Intensity", Ylab=Ylab)
+           ps1_mean_se <- draw_mean_se_barplot(stat_df=stat_df, xc="Reference", yc="Intensity", comp=comp, Ylab=Ylab)
            prank <- draw_rank_plot(stat_df=stat_df, xc="Reference", yc="Intensity", Ylab=Ylab)
 
            comp1 <- plot_grid(p, ps1_mean_se, prank, ncol = 3, rel_widths = c(1,1,1))
@@ -2569,21 +2568,20 @@ plot_reference_locus_with_random <- function(queryfiles, centerfiles, txdb, ext=
           plot_df <- plot_df %>%  # unify order of factors to get consistent color mapping
              mutate(Query=factor(Query, levels=sort(unique(Query)))) %>%
              mutate(Reference=factor(Reference, levels=sort(unique(Reference))))
-          stat_df <- stat_df %>%  # unify order of factors to get consistent color mapping
-             mutate(Query=factor(Query, levels=sort(unique(Query)))) %>%
-             mutate(Reference=factor(Reference, levels=sort(unique(Reference))))
 
           p <- draw_locus_profile(plot_df, cn="Reference", sn="Query", Xlab=Xlab, Ylab=Ylab, shade=shade, hl=hl) +
             ggtitle(paste("Feature:", regionName, "\nReference size:", refsize, "\nSample name:", ratiolabel))
 
           if(hl[2] > hl[1]){
-
+             stat_df <- stat_df %>%  # unify order of factors to get consistent color mapping
+                mutate(Query=factor(Query, levels=sort(unique(Query)))) %>%
+                mutate(Reference=factor(Reference, levels=sort(unique(Reference))))
              comp <- list(c(1, 2))
 
-             ps1 <- draw_boxplot_logy(stat_df=stat_df, xc="Reference", yc="Intensity",  comp=comp, stats=stats.method, Ylab=Ylab, logy="linear") + scale_x_discrete(limits=c("Random", centerlabel))
-             ps2 <- draw_boxplot_logy(stat_df=stat_df, xc="Reference", yc="Intensity",  comp=comp, stats=stats.method, Ylab=Ylab, logy="logy") + scale_x_discrete(limits=c("Random", centerlabel))
+             ps1 <- draw_boxplot_logy(stat_df=stat_df, xc="Reference", yc="Intensity",  comp=comp, stats=stats.method, Ylab=Ylab, logy="linear") 
+             ps2 <- draw_boxplot_logy(stat_df=stat_df, xc="Reference", yc="Intensity",  comp=comp, stats=stats.method, Ylab=Ylab, logy="logy") 
              ps1_wo_outlier <- draw_boxplot_wo_outlier(stat_df=stat_df, xc="Reference", yc="Intensity", comp=comp, stats=stats.method, Ylab=Ylab)
-             ps1_mean_se <- draw_mean_se_barplot(stat_df=stat_df, xc="Reference", yc="Intensity", Ylab=Ylab)
+             ps1_mean_se <- draw_mean_se_barplot(stat_df=stat_df, xc="Reference", yc="Intensity", comp=comp, Ylab=Ylab)
              prank <- draw_rank_plot(stat_df=stat_df, xc="Reference", yc="Intensity", Ylab=Ylab)
 
              comp1 <- plot_grid(p, ps1_mean_se, prank, ncol = 3, rel_widths = c(1,1,1))
