@@ -280,7 +280,7 @@ draw_locus_profile <- function(plot_df, xc="Position", yc="Intensity", cn="Query
 #'
 
 draw_boxplot_logy <- function(stat_df, xc="Feature", yc="Intensity", fc=xc, comp=list(c(1,2)), stats="wilcox.test", Xlab=xc, Ylab=yc, logy="linear", nf=1){
-   xlabs <- paste(levels(as.factor(stat_df[[xc]])),"\n(n=",table(stat_df[[xc]])/nf,")",sep="")
+   xlabs <- paste(levels(as.factor(stat_df[[xc]])),"\n(",table(stat_df[[xc]])/nf,")",sep="")
    ypos <- rep(max(stat_df[[yc]]), length(comp))*seq(1, 1+(length(comp)-1)*0.1, 0.1)
    outlier.shape = 19
    if(logy == "wo"){
@@ -368,18 +368,17 @@ draw_boxplot_logy <- function(stat_df, xc="Feature", yc="Intensity", fc=xc, comp
 #' p
 #' 
 draw_boxplot_wo_outlier <- function(stat_df, xc="Feature", yc="Intensity", fc=xc, comp=list(c(1,2)), stats="wilcox.test", Xlab=xc, Ylab=yc, nf=1){
-   xlabs <- paste(levels(as.factor(stat_df[[xc]])),"\n(n=",table(stat_df[[xc]])/nf,")",sep="")
+   xlabs <- paste(levels(as.factor(stat_df[[xc]])),"\n(",table(stat_df[[xc]])/nf,")",sep="")
    fomu <- as.formula(paste(yc, "~", xc))
    bp <- boxplot(fomu, stat_df, plot=FALSE)
    lim <- c(min(bp$stats) - abs(min(bp$stats))*0.25, max(bp$stats) + abs(max(bp$stats))*0.25)
    ypos <- rep(lim[2], length(comp))*seq(1, 1+(length(comp)-1)*0.1, 0.1)
-   lim[2] <- max(ypos)*1.5
-   
-   print(ypos)
+   lim[2] <- max(ypos)+0.05
+   violin <- FALSE
+   if(max(stat_df[[yc]])/lim[2] < 10) violin <- TRUE
    
    if(fc == xc){
       p <- ggplot(stat_df, aes(x=.data[[xc]], y=.data[[yc]], fill=.data[[fc]])) +
-         geom_violin(width=0.5) +
          geom_boxplot(width=0.2, outlier.shape = NA) +
          scale_fill_npg() +
          scale_color_npg() +
@@ -389,9 +388,10 @@ draw_boxplot_wo_outlier <- function(stat_df, xc="Feature", yc="Intensity", fc=xc
                axis.title = element_text(face="bold", size=16, color="black"),
                legend.position = "bottom") +
          labs(y=Ylab, x=Xlab) +
-         geom_signif(comparisons=comp, test=stats, map_signif_level=TRUE, y_position=ypos, tip_length=0) +
+         geom_signif(comparisons=comp, test=stats, map_signif_level=TRUE, y_position=ypos, tip_length=0.03) +
          coord_cartesian(ylim=lim) +
          scale_x_discrete(labels = xlabs) 
+      
    }else{
       mid <- function(v){
          m <- rep(0, (length(v)/2))
@@ -403,7 +403,6 @@ draw_boxplot_wo_outlier <- function(stat_df, xc="Feature", yc="Intensity", fc=xc
       stat_df <- stat_df %>%
          mutate(x2 = as.integer(interaction(.data[[fc]], .data[[xc]])))
       p <- ggplot(stat_df, aes(x=x2, y=.data[[yc]], group=x2, fill=.data[[fc]])) +
-         geom_violin(width=0.5) +
          geom_boxplot(width=0.2, outlier.shape = NA) +
          scale_fill_npg() +
          scale_color_npg() +
@@ -419,6 +418,7 @@ draw_boxplot_wo_outlier <- function(stat_df, xc="Feature", yc="Intensity", fc=xc
          
    }
    
+   if(violin) p <- p + geom_violin(width=0.5)
       
    return(p)
 }
@@ -453,8 +453,7 @@ draw_mean_se_barplot <- function(stat_df, xc="Feature", yc="Intensity", comp=lis
                 lower_limit=mean_Intensity-se
       )
    means_se <- means_se %>%
-      mutate(label=paste("n =", N_Intensity)) %>%
-      mutate(labelx=paste(.data[[xc]], "\n", label)) ## now .data is means_se, not stat_df anymore
+      mutate(labelx=paste0(.data[[xc]], "\n(", N_Intensity, ")")) ## now .data is means_se, not stat_df anymore
    levels(means_se[[xc]]) <- levels(stat_df[[xc]])
 
    p <- ggplot(means_se, aes(x=.data[[xc]], y=mean_Intensity, fill=.data[[xc]])) +
@@ -466,14 +465,16 @@ draw_mean_se_barplot <- function(stat_df, xc="Feature", yc="Intensity", comp=lis
             axis.text = element_text(face="plain", size=16, color="black"),
             legend.position = "none") +
       labs(y=Ylab, x=Xlab, caption="post hoc TukeyHSD test") +
+      scale_x_discrete(labels = means_se$labelx) +
       ggtitle(label="Mean + SE" , subtitle=paste("ANOVA p-value =",format(stats$ANOVA, digits=3)))
    
    stats$HSD[,1:3] <- round(stats$HSD[,1:3], digits=3)
    stats$HSD[,4] <- format(stats$HSD[,4], digits=3)
    
    comp_row <- sapply(comp, function(x){arow <- paste0(levels(stat_df[[xc]])[x[2]], "-", levels(stat_df[[xc]])[x[1]])})
-   
-   ptable <- ggtexttable(stats$HSD[comp_row,])
+   stats_selected <- as.data.frame(stats$HSD) %>%
+      filter(row.names(stats$HSD) %in% comp_row)
+   ptable <- ggtexttable(stats_selected)
    
    outp <- cowplot::plot_grid(p, ptable, ncol=1, rel_heights = c(3,1))
 
@@ -508,7 +509,7 @@ draw_mean_se_barplot <- function(stat_df, xc="Feature", yc="Intensity", comp=lis
 #' }
 #'
 #' 
-draw_rank_plot <- function(stat_df, xc="Feature", yc="Intensity", Ylab="Signal Intensity", ecdf=FALSE, rank=TRUE){
+draw_rank_plot <- function(stat_df, xc="Feature", yc="Intensity", Ylab="Signal Intensity", ecdf=TRUE, rank=FALSE){
    
    if(ecdf){
       long_df <- stat_df %>%
