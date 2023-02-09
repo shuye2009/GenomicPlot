@@ -4,6 +4,8 @@
 #' @description Method for starting a virtual cluster needed for parallel processing
 #'
 #' @param nc a positive integer greater than 1, denoting number of cores requested
+#' @param verbose logical, whether to output additional information
+#' 
 #' @return an object of class c("SOCKcluster", "cluster"), depending on platform
 #' @author Shuye Pu
 #'
@@ -12,7 +14,7 @@
 #'
 #' @export start_parallel
 #'
-start_parallel <- function(nc=2){
+start_parallel <- function(nc=2, verbose=FALSE){
 
    n.cores <- detectCores()
    fnc <- min(nc, as.integer(n.cores-1))
@@ -22,7 +24,7 @@ start_parallel <- function(nc=2){
           Linux = {my.cluster <- makeCluster(fnc, type = "FORK")}
    )
 
-   #print(paste("Using", fnc, "out of", n.cores, "cores!"))
+   if(verbose) print(paste("Using", fnc, "out of", n.cores, "cores!"))
 
    invisible(my.cluster)
 }

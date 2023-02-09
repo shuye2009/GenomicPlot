@@ -46,7 +46,7 @@ plot_5parts_metagene(queryfiles, gFeatures=list(metaF=gf), inputfiles=NULL, hand
                      
 ```
 
-This example shows you how to visualize your iCLIP_peaks around ChIP-seq peaks, The resulting figure is 'test_plot_reference_locus.pdf'.
+This example shows you how to visualize your iCLIP_peaks around ChIP-seq peaks. The resulting figure is 'test_plot_reference_locus.pdf'.
 
 ``` r
 
@@ -61,7 +61,7 @@ plot_reference_locus(queryfiles=queryfiles[3], centerfiles=queryfiles[1:2], ext=
                      
 ```
 
-This example shows you how to annotate ChIP-seq peaks, The resulting figure is 'test_plot_peak_annotation.pdf', and the detailed annotation is in the table "summitPeak_targeted_annotated_gene.tab".
+This example shows you how to annotate ChIP-seq peaks. The resulting figure is 'test_plot_peak_annotation.pdf', and the detailed annotation is in the table "summitPeak_targeted_annotated_gene.tab".
 
 ``` r
 

@@ -9,6 +9,7 @@ plot_bam_correlation(
   binsize = 1e+06,
   outPrefix = NULL,
   handleInputParams = NULL,
+  verbose = FALSE,
   nc = 2
 )
 }

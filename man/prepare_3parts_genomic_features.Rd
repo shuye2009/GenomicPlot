@@ -12,7 +12,8 @@ prepare_3parts_genomic_features(
   fiveP = 1000,
   threeP = 1000,
   longest = TRUE,
-  protein_coding = TRUE
+  protein_coding = TRUE,
+  verbose = FALSE
 )
 }
 \arguments{
@@ -31,6 +32,8 @@ prepare_3parts_genomic_features(
 \item{longest}{logical, indicating whether the output should be limited to the longest transcript of each gene}
 
 \item{protein_coding}{logical, indicating whether to limit to protein_coding genes}
+
+\item{verbose}{logical, whether to output additional information}
 }
 \value{
 a named list with the elements c("windowRs", "nbins", "scaled_bins", "fiveP", "threeP", "meta", "longest")

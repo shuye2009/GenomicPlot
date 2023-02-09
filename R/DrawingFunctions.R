@@ -59,7 +59,7 @@ draw_matrix_heatmap <- function(fullmatrix, dataName="geneData", labels_col=NULL
 
    ha <- HeatmapAnnotation(df = data.frame(feature = features), col=list(feature=mycols), which="column", show_legend=FALSE, annotation_label = "")
    #y <- matrix(as.vector(fullmatrix), ncol=1)
-   print(quantile(fullmatrix, c(seq(0.9, 1, 0.005)), na.rm=TRUE))
+   if(verbose) print(quantile(fullmatrix, c(seq(0.9, 1, 0.005)), na.rm=TRUE))
    ranges <- quantile(fullmatrix, c(0.025, 0.975), na.rm=TRUE)
    if(ranges[1] == ranges[2]){
       message("97.5% of values are not unique, heatmap may not show signals effectively")
@@ -329,7 +329,6 @@ draw_boxplot_logy <- function(stat_df, xc="Feature", yc="Intensity", fc=xc, comp
          labs(y=Ylab, x=Xlab) +
          geom_signif(comparisons = comp, test=stats, map_signif_level=TRUE, y_position=ypos) +
          scale_x_continuous(breaks = mid(sort(unique(stat_df$x2))), labels = xlabs) 
-         
    }
    
    if(logy == "logy"){
@@ -344,7 +343,6 @@ draw_boxplot_logy <- function(stat_df, xc="Feature", yc="Intensity", fc=xc, comp
       stop("plot type is not supported, use one of c(linear, logy, wo) only")
    }
    
-
    return(p)
 }
 

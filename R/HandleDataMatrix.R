@@ -63,14 +63,18 @@ inspect_matrix <- function(fullmatrix, verbose=FALSE){
 #' @description Replace 0 and missing values in a matrix with half of minimum, to avoid use of arbitrary pseudo numbers
 #' and to allow log transformation
 #' @param fullmatrix a numeric matrix
+#' @param verbose logical, whether to output additional information
+#' 
 #' @return a numeric matrix
 #' @keywords internal
 #'
 
-impute_hm <- function(fullmatrix){
+impute_hm <- function(fullmatrix, verbose=FALSE){
 
-   message("Imputing missing values. Matrix quartiles:")
-   print(quantile(fullmatrix))
+   if(verbose){
+      message("Imputing missing values. Matrix quartiles:")
+      print(quantile(fullmatrix))
+   }
 
    #minv <- median(fullmatrix[fullmatrix != 0])
    minv <- median(apply(fullmatrix, 2, mean))
@@ -169,7 +173,7 @@ rm_outlier <- function(fullmatrix, verbose=FALSE, multiplier=1000){
    percentile <- fn(up_bound)
 
    if(length(which(rowmax > up_bound)) > 0){
-      print("Outlier detected:")
+      if(verbose) print("Outlier detected:")
       outliers <- fullmatrix[fullmatrix>up_bound]
 
       if(verbose){
@@ -216,10 +220,10 @@ aov_TukeyHSD <- function(df, xc="Group", yc="Intensity", op=NULL, verbose=FALSE)
    res.aov <- aov(formu, data = df)
    s <- summary(res.aov)
    p <-  s[[1]][1, "Pr(>F)"]
-   print(s) ## anova summary
+   if(verbose) print(s) ## anova summary
    cat("\nPost hoc Tukey Honest Significant Differences test\n")
    v <- TukeyHSD(res.aov, which = xc)
-   print(v)
+   if(verbose) print(v)
    if(verbose) sink()
    invisible(list("ANOVA"=p, "HSD"=v[[xc]]))
 }
@@ -257,34 +261,4 @@ gr2df <- function(gr){
    return(df)
 }
 
-
-#' @title Rank rows of a matrix based on user input
-#' @description The rows of a input numeric matrix is ordered based row sum, row maximum, or hierarchical clustering of the rows with euclidean
-#' distannce and centroid linkage.
-#'
-#' @param fullmatrix a numeric matrix
-#' @param ranking a string in c("Sum", "Max", "Hierarchical", "None")
-#'
-#' @return a numerical matrix
-#' @author Shuye Pu
-#'
-#' @export rank_rows
-#'
-#'
-
-rank_rows <- function(fullmatrix, ranking="Hierarchical"){
-   fullmatrix <- data.matrix(fullmatrix)
-   if(ranking == "None"){
-      invisible(fullmatrix)
-   }else if(ranking == "Sum"){
-      fullmatrix <- arrange(as.data.frame(fullmatrix), desc(rowSums(fullmatrix)))
-      invisible(data.matrix(fullmatrix))
-   }else if(ranking == "Max"){
-      fullmatrix <- arrange(as.data.frame(fullmatrix), desc(rowMax(fullmatrix)))
-      invisible(data.matrix(fullmatrix))
-   }else{
-      clust <- hclust(dist(fullmatrix, method="euclidean"), method="centroid")
-      invisible(data.matrix(fullmatrix[clust$order,]))
-   }
-}
 
