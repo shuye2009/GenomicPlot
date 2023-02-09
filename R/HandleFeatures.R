@@ -294,6 +294,7 @@ get_genomic_feature_coordinates <- function(txdb, featureName, featureSource=NUL
 #' @param nbins an integer defines the total number of bins
 #' @param fiveP extension out of the 5' boundary of gene
 #' @param threeP extension out of the 3' boundary of gene
+#' @param verbose logical, whether to output additional information
 #' @param longest logical, indicating whether the output should be limited to the longest transcript of each gene
 #' @param protein_coding logical, indicating whether to limit to protein_coding genes
 #'
@@ -308,10 +309,10 @@ get_genomic_feature_coordinates <- function(txdb, featureName, featureSource=NUL
 #'
 #' @export prepare_3parts_genomic_features
 
-prepare_3parts_genomic_features <- function(txdb, featureName="transcript", meta=TRUE, nbins=100, fiveP=1000, threeP=1000, longest=TRUE, protein_coding=TRUE){
+prepare_3parts_genomic_features <- function(txdb, featureName="transcript", meta=TRUE, nbins=100, fiveP=1000, threeP=1000, longest=TRUE, protein_coding=TRUE, verbose=FALSE){
    ## prepare transcripts
 
-   print("Preparing features ...")
+   if(verbose) print("Preparing features ...")
 
    ## prepare transcripts that are suitable for overlap
    if(featureName %in% c("utr5", "cds", "utr3")){
@@ -352,12 +353,12 @@ prepare_3parts_genomic_features <- function(txdb, featureName="transcript", meta
    names(windowRs) <- featureNames
    names(scaled_bins) <- featureNames
 
-   print("median sizes for features")
-   print(means)
-   print("bin sizes for features")
-   print(scaled_bins)
-   print("number of transcripts")
-   print(vapply(windowRs, length, numeric(1)))
+   if(verbose) print("median sizes for features")
+   if(verbose) print(means)
+   if(verbose) print("bin sizes for features")
+   if(verbose) print(scaled_bins)
+   if(verbose) print("number of transcripts")
+   if(verbose) print(vapply(windowRs, length, numeric(1)))
 
    invisible(list("windowRs"=windowRs, "nbins"=nbins, "scaled_bins"=scaled_bins, "fiveP"=fiveP, "threeP"=threeP, "meta"=meta, "longest"=longest))
 }
@@ -371,6 +372,7 @@ prepare_3parts_genomic_features <- function(txdb, featureName="transcript", meta
 #' @param nbins an integer defines the total number of bins
 #' @param fiveP extension out of the 5' boundary of gene
 #' @param threeP extension out of the 3' boundary of gene
+#' @param verbose logical, whether to output additional information
 #' @param longest logical, indicating whether the output should be limited to the longest transcript of each gene
 #' @param subsetTx a vector of transcript ids for subseting the genome
 #'
@@ -385,10 +387,10 @@ prepare_3parts_genomic_features <- function(txdb, featureName="transcript", meta
 #'
 #' @export prepare_5parts_genomic_features
 #'
-prepare_5parts_genomic_features <- function(txdb, meta=TRUE, nbins=100, fiveP=1000, threeP=1000, longest=TRUE, subsetTx=NULL){
+prepare_5parts_genomic_features <- function(txdb, meta=TRUE, nbins=100, fiveP=1000, threeP=1000, longest=TRUE, verbose=FALSE, subsetTx=NULL){
    ## prepare transcripts
    
-   print("Preparing genomic features ... ")
+   if(verbose) print("Preparing genomic features ... ")
    five <- -fiveP/1000
    five <- paste0(five, "K")
    if(fiveP==0) five=""
@@ -450,12 +452,12 @@ prepare_5parts_genomic_features <- function(txdb, meta=TRUE, nbins=100, fiveP=10
 
    names(windowRs) <- featureNames
 
-   print("median sizes for features")
-   print(means)
-   print("bin sizes for features")
-   print(scaled_bins)
-   print("number of transcripts")
-   print(vapply(windowRs, length, numeric(1)))
+   if(verbose) print("median sizes for features")
+   if(verbose) print(means)
+   if(verbose) print("bin sizes for features")
+   if(verbose) print(scaled_bins)
+   if(verbose) print("number of transcripts")
+   if(verbose) print(vapply(windowRs, length, numeric(1)))
 
    invisible(list("windowRs"=windowRs, "nbins"=nbins, "scaled_bins"=scaled_bins, "fiveP"=fiveP, "threeP"=threeP, "meta"=meta, "longest"=longest))
 }

@@ -13,6 +13,7 @@
 #' 'genome' a string denoting the genome name and version.
 #' 'useSizeFactor' logical, indicating whether the library size should be adjusted with a size factor
 #' @param nc integer, number of cores for parallel processing
+#' @param verbose logical, whether to output additional information
 #'
 #' @details when 'useScore' is TRUE, the score column of the bed file will be used in the metadata column 'score' of the GRanges object, or the 'Values' field of the RleList object. Otherwise the value 1 will be used instead. When the intended use of the input bed is a reference feature, both 'useScore' and 'outRle' should be set to FALSE.
 #'
@@ -27,9 +28,9 @@
 #'
 #' @export handle_input
 
-handle_input <- function(inputFiles, handleInputParams=NULL, nc=2){
+handle_input <- function(inputFiles, handleInputParams=NULL, verbose=FALSE, nc=2){
 
-   if(is.null(handleInputParams)) handleInputParams=list(CLIP_reads=FALSE, fix_width=0, fix_point="center", useScore=FALSE, outRle=TRUE, norm=TRUE, useSizeFactor=FALSE, genome="hg19")
+   if(is.null(handleInputParams)) handleInputParams=list(CLIP_reads=FALSE, fix_width=0, fix_point="center", useScore=FALSE, outRle=TRUE, norm=TRUE, useSizeFactor=FALSE, genome="hg19", verbose=FALSE)
 
    original_outRle <- handleInputParams$outRle
    if(handleInputParams$useSizeFactor && length(inputFiles)>1){
@@ -41,19 +42,19 @@ handle_input <- function(inputFiles, handleInputParams=NULL, nc=2){
       namef <- names(inputFiles)[which(inputFiles==inputFile)]
       if(grepl("\\.bed|BED|Bed|narrowPeak$", inputFile)){
          fileType <- "bed"
-         print(paste("Reading", fileType, "file:", namef))
+         if(verbose) print(paste("Reading", fileType, "file:", namef))
          out <- handle_bed(inputFile=inputFile, handleInputParams)
       }else if(grepl("\\.bam|BAM|Bam$", inputFile)){
          fileType <- "bam"
-         print(paste("Reading", fileType, "file:", namef))
+         if(verbose) print(paste("Reading", fileType, "file:", namef))
          out <- handle_bam(inputFile=inputFile, handleInputParams)
       }else if(grepl("\\.wig|WIG|Wig$", inputFile)){
          fileType <- "wig"
-         print(paste("Reading", fileType, "file:", namef))
+         if(verbose) print(paste("Reading", fileType, "file:", namef))
          out <- handle_wig(inputFile=inputFile, handleInputParams)
       }else if(grepl("\\.bw|bigwig|bigWig|BigWig|BW|BIGWIG$", inputFile)){
          fileType <- "bw"
-         print(paste("Reading", fileType, "file:", namef))
+         if(verbose) print(paste("Reading", fileType, "file:", namef))
          out <- handle_bw(inputFile=inputFile, handleInputParams)
       }else{
          stop(paste("The file format of", namef, "is not supported, please convert it to one of the following format:
@@ -96,6 +97,7 @@ handle_input <- function(inputFiles, handleInputParams=NULL, nc=2){
 #' @param outRle logical, indicating whether the output is a list of RleList objects or GRanges objects
 #' @param genome a string denoting the genome name and version
 #' @param nc integer, number of cores for parallel processing
+#' @param verbose logical, whether to output additional information
 #'
 #' @return a list object with four elements ('query', 'size', 'type', 'weight'), with the 'size' element modified.
 #'
@@ -103,8 +105,8 @@ handle_input <- function(inputFiles, handleInputParams=NULL, nc=2){
 #'
 #' @export effective_size
 #'
-effective_size <- function(outlist, outRle, genome="hg19", nc=2){
-   print("Estimating size factor")
+effective_size <- function(outlist, outRle, genome="hg19", nc=2, verbose=FALSE){
+   if(verbose) print("Estimating size factor")
 
    seqi <- Seqinfo(genome=genome)
 
@@ -140,8 +142,8 @@ effective_size <- function(outlist, outRle, genome="hg19", nc=2){
    }
 
    names(normFactor) <- NULL
-   print("Library size normalizing factors:")
-   print(normFactor)
+   if(verbose) print("Library size normalizing factors:")
+   if(verbose) print(normFactor)
    invisible(normlist)
 }
 
@@ -381,7 +383,7 @@ find_mate <- function(inputFile){
       if(length(fch_v) == length(och_v) && sum(fch_v != och_v) == 1){
          mate <- file.path(dirName, afile)
          diff <- base::setdiff(och_v, fch_v)
-         print(diff)
+         if(verbose) print(diff)
       }
    }
    invisible(mate)

@@ -4,10 +4,12 @@
 \alias{start_parallel}
 \title{Prepare for parallel processing}
 \usage{
-start_parallel(nc = 2)
+start_parallel(nc = 2, verbose = FALSE)
 }
 \arguments{
 \item{nc}{a positive integer greater than 1, denoting number of cores requested}
+
+\item{verbose}{logical, whether to output additional information}
 }
 \value{
 an object of class c("SOCKcluster", "cluster"), depending on platform

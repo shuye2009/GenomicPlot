@@ -11,6 +11,7 @@ prepare_5parts_genomic_features(
   fiveP = 1000,
   threeP = 1000,
   longest = TRUE,
+  verbose = FALSE,
   subsetTx = NULL
 )
 }
@@ -26,6 +27,8 @@ prepare_5parts_genomic_features(
 \item{threeP}{extension out of the 3' boundary of gene}
 
 \item{longest}{logical, indicating whether the output should be limited to the longest transcript of each gene}
+
+\item{verbose}{logical, whether to output additional information}
 
 \item{subsetTx}{a vector of transcript ids for subseting the genome}
 }

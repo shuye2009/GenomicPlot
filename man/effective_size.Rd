@@ -4,7 +4,7 @@
 \alias{effective_size}
 \title{Normalize sample library size to effective size}
 \usage{
-effective_size(outlist, outRle, genome = "hg19", nc = 2)
+effective_size(outlist, outRle, genome = "hg19", nc = 2, verbose = FALSE)
 }
 \arguments{
 \item{outlist}{a list object with four elements, 'query' is a list GRanges objects or RleList objects, 'size' is the library size, 'type' is the input file type,
@@ -15,6 +15,8 @@ effective_size(outlist, outRle, genome = "hg19", nc = 2)
 \item{genome}{a string denoting the genome name and version}
 
 \item{nc}{integer, number of cores for parallel processing}
+
+\item{verbose}{logical, whether to output additional information}
 }
 \value{
 a list object with four elements ('query', 'size', 'type', 'weight'), with the 'size' element modified.

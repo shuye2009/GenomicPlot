@@ -4,7 +4,7 @@
 \alias{handle_input}
 \title{Hand input of NGS data with various formats}
 \usage{
-handle_input(inputFiles, handleInputParams = NULL, nc = 2)
+handle_input(inputFiles, handleInputParams = NULL, verbose = FALSE, nc = 2)
 }
 \arguments{
 \item{inputFiles}{a vector of strings denoting file names}
@@ -18,6 +18,8 @@ handle_input(inputFiles, handleInputParams = NULL, nc = 2)
 'norm' logical, indicating whether the output RleList should be normalized to RPM using library sizes.
 'genome' a string denoting the genome name and version.
 'useSizeFactor' logical, indicating whether the library size should be adjusted with a size factor}
+
+\item{verbose}{logical, whether to output additional information}
 
 \item{nc}{integer, number of cores for parallel processing}
 }

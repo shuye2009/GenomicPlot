@@ -5,8 +5,6 @@
 \title{Rank rows of a matrix based on user input}
 \usage{
 rank_rows(fullmatrix, ranking = "Hierarchical")
-
-rank_rows(fullmatrix, ranking = "Hierarchical")
 }
 \arguments{
 \item{fullmatrix}{a numeric matrix}
@@ -15,13 +13,8 @@ rank_rows(fullmatrix, ranking = "Hierarchical")
 }
 \value{
 a numerical matrix
-
-a numerical matrix
 }
 \description{
-The rows of a input numeric matrix is ordered based row sum, row maximum, or hierarchical clustering of the rows with euclidean
-distannce and centroid linkage.
-
 The rows of a input numeric matrix is ordered based row sum, row maximum, or hierarchical clustering of the rows with euclidean
 distannce and centroid linkage.
 }

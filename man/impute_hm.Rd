@@ -4,10 +4,12 @@
 \alias{impute_hm}
 \title{Impute missing values}
 \usage{
-impute_hm(fullmatrix)
+impute_hm(fullmatrix, verbose = FALSE)
 }
 \arguments{
 \item{fullmatrix}{a numeric matrix}
+
+\item{verbose}{logical, whether to output additional information}
 }
 \value{
 a numeric matrix
