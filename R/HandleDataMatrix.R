@@ -214,17 +214,23 @@ rm_outlier <- function(fullmatrix, verbose=FALSE, multiplier=1000){
 #'
 
 aov_TukeyHSD <- function(df, xc="Group", yc="Intensity", op=NULL, verbose=FALSE){
-   if(verbose) sink(file=paste0(op,"_TukeyHSD.txt"), append=TRUE, split=TRUE)
-   cat(paste("Performing one-way ANOVA analysis for", op, "\n"))
+   if(verbose){
+      sink(file=paste0(op,"_TukeyHSD.txt"), append=TRUE, split=TRUE)
+      cat(paste("Performing one-way ANOVA analysis for", op, "\n"))
+   }
    formu <- as.formula(paste(yc, "~", xc))
    res.aov <- aov(formu, data = df)
    s <- summary(res.aov)
    p <-  s[[1]][1, "Pr(>F)"]
-   if(verbose) print(s) ## anova summary
-   cat("\nPost hoc Tukey Honest Significant Differences test\n")
+   if(verbose){
+      print(s) ## anova summary
+      cat("\nPost hoc Tukey Honest Significant Differences test\n")
+   } 
    v <- TukeyHSD(res.aov, which = xc)
-   if(verbose) print(v)
-   if(verbose) sink()
+   if(verbose){
+      print(v)
+      sink()
+   }
    invisible(list("ANOVA"=p, "HSD"=v[[xc]]))
 }
 

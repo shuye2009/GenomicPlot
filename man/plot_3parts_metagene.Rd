@@ -5,9 +5,9 @@
 \title{Plot promoter, gene body and TTS}
 \usage{
 plot_3parts_metagene(
-  queryfiles,
+  queryFiles,
   gFeatures,
-  inputfiles = NULL,
+  inputFiles = NULL,
   scale = FALSE,
   verbose = FALSE,
   handleInputParams = NULL,
@@ -21,11 +21,11 @@ plot_3parts_metagene(
 )
 }
 \arguments{
-\item{queryfiles}{a vector of sample file names. The file should be in .bam, .bed, .wig or .bw format, mixture of formats is allowed}
+\item{queryFiles}{a vector of sample file names. The file should be in .bam, .bed, .wig or .bw format, mixture of formats is allowed}
 
 \item{gFeatures}{genomic features as output of the function 'prepare_3parts_genomic_features'}
 
-\item{inputfiles}{a vector of input sample file names. The file should be in .bam, .bed, .wig or .bw format, mixture of formats is allowed}
+\item{inputFiles}{a vector of input sample file names. The file should be in .bam, .bed, .wig or .bw format, mixture of formats is allowed}
 
 \item{scale}{logical, indicating whether the score matrix should be scaled to the range 0:1, so that samples with different baseline can be compared}
 
@@ -56,9 +56,9 @@ can be given separately, the parameter 'meta' controls if gene or metagene plots
 is computed and displaued as well.
 }
 \examples{
-centerfiles <- c(system.file("data", "test_B.bed", package="GenomicPlotData"),
+centerFiles <- c(system.file("data", "test_B.bed", package="GenomicPlotData"),
 system.file("data", "test_C.bed", package="GenomicPlotData"))
-names(centerfiles) <- c("TestB", "TestC")
+names(centerFiles) <- c("TestB", "TestC")
 
 }
 \author{

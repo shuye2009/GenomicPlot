@@ -5,9 +5,9 @@
 \title{Plot signal inside as well as around custom genomic regions}
 \usage{
 plot_reference_region(
-  queryfiles,
-  centerfiles,
-  inputfiles = NULL,
+  queryFiles,
+  centerFiles,
+  inputFiles = NULL,
   nbins = 100,
   handleInputParams = NULL,
   verbose = FALSE,
@@ -25,11 +25,11 @@ plot_reference_region(
 )
 }
 \arguments{
-\item{queryfiles}{a named vector of sample file names. The file should be in .bam, .bed, .wig or .bw format, mixture of formats is allowed}
+\item{queryFiles}{a named vector of sample file names. The file should be in .bam, .bed, .wig or .bw format, mixture of formats is allowed}
 
-\item{centerfiles}{a named vector of reference file names. The file should be .bed format only}
+\item{centerFiles}{a named vector of reference file names. The file should be .bed format only}
 
-\item{inputfiles}{a named vector of input sample file names. The file should be in .bam, .bed, .wig or .bw format, mixture of formats is allowed}
+\item{inputFiles}{a named vector of input sample file names. The file should be in .bam, .bed, .wig or .bw format, mixture of formats is allowed}
 
 \item{nbins}{an integer defines the total number of bins}
 
@@ -63,13 +63,13 @@ plot_reference_region(
 a dataframe containing the data used for plotting
 }
 \description{
-Plot reads or peak signal intensity of samples in the query files inside regions defined in the centerfiles. The upstream and downstream flanking windows
+Plot reads or peak signal intensity of samples in the query files inside regions defined in the centerFiles. The upstream and downstream flanking windows
 can be given separately. If Input files are provided, ratio over Input is computed and displaued as well.
 }
 \examples{
-centerfiles <- c(system.file("data", "test_B.bed", package="GenomicPlotData"),
+centerFiles <- c(system.file("data", "test_B.bed", package="GenomicPlotData"),
 system.file("data", "test_C.bed", package="GenomicPlotData"))
-names(centerfiles) <- c("TestB", "TestC")
+names(centerFiles) <- c("TestB", "TestC")
 
 }
 \author{

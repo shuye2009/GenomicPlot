@@ -5,9 +5,9 @@
 \title{Plot promoter, 5'UTR, CDS, 3'UTR and TTS}
 \usage{
 plot_5parts_metagene(
-  queryfiles,
+  queryFiles,
   gFeatures_list,
-  inputfiles = NULL,
+  inputFiles = NULL,
   handleInputParams = NULL,
   verbose = FALSE,
   transform = FALSE,
@@ -21,11 +21,11 @@ plot_5parts_metagene(
 )
 }
 \arguments{
-\item{queryfiles}{a vector of sample file names. The file should be in .bam, .bed, .wig or .bw format, mixture of formats is allowed}
+\item{queryFiles}{a vector of sample file names. The file should be in .bam, .bed, .wig or .bw format, mixture of formats is allowed}
 
 \item{gFeatures_list}{a list of genomic features as output of the function 'prepare_5parts_genomic_features'}
 
-\item{inputfiles}{a vector of input sample file names. The file should be in .bam, .bed, .wig or .bw format, mixture of formats is allowed}
+\item{inputFiles}{a vector of input sample file names. The file should be in .bam, .bed, .wig or .bw format, mixture of formats is allowed}
 
 \item{handleInputParams}{a list of parameters for \code{handle_input}}
 
@@ -56,16 +56,16 @@ Plot reads or peak signal intensity of samples in the query files around genes. 
 \examples{
 txdb <- AnnotationDbi::loadDb(system.file("data", "txdb_chr19.sql", package="GenomicPlotData"))
 gf <- prepare_5parts_genomic_features(txdb, meta=FALSE, nbins=100, fiveP=500, threeP=500, longest=TRUE)
-queryfiles <- c(system.file("data", "test_chip_peak_chr19.narrowPeak", package="GenomicPlotData"),
+queryFiles <- c(system.file("data", "test_chip_peak_chr19.narrowPeak", package="GenomicPlotData"),
 system.file("data", "test_chip_peak_chr19.bed", package="GenomicPlotData"),
 system.file("data", "test_clip_peak_chr19.bed", package="GenomicPlotData"))
-names(queryfiles) <- c("narrowPeak", "summitPeak", "iCLIPPeak")
+names(queryFiles) <- c("narrowPeak", "summitPeak", "iCLIPPeak")
 op <- NULL
 
 handleInputParams <- list(CLIP_reads=FALSE, fix_width=150, fix_point="center", norm=FALSE, useScore=FALSE,
                           outRle=TRUE, useSizeFactor=FALSE, genome="hg19")
 
-plot_5parts_metagene(queryfiles, gFeatures=gf, inputfiles=NULL, handleInputParams=handleInputParams,
+plot_5parts_metagene(queryFiles, gFeatures=gf, inputFiles=NULL, handleInputParams=handleInputParams,
                      verbose=FALSE, smooth=TRUE, scale=FALSE, stranded=TRUE, outPrefix=op, transform=FALSE,
                      heatmap =TRUE,  rmOutlier=TRUE, nc=2)
 

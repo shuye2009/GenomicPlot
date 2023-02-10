@@ -66,18 +66,18 @@ extract_longest_tx <- function(txdb, plot=FALSE){
       for(featureName in names(feature_list)){
          feature <- feature_list[[featureName]]
          feature_gr <- unlist(feature)
-         feature_length <- width(feature_gr)
-         length_df <- data.frame(tx=names(feature_gr), feature_length)
+         featureLength <- width(feature_gr)
+         length_df <- data.frame(tx=names(feature_gr), featureLength)
 
-         p1 <- ggplot(length_df, aes(x=feature_length)) +
+         p1 <- ggplot(length_df, aes(x=featureLength)) +
             geom_density() +
             scale_x_log10() +
             stat_ecdf(color="red") +
             scale_y_continuous(name = "Density", sec.axis = sec_axis( trans=~.*1, name="Probability")) +
-            geom_vline(xintercept = c(mean(feature_length), median(feature_length)), linetype="dotted", color = c("brown4", "blue"), size=0.5) +
+            geom_vline(xintercept = c(mean(featureLength), median(featureLength)), linetype="dotted", color = c("brown4", "blue"), size=0.5) +
             annotate(
-               "text", label = round(c(mean(feature_length), median(feature_length))),
-               x = c(mean(feature_length), median(feature_length)), y = c(0, 0.1), size = 6, color = c("brown4", "blue")
+               "text", label = round(c(mean(featureLength), median(featureLength))),
+               x = c(mean(featureLength), median(featureLength)), y = c(0, 0.1), size = 6, color = c("brown4", "blue")
             ) +
             xlab(paste(featureName, "length"))
 
@@ -622,9 +622,9 @@ get_targeted_genes <- function(peak, features, stranded=TRUE){
 #' @return a TxDb object
 #' @author Shuye Pu
 #' 
-#' @export makeSubTxDbFromGtf
+#' @export make_subTxDb_from_GTF
 
-makeSubTxDbFromGtf <- function(gtfFile, geneList, geneCol=1){
+make_subTxDb_from_GTF <- function(gtfFile, geneList, geneCol=1){
    gff <- RCAS::importGtf(saveObjectAsRds = TRUE, filePath = gtfFile)
    if(length(geneList == 1)){
       aList <- read.delim2(geneList, comment.char = "#")

@@ -5,8 +5,8 @@
 \title{Plot signal around custom genomic loci and random loci for comparison}
 \usage{
 plot_reference_locus_with_random(
-  queryfiles,
-  centerfiles,
+  queryFiles,
+  centerFiles,
   txdb,
   ext = c(0, 0),
   hl = c(0, 0),
@@ -15,23 +15,23 @@ plot_reference_locus_with_random(
   verbose = FALSE,
   smooth = FALSE,
   transform = FALSE,
-  binsize = 10,
+  binSize = 10,
   refPoint = "center",
   Xlab = "Center",
-  inputfiles = NULL,
+  inputFiles = NULL,
   stranded = TRUE,
   scale = FALSE,
   outPrefix = NULL,
   rmOutlier = FALSE,
   n_random = 1,
-  stats.method = "wilcox.test",
+  statsMethod = "wilcox.test",
   nc = 2
 )
 }
 \arguments{
-\item{queryfiles}{a vector of sample file names. The file should be in .bam, .bed, .wig or .bw format, mixture of formats is allowed}
+\item{queryFiles}{a vector of sample file names. The file should be in .bam, .bed, .wig or .bw format, mixture of formats is allowed}
 
-\item{centerfiles}{a vector of reference file names. The file should be .bed format only}
+\item{centerFiles}{a vector of reference file names. The file should be .bed format only}
 
 \item{txdb}{a TxDb object defined in the GenomicFeatures package}
 
@@ -49,13 +49,13 @@ plot_reference_locus_with_random(
 
 \item{transform}{logical, whether to log2 transform the data matrix}
 
-\item{binsize}{an integer defines bin size for intensity calculation}
+\item{binSize}{an integer defines bin size for intensity calculation}
 
 \item{refPoint}{a string in c("start", "center", "end")}
 
 \item{Xlab}{a string denotes the label on x-axis}
 
-\item{inputfiles}{a vector of input sample file names. The file should be in .bam, .bed, .wig or .bw format, mixture of formats is allowed}
+\item{inputFiles}{a vector of input sample file names. The file should be in .bam, .bed, .wig or .bw format, mixture of formats is allowed}
 
 \item{stranded}{logical, indicating whether the strand of the feature should be considered}
 
@@ -67,7 +67,7 @@ plot_reference_locus_with_random(
 
 \item{n_random}{an integer denotes the number of randomization should be formed}
 
-\item{stats.method}{a string in c("wilcox.test", "t.test"), for pair-wise groups comparisons}
+\item{statsMethod}{a string in c("wilcox.test", "t.test"), for pair-wise groups comparisons}
 
 \item{nc}{integer, number of cores for parallel processing}
 }
@@ -75,14 +75,14 @@ plot_reference_locus_with_random(
 a dataframe containing the data used for plotting
 }
 \description{
-Plot reads or peak signal intensity of samples in the query files around reference locus defined in the centerfiles. The upstream and downstream windows flanking genes
+Plot reads or peak signal intensity of samples in the query files around reference locus defined in the centerFiles. The upstream and downstream windows flanking genes
 can be given separately, a smaller window can be defined to allow statistical comparisons between reference and random loci.
 }
 \examples{
-queryfiles <- system.file("data", "test_clip.bam", package="GenomicPlotData")
-names(queryfiles) <- "query"
-inputfiles <- system.file("data", "test_clip_input.bam", package="GenomicPlotData")
-names(inputfiles) <- "input"
+queryFiles <- system.file("data", "test_clip.bam", package="GenomicPlotData")
+names(queryFiles) <- "query"
+inputFiles <- system.file("data", "test_clip_input.bam", package="GenomicPlotData")
+names(inputFiles) <- "input"
 
 }
 \author{

@@ -27,15 +27,15 @@ plot_overlap_bed(
 This function takes a list of bed file names, and produce a Venn diagram
 }
 \examples{
-queryfiles <- c(system.file("data", "test_chip_peak_chr19.narrowPeak", package="GenomicPlotData"),
+queryFiles <- c(system.file("data", "test_chip_peak_chr19.narrowPeak", package="GenomicPlotData"),
 system.file("data", "test_chip_peak_chr19.bed", package="GenomicPlotData"),
 system.file("data", "test_clip_peak_chr19.bed", package="GenomicPlotData"))
-names(queryfiles) <- c("narrowPeak", "summitPeak", "iCLIPPeak")
+names(queryFiles) <- c("narrowPeak", "summitPeak", "iCLIPPeak")
 op <- NULL
 handleBedParams <- list(fix_width=100, fix_point="center", useScore=FALSE, outRle=FALSE,
                         CLIP_reads=FALSE, norm=FALSE, useSizeFactor=FALSE, genome="hg19")
 
-plot_overlap_bed(bedList=queryfiles, outPrefix=op, handleInputParams=handleBedParams, pairOnly=FALSE, stranded=FALSE)
+plot_overlap_bed(bedList=queryFiles, outPrefix=op, handleInputParams=handleBedParams, pairOnly=FALSE, stranded=FALSE)
 
 }
 \author{

@@ -2,7 +2,7 @@
 #' @title Display matrix as a heatmap
 #' @description Make a complex heatmap with column annotations
 #'
-#' @param fullmatrix a numeric matrix
+#' @param fullMatrix a numeric matrix
 #' @param dataName the nature of the numeric data
 #' @param labels_col a vector make column annotation
 #' @param levels_col factor levels for labels_col, specifying the order of labels_col
@@ -13,25 +13,25 @@
 #' @author Shuye Pu
 #'
 #' @examples
-#' fullmatrix <- matrix(rnorm(10000), ncol=100)
+#' fullMatrix <- matrix(rnorm(10000), ncol=100)
 #' labels_col <- as.character(seq(1:100))
 #' levels_col <- c("start", "center", "end")
 #' names(labels_col) <- rep(levels_col, c(15, 60, 25))
 #'
-#' draw_matrix_heatmap(fullmatrix, dataName="test", labels_col, levels_col, ranking="Sum")
+#' draw_matrix_heatmap(fullMatrix, dataName="test", labels_col, levels_col, ranking="Sum")
 #'
 #' @export draw_matrix_heatmap
 #'
 #'
 
-draw_matrix_heatmap <- function(fullmatrix, dataName="geneData", labels_col=NULL, levels_col=NULL, ranking="Sum", verbose=FALSE){
+draw_matrix_heatmap <- function(fullMatrix, dataName="geneData", labels_col=NULL, levels_col=NULL, ranking="Sum", verbose=FALSE){
    
    message("drawing heatmap")
-   #inspect_matrix(fullmatrix, verbose)
+   #inspect_matrix(fullMatrix, verbose)
    ## reduce the size by removing rows with all 0s
-   #fullmatrix[is.na(fullmatrix)] <- 0
-   #all0 <- apply(fullmatrix, 1, function(x)all(x == sum(x)/length(x)))
-   #fullmatrix <- data.matrix(fullmatrix[!all0,])
+   #fullMatrix[is.na(fullMatrix)] <- 0
+   #all0 <- apply(fullMatrix, 1, function(x)all(x == sum(x)/length(x)))
+   #fullMatrix <- data.matrix(fullMatrix[!all0,])
    #count_all0_rows <- sum(all0)
    #if(count_all0_rows > 0){
    #   message(count_all0_rows, " all 0 rows are removed!")
@@ -39,17 +39,17 @@ draw_matrix_heatmap <- function(fullmatrix, dataName="geneData", labels_col=NULL
 
    if(verbose){
       vdataName <- gsub(":", "_", dataName, fixed=TRUE)
-      write.table(fullmatrix, paste(vdataName, "_matrix.tab", sep=""), row.names=FALSE, sep="\t", quote=FALSE)
+      write.table(fullMatrix, paste(vdataName, "_matrix.tab", sep=""), row.names=FALSE, sep="\t", quote=FALSE)
    }
 
    if(is.null(labels_col)){
-      labels_col <- seq(1, ncol(fullmatrix))
-      names(labels_col) <- rep("column", ncol(fullmatrix))
+      labels_col <- seq(1, ncol(fullMatrix))
+      names(labels_col) <- rep("column", ncol(fullMatrix))
       levels_col <- "column"
    }
-   colnames(fullmatrix) <- labels_col
+   colnames(fullMatrix) <- labels_col
 
-   fullmatrix <- rank_rows(fullmatrix, ranking)
+   fullMatrix <- rank_rows(fullMatrix, ranking)
 
    features <- factor(names(labels_col), levels=levels_col)
    cols <- ggsci::pal_npg()(length(levels(features)))
@@ -58,17 +58,17 @@ draw_matrix_heatmap <- function(fullmatrix, dataName="geneData", labels_col=NULL
    names(mycols) <- features
 
    ha <- HeatmapAnnotation(df = data.frame(feature = features), col=list(feature=mycols), which="column", show_legend=FALSE, annotation_label = "")
-   #y <- matrix(as.vector(fullmatrix), ncol=1)
-   if(verbose) print(quantile(fullmatrix, c(seq(0.9, 1, 0.005)), na.rm=TRUE))
-   ranges <- quantile(fullmatrix, c(0.025, 0.975), na.rm=TRUE)
+   #y <- matrix(as.vector(fullMatrix), ncol=1)
+   if(verbose) print(quantile(fullMatrix, c(seq(0.9, 1, 0.005)), na.rm=TRUE))
+   ranges <- quantile(fullMatrix, c(0.025, 0.975), na.rm=TRUE)
    if(ranges[1] == ranges[2]){
       message("97.5% of values are not unique, heatmap may not show signals effectively")
       
-      ranges <- quantile(fullmatrix, c(0, 0.995), na.rm=TRUE) ## Need to have a better way for determine the upper bound
+      ranges <- quantile(fullMatrix, c(0, 0.995), na.rm=TRUE) ## Need to have a better way for determine the upper bound
       ranges[2] <- ranges[2]*2
    }
 
-   h <- Heatmap(fullmatrix,
+   h <- Heatmap(fullMatrix,
                 name = unlist(strsplit(dataName, split=":", fixed=TRUE))[1],
                 col = colorRamp2(ranges, viridis(2)),
                 bottom_annotation = ha,
@@ -366,14 +366,13 @@ draw_boxplot_logy <- function(stat_df, xc="Feature", yc="Intensity", fc=xc, comp
 #' p
 #' 
 draw_boxplot_wo_outlier <- function(stat_df, xc="Feature", yc="Intensity", fc=xc, comp=list(c(1,2)), stats="wilcox.test", Xlab=xc, Ylab=yc, nf=1){
+   
    xlabs <- paste(levels(as.factor(stat_df[[xc]])),"\n(",table(stat_df[[xc]])/nf,")",sep="")
    fomu <- as.formula(paste(yc, "~", xc))
    bp <- boxplot(fomu, stat_df, plot=FALSE)
    lim <- c(min(bp$stats) - abs(min(bp$stats))*0.25, max(bp$stats) + abs(max(bp$stats))*0.25)
    ypos <- rep(lim[2], length(comp))*seq(1, 1+(length(comp)-1)*0.1, 0.1)
    lim[2] <- max(ypos)+0.05
-   violin <- FALSE
-   if(max(stat_df[[yc]])/lim[2] < 10) violin <- TRUE
    
    if(fc == xc){
       p <- ggplot(stat_df, aes(x=.data[[xc]], y=.data[[yc]], fill=.data[[fc]])) +
@@ -415,8 +414,6 @@ draw_boxplot_wo_outlier <- function(stat_df, xc="Feature", yc="Intensity", fc=xc
          coord_cartesian(ylim=lim) 
          
    }
-   
-   if(violin) p <- p + geom_violin(width=0.5)
       
    return(p)
 }

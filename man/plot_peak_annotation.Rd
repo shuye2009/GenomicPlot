@@ -5,7 +5,7 @@
 \title{Annotate peaks with genomic features and genes}
 \usage{
 plot_peak_annotation(
-  peakfile,
+  peakFile,
   gtfFile,
   handleInputParams = NULL,
   fiveP = 1000,
@@ -17,7 +17,7 @@ plot_peak_annotation(
 )
 }
 \arguments{
-\item{peakfile}{a string denoting the peak file name, only .bed format is allowed}
+\item{peakFile}{a string denoting the peak file name, only .bed format is allowed}
 
 \item{gtfFile}{path to a gene annotation gtf file with gene_biotype field}
 
@@ -49,13 +49,13 @@ gz <- bfcrpath(bfc, url)
 gtffile <- gsub(".gz", "", gz)
 if(!file.exists(gtffile)) gtffile <- R.utils::gunzip(gz, remove=FALSE)
 
-centerfile <- system.file("data", "test_chip_peak.narrowPeak", package="GenomicPlotData")
-names(centerfile) <- c("narrowPeak")
+centerFile <- system.file("data", "test_chip_peak.narrowPeak", package="GenomicPlotData")
+names(centerFile) <- c("narrowPeak")
 op <- "test_plot_peak_annotation"
 handleBedparams <- list(fix_width=0, fix_point="center", useScore=FALSE, outRle=FALSE, CLIP_reads=FALSE,
                         norm=FALSE, useSizeFactor=FALSE, genome="hg19")
 
-plot_peak_annotation(peakfile=centerfile, gtfFile=gtffile, handleInputParams=handleBedparams, fiveP=0,
+plot_peak_annotation(peakFile=centerFile, gtfFile=gtffile, handleInputParams=handleBedparams, fiveP=0,
                      threeP=0, simple=FALSE)
 
 }
