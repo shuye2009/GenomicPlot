@@ -26,7 +26,7 @@
 
 draw_matrix_heatmap <- function(fullMatrix, dataName="geneData", labels_col=NULL, levels_col=NULL, ranking="Sum", verbose=FALSE){
    
-   message("drawing heatmap")
+   if(verbose) print("drawing heatmap")
    #inspect_matrix(fullMatrix, verbose)
    ## reduce the size by removing rows with all 0s
    #fullMatrix[is.na(fullMatrix)] <- 0

@@ -40,7 +40,7 @@ rank_rows <- function(fullmatrix, ranking="Hierarchical"){
 
 inspect_matrix <- function(fullmatrix, verbose=FALSE){
 
-   message("Inspecting matrix")
+   if(verbose) print("Inspecting matrix")
    size <- nrow(fullmatrix)*ncol(fullmatrix)
    n_infinite <- sum(is.infinite(fullmatrix))
    n_NA <- sum(is.na(fullmatrix))
@@ -81,7 +81,7 @@ impute_hm <- function(fullmatrix, verbose=FALSE){
    halfmin <- ifelse(minv>0, minv/2, minv*2)
    fullmatrix[fullmatrix == 0] <- halfmin ##  to avoid take log of zero and use of pseudo numbers
 
-   cat(paste("Imputed value", halfmin, "\n\n"))
+   if(verbose) print(paste("Imputed value", halfmin, "\n\n"))
 
    return(fullmatrix)
 }

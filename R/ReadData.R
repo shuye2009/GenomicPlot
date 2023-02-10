@@ -166,9 +166,9 @@ handle_bed <- function(inputFile, handleInputParams=NULL){
 
    nco <- ncol(beddata)
    if(nco > 6){
-      message("The input file have more than 6 columns, only the first 6 columns will be used!")
+      message(paste("The input file", inputFile, "have more than 6 columns, only the first 6 columns will be used!"))
    }else if(nco < 6){
-      message(paste("The input file only have", nco, "columns!"))
+      message(paste("The input file", inputFile, "only have", nco, "columns!"))
    }
 
    beddata <- type.convert(beddata[, 1:min(6,nco)], as.is=TRUE)  ## ignore extra columns, which cause problem in import.bed()

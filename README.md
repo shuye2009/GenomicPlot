@@ -37,7 +37,7 @@ names(queryfiles) <- c("Narrow", "Summit", "iCLIP")
 
 op <- "test_plot_5parts_metagene"
 
-handleInputParams <- list(CLIP_reads=FALSE, fix_width=150, fix_point="center", norm=FALSE, useScore=FALSE,
+handleInputParams <- list(CLIP_reads=FALSE, fix_width=100, fix_point="center", norm=TRUE, useScore=FALSE,
                           outRle=TRUE, useSizeFactor=FALSE, genome="hg19")
 
 plot_5parts_metagene(queryFiles=queryfiles, 
@@ -62,7 +62,7 @@ This example shows you how to visualize your iCLIP_peaks around ChIP-seq peaks. 
 
 op <- "test_plot_reference_locus"
 
-handleInputParams <- list(CLIP_reads=FALSE, fix_width=0, fix_point="center", norm=FALSE, useScore=FALSE,
+handleInputParams <- list(CLIP_reads=FALSE, fix_width=0, fix_point="center", norm=TRUE, useScore=FALSE,
                           outRle=TRUE, useSizeFactor=FALSE, genome="hg19")
 
 plot_reference_locus(queryFiles=queryfiles[c(1,3)], 
@@ -72,7 +72,7 @@ plot_reference_locus(queryFiles=queryfiles[c(1,3)],
                      inputFiles=NULL,                              
                      handleInputParams=handleInputParams, 
                      shade=TRUE, 
-                     binsize=10, 
+                     binSize=10, 
                      refPoint="center", 
                      Xlab="Summit",
                      verbose=FALSE, 
@@ -93,7 +93,7 @@ This example shows you how to annotate ChIP-seq peaks. The resulting figure is '
 
 op <- "test_plot_peak_annotation"
 
-gtffile <- system.file("data", "gencode.v19.annotation_chr19.gtf", package="GenomicPlot")
+gtffile <- system.file("extdata", "gencode.v19.annotation_chr19.gtf", package="GenomicPlot")
 
 handleInputParams <- list(CLIP_reads=FALSE, fix_width=21, fix_point="center", norm=FALSE, useScore=FALSE,
                           outRle=FALSE, useSizeFactor=FALSE, genome="hg19")
