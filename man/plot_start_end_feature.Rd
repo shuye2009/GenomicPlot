@@ -5,12 +5,12 @@
 \title{Plot signals around the start and the end of genomic features}
 \usage{
 plot_start_end_feature(
-  queryfiles,
-  inputfiles = NULL,
+  queryFiles,
+  inputFiles = NULL,
   txdb,
   featureName,
   handleInputParams = NULL,
-  binsize = 10,
+  binSize = 10,
   insert = 0,
   verbose = FALSE,
   longest = TRUE,
@@ -28,9 +28,9 @@ plot_start_end_feature(
 )
 }
 \arguments{
-\item{queryfiles}{a vector of sample file names. The file should be in .bam, .bed, .wig or .bw format, mixture of formats is allowed}
+\item{queryFiles}{a vector of sample file names. The file should be in .bam, .bed, .wig or .bw format, mixture of formats is allowed}
 
-\item{inputfiles}{a vector of input sample file names. The file should be in .bam, .bed, .wig or .bw format, mixture of formats is allowed}
+\item{inputFiles}{a vector of input sample file names. The file should be in .bam, .bed, .wig or .bw format, mixture of formats is allowed}
 
 \item{txdb}{a TxDb object defined in the GenomicFeatures package. If featureName is "custom", a bed file that define the feature}
 
@@ -38,7 +38,7 @@ plot_start_end_feature(
 
 \item{handleInputParams}{a list of parameters for \code{handle_input}}
 
-\item{binsize}{an integer defines bin size for intensity calculation}
+\item{binSize}{an integer defines bin size for intensity calculation}
 
 \item{insert}{an integer specifies the length of the center regions to be included, in addition to the start and end of the feature}
 
@@ -78,17 +78,17 @@ computed and displayed as well. A random feature can be generated to serve as a 
 }
 \examples{
 txdb <- AnnotationDbi::loadDb(system.file("data", "txdb_chr19.sql", package="GenomicPlotData"))
-queryfiles <- system.file("data", "test_clip_chr19.bam", package="GenomicPlotData")
-names(queryfiles) <- "query"
-inputfiles <- system.file("data", "test_clip_input_chr19.bam", package="GenomicPlotData")
-names(inputfiles) <- "input"
+queryFiles <- system.file("data", "test_clip_chr19.bam", package="GenomicPlotData")
+names(queryFiles) <- "query"
+inputFiles <- system.file("data", "test_clip_input_chr19.bam", package="GenomicPlotData")
+names(inputFiles) <- "input"
 ext <- c(-500, 200, -200, 500)
 hl <- c(-50, 50, -50, 50)
 op <- NULL
 handleInputParams <- list(CLIP_reads=FALSE, fix_width=150, fix_point="start", norm=TRUE, useScore=FALSE,
  outRle=TRUE, useSizeFactor=TRUE, genome="hg19")
-plot_start_end_feature(queryfiles=c(queryfiles,inputfiles), inputfiles=NULL, txdb=txdb, featureName="intron",
- binsize=10, handleInputParams=handleInputParams, longest=TRUE, ext=ext, hl=hl, randomize=FALSE,
+plot_start_end_feature(queryFiles=c(queryFiles,inputFiles), inputFiles=NULL, txdb=txdb, featureName="intron",
+ binSize=10, handleInputParams=handleInputParams, longest=TRUE, ext=ext, hl=hl, randomize=FALSE,
  insert=100, stranded=TRUE, scale=FALSE, smooth=TRUE, outPrefix=op, nc=2)
 
 }

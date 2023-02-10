@@ -27,22 +27,32 @@ This is a basic example which shows you how to visualize your ChIP-seq peaks in 
 
 library(GenomicPlot)
 
-txdb <- AnnotationDbi::loadDb(system.file("data", "txdb_chr19.sql", package="GenomicPlot"))
+txdb <- AnnotationDbi::loadDb(system.file("extdata", "txdb_chr19.sql", package="GenomicPlot"))
 gf <- prepare_5parts_genomic_features(txdb, meta=TRUE, nbins=100, fiveP=1000, threeP=1000, longest=TRUE)
 
-queryfiles <- c(system.file("data", "test_chip_peak_chr19.narrowPeak", package="GenomicPlot"),
-                system.file("data", "test_chip_peak_chr19.bed", package="GenomicPlot"),
-                system.file("data", "test_clip_peak_chr19.bed", package="GenomicPlot"))
-names(queryfiles) <- c("narrowPeak", "summitPeak", "iCLIPPeak")
+queryfiles <- c(system.file("extdata", "test_chip_peak_chr19.narrowPeak", package="GenomicPlot"),
+                system.file("extdata", "test_chip_peak_chr19.bed", package="GenomicPlot"),
+                system.file("extdata", "test_clip_peak_chr19.bed", package="GenomicPlot"))
+names(queryfiles) <- c("Narrow", "Summit", "iCLIP")
 
 op <- "test_plot_5parts_metagene"
 
 handleInputParams <- list(CLIP_reads=FALSE, fix_width=150, fix_point="center", norm=FALSE, useScore=FALSE,
                           outRle=TRUE, useSizeFactor=FALSE, genome="hg19")
 
-plot_5parts_metagene(queryfiles, gFeatures=list(metaF=gf), inputfiles=NULL, handleInputParams=handleInputParams,
-                     verbose=FALSE, smooth=TRUE, scale=FALSE, stranded=TRUE, outPrefix=op, transform=FALSE, heatmap=TRUE,
-                     rmOutlier=TRUE, nc=4)
+plot_5parts_metagene(queryFiles=queryfiles, 
+                     gFeatures=list(metaF=gf), 
+                     inputFiles=NULL, 
+                     handleInputParams=handleInputParams,
+                     verbose=FALSE, 
+                     smooth=TRUE, 
+                     scale=FALSE, 
+                     stranded=TRUE, 
+                     outPrefix=op, 
+                     transform=FALSE, 
+                     heatmap=TRUE,
+                     rmOutlier=TRUE, 
+                     nc=4)
                      
 ```
 
@@ -52,12 +62,28 @@ This example shows you how to visualize your iCLIP_peaks around ChIP-seq peaks. 
 
 op <- "test_plot_reference_locus"
 
-handleInputParams <- list(CLIP_reads=FALSE, fix_width=100, fix_point="center", norm=FALSE, useScore=FALSE,
+handleInputParams <- list(CLIP_reads=FALSE, fix_width=0, fix_point="center", norm=FALSE, useScore=FALSE,
                           outRle=TRUE, useSizeFactor=FALSE, genome="hg19")
 
-plot_reference_locus(queryfiles=queryfiles[3], centerfiles=queryfiles[1:2], ext=c(-500, 500), hl=c(-50, 50), inputfiles=NULL,                              handleInputParams=handleInputParams, shade=TRUE, binsize=10, refPoint="center", Xlab="ChIP-seq peak",
-                     verbose=FALSE, smooth=TRUE, scale=FALSE, stranded=TRUE, outPrefix=op, transform=FALSE, heatmap=TRUE,
-                     rmOutlier=TRUE, nc=4)
+plot_reference_locus(queryFiles=queryfiles[c(1,3)], 
+                     centerFiles=queryfiles[2], 
+                     ext=c(-500, 500), 
+                     hl=c(-50, 50), 
+                     inputFiles=NULL,                              
+                     handleInputParams=handleInputParams, 
+                     shade=TRUE, 
+                     binsize=10, 
+                     refPoint="center", 
+                     Xlab="Summit",
+                     verbose=FALSE, 
+                     smooth=TRUE, 
+                     scale=FALSE, 
+                     stranded=TRUE, 
+                     outPrefix=op, 
+                     transform=FALSE, 
+                     heatmap=TRUE,
+                     rmOutlier=TRUE, 
+                     nc=4)
                      
 ```
 
@@ -72,7 +98,13 @@ gtffile <- system.file("data", "gencode.v19.annotation_chr19.gtf", package="Geno
 handleInputParams <- list(CLIP_reads=FALSE, fix_width=21, fix_point="center", norm=FALSE, useScore=FALSE,
                           outRle=FALSE, useSizeFactor=FALSE, genome="hg19")
                           
-plot_peak_annotation(queryfiles[2], gtffile, handleInputParams=handleInputParams, fiveP=1000, threeP=1000, outPrefix=op, verbose=FALSE)
+plot_peak_annotation(peakFile=queryfiles[2], 
+                     gtfFile=gtffile, 
+                     handleInputParams=handleInputParams, 
+                     fiveP=1000, 
+                     threeP=1000, 
+                     outPrefix=op, 
+                     verbose=FALSE)
 
 ```
 

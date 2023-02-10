@@ -5,32 +5,32 @@
 \title{Plot signal around custom genomic loci}
 \usage{
 plot_reference_locus(
-  queryfiles,
-  centerfiles,
+  queryFiles,
+  centerFiles,
   ext = c(-100, 100),
   hl = c(0, 0),
   shade = TRUE,
   smooth = FALSE,
   handleInputParams = NULL,
   verbose = FALSE,
-  binsize = 10,
+  binSize = 10,
   refPoint = "center",
   Xlab = "Center",
-  inputfiles = NULL,
+  inputFiles = NULL,
   stranded = TRUE,
   heatmap = TRUE,
   scale = FALSE,
   outPrefix = NULL,
   rmOutlier = FALSE,
   transform = FALSE,
-  stats.method = "wilcox.test",
+  statsMethod = "wilcox.test",
   nc = 2
 )
 }
 \arguments{
-\item{queryfiles}{a vector of sample file names. The file should be in .bam, .bed, .wig or .bw format, mixture of formats is allowed}
+\item{queryFiles}{a vector of sample file names. The file should be in .bam, .bed, .wig or .bw format, mixture of formats is allowed}
 
-\item{centerfiles}{a vector of reference file names. The file should be .bed format only}
+\item{centerFiles}{a vector of reference file names. The file should be .bed format only}
 
 \item{ext}{a vector of two integers defining upstream and downstream boundaries of the plot window, flanking the reference locus}
 
@@ -44,13 +44,13 @@ plot_reference_locus(
 
 \item{verbose}{logical, indicating whether to output additional information (data used for plotting or statistical test results)}
 
-\item{binsize}{an integer defines bin size for intensity calculation}
+\item{binSize}{an integer defines bin size for intensity calculation}
 
 \item{refPoint}{a string in c("start", "center", "end")}
 
 \item{Xlab}{a string denotes the label on x-axis}
 
-\item{inputfiles}{a vector of input sample file names. The file should be in .bam, .bed, .wig or .bw format, mixture of formats is allowed}
+\item{inputFiles}{a vector of input sample file names. The file should be in .bam, .bed, .wig or .bw format, mixture of formats is allowed}
 
 \item{stranded}{logical, indicating whether the strand of the feature should be considered}
 
@@ -64,7 +64,7 @@ plot_reference_locus(
 
 \item{transform}{logical, whether to log2 transform the data matrix}
 
-\item{stats.method}{a string in c("wilcox.test", "t.test"), for pair-wise group comparisons}
+\item{statsMethod}{a string in c("wilcox.test", "t.test"), for pair-wise group comparisons}
 
 \item{nc}{integer, number of cores for parallel processing}
 }
@@ -73,14 +73,14 @@ a list of two dataframes containing the data used for plotting and for statistic
 }
 \description{
 Plot reads or peak signal intensity of samples in the query files around reference locus (start, end or center of a genomic region)
-defined in the centerfiles. The upstream and downstream windows flanking loci can be given separately, a smaller window can be defined to allow
+defined in the centerFiles. The upstream and downstream windows flanking loci can be given separately, a smaller window can be defined to allow
 statistical comparisons between samples for the same reference, or between references for a given sample. If Input files are provided, ratio over
 Input is computed and displaued as well.
 }
 \examples{
-centerfiles <- c(system.file("data", "test_B.bed", package="GenomicPlotData"),
+centerFiles <- c(system.file("data", "test_B.bed", package="GenomicPlotData"),
 system.file("data", "test_C.bed", package="GenomicPlotData"))
-names(centerfiles) <- c("TestB", "TestC")
+names(centerFiles) <- c("TestB", "TestC")
 
 }
 \author{

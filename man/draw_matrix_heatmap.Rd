@@ -5,7 +5,7 @@
 \title{Display matrix as a heatmap}
 \usage{
 draw_matrix_heatmap(
-  fullmatrix,
+  fullMatrix,
   dataName = "geneData",
   labels_col = NULL,
   levels_col = NULL,
@@ -14,7 +14,7 @@ draw_matrix_heatmap(
 )
 }
 \arguments{
-\item{fullmatrix}{a numeric matrix}
+\item{fullMatrix}{a numeric matrix}
 
 \item{dataName}{the nature of the numeric data}
 
@@ -30,12 +30,12 @@ draw_matrix_heatmap(
 Make a complex heatmap with column annotations
 }
 \examples{
-fullmatrix <- matrix(rnorm(10000), ncol=100)
+fullMatrix <- matrix(rnorm(10000), ncol=100)
 labels_col <- as.character(seq(1:100))
 levels_col <- c("start", "center", "end")
 names(labels_col) <- rep(levels_col, c(15, 60, 25))
 
-draw_matrix_heatmap(fullmatrix, dataName="test", labels_col, levels_col, ranking="Sum")
+draw_matrix_heatmap(fullMatrix, dataName="test", labels_col, levels_col, ranking="Sum")
 
 }
 \author{

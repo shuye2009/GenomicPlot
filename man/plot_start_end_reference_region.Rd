@@ -5,11 +5,11 @@
 \title{Plot signals around the start and the end of custom features}
 \usage{
 plot_start_end_reference_region(
-  queryfiles,
-  inputfiles = NULL,
-  centerfiles,
+  queryFiles,
+  inputFiles = NULL,
+  centerFiles,
   handleInputParams = NULL,
-  binsize = 10,
+  binSize = 10,
   insert = 0,
   verbose = FALSE,
   ext = c(-500, 100, -100, 500),
@@ -25,15 +25,15 @@ plot_start_end_reference_region(
 )
 }
 \arguments{
-\item{queryfiles}{a vector of sample file names. The file should be in .bam, .bed, .wig or .bw format, mixture of formats is allowed}
+\item{queryFiles}{a vector of sample file names. The file should be in .bam, .bed, .wig or .bw format, mixture of formats is allowed}
 
-\item{inputfiles}{a vector of input sample file names. The file should be in .bam, .bed, .wig or .bw format, mixture of formats is allowed}
+\item{inputFiles}{a vector of input sample file names. The file should be in .bam, .bed, .wig or .bw format, mixture of formats is allowed}
 
-\item{centerfiles}{bed files that define the custom features}
+\item{centerFiles}{bed files that define the custom features}
 
 \item{handleInputParams}{a list of parameters for \code{handle_input}}
 
-\item{binsize}{an integer defines bin size for intensity calculation}
+\item{binSize}{an integer defines bin size for intensity calculation}
 
 \item{insert}{an integer specifies the length of the center regions to be included, in addition to the start and end of the feature}
 
@@ -69,9 +69,9 @@ A line plot will be displayed for both start and end of feature. If Input files 
 computed and displayed as well.
 }
 \examples{
-centerfiles <- c(system.file("data", "test_B.bed", package="GenomicPlotData"),
+centerFiles <- c(system.file("data", "test_B.bed", package="GenomicPlotData"),
 system.file("data", "test_C.bed", package="GenomicPlotData"))
-names(centerfiles) <- c("TestB", "TestC")
+names(centerFiles) <- c("TestB", "TestC")
 
 }
 \author{

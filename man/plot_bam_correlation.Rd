@@ -6,7 +6,7 @@
 \usage{
 plot_bam_correlation(
   bamfiles,
-  binsize = 1e+06,
+  binSize = 1e+06,
   outPrefix = NULL,
   handleInputParams = NULL,
   verbose = FALSE,
@@ -16,7 +16,7 @@ plot_bam_correlation(
 \arguments{
 \item{bamfiles}{a named vector of strings denoting file names}
 
-\item{binsize}{an integer denoting the tile width for tiling the genome, default 1000000}
+\item{binSize}{an integer denoting the tile width for tiling the genome, default 1000000}
 
 \item{outPrefix}{a string denoting output file name in pdf format}
 
@@ -28,17 +28,17 @@ plot_bam_correlation(
 plot correlation in reads coverage distributions along the genome for bam files
 }
 \examples{
-queryfiles <- c(system.file("data", "test_chip_chr19.bam", package="GenomicPlotData"),
+queryFiles <- c(system.file("data", "test_chip_chr19.bam", package="GenomicPlotData"),
 system.file("data", "test_clip_chr19.bam", package="GenomicPlotData"))
-names(queryfiles) <- c("chip_query", "clip_query")
-inputfiles <- c(system.file("data", "test_chip_input_chr19.bam", package="GenomicPlotData"),
+names(queryFiles) <- c("chip_query", "clip_query")
+inputFiles <- c(system.file("data", "test_chip_input_chr19.bam", package="GenomicPlotData"),
                 system.file("data", "test_clip_input_chr19.bam", package="GenomicPlotData"))
-names(inputfiles) <- c("chip_input", "clip_input")
+names(inputFiles) <- c("chip_input", "clip_input")
 
 op=NULL
 handleInputParams <- list(CLIP_reads=FALSE, fix_width=0, fix_point="start", norm=FALSE, useScore=FALSE,
                           outRle=FALSE, useSizeFactor=FALSE, genome="hg19")
-plot_bam_correlation(bamfiles=c(queryfiles[1], inputfiles[1]), binsize=10000, outPrefix=op,
+plot_bam_correlation(bamfiles=c(queryFiles[1], inputFiles[1]), binSize=10000, outPrefix=op,
                      handleInputParams=handleInputParams, nc=2)
 
 
