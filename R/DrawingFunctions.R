@@ -24,7 +24,7 @@
 #'
 #'
 
-draw_matrix_heatmap <- function(fullMatrix, dataName="geneData", labels_col=NULL, levels_col=NULL, ranking="Sum", verbose=FALSE){
+draw_matrix_heatmap <- function(fullMatrix, dataName="geneData", labels_col=NULL, levels_col=NULL, ranking="Sum", ranges=NULL, verbose=FALSE){
    
    if(verbose) print("drawing heatmap")
    #inspect_matrix(fullMatrix, verbose)
@@ -60,14 +60,16 @@ draw_matrix_heatmap <- function(fullMatrix, dataName="geneData", labels_col=NULL
    ha <- HeatmapAnnotation(df = data.frame(feature = features), col=list(feature=mycols), which="column", show_legend=FALSE, annotation_label = "")
    #y <- matrix(as.vector(fullMatrix), ncol=1)
    if(verbose) print(quantile(fullMatrix, c(seq(0.9, 1, 0.005)), na.rm=TRUE))
+   if(is.null(ranges)){
    ranges <- quantile(fullMatrix, c(0.025, 0.975), na.rm=TRUE)
-   if(ranges[1] == ranges[2]){
-      message("97.5% of values are not unique, heatmap may not show signals effectively")
-      
-      ranges <- quantile(fullMatrix, c(0, 0.995), na.rm=TRUE) ## Need to have a better way for determine the upper bound
-      ranges[2] <- ranges[2]*2
+      if(ranges[1] == ranges[2]){
+         message("97.5% of values are not unique, heatmap may not show signals effectively")
+         
+         ranges <- quantile(fullMatrix, c(0, 0.995), na.rm=TRUE) ## Need to have a better way for determine the upper bound
+         ranges[2] <- ranges[2]*2
+      }
    }
-
+   
    h <- Heatmap(fullMatrix,
                 name = unlist(strsplit(dataName, split=":", fixed=TRUE))[1],
                 col = colorRamp2(ranges, viridis(2)),
@@ -280,6 +282,13 @@ draw_locus_profile <- function(plot_df, xc="Position", yc="Intensity", cn="Query
 #'
 
 draw_boxplot_logy <- function(stat_df, xc="Feature", yc="Intensity", fc=xc, comp=list(c(1,2)), stats="wilcox.test", Xlab=xc, Ylab=yc, logy="linear", nf=1){
+   
+   if(logy == "logy"){
+      stat_df[[yc]] <- log10(stat_df[[yc]] + 1)
+      if(Ylab==yc) Ylab <- paste0("log10 (",yc, ")")
+      #p <- p + scale_y_continuous(trans='log10', labels = scales::scientific)
+      #message("log scale")
+   }
    xlabs <- paste(levels(as.factor(stat_df[[xc]])),"\n(",table(stat_df[[xc]])/nf,")",sep="")
    ypos <- rep(max(stat_df[[yc]]), length(comp))*seq(1, 1+(length(comp)-1)*0.1, 0.1)
    outlier.shape = 19
@@ -330,9 +339,7 @@ draw_boxplot_logy <- function(stat_df, xc="Feature", yc="Intensity", fc=xc, comp
          geom_signif(comparisons = comp, test=stats, map_signif_level=TRUE, y_position=ypos) +
          scale_x_continuous(breaks = mid(sort(unique(stat_df$x2))), labels = xlabs) 
    }
-   
    if(logy == "logy"){
-      p <- p + scale_y_continuous(trans='log10', labels = scales::scientific)
       message("log scale")
    }else if(logy == "linear"){
       message("linear scale")
@@ -372,7 +379,11 @@ draw_boxplot_wo_outlier <- function(stat_df, xc="Feature", yc="Intensity", fc=xc
    bp <- boxplot(fomu, stat_df, plot=FALSE)
    lim <- c(min(bp$stats) - abs(min(bp$stats))*0.25, max(bp$stats) + abs(max(bp$stats))*0.25)
    ypos <- rep(lim[2], length(comp))*seq(1, 1+(length(comp)-1)*0.1, 0.1)
-   lim[2] <- max(ypos)+0.05
+   lim[2] <- max(ypos)*1.25
+   tipl <- 0.03
+   print(lim)
+   print(ypos)
+   print(tipl)
    
    if(fc == xc){
       p <- ggplot(stat_df, aes(x=.data[[xc]], y=.data[[yc]], fill=.data[[fc]])) +
@@ -385,9 +396,9 @@ draw_boxplot_wo_outlier <- function(stat_df, xc="Feature", yc="Intensity", fc=xc
                axis.title = element_text(face="bold", size=16, color="black"),
                legend.position = "bottom") +
          labs(y=Ylab, x=Xlab) +
-         geom_signif(comparisons=comp, test=stats, map_signif_level=TRUE, y_position=ypos, tip_length=(lim[2]-lim[1])*0.03) +
          coord_cartesian(ylim=lim) +
-         scale_x_discrete(labels = xlabs) 
+         scale_x_discrete(labels = xlabs)  +
+         geom_signif(comparisons=comp, test=stats, map_signif_level=TRUE, y_position=ypos, tip_length=tipl)
       
    }else{
       mid <- function(v){
@@ -409,10 +420,9 @@ draw_boxplot_wo_outlier <- function(stat_df, xc="Feature", yc="Intensity", fc=xc
                axis.title = element_text(face="bold", size=16, color="black"),
                legend.position = "bottom") +
          labs(y=Ylab, x=Xlab) +
-         geom_signif(comparisons=comp, test=stats, map_signif_level=TRUE, y_position=ypos, tip_length=(lim[2]-lim[1])*0.03) +
          scale_x_continuous(breaks = mid(sort(unique(stat_df$x2))), labels = xlabs) +
-         coord_cartesian(ylim=lim) 
-         
+         coord_cartesian(ylim=lim)  +
+         geom_signif(comparisons=comp, test=stats, map_signif_level=TRUE, y_position=ypos, tip_length=tipl) 
    }
       
    return(p)

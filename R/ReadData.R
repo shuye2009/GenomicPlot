@@ -168,11 +168,11 @@ handle_bed <- function(inputFile, handleInputParams=NULL){
    if(nco > 6){
       message(paste("The input file", inputFile, "have more than 6 columns, only the first 6 columns will be used!"))
    }else if(nco < 6){
-      message(paste("The input file", inputFile, "only have", nco, "columns!"))
+      message(paste("The input file", inputFile, "have only", nco, "columns!"))
    }
 
    beddata <- type.convert(beddata[, 1:min(6,nco)], as.is=TRUE)  ## ignore extra columns, which cause problem in import.bed()
-   colnames(beddata) <- c("chr", "start", "end", "id", "score", "strand")[1:min(6,ncol(beddata))]
+   colnames(beddata) <- c("chr", "start", "end", "name", "score", "strand")[1:min(6,ncol(beddata))]
    queryRegions <- makeGRangesFromDataFrame(beddata, keep.extra.columns=TRUE, starts.in.df.are.0based=TRUE)
    if(ncol(beddata)<6) strand(queryRegions) <- "*"
 

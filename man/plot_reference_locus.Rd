@@ -24,6 +24,7 @@ plot_reference_locus(
   rmOutlier = FALSE,
   transform = FALSE,
   statsMethod = "wilcox.test",
+  heatRange = NULL,
   nc = 2
 )
 }
@@ -65,6 +66,8 @@ plot_reference_locus(
 \item{transform}{logical, whether to log2 transform the data matrix}
 
 \item{statsMethod}{a string in c("wilcox.test", "t.test"), for pair-wise group comparisons}
+
+\item{heatRange}{a numerical vector of two elements, defining range for heatmap color ramp generation}
 
 \item{nc}{integer, number of cores for parallel processing}
 }

@@ -488,7 +488,7 @@ get_txdb_features <- function(txdb, fiveP=1000, dsTSS=300, threeP=1000){
    cds <- get_genomic_feature_coordinates(txdb, "cds", longest=TRUE, protein_coding=TRUE)
    intron <- get_genomic_feature_coordinates(txdb, "intron", longest=TRUE, protein_coding=TRUE)
    
-   gene <- get_genomic_feature_coordinates(txdb, "transcript", longest=TRUE, protein_coding=TRUE)$GRanges
+   gene_gr <- get_genomic_feature_coordinates(txdb, "transcript", longest=TRUE, protein_coding=TRUE)$GRanges
    
    features <- GRangesList("5'UTR"=unlist(utr5$GRangesList, use.names=TRUE),
                            "3'UTR"=unlist(utr3$GRangesList, use.names=TRUE),
@@ -496,14 +496,55 @@ get_txdb_features <- function(txdb, fiveP=1000, dsTSS=300, threeP=1000){
                            "Intron"=unlist(intron$GRangesList, use.names=TRUE),
                            compress=FALSE)
    if(fiveP > 0){
-      promoter <- GenomicRanges::promoters(gene, upstream=fiveP, downstream=dsTSS, use.names=TRUE)
+      promoter <- GenomicRanges::promoters(gene_gr, upstream=fiveP, downstream=dsTSS, use.names=TRUE)
       features[["Promoter"]] <- promoter
    }else{
       promoter <- NULL
    }
    
    if(threeP > 0){
-      TTS <- GenomicRanges::flank(gene, width=threeP, both=FALSE, start=FALSE, ignore.strand=FALSE)
+      TTS <- GenomicRanges::flank(gene_gr, width=threeP, both=FALSE, start=FALSE, ignore.strand=FALSE)
+      ol <- GenomicRanges::findOverlaps(TTS, gene_gr)
+      queries <- unique(ol@from)
+      
+      cl <- start_parallel(nc=20)
+      parallel::clusterEvalQ(cl, library("GenomicRanges"))
+      parallel::clusterExport(cl, varlist=c("TTS", "gene_gr", "ol"), envir=environment())
+       
+      out <- parallel::parLapply(cl, queries, function(tts_idx){
+        
+         gene_idx <- ol@to[ol@from == tts_idx]
+         ogenes <- gene_gr[gene_idx]
+         ogene <- ogenes[nearest(TTS[tts_idx], ogenes, select="arbitrary")]
+         
+         if(runValue(strand(TTS[tts_idx])) == "+"){
+            dist <-  start(ogene) - start(TTS[tts_idx])
+            if(dist > 0){
+               end(TTS[tts_idx]) <- start(TTS[tts_idx]) + dist
+            }else{
+               end(TTS[tts_idx]) <- start(TTS[tts_idx])  
+            }
+            
+         }else if(runValue(strand(TTS[tts_idx])) == "-"){
+            dist <-  end(TTS[tts_idx]) - end(ogene)
+            if(dist > 0){
+               start(TTS[tts_idx]) <- end(TTS[tts_idx]) - dist
+            }else{
+               start(TTS[tts_idx]) <- end(TTS[tts_idx])
+            }
+            
+         }else{
+            stop("invalid strand")
+         }
+         return(c(tts_idx, start(TTS[tts_idx]), end(TTS[tts_idx])))
+      })
+      stop_parallel(cl)
+      
+      out1 <- as.data.frame(Reduce(rbind, out))
+      start(TTS[out1[,1]]) <- out1[,2]
+      end(TTS[out1[,1]]) <- out1[,3]
+      
+      
       features[["TTS"]] <- TTS
    }else{
       TTS <- NULL
@@ -561,8 +602,8 @@ get_targeted_genes <- function(peak, features, stranded=TRUE){
          mutate(chrPeak=as.character(chr),
                 startPeak=as.integer(start)-1,
                 endPeak=as.integer(end),
-                idPeak=as.character(id),
-                widthPeak=as.integer(width),
+                idPeak=as.character(name),
+                scorePeak=as.integer(score),
                 strandPeak=as.character(strand),
                 .keep="unused")
       feature_df <- featureGr[featureOverlaps@to]
@@ -571,12 +612,12 @@ get_targeted_genes <- function(peak, features, stranded=TRUE){
          mutate(chrfeature=as.character(chr),
                 startfeature=as.integer(start)-1,
                 endfeature=as.integer(end),
-                widthfeature=as.integer(width),
+                widthfeature=as.integer(score),
                 strandfeature=as.character(strand),
                 .keep="unused")
       
       ot <- cbind(peak_df, feature_df) %>%
-         select(chrPeak, startPeak, endPeak, idPeak, widthPeak, strandPeak, chrfeature, startfeature, endfeature, widthfeature, strandfeature, tx_name) %>%
+         select(chrPeak, startPeak, endPeak, idPeak, scorePeak, strandPeak, chrfeature, startfeature, endfeature, widthfeature, strandfeature, tx_name) %>%
          mutate(feature_name=feature)
       return(ot)
    })

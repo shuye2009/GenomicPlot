@@ -16,6 +16,7 @@ plot_5parts_metagene(
   stranded = TRUE,
   outPrefix = NULL,
   heatmap = FALSE,
+  heatRange = NULL,
   rmOutlier = FALSE,
   nc = 2
 )
@@ -42,6 +43,8 @@ plot_5parts_metagene(
 \item{outPrefix}{a string specifying output file prefix for plots (outPrefix.pdf)}
 
 \item{heatmap}{logical, indicating whether a heatmap of the score matrix should be generated}
+
+\item{heatRange}{a numerical vector of two elements, defining range for heatmap color ramp generation}
 
 \item{rmOutlier}{logical, indicating whether a row with abnormally high values in the score matrix should be removed}
 

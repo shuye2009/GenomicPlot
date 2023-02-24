@@ -259,11 +259,28 @@ gr2df <- function(gr){
    width <- width(gr)
    strand <- as.vector(strand(gr))
    meta <- mcols(gr, us.names=TRUE)
-   id <- seq_along(gr)
-   if(!is.null(names(gr))) id <- names(gr)
+   
+   if("name" %in% colnames(meta)){
+      name <- gr$name
+      meta <- meta[, !colnames(meta) %in% c("name"), drop=FALSE]
+   }else if("id" %in% colnames(meta)){
+         name <- gr$id
+         meta <- meta[, !colnames(meta) %in% c("id"), drop=FALSE]
+   }else if(!is.null(names(gr))){
+      name <- names(gr)
+   }else{
+      name <- seq_along(gr)
+   }
+   
+   if("score" %in% colnames(meta)){
+      score <- gr$score
+      meta <- meta[, !colnames(meta) %in% c("score"), drop=FALSE]
+   }else{
+      score <- width
+   }
 
-   df <- as.data.frame(cbind(chr, start, end, id, width, strand, meta))
-
+   df <- as.data.frame(cbind(chr, start, end, name, score, strand, meta))
+   
    return(df)
 }
 

@@ -21,6 +21,7 @@ plot_reference_region(
   transform = FALSE,
   outPrefix = "plots",
   rmOutlier = FALSE,
+  heatRange = NULL,
   nc = 2
 )
 }
@@ -56,6 +57,8 @@ plot_reference_region(
 \item{outPrefix}{a string specifying output file prefix for plots (outPrefix.pdf)}
 
 \item{rmOutlier}{logical, indicating whether a row with abnormally high values in the score matrix should be removed}
+
+\item{heatRange}{a numerical vector of two elements, defining range for heatmap color ramp generation}
 
 \item{nc}{integer, number of cores for parallel processing}
 }

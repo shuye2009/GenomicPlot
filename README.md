@@ -62,7 +62,7 @@ This example shows you how to visualize your iCLIP_peaks around ChIP-seq peaks. 
 
 op <- "test_plot_reference_locus"
 
-handleInputParams <- list(CLIP_reads=FALSE, fix_width=0, fix_point="center", norm=TRUE, useScore=FALSE,
+handleInputParams <- list(CLIP_reads=FALSE, fix_width=0, fix_point="center", norm=FALSE, useScore=FALSE,
                           outRle=TRUE, useSizeFactor=FALSE, genome="hg19")
 
 plot_reference_locus(queryFiles=queryfiles[c(1,3)], 

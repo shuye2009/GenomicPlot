@@ -677,6 +677,7 @@ plot_start_end_reference_region <- function(queryFiles, inputFiles=NULL, centerF
 #' @param scale logical, indicating whether the score matrix should be scaled to the range 0:1, so that samples with different baseline can be compared
 #' @param smooth logical, indicating whether the line should smoothed with a spline smoothing algorithm
 #' @param heatmap logical, indicating whether a heatmap of the score matrix should be generated
+#' @param heatRange a numerical vector of two elements, defining range for heatmap color ramp generation
 #' @param rmOutlier logical, indicating whether a row with abnormally high values in the score matrix should be removed
 #' @param outPrefix a string specifying output file prefix for plots (outPrefix.pdf)
 #' @param transform logical, whether to log2 transform the data matrix
@@ -694,7 +695,7 @@ plot_start_end_reference_region <- function(queryFiles, inputFiles=NULL, centerF
 #' @export plot_3parts_metagene
 
 
-plot_3parts_metagene <- function(queryFiles, gFeatures, inputFiles=NULL, scale=FALSE,  verbose=FALSE, handleInputParams=NULL, smooth=FALSE, stranded=TRUE, outPrefix="plots", heatmap=FALSE, rmOutlier=FALSE, transform=FALSE, nc=2){
+plot_3parts_metagene <- function(queryFiles, gFeatures, inputFiles=NULL, scale=FALSE,  verbose=FALSE, handleInputParams=NULL, smooth=FALSE, stranded=TRUE, outPrefix="plots", heatmap=FALSE, rmOutlier=FALSE, heatRange=NULL, transform=FALSE, nc=2){
 
 
   queryLabels <- names(queryFiles)
@@ -799,7 +800,7 @@ plot_3parts_metagene <- function(queryFiles, gFeatures, inputFiles=NULL, scale=F
 
        if(heatmap){
           dataname <- paste(Ylab, queryLabel, "gene", sep=":")
-          heatmap_list[dataname] <- draw_matrix_heatmap(featureMatrix, dataName=dataname, labels_col=collabel, levels_col=featureNames, verbose=verbose)
+          heatmap_list[dataname] <- draw_matrix_heatmap(featureMatrix, dataName=dataname, labels_col=collabel, levels_col=featureNames, ranges=heatRange, verbose=verbose)
        }
 
        plot_df <- data.frame("Intensity"=colm, "sd"=colsd, "se"=colse, "Position"=collabel, "Query"=querybed, "Feature"=featuretype)
@@ -898,7 +899,7 @@ plot_3parts_metagene <- function(queryFiles, gFeatures, inputFiles=NULL, scale=F
 
          if(heatmap){
             dataname <- paste(Ylab, ratiolabel, "gene", sep=":")
-            heatmap_list[dataname] <- draw_matrix_heatmap(featureMatrix, dataName=dataname, labels_col=collabel, levels_col=featureNames, verbose=verbose)
+            heatmap_list[dataname] <- draw_matrix_heatmap(featureMatrix, dataName=dataname, labels_col=collabel, levels_col=featureNames, ranges=heatRange, verbose=verbose)
          }
          plot_df <- data.frame("Intensity"=colm, "sd"=colsd, "se"=colse, "Position"=collabel, "Query"=querybed, "Feature"=featuretype)
       }
@@ -964,6 +965,7 @@ plot_3parts_metagene <- function(queryFiles, gFeatures, inputFiles=NULL, scale=F
 #' @param scale logical, indicating whether the score matrix should be scaled to the range 0:1, so that samples with different baseline can be compared
 #' @param smooth logical, indicating whether the line should smoothed with a spline smoothing algorithm
 #' @param heatmap logical, indicating whether a heatmap of the score matrix should be generated
+#' @param heatRange a numerical vector of two elements, defining range for heatmap color ramp generation
 #' @param rmOutlier logical, indicating whether a row with abnormally high values in the score matrix should be removed
 #' @param handleInputParams a list of parameters for \code{handle_input}
 #' @param outPrefix a string specifying output file prefix for plots (outPrefix.pdf)
@@ -982,7 +984,7 @@ plot_3parts_metagene <- function(queryFiles, gFeatures, inputFiles=NULL, scale=F
 #'
 #' @export plot_reference_region
 
-plot_reference_region <- function(queryFiles, centerFiles, inputFiles=NULL, nbins=100, handleInputParams=NULL, verbose=FALSE, scale=FALSE, heatmap=FALSE, regionName="region", fiveP=1000, threeP=1000, smooth=FALSE, stranded=TRUE, transform=FALSE, outPrefix="plots", rmOutlier=FALSE, nc=2){
+plot_reference_region <- function(queryFiles, centerFiles, inputFiles=NULL, nbins=100, handleInputParams=NULL, verbose=FALSE, scale=FALSE, heatmap=FALSE, regionName="region", fiveP=1000, threeP=1000, smooth=FALSE, stranded=TRUE, transform=FALSE, outPrefix="plots", rmOutlier=FALSE, heatRange=NULL, nc=2){
 
   if(!is.null(outPrefix)){
     pdf(paste(outPrefix, "pdf", sep="."), height=8, width=12)
@@ -1119,7 +1121,7 @@ plot_reference_region <- function(queryFiles, centerFiles, inputFiles=NULL, nbin
 
          if(heatmap){
             dataname <- paste(Ylab, queryLabel, centerLabel, sep=":")
-            heatmap_list[dataname] <- draw_matrix_heatmap(featureMatrix, dataName=dataname, labels_col=collabel, levels_col=featureNames, verbose=verbose)
+            heatmap_list[dataname] <- draw_matrix_heatmap(featureMatrix, dataName=dataname, labels_col=collabel, levels_col=featureNames, ranges=heatRange, verbose=verbose)
          }
 
          plot_df <- data.frame("Intensity"=colm, "sd"=colsd, "se"=colse, "Position"=collabel, "Query"=querybed, "Reference"=centerbed, "Feature"=featuretype)
@@ -1248,7 +1250,7 @@ plot_reference_region <- function(queryFiles, centerFiles, inputFiles=NULL, nbin
 
            if(heatmap){
               dataname <- paste(Ylab, ratiolabel, centerLabel, sep=":")
-              heatmap_list[dataname] <- draw_matrix_heatmap(featureMatrix, dataName=dataname, labels_col=collabel, levels_col=featureNames, verbose=verbose)
+              heatmap_list[dataname] <- draw_matrix_heatmap(featureMatrix, dataName=dataname, labels_col=collabel, levels_col=featureNames, ranges=heatRange, verbose=verbose)
            }
            plot_df <- data.frame("Intensity"=colm, "sd"=colsd, "se"=colse, "Position"=collabel, "Query"=ratiobed, "Reference"=centerbed, "Feature"=featuretype)
         }
@@ -1327,6 +1329,7 @@ plot_reference_region <- function(queryFiles, centerFiles, inputFiles=NULL, nbin
 #' @param scale logical, indicating whether the score matrix should be scaled to the range 0:1, so that samples with different baseline can be compared
 #' @param smooth logical, indicating whether the line should smoothed with a spline smoothing algorithm
 #' @param heatmap logical, indicating whether a heatmap of the score matrix should be generated
+#' @param heatRange a numerical vector of two elements, defining range for heatmap color ramp generation
 #' @param rmOutlier logical, indicating whether a row with abnormally high values in the score matrix should be removed
 #' @param transform logical, whether to log2 transform the matrix
 #' @param outPrefix a string specifying output file prefix for plots (outPrefix.pdf)
@@ -1357,7 +1360,7 @@ plot_reference_region <- function(queryFiles, centerFiles, inputFiles=NULL, nbin
 
 plot_5parts_metagene <- function(queryFiles, gFeatures_list, inputFiles=NULL, handleInputParams=NULL,
                                  verbose=FALSE, transform=FALSE, smooth=FALSE, scale=FALSE, stranded=TRUE,
-                                 outPrefix=NULL, heatmap=FALSE, rmOutlier=FALSE, nc=2){
+                                 outPrefix=NULL, heatmap=FALSE, heatRange=NULL, rmOutlier=FALSE, nc=2){
 
   queryLabels <- names(queryFiles)
   names(queryLabels) <- queryFiles
@@ -1466,7 +1469,7 @@ plot_5parts_metagene <- function(queryFiles, gFeatures_list, inputFiles=NULL, ha
 
           if(heatmap){
              dataname <- paste(Ylab, queryLabel, aFeature, sep=":")
-             heatmap_list[[dataname]] <- draw_matrix_heatmap(featureMatrix, dataName=dataname, labels_col=collabel, levels_col=featureNames, verbose=verbose)
+             heatmap_list[[dataname]] <- draw_matrix_heatmap(featureMatrix, dataName=dataname, labels_col=collabel, levels_col=featureNames, ranges=heatRange, verbose=verbose)
           }
           plot_df <- data.frame("Intensity"=colm, "sd"=colsd, "se"=colse, "Position"=collabel, "Query"=paste(querybed,aFeature, sep=":"), "Feature"=featuretype)
        }
@@ -1536,7 +1539,7 @@ plot_5parts_metagene <- function(queryFiles, gFeatures_list, inputFiles=NULL, ha
    
             if(heatmap){
                dataname <- paste(Ylab, ratiolabel, aFeature, sep=":")
-               heatmap_list_ratio[[dataname]] <- draw_matrix_heatmap(featureMatrix, dataName=dataname, labels_col=collabel, levels_col=featureNames, verbose=verbose)
+               heatmap_list_ratio[[dataname]] <- draw_matrix_heatmap(featureMatrix, dataName=dataname, labels_col=collabel, levels_col=featureNames, ranges=heatRange, verbose=verbose)
             }
             plot_df <- data.frame("Intensity"=colm, "sd"=colsd, "se"=colse, "Position"=collabel, "Query"=paste(querybed,aFeature,sep=":"), "Feature"=featuretype)
          }
@@ -1653,6 +1656,7 @@ plot_5parts_metagene <- function(queryFiles, gFeatures_list, inputFiles=NULL, ha
 #' @param scale logical, indicating whether the score matrix should be scaled to the range 0:1, so that samples with different baseline can be compared
 #' @param smooth logical, indicating whether the line should smoothed with a spline smoothing algorithm
 #' @param heatmap logical, indicating whether a heatmap of the score matrix should be generated
+#' @param heatRange a numerical vector of two elements, defining range for heatmap color ramp generation
 #' @param rmOutlier logical, indicating whether a row with abnormally high values in the score matrix should be removed
 #' @param outPrefix a string specifying output file prefix for plots (outPrefix.pdf)
 #' @param refPoint a string in c("start", "center", "end")
@@ -1678,7 +1682,7 @@ plot_5parts_metagene <- function(queryFiles, gFeatures_list, inputFiles=NULL, ha
 plot_reference_locus <- function(queryFiles, centerFiles, ext=c(-100,100), hl=c(0,0), shade=TRUE, smooth=FALSE,
                                  handleInputParams=NULL, verbose=FALSE, binSize=10, refPoint="center", Xlab="Center",
                                  inputFiles=NULL, stranded=TRUE, heatmap=TRUE, scale=FALSE, outPrefix=NULL,
-                                 rmOutlier=FALSE, transform=FALSE, statsMethod="wilcox.test", nc=2){
+                                 rmOutlier=FALSE, transform=FALSE, statsMethod="wilcox.test", heatRange=NULL, nc=2){
 
   queryLabels <- names(queryFiles)
   names(queryLabels) <- queryFiles
@@ -1805,7 +1809,7 @@ plot_reference_locus <- function(queryFiles, centerFiles, ext=c(-100,100), hl=c(
       if(heatmap){
          dataname <- paste(Ylab, queryLabel, centerLabel, sep=":")
          heatmap_list[[dataname]] <- draw_matrix_heatmap(fullMatrix, dataName=dataname, labels_col=collabel,
-                                                         levels_col=featureNames, verbose=verbose)
+                                                         levels_col=featureNames, ranges=heatRange, verbose=verbose)
       }
 
       if(smooth){
@@ -2069,7 +2073,7 @@ plot_reference_locus <- function(queryFiles, centerFiles, ext=c(-100,100), hl=c(
 
         if(heatmap){
            dataname <- paste(Ylab, ratiolabel, centerLabel, sep=":")
-           heatmap_list[[dataname]] <- draw_matrix_heatmap(fullMatrix, dataName=dataname, labels_col=collabel, levels_col=featureNames, verbose=verbose)
+           heatmap_list[[dataname]] <- draw_matrix_heatmap(fullMatrix, dataName=dataname, labels_col=collabel, levels_col=featureNames, ranges=heatRange, verbose=verbose)
         }
 
         if(hl[2] > hl[1]){
@@ -2886,7 +2890,7 @@ plot_peak_annotation <- function(peakFile, gtfFile, handleInputParams=NULL, five
     }
     gene_info_table <- gr2df(gff) %>% 
        filter(type == "transcript") %>%
-       select(chr, start, end, id, strand, transcript_id, gene_id, gene_name, all_of(geneType))
+       select(chr, start, end, name, strand, transcript_id, gene_id, gene_name, all_of(geneType))
 
     # To find out the distribution of the query regions across gene types:
     if(verbose) print("Computing barchart of gene types")
@@ -3359,7 +3363,7 @@ filter_by_nonoverlaps_stranded <- function(query, subject){
   if(length(overlaps) > min(length(query), length(subject))){
      message("Size of overlap is greater than min(sizeOfQuery, sizeOfSubject!")
   }
-  nonoverlaps <- query[!query %in% overlaps]
+  nonoverlaps <- GenomicRanges::setdiff(query, overlaps)
   invisible(nonoverlaps)
 }
 
