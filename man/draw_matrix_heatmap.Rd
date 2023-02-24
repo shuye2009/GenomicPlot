@@ -10,6 +10,7 @@ draw_matrix_heatmap(
   labels_col = NULL,
   levels_col = NULL,
   ranking = "Sum",
+  ranges = NULL,
   verbose = FALSE
 )
 }

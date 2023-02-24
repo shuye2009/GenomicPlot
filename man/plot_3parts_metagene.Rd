@@ -16,6 +16,7 @@ plot_3parts_metagene(
   outPrefix = "plots",
   heatmap = FALSE,
   rmOutlier = FALSE,
+  heatRange = NULL,
   transform = FALSE,
   nc = 2
 )
@@ -42,6 +43,8 @@ plot_3parts_metagene(
 \item{heatmap}{logical, indicating whether a heatmap of the score matrix should be generated}
 
 \item{rmOutlier}{logical, indicating whether a row with abnormally high values in the score matrix should be removed}
+
+\item{heatRange}{a numerical vector of two elements, defining range for heatmap color ramp generation}
 
 \item{transform}{logical, whether to log2 transform the data matrix}
 

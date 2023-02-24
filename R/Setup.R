@@ -26,7 +26,7 @@
 #' @importFrom tidyr pivot_longer
 #' @importFrom scales percent
 #' @importFrom IRanges mergeByOverlaps width
-#' @importFrom GenomicRanges trim shift resize promoters flank countOverlaps coverage granges grglist tileGenome
+#' @importFrom GenomicRanges trim shift resize promoters flank countOverlaps coverage granges grglist tileGenome setdiff
 #' @importFrom GenomicRanges binnedAverage findOverlaps GRanges GRangesList mcols mcols<- makeGRangesFromDataFrame
 #' @importFrom GenomicFeatures transcriptLengths exonsBy intronsByTranscript threeUTRsByTranscript fiveUTRsByTranscript
 #' @importFrom GenomicFeatures cdsBy genes transcripts makeTxDbFromGRanges makeTxDbFromGFF makeTxDbFromEnsembl
