@@ -8,9 +8,10 @@ draw_rank_plot(
   stat_df,
   xc = "Feature",
   yc = "Intensity",
-  Ylab = "Signal Intensity",
+  Ylab = yc,
   ecdf = TRUE,
-  rank = FALSE
+  rank = FALSE,
+  logy = FALSE
 )
 }
 \arguments{
@@ -25,6 +26,8 @@ draw_rank_plot(
 \item{ecdf}{logical, indicating using quantile instead of cumulative sum as y-axis}
 
 \item{rank}{logical, indicating using rank of values instead of value itself as x-axis}
+
+\item{logy}{logical, indicating whether to log10 transform yc}
 }
 \value{
 a ggplot object

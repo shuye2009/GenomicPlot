@@ -24,7 +24,8 @@ plot_start_end_feature(
   outPrefix = "plots",
   transform = FALSE,
   shade = TRUE,
-  nc = 2
+  nc = 2,
+  Ylab = "Signal intensity"
 )
 }
 \arguments{

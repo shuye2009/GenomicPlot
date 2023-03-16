@@ -18,6 +18,7 @@ plot_reference_locus_with_random(
   binSize = 10,
   refPoint = "center",
   Xlab = "Center",
+  Ylab = "Signal intensity",
   inputFiles = NULL,
   stranded = TRUE,
   scale = FALSE,

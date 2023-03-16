@@ -21,6 +21,7 @@ plot_start_end_reference_region(
   outPrefix = "plots",
   transform = TRUE,
   shade = TRUE,
+  Ylab = "Signal intensity",
   nc = 2
 )
 }

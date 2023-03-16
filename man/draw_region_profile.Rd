@@ -9,6 +9,7 @@ draw_region_profile(
   xc = "Position",
   yc = "Intensity",
   cn = "Query",
+  sn = "Reference",
   Ylab = "Signal Intensity",
   vx
 )

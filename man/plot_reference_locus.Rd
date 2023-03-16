@@ -7,6 +7,7 @@
 plot_reference_locus(
   queryFiles,
   centerFiles,
+  txdb = NULL,
   ext = c(-100, 100),
   hl = c(0, 0),
   shade = TRUE,
@@ -16,6 +17,7 @@ plot_reference_locus(
   binSize = 10,
   refPoint = "center",
   Xlab = "Center",
+  Ylab = "Signal intensity",
   inputFiles = NULL,
   stranded = TRUE,
   heatmap = TRUE,
@@ -31,7 +33,9 @@ plot_reference_locus(
 \arguments{
 \item{queryFiles}{a vector of sample file names. The file should be in .bam, .bed, .wig or .bw format, mixture of formats is allowed}
 
-\item{centerFiles}{a vector of reference file names. The file should be .bed format only}
+\item{centerFiles}{a named vector of reference file names or genomic features in  c("utr3", "utr5", "cds", "intron", "exon", "transcript", "gene"). The file should be in .bed format only}
+
+\item{txdb}{a TxDb object defined in the GenomicFeatures package.}
 
 \item{ext}{a vector of two integers defining upstream and downstream boundaries of the plot window, flanking the reference locus}
 

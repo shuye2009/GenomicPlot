@@ -15,13 +15,12 @@ extract_longest_tx(txdb, plot = FALSE)
 a vector of transcript ids
 }
 \description{
-Gene level computations require selecting one transcript per gene to avoid bias by genes with multiple isoforms.
-In ideal case, the most abundant transcript (principal or canonical isoform) should be chosen. However, the
+Gene level computations require selecting one transcript per gene to avoid bias by genes with multiple
+isoforms. In ideal case, the most abundant transcript (principal or canonical isoform) should be chosen. However, the
 most abundant isoform may vary depending on tissue type or physiological condition, the longest transcript is usually
 the principal isoform, and alternatively spliced isoforms are not. This method get the longest transcript for each
-gene. The longest transcript is defined as the isoform that has the longest CDS. In case of tie in the lengths of CDS,
-the one with longer transcript is selected. If the lengths of transcripts tie again, the transcript with smaller id
-is selected arbitrarily.
+gene. The longest transcript is defined as the isoform that has the longest transcript length. In case of tie, the one
+with longer CDS is selected. If the lengths of CDS tie again, the transcript with smaller id is selected arbitrarily.
 }
 \examples{
 txdb <- AnnotationDbi::loadDb(system.file("data", "txdb.sql", package="GenomicPlotData"))

@@ -79,7 +79,7 @@ impute_hm <- function(fullmatrix, verbose=FALSE){
    #minv <- median(fullmatrix[fullmatrix != 0])
    minv <- median(apply(fullmatrix, 2, mean))
    halfmin <- ifelse(minv>0, minv/2, minv*2)
-   fullmatrix[fullmatrix == 0] <- halfmin ##  to avoid take log of zero and use of pseudo numbers
+   fullmatrix[fullmatrix < halfmin] <- halfmin ##  to avoid take log of zero and use of pseudo numbers
 
    if(verbose) print(paste("Imputed value", halfmin, "\n\n"))
 
@@ -105,14 +105,15 @@ impute_hm <- function(fullmatrix, verbose=FALSE){
 #'
 process_scoreMatrix <- function(fullmatrix, scale=FALSE, rmOutlier=FALSE, transform=FALSE, verbose=FALSE){
 
+   #rn <- rownames(fullmatrix)
    inspect_matrix(fullmatrix, verbose=verbose)
 
    fullmatrix[is.infinite(fullmatrix)] <- 0
    fullmatrix[is.na(fullmatrix)] <- 0
 
-   fullmatrix <- impute_hm(fullmatrix)
+   fullmatrix <- impute_hm(fullmatrix, verbose)
    
-   inspect_matrix(fullmatrix, verbose=verbose)
+   inspect_matrix(fullmatrix, verbose)
 
    if(transform) {
       if(min(fullmatrix) < 0){
@@ -134,6 +135,7 @@ process_scoreMatrix <- function(fullmatrix, scale=FALSE, rmOutlier=FALSE, transf
    }
    fullmatrix[is.na(fullmatrix)] <- 0
 
+   #rownames(fullmatrix) <- rn
    invisible(fullmatrix)
 }
 

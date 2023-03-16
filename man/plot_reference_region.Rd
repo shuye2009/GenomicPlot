@@ -7,13 +7,14 @@
 plot_reference_region(
   queryFiles,
   centerFiles,
+  txdb = NULL,
+  regionName = "region",
   inputFiles = NULL,
   nbins = 100,
   handleInputParams = NULL,
   verbose = FALSE,
   scale = FALSE,
   heatmap = FALSE,
-  regionName = "region",
   fiveP = 1000,
   threeP = 1000,
   smooth = FALSE,
@@ -22,13 +23,19 @@ plot_reference_region(
   outPrefix = "plots",
   rmOutlier = FALSE,
   heatRange = NULL,
+  Ylab = "Signal intensity",
+  statsMethod = "wilcox.test",
   nc = 2
 )
 }
 \arguments{
 \item{queryFiles}{a named vector of sample file names. The file should be in .bam, .bed, .wig or .bw format, mixture of formats is allowed}
 
-\item{centerFiles}{a named vector of reference file names. The file should be .bed format only}
+\item{centerFiles}{a named vector of reference file names or genomic features in  c("utr3", "utr5", "cds", "intron", "exon", "transcript", "gene"). The file should be in .bed format only}
+
+\item{txdb}{a TxDb object defined in the GenomicFeatures package.}
+
+\item{regionName}{a string specifying the name of the center region in the plots}
 
 \item{inputFiles}{a named vector of input sample file names. The file should be in .bam, .bed, .wig or .bw format, mixture of formats is allowed}
 
@@ -41,8 +48,6 @@ plot_reference_region(
 \item{scale}{logical, indicating whether the score matrix should be scaled to the range 0:1, so that samples with different baseline can be compared}
 
 \item{heatmap}{logical, indicating whether a heatmap of the score matrix should be generated}
-
-\item{regionName}{a string specifying the name of the center region in the plots}
 
 \item{fiveP}{extension out of the 5' boundary of gene}
 
@@ -59,6 +64,8 @@ plot_reference_region(
 \item{rmOutlier}{logical, indicating whether a row with abnormally high values in the score matrix should be removed}
 
 \item{heatRange}{a numerical vector of two elements, defining range for heatmap color ramp generation}
+
+\item{statsMethod}{a string in c("wilcox.test", "t.test"), for pair-wise group comparisons}
 
 \item{nc}{integer, number of cores for parallel processing}
 }

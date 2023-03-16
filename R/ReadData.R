@@ -30,7 +30,7 @@
 
 handle_input <- function(inputFiles, handleInputParams=NULL, verbose=FALSE, nc=2){
 
-   if(is.null(handleInputParams)) handleInputParams=list(CLIP_reads=FALSE, fix_width=0, fix_point="center", useScore=FALSE, outRle=TRUE, norm=TRUE, useSizeFactor=FALSE, genome="hg19", verbose=FALSE)
+   if(is.null(handleInputParams)) handleInputParams=list(CLIP_reads=FALSE, fix_width=0, fix_point="center", useScore=FALSE, outRle=TRUE, norm=TRUE, useSizeFactor=FALSE, genome="hg19")
 
    original_outRle <- handleInputParams$outRle
    if(handleInputParams$useSizeFactor && length(inputFiles)>1){
@@ -40,7 +40,7 @@ handle_input <- function(inputFiles, handleInputParams=NULL, verbose=FALSE, nc=2
    outlist <- lapply(inputFiles, function(inputFile){
 
       namef <- names(inputFiles)[which(inputFiles==inputFile)]
-      if(grepl("\\.bed|BED|Bed|narrowPeak$", inputFile)){
+      if(grepl("\\.bed|BED|Bed|narrowPeak|broadPeak$", inputFile)){
          fileType <- "bed"
          if(verbose) print(paste("Reading", fileType, "file:", namef))
          out <- handle_bed(inputFile=inputFile, handleInputParams)

@@ -18,6 +18,7 @@ plot_5parts_metagene(
   heatmap = FALSE,
   heatRange = NULL,
   rmOutlier = FALSE,
+  Ylab = "Signal intensity",
   nc = 2
 )
 }
