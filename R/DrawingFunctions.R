@@ -39,7 +39,7 @@ draw_matrix_heatmap <- function(fullMatrix, dataName="geneData", labels_col=NULL
 
    if(verbose){
       vdataName <- gsub(":", "_", dataName, fixed=TRUE)
-      write.table(fullMatrix, paste(vdataName, "_matrix.tab", sep=""), row.names=FALSE, sep="\t", quote=FALSE)
+      write.table(fullMatrix, paste(vdataName, "_matrix.tab", sep=""), row.names=TRUE, col.names=NA, sep="\t", quote=FALSE)
    }
 
    if(is.null(labels_col)){
@@ -208,7 +208,7 @@ draw_region_name <- function(featureNames, scaled_bins, xmax){
 #'
 #'
 
-draw_region_profile <- function(plot_df, xc="Position", yc="Intensity", cn="Query", Ylab="Signal Intensity", vx){
+draw_region_profile <- function(plot_df, xc="Position", yc="Intensity", cn="Query", sn="Reference", Ylab="Signal Intensity", vx){
 
    p <- ggplot(plot_df, aes(x=.data[[xc]], y=.data[[yc]], color=.data[[cn]])) + scale_fill_npg() + scale_color_npg() +
       geom_line(size=2) + #geom_point(color="grey30", size=2) +
@@ -219,7 +219,8 @@ draw_region_profile <- function(plot_df, xc="Position", yc="Intensity", cn="Quer
             axis.title.x=element_blank(),
             axis.ticks.x=element_blank(),
             axis.text.x=element_blank(),
-            plot.margin=unit(c(1, 1, 0, 1), "lines"))
+            plot.margin=unit(c(1, 1, 0, 1), "lines")) +
+      ggtitle(unique(plot_df[[sn]]))
 
    return(p)
 }
@@ -285,10 +286,9 @@ draw_boxplot_logy <- function(stat_df, xc="Feature", yc="Intensity", fc=xc, comp
    
    if(logy == "logy"){
       stat_df[[yc]] <- log10(stat_df[[yc]] + 1)
-      if(Ylab==yc) Ylab <- paste0("log10 (",yc, ")")
-      #p <- p + scale_y_continuous(trans='log10', labels = scales::scientific)
-      #message("log scale")
+      Ylab <- paste0("log10 (", Ylab, ")")
    }
+   
    xlabs <- paste(levels(as.factor(stat_df[[xc]])),"\n(",table(stat_df[[xc]])/nf,")",sep="")
    ypos <- rep(max(stat_df[[yc]]), length(comp))*seq(1, 1+(length(comp)-1)*0.1, 0.1)
    outlier.shape = 19
@@ -435,6 +435,7 @@ draw_boxplot_wo_outlier <- function(stat_df, xc="Feature", yc="Intensity", fc=xc
 #' @param yc a string denoting column name for numeric data to be plotted
 #' @param comp a list of vectors denoting pair-wise comparisons to be performed between groups
 #' @param Ylab a string for y-axis label
+#' @param logy logical, indicating whether to log10 transform yc
 #'
 #' @return a ggplot object
 #' @note used by \code{plot_reference_locus}, \code{plot_reference_locus_with_random}
@@ -443,8 +444,12 @@ draw_boxplot_wo_outlier <- function(stat_df, xc="Feature", yc="Intensity", fc=xc
 #' @export draw_mean_se_barplot
 #'
 
-draw_mean_se_barplot <- function(stat_df, xc="Feature", yc="Intensity", comp=list(c(1,2)), Xlab=xc, Ylab=yc){
+draw_mean_se_barplot <- function(stat_df, xc="Feature", yc="Intensity", comp=list(c(1,2)), Xlab=xc, Ylab=yc, logy=FALSE){
    stat_df[[xc]] <- as.factor(stat_df[[xc]])
+   if(logy){
+      stat_df[[yc]] <- log10(stat_df[[yc]] + 1)
+      Ylab <- paste0("log10 (", Ylab, ")")
+   }
    
    stats <- aov_TukeyHSD(stat_df, xc, yc)
 
@@ -495,6 +500,7 @@ draw_mean_se_barplot <- function(stat_df, xc="Feature", yc="Intensity", comp=lis
 #' @param Ylab a string for y-axis label
 #' @param ecdf logical, indicating using quantile instead of cumulative sum as y-axis
 #' @param rank logical, indicating using rank of values instead of value itself as x-axis
+#' @param logy logical, indicating whether to log10 transform yc
 #' 
 #' @return a ggplot object
 #' @note used by \code{plot_reference_locus}, \code{plot_reference_locus_with_random}
@@ -514,8 +520,11 @@ draw_mean_se_barplot <- function(stat_df, xc="Feature", yc="Intensity", comp=lis
 #' }
 #'
 #' 
-draw_rank_plot <- function(stat_df, xc="Feature", yc="Intensity", Ylab="Signal Intensity", ecdf=TRUE, rank=FALSE){
-   
+draw_rank_plot <- function(stat_df, xc="Feature", yc="Intensity", Ylab=yc, ecdf=TRUE, rank=FALSE, logy=FALSE){
+   if(logy){
+      stat_df[[yc]] <- log10(stat_df[[yc]] + 1)
+      Ylab <- paste0("log10 (", Ylab, ")")
+   }
    if(ecdf){
       long_df <- stat_df %>%
          group_by(.data[[xc]]) %>%
@@ -613,7 +622,8 @@ draw_rank_plot <- function(stat_df, xc="Feature", yc="Intensity", Ylab="Signal I
 #' @param atitle a string for the title of the plot
 #' @param insert a integer denoting the width of the center region
 #' @param Ylab a string for y-axis label
-#' @param shade logical indicating whether to place a shaded rectangle around the point of interest
+#' @param shade logical, indicating whether to place a shaded rectangle around the point of interest
+#' @param stack logical, indicating whether to plot the number of valid (non-zero) data points in each bin 
 #'
 #' @return a ggplot object
 #' @note used by \code{plot_start_end_feature}, \code{plot_start_end_reference_region}
@@ -621,7 +631,7 @@ draw_rank_plot <- function(stat_df, xc="Feature", yc="Intensity", Ylab="Signal I
 #' @export draw_stacked_profile
 #'
 
-draw_stacked_profile <- function(plot_df, xc="Position", yc="Intensity", cn="Query", ext=c(0,0,0,0), hl=c(0,0,0,0), atitle="title", insert=0, Ylab="Signal Intensity", shade=FALSE){
+draw_stacked_profile <- function(plot_df, xc="Position", yc="Intensity", cn="Query", ext=c(0,0,0,0), hl=c(0,0,0,0), atitle="title", insert=0, Ylab="Signal Intensity", shade=FALSE, stack=TRUE){
 
    ylimits <- c(min(plot_df$lower), max(plot_df$upper))
    ylimits_intervals <- c(0, max(plot_df$Interval))
@@ -721,10 +731,20 @@ draw_stacked_profile <- function(plot_df, xc="Position", yc="Intensity", cn="Que
 
    pe_stack <- plot_grid(pe, pei, ncol = 1, align = "v", rel_heights = c(1, 0.25))
 
-   if(insert >0){
-      p <- plot_grid(ps_stack, pc_stack, pe_stack, ncol = 3, align = "h", rel_widths = c(1, 0.5, 0.9))
+   if(insert > 0){
+      if(stack){
+         p <- plot_grid(ps_stack, pc_stack, pe_stack, ncol = 3, align = "h", rel_widths = c(1, 0.5, 0.9))
+      }else{
+         p <- plot_grid(ps, pc, pe, ncol = 3, align = "h", rel_widths = c(1, 0.5, 0.9))
+      }
+         
    }else{
-      p <- plot_grid(ps_stack, pe_stack, ncol = , align = "h", rel_widths = c(1, 0.9))
+      if(stack){
+         p <- plot_grid(ps_stack, pe_stack, ncol = 2, align = "h", rel_widths = c(1, 0.9))
+      }else{
+         p <- plot_grid(ps, pe, ncol = 2, align = "h", rel_widths = c(1, 0.9))
+      }
+      
    }
    return(p)
 

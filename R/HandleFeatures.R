@@ -1,13 +1,12 @@
 
 #' @title Extract the longest transcript for each protein-coding genes
 #
-#' @description Gene level computations require selecting one transcript per gene to avoid bias by genes with multiple isoforms.
-#' In ideal case, the most abundant transcript (principal or canonical isoform) should be chosen. However, the
+#' @description Gene level computations require selecting one transcript per gene to avoid bias by genes with multiple
+#' isoforms. In ideal case, the most abundant transcript (principal or canonical isoform) should be chosen. However, the
 #' most abundant isoform may vary depending on tissue type or physiological condition, the longest transcript is usually
 #' the principal isoform, and alternatively spliced isoforms are not. This method get the longest transcript for each
-#' gene. The longest transcript is defined as the isoform that has the longest CDS. In case of tie in the lengths of CDS,
-#' the one with longer transcript is selected. If the lengths of transcripts tie again, the transcript with smaller id
-#' is selected arbitrarily.
+#' gene. The longest transcript is defined as the isoform that has the longest transcript length. In case of tie, the one
+#' with longer CDS is selected. If the lengths of CDS tie again, the transcript with smaller id is selected arbitrarily.
 #'
 #' @param txdb a TxDb object defined in the GenomicFeatures package
 #' @param plot logical, indicating whether feature length plots should be generated
@@ -24,15 +23,15 @@
 extract_longest_tx <- function(txdb, plot=FALSE){
    tl <- GenomicFeatures::transcriptLengths(txdb, with.utr5_len = TRUE, with.cds_len = TRUE, with.utr3_len = TRUE)
    pc <- tl[tl$cds_len > 0, ]  ## pc stands for protein-coding
-   ## choose tx with longest cds for each gene
-   longest_cds <- aggregate(pc$cds_len, list(pc$gene_id), max)
-   colnames(longest_cds) <- c("gene_id", "cds_len")
-   tx_longest_cds <- merge(pc, longest_cds)
+   ## choose tx with longest length for each gene
+   longest_tx <- aggregate(pc$tx_len, list(pc$gene_id), max)
+   colnames(longest_tx) <- c("gene_id", "tx_len")
+   tx_longest <- merge(pc, longest_tx)
 
-   ## for two tx of the same gene, if cds_len are same, choose longer tx_len
-   longest_tx <- aggregate(tx_longest_cds$tx_len, list(tx_longest_cds$gene_id, tx_longest_cds$cds_len), max)
-   colnames(longest_tx) <- c("gene_id", "cds_len", "tx_len")
-   longest_cdstx <- merge(longest_tx, tx_longest_cds)
+   ## for two tx of the same gene, if tx_len are same, choose longer cds_len
+   longest_cds <- aggregate(tx_longest$cds_len, list(tx_longest$gene_id, tx_longest$tx_len), max)
+   colnames(longest_cds) <- c("gene_id", "tx_len", "cds_len")
+   longest_cdstx <- merge(tx_longest, longest_cds)
 
    dup_genes <- longest_cdstx$gene_id[duplicated(longest_cdstx$gene_id)]
    dup_genestx <- longest_cdstx[longest_cdstx$gene_id %in% dup_genes,]
@@ -590,6 +589,14 @@ get_txdb_features <- function(txdb, fiveP=1000, dsTSS=300, threeP=1000){
 
 get_targeted_genes <- function(peak, features, stranded=TRUE){
    
+   precedence <- function(terms){
+      scope <- c("5'UTR", "CDS", "3'UTR", "Intron", "Promoter", "TTS")
+      rank <- seq(6)
+      names(rank) <- scope
+      pre <- names(rank[rank == min(rank[terms])])
+      return(pre)
+   }
+   
    num_peaks <- length(peak)
    num_genes <- length(unique(features$CDS$tx_name))
    
@@ -623,6 +630,9 @@ get_targeted_genes <- function(peak, features, stranded=TRUE){
    })
    
    annot_table <- bind_rows(annot_list)
+   annot_table <- annot_table %>%
+      group_by(chrPeak, startPeak, endPeak, strandPeak) %>%
+      filter(n() == 1 | feature_name == precedence(unique(feature_name)))
    
    annot_count <- as.data.frame(annot_table %>%
       group_by(tx_name) %>%

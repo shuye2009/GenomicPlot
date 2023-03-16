@@ -10,7 +10,8 @@ draw_mean_se_barplot(
   yc = "Intensity",
   comp = list(c(1, 2)),
   Xlab = xc,
-  Ylab = yc
+  Ylab = yc,
+  logy = FALSE
 )
 }
 \arguments{
@@ -23,6 +24,8 @@ draw_mean_se_barplot(
 \item{comp}{a list of vectors denoting pair-wise comparisons to be performed between groups}
 
 \item{Ylab}{a string for y-axis label}
+
+\item{logy}{logical, indicating whether to log10 transform yc}
 }
 \value{
 a ggplot object

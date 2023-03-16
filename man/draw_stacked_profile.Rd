@@ -14,7 +14,8 @@ draw_stacked_profile(
   atitle = "title",
   insert = 0,
   Ylab = "Signal Intensity",
-  shade = FALSE
+  shade = FALSE,
+  stack = TRUE
 )
 }
 \arguments{
@@ -36,7 +37,9 @@ draw_stacked_profile(
 
 \item{Ylab}{a string for y-axis label}
 
-\item{shade}{logical indicating whether to place a shaded rectangle around the point of interest}
+\item{shade}{logical, indicating whether to place a shaded rectangle around the point of interest}
+
+\item{stack}{logical, indicating whether to plot the number of valid (non-zero) data points in each bin}
 }
 \value{
 a ggplot object

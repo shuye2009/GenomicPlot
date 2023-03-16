@@ -10,6 +10,7 @@ plot_3parts_metagene(
   inputFiles = NULL,
   scale = FALSE,
   verbose = FALSE,
+  Ylab = "Signal intensity",
   handleInputParams = NULL,
   smooth = FALSE,
   stranded = TRUE,
