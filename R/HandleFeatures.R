@@ -563,7 +563,7 @@ get_txdb_features <- function(txdb, fiveP=1000, dsTSS=300, threeP=1000){
    invisible(features)
 }
 
-#' @title Get the number of peaks overlapping each feature of all protein-coding genes.
+#' @title Get the number of peaks overlapping each feature of all protein-coding genes
 #
 #' @description Annotate each peak with genomic features based on overlap, and produce summary statistics for distribution of peaks in features of protein-coding genes.
 #'
@@ -663,7 +663,7 @@ get_targeted_genes <- function(peak, features, stranded=TRUE){
    invisible(list(gene_table=annot_df, peak_table=annot_table, num_peak=num_peaks, num_gene=num_genes, feature_count=feature_counts, overlap_peak=overlap_peaks, overlap_gene=overlap_genes))
 }
 
-#' @title Make TxDb object from a GTF file for a subset of genes.
+#' @title Make TxDb object from a GTF file for a subset of genes
 #
 #' @description Make a partial TxDb object given a GTF file and a list of gene names in a file or in a character vector.
 #'
@@ -687,9 +687,9 @@ make_subTxDb_from_GTF <- function(gtfFile, geneList, geneCol=1){
    return(TxDb)
 }
 
-#' @title Translate gene names to transcript ids using a GTF file for a subset of genes.
+#' @title Translate gene names to transcript ids using a GTF file for a subset of genes
 #
-#' @description Given a list of gene names in a file or in a character vector, turn them into a vector of transcript ids
+#' @description Given a list of gene names in a file or in a character vector, turn them into a vector of transcript ids.
 #'
 #' @param gtfFfile path to a GTF file
 #' @param geneList path to a line-delimited text file with one gene name on each line, or a character vector of gene names
@@ -712,3 +712,27 @@ gene2tx <- function(gtfFile, geneList, geneCol=1){
    return(tx)
 }
 
+#' @title Check constraints of genomic ranges
+#' @description Make sure the coordinates of GRanges are within the boundaries of chromosomes, and trim anything that goes beyound. Also, remove entries whose seqname is not the seqname of a query GRanges.
+#' 
+#' @param gr a GenomicRanges object
+#' @param genome genomic version name such as "hg18"
+#' @param queryGr a RleList object used as a query against gr
+#' 
+#' @return a GRanges object
+#' @author Shuye Pu
+#' 
+#' @export check_constraints
+#' 
+check_constraints <- function(gr, genome, queryRle=NULL){
+   seqInfo <- Seqinfo(genome=genome)
+   len <- seqlengths(seqInfo)
+   
+   end(gr)[end(gr)>len[as.vector(seqnames(gr))]] <- len[as.vector(seqnames(gr))][end(gr)>len[as.vector(seqnames(gr))]]
+   
+   if(!is.null(queryRle)){
+      gr <- gr[as.vector(seqnames(gr)) %in% names(queryRle)]
+   }
+    
+   return(gr)
+}

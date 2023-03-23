@@ -2,7 +2,7 @@
 % Please edit documentation in R/HandleFeatures.R
 \name{make_subTxDb_from_GTF}
 \alias{make_subTxDb_from_GTF}
-\title{Make TxDb object from a GTF file for a subset of genes.}
+\title{Make TxDb object from a GTF file for a subset of genes}
 \usage{
 make_subTxDb_from_GTF(gtfFile, geneList, geneCol = 1)
 }

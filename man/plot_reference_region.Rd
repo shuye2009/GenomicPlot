@@ -15,7 +15,7 @@ plot_reference_region(
   verbose = FALSE,
   scale = FALSE,
   heatmap = FALSE,
-  fiveP = 1000,
+  fiveP = -1000,
   threeP = 1000,
   smooth = FALSE,
   stranded = TRUE,
@@ -49,9 +49,9 @@ plot_reference_region(
 
 \item{heatmap}{logical, indicating whether a heatmap of the score matrix should be generated}
 
-\item{fiveP}{extension out of the 5' boundary of gene}
+\item{fiveP}{an integer, indicating extension out or inside of the 5' boundary of gene by negative or positive number}
 
-\item{threeP}{extension out of the 3' boundary of gene}
+\item{threeP}{an integer, indicating extension out or inside of the 5' boundary of gene by positive or negative number}
 
 \item{smooth}{logical, indicating whether the line should smoothed with a spline smoothing algorithm}
 

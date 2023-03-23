@@ -968,8 +968,8 @@ plot_3parts_metagene <- function(queryFiles, gFeatures, inputFiles=NULL, scale=F
 #' @param txdb a TxDb object defined in the GenomicFeatures package.
 #' @param inputFiles a named vector of input sample file names. The file should be in .bam, .bed, .wig or .bw format, mixture of formats is allowed
 #' @param nbins an integer defines the total number of bins
-#' @param fiveP extension out of the 5' boundary of gene
-#' @param threeP extension out of the 3' boundary of gene
+#' @param fiveP an integer, indicating extension out or inside of the 5' boundary of gene by negative or positive number 
+#' @param threeP an integer, indicating extension out or inside of the 5' boundary of gene by positive or negative number
 #' @param stranded logical, indicating whether the strand of the feature should be considered
 #' @param scale logical, indicating whether the score matrix should be scaled to the range 0:1, so that samples with different baseline can be compared
 #' @param smooth logical, indicating whether the line should smoothed with a spline smoothing algorithm
@@ -994,7 +994,7 @@ plot_3parts_metagene <- function(queryFiles, gFeatures, inputFiles=NULL, scale=F
 #'
 #' @export plot_reference_region
 
-plot_reference_region <- function(queryFiles, centerFiles, txdb=NULL, regionName="region", inputFiles=NULL, nbins=100, handleInputParams=NULL, verbose=FALSE, scale=FALSE, heatmap=FALSE, fiveP=1000, threeP=1000, smooth=FALSE, stranded=TRUE, transform=FALSE, outPrefix="plots", rmOutlier=FALSE, heatRange=NULL, Ylab="Signal intensity", statsMethod="wilcox.test", nc=2){
+plot_reference_region <- function(queryFiles, centerFiles, txdb=NULL, regionName="region", inputFiles=NULL, nbins=100, handleInputParams=NULL, verbose=FALSE, scale=FALSE, heatmap=FALSE, fiveP=-1000, threeP=1000, smooth=FALSE, stranded=TRUE, transform=FALSE, outPrefix="plots", rmOutlier=FALSE, heatRange=NULL, Ylab="Signal intensity", statsMethod="wilcox.test", nc=2){
 
   if(!is.null(outPrefix)){
     pdf(paste(outPrefix, "pdf", sep="."), height=8, width=12)
@@ -1037,18 +1037,18 @@ plot_reference_region <- function(queryFiles, centerFiles, txdb=NULL, regionName
         
      }else if(file.exists(featureName)){
         feature <- handle_input(featureName, bedparam, nc=nc)[[1]]
-        centerInputs[[name(featureName)]] <- feature
-        centerLabels[featureName] <- names(featureName)
+        centerInputs[[featureName]] <- feature
+        centerLabels[featureName] <- names(centerFiles[centerFiles==featureName])
      }else{
         stop(paste(featureName, "is not supported!"))
      }
    }
   
 
-  five <- -fiveP/1000
+  five <- fiveP/1000
   five <- paste0(five, "K")
-  fiveL <- fiveP
-  if(fiveP<=0){fiveL <- 0}
+  fiveL <- -fiveP
+  if(fiveP>=0){fiveL <- 0}
   three <- threeP/1000
   three <- paste0(three, "K")
   threeL <- threeP
@@ -1083,9 +1083,11 @@ plot_reference_region <- function(queryFiles, centerFiles, txdb=NULL, regionName
       if(verbose) print(paste("centerLabel", centerLabel))
       centerInput <- centerInputs[[centerFile]]
       centerGr <- centerInput$query
-      if(fiveP < 0 && threeP < 0){ # to avoid generating negative width in the narrow function below
+      centerGr <- check_constraints(centerGr, handleInputParams$genome, queryRegions)
+      
+      if(fiveP > 0 && threeP < 0){ # to avoid generating negative width in the narrow function below
          centerGr <- centerGr[width(centerGr) > (abs(fiveP) + abs(threeP))]
-      }else if(fiveP < 0){
+      }else if(fiveP > 0){
          centerGr <- centerGr[width(centerGr) > abs(fiveP)]
       }else if(threeP < 0){
          centerGr <- centerGr[width(centerGr) > abs(threeP)]
@@ -1095,23 +1097,32 @@ plot_reference_region <- function(queryFiles, centerFiles, txdb=NULL, regionName
 
       upstreamGr <- flank(centerGr, width=fiveL, start=TRUE, both=FALSE, use.names=TRUE, ignore.strand=FALSE)
       downstreamGr <- flank(centerGr, width=threeL, start=FALSE, both=FALSE, use.names=TRUE, ignore.strand=FALSE)
+      upstreamGr <- check_constraints(upstreamGr, handleInputParams$genome, queryRegions)
+      downstreamGr <- check_constraints(downstreamGr, handleInputParams$genome, queryRegions)
       
-      if(fiveP < 0){
-         centerGrPlus <- narrow(centerGrPlus, start=(fiveP*-1), end=NA)
+      if(fiveP > 0){
+         centerGrPlus <- narrow(centerGrPlus, start=fiveP, end=NA)
          centerGrMinus <- narrow(centerGrMinus, start=NA, end=fiveP)
       }
       if(threeP < 0){
          centerGrPlus <- narrow(centerGrPlus, start=NA, end=threeP)
-         centerGrMinus <- narrow(centerGrMinus, start=threeP*-1, end=NA)
+         centerGrMinus <- narrow(centerGrMinus, start=-threeP, end=NA)
       }
       centerGr <- c(centerGrPlus, centerGrMinus)
       centerGr <- centerGr[width(centerGr) >= scaled_bins[regionName]]
       
       
-      windowRegions <- split(centerGr, f=factor(seq(1:length(centerGr))))
-      windowUp <- split(upstreamGr, f=factor(seq(1:length(upstreamGr))))
-      windowDown <- split(downstreamGr, f=factor(seq(1:length(downstreamGr))))
-
+      if(fiveP < 0 && threeP > 0){
+         commonNames <- Reduce(intersect, list(names(upstreamGr), names(downstreamGr), names(centerGr)))
+         
+         upstreamGr <- upstreamGr[commonNames]
+         downstreamGr <- downstreamGr[commonNames]
+         centerGr <- centerGr[commonNames]  
+      }
+      
+      windowRegions <- split(centerGr, f=factor(names(centerGr)))
+      windowUp <- split(upstreamGr, f=factor(names(upstreamGr)))
+      windowDown <- split(downstreamGr, f=factor(names(downstreamGr)))
       windowRs <- list(windowUp, windowRegions, windowDown)
       names(windowRs) <- featureNames
 
@@ -1155,6 +1166,7 @@ plot_reference_region <- function(queryFiles, centerFiles, txdb=NULL, regionName
             as genomation will remvove all feature windows outside chromosome boundaries")
       }else{
          featureMatrix <- as.matrix(bind_cols(scoreMatrix_list[[queryLabel]][[centerLabel]]))
+         rownames(featureMatrix) <- rownames(scoreMatrix_list[[queryLabel]][[centerLabel]][[1]])
          featureMatrix <- process_scoreMatrix(featureMatrix, scale=scale, rmOutlier=rmOutlier, transform=transform, verbose=verbose)
          colm <- apply(featureMatrix, 2, mean)
          colsd <- apply(featureMatrix, 2, sd)
@@ -1176,8 +1188,9 @@ plot_reference_region <- function(queryFiles, centerFiles, txdb=NULL, regionName
          names(collabel) <- featuretype
 
          if(heatmap){
+           
             dataname <- paste(Ylab, queryLabel, centerLabel, sep=":")
-            heatmap_list[dataname] <- draw_matrix_heatmap(featureMatrix, dataName=dataname, labels_col=collabel, levels_col=featureNames, ranges=heatRange, verbose=verbose)
+            heatmap_list[dataname] <- draw_matrix_heatmap(featureMatrix, dataName=dataname, labels_col=collabel, levels_col=names(scaled_bins[scaled_bins>0]), ranges=heatRange, verbose=verbose)
          }
 
          plot_df <- data.frame("Intensity"=colm, "sd"=colsd, "se"=colse, "Position"=collabel, "Query"=querybed, "Reference"=centerbed, "Feature"=featuretype)
@@ -1303,16 +1316,18 @@ plot_reference_region <- function(queryFiles, centerFiles, txdb=NULL, regionName
 
     for(centerFile in centerFiles){
       centerLabel <- centerLabels[centerFile]
-      for(regionName in featureNames){
-        for(i in seq_along(ratiolabels)){
-          rm <- ratioMatrix_list[[ratiolabels[i]]][[centerLabel]][[regionName]]
-          im <- inputMatrix_list[[inputLabels[i]]][[centerLabel]][[regionName]]
-          minrow <- min(nrow(rm), nrow(im))
-
-          fullMatrix <- rm[1:minrow,]/im[1:minrow,]
-
-          ratioMatrix_list[[ratiolabels[i]]][[centerLabel]][[regionName]] <- fullMatrix
-        }
+      for(featureName in featureNames){
+         if(scaled_bins[featureName]> 0){
+            for(i in seq_along(ratiolabels)){
+               rm <- ratioMatrix_list[[ratiolabels[i]]][[centerLabel]][[featureName]]
+               im <- inputMatrix_list[[inputLabels[i]]][[centerLabel]][[featureName]]
+               commonrow <- intersect(rownames(rm), rownames(im))
+               
+               fullMatrix <- rm[commonrow,]/im[commonrow,]
+               
+               ratioMatrix_list[[ratiolabels[i]]][[centerLabel]][[featureName]] <- fullMatrix
+            }
+         }
       }
     }
 
@@ -1335,6 +1350,7 @@ plot_reference_region <- function(queryFiles, centerFiles, txdb=NULL, regionName
             as genomation will remvove all feature windows outside chromosome boundaries")
         }else{
            featureMatrix <- as.matrix(bind_cols(scoreMatrix_list[[ratiolabel]][[centerLabel]]))
+           rownames(featureMatrix) <- rownames(scoreMatrix_list[[ratiolabel]][[centerLabel]][[1]])
            featureMatrix <- process_scoreMatrix(featureMatrix, scale=scale, rmOutlier=rmOutlier, transform=transform, verbose=verbose)
            colm <- apply(featureMatrix, 2, mean)
            colsd <- apply(featureMatrix, 2, sd)
@@ -1357,7 +1373,7 @@ plot_reference_region <- function(queryFiles, centerFiles, txdb=NULL, regionName
 
            if(heatmap){
               dataname <- paste(Ylab, ratiolabel, centerLabel, sep=":")
-              heatmap_list[dataname] <- draw_matrix_heatmap(featureMatrix, dataName=dataname, labels_col=collabel, levels_col=featureNames, ranges=heatRange, verbose=verbose)
+              heatmap_list[dataname] <- draw_matrix_heatmap(featureMatrix, dataName=dataname, labels_col=collabel, levels_col=names(scaled_bins[scaled_bins>0]), ranges=heatRange, verbose=verbose)
            }
            plot_df <- data.frame("Intensity"=colm, "sd"=colsd, "se"=colse, "Position"=collabel, "Query"=ratiobed, "Reference"=centerbed, "Feature"=featuretype)
         }
@@ -1904,8 +1920,8 @@ plot_reference_locus <- function(queryFiles, centerFiles, txdb=NULL, ext=c(-100,
         
      }else if(file.exists(featureName)){
         feature <- handle_input(featureName, bedparam, nc=nc)[[1]]
-        centerInputs[[name(featureName)]] <- feature
-        centerLabels[featureName] <- names(featureName)
+        centerInputs[[featureName]] <- feature
+        centerLabels[featureName] <- names(centerFiles[centerFiles==featureName])
      }else{
         stop(paste(featureName, "is not supported!"))
      }
@@ -1932,11 +1948,12 @@ plot_reference_locus <- function(queryFiles, centerFiles, txdb=NULL, ext=c(-100,
 
       if(refPoint %in% c("center", "start", "end")){
          windowRegions <- resize(centerGr, width = 1, fix = refPoint)
-         windowRegions <- trim(promoters(windowRegions, upstream = -ext[1], downstream = ext[2]))
+         windowRegions <- promoters(windowRegions, upstream = -ext[1], downstream = ext[2])
+         windowRegions <- check_constraints(windowRegions, handleInputParams$genome, queryRegions)
       }else{
         stop("invalid reference point! Must be one of c('center', 'start', 'end')")
       }
-      windowRs <- as(split(windowRegions, f=factor(seq(1:length(centerGr)))), "GRangesList")
+      windowRs <- as(split(windowRegions, f=factor(names(windowRegions))), "GRangesList")
 
       if(verbose) print(paste("number of window regions", length(windowRs)))
 
@@ -1944,7 +1961,7 @@ plot_reference_locus <- function(queryFiles, centerFiles, txdb=NULL, ext=c(-100,
 
       fullMatrix <- parallel_scoreMatrixBin(queryRegions, windowRs, bin_num, bin_op, weight_col, stranded, nc=nc)
       colnames(fullMatrix) <- as.character(colLabel)
-      rownames(fullMatrix) <- names(centerGr)
+      rownames(fullMatrix) <- names(windowRegions)
 
       scoreMatrix_list[[queryLabel]][[centerLabel]] <- fullMatrix
 
