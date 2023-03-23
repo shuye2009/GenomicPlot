@@ -11,7 +11,8 @@ draw_mean_se_barplot(
   comp = list(c(1, 2)),
   Xlab = xc,
   Ylab = yc,
-  logy = FALSE
+  logy = FALSE,
+  Ylim = NULL
 )
 }
 \arguments{

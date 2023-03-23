@@ -39,7 +39,7 @@ draw_matrix_heatmap <- function(fullMatrix, dataName="geneData", labels_col=NULL
 
    if(verbose){
       vdataName <- gsub(":", "_", dataName, fixed=TRUE)
-      write.table(fullMatrix, paste(vdataName, "_matrix.tab", sep=""), row.names=TRUE, col.names=NA, sep="\t", quote=FALSE)
+      write.table(fullMatrix, paste(vdataName, "_matrix.tab", sep=""), row.names=TRUE, col.names=TRUE, sep="\t", quote=FALSE)
    }
 
    if(is.null(labels_col)){
@@ -444,7 +444,7 @@ draw_boxplot_wo_outlier <- function(stat_df, xc="Feature", yc="Intensity", fc=xc
 #' @export draw_mean_se_barplot
 #'
 
-draw_mean_se_barplot <- function(stat_df, xc="Feature", yc="Intensity", comp=list(c(1,2)), Xlab=xc, Ylab=yc, logy=FALSE){
+draw_mean_se_barplot <- function(stat_df, xc="Feature", yc="Intensity", comp=list(c(1,2)), Xlab=xc, Ylab=yc, logy=FALSE, Ylim=NULL){
    stat_df[[xc]] <- as.factor(stat_df[[xc]])
    if(logy){
       stat_df[[yc]] <- log10(stat_df[[yc]] + 1)
@@ -477,6 +477,10 @@ draw_mean_se_barplot <- function(stat_df, xc="Feature", yc="Intensity", comp=lis
       labs(y=Ylab, x=Xlab, caption="post hoc TukeyHSD test") +
       scale_x_discrete(labels = means_se$labelx) +
       ggtitle(label="Mean + SE" , subtitle=paste("ANOVA p-value =",format(stats$ANOVA, digits=3)))
+   
+   if(!is.null(Ylim)){
+      p <- p + coord_cartesian(ylim=Ylim)
+   }
    
    stats$HSD[,1:3] <- round(stats$HSD[,1:3], digits=3)
    stats$HSD[,4] <- format(stats$HSD[,4], digits=3)

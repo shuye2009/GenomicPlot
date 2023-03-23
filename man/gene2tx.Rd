@@ -2,7 +2,7 @@
 % Please edit documentation in R/HandleFeatures.R
 \name{gene2tx}
 \alias{gene2tx}
-\title{Translate gene names to transcript ids using a GTF file for a subset of genes.}
+\title{Translate gene names to transcript ids using a GTF file for a subset of genes}
 \usage{
 gene2tx(gtfFile, geneList, geneCol = 1)
 }
@@ -15,7 +15,7 @@ gene2tx(gtfFile, geneList, geneCol = 1)
 a vector
 }
 \description{
-Given a list of gene names in a file or in a character vector, turn them into a vector of transcript ids
+Given a list of gene names in a file or in a character vector, turn them into a vector of transcript ids.
 }
 \author{
 Shuye Pu

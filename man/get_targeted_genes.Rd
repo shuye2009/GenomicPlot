@@ -2,7 +2,7 @@
 % Please edit documentation in R/HandleFeatures.R
 \name{get_targeted_genes}
 \alias{get_targeted_genes}
-\title{Get the number of peaks overlapping each feature of all protein-coding genes.}
+\title{Get the number of peaks overlapping each feature of all protein-coding genes}
 \usage{
 get_targeted_genes(peak, features, stranded = TRUE)
 }

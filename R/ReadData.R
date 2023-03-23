@@ -200,7 +200,9 @@ handle_bed <- function(inputFile, handleInputParams=NULL){
    seqinfo(queryRegions) <- seqInfo
 
    libsize <- sum(queryRegions$score, na.rm=TRUE)
-
+  
+   if("name" %in% colnames(mcols(queryRegions))) names(queryRegions) <- queryRegions$name
+  
    if(handleInputParams$outRle){
       queryRegions <- coverage(queryRegions, weight=weight_col)
       seqinfo(queryRegions) <- seqInfo
@@ -257,6 +259,7 @@ handle_bam <- function(inputFile, handleInputParams=NULL){
    queryRegions <- queryRegions[as.vector(seqnames(queryRegions)) %in% seqnames(seqInfo)]
    seqlevels(queryRegions) <- seqlevels(seqInfo)
    seqinfo(queryRegions) <- seqInfo
+   
 
    if(handleInputParams$outRle){
       queryRegions <- coverage(queryRegions, weight= weight_col)
