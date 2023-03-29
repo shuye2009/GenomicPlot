@@ -58,6 +58,7 @@ plot_5parts_metagene(queryFiles=queryfiles,
 ```
 
 This example shows you how to visualize your iCLIP_peaks around ChIP-seq peaks. The resulting figure is 'test_plot_reference_locus.pdf'.
+![image of plot_5parts_metagene](https://github.com/shuye2009/GenomicPlot/blob/master/test_plot_5parts_metagene.pdf)
 
 ![image1](./assets/test_plot_5parts_metagene-1.png)
 ![image2](./assets/test_plot_5parts_metagene-2.png)
