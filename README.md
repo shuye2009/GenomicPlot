@@ -21,7 +21,7 @@ devtools::install_github("shuye2009/GenomicPlot")
 
 ## Examples
 
-This is a basic example which shows you how to visualize your ChIP-seq peaks in different parts of genes, The resulting figure is 'test_plot_5parts_metagene.pdf'.
+The following is a basic example which shows you how to visualize your ChIP-seq peaks in different parts of genes. The resulting figure is 'test_plot_5parts_metagene.pdf'.
 
 ``` r
 
@@ -56,11 +56,11 @@ plot_5parts_metagene(queryFiles=queryfiles,
                      nc=4)
                      
 ```
-
-This example shows you how to visualize your iCLIP_peaks around ChIP-seq peaks. The resulting figure is 'test_plot_reference_locus.pdf'.
-
 ![image1](./assets/test_plot_5parts_metagene-1.png)
 ![image2](./assets/test_plot_5parts_metagene-2.png)
+
+The following example shows you how to visualize your iCLIP_peaks around ChIP-seq peaks. The resulting figure is 'test_plot_reference_locus.pdf'.
+
 
 ``` r
 
@@ -90,8 +90,10 @@ plot_reference_locus(queryFiles=queryfiles[c(1,3)],
                      nc=4)
                      
 ```
+![image1](./assets/test_plot_reference_locus-1.png)
+![image2](./assets/test_plot_reference_locus-2.png)
 
-This example shows you how to annotate ChIP-seq peaks. The resulting figure is 'test_plot_peak_annotation.pdf', and the detailed annotation is in the table "summitPeak_targeted_annotated_gene.tab".
+The following example shows you how to annotate ChIP-seq peaks. The resulting figure is 'test_plot_peak_annotation.pdf', and the detailed annotation is in the table "summitPeak_targeted_annotated_gene.tab".
 
 ``` r
 
@@ -111,6 +113,9 @@ plot_peak_annotation(peakFile=queryfiles[2],
                      verbose=FALSE)
 
 ```
+![image1](./assets/test_plot_peak_annotation-1.png)
+![image2](./assets/test_plot_peak_annotation-2.png)
+![image3](./assets/test_plot_peak_annotation-3.png)
 
 For more examples, please check out the tests/test_output directory.
 
