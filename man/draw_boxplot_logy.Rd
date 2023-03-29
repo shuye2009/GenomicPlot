@@ -14,7 +14,8 @@ draw_boxplot_logy(
   Xlab = xc,
   Ylab = yc,
   logy = "linear",
-  nf = 1
+  nf = 1,
+  pc = 1
 )
 }
 \arguments{
@@ -32,9 +33,11 @@ draw_boxplot_logy(
 
 \item{Ylab}{a string for y-axis label}
 
-\item{logy}{character string in c(linear, logy, wo), "wo" = without outliers}
+\item{logy}{character string in c(linear, logy, log2, log10, wo), "wo" = without outliers}
 
-\item{nf}{a integr normalizing factor for correct count of observations when the data table is produced by pivot_longer, equals to the number of columns in cols argument of pivot_longer}
+\item{nf}{a integer normalizing factor for correct count of observations when the data table is produced by pivot_longer, equals to the number of columns in cols argument of pivot_longer}
+
+\item{pc}{pseudo-count for log transformation}
 }
 \value{
 a ggplot object

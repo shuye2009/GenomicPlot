@@ -7,7 +7,7 @@
 #' @import GenomicRanges
 #' @importFrom parallel detectCores clusterExport parLapply makeCluster stopCluster
 #' @importFrom dplyr bind_cols bind_rows mutate filter arrange %>% group_by select count full_join left_join desc inner_join
-#' @importFrom dplyr rename_with summarize n_distinct lead
+#' @importFrom dplyr rename_with summarize n_distinct lead n
 #' @importFrom plyranges filter_by_overlaps
 #' @importFrom GenomicAlignments readGAlignments
 #' @importFrom GenomeInfoDb Seqinfo seqinfo seqlevels seqnames seqinfo<- seqlevels<- seqnames<-

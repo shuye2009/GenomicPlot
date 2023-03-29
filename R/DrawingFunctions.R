@@ -272,8 +272,9 @@ draw_locus_profile <- function(plot_df, xc="Position", yc="Intensity", cn="Query
 #' @param Ylab a string for y-axis label
 #' @param comp a list of vectors denoting pair-wise comparisons to be performed between groups
 #' @param stats the name of pair-wise statistical tests, like t.test or wilcox.test
-#' @param logy character string in c(linear, logy, wo), "wo" = without outliers
-#' @param nf a integr normalizing factor for correct count of observations when the data table is produced by pivot_longer, equals to the number of columns in cols argument of pivot_longer
+#' @param logy character string in c(linear, logy, log2, log10, wo), "wo" = without outliers
+#' @param nf a integer normalizing factor for correct count of observations when the data table is produced by pivot_longer, equals to the number of columns in cols argument of pivot_longer
+#' @param pc pseudo-count for log transformation
 #'
 #' @return a ggplot object
 #' @note used by \code{plot_reference_locus}, \code{plot_reference_locus_with_random}
@@ -282,11 +283,17 @@ draw_locus_profile <- function(plot_df, xc="Position", yc="Intensity", cn="Query
 #' @export draw_boxplot_logy
 #'
 
-draw_boxplot_logy <- function(stat_df, xc="Feature", yc="Intensity", fc=xc, comp=list(c(1,2)), stats="wilcox.test", Xlab=xc, Ylab=yc, logy="linear", nf=1){
+draw_boxplot_logy <- function(stat_df, xc="Feature", yc="Intensity", fc=xc, comp=list(c(1,2)), stats="wilcox.test", Xlab=xc, Ylab=yc, logy="linear", nf=1, pc=1){
    
    if(logy == "logy"){
-      stat_df[[yc]] <- log10(stat_df[[yc]] + 1)
-      Ylab <- paste0("log10 (", Ylab, ")")
+      stat_df[[yc]] <- log(stat_df[[yc]] + pc)
+      Ylab <- paste0("log(", Ylab, ")")
+   }else if(logy == "log2"){
+      stat_df[[yc]] <- log2(stat_df[[yc]] + pc)
+      Ylab <- paste0("log2(", Ylab, ")")
+   }else if(logy == "log10"){
+      stat_df[[yc]] <- log10(stat_df[[yc]] + pc)
+      Ylab <- paste0("log10(", Ylab, ")")
    }
    
    xlabs <- paste(levels(as.factor(stat_df[[xc]])),"\n(",table(stat_df[[xc]])/nf,")",sep="")
@@ -339,7 +346,7 @@ draw_boxplot_logy <- function(stat_df, xc="Feature", yc="Intensity", fc=xc, comp
          geom_signif(comparisons = comp, test=stats, map_signif_level=TRUE, y_position=ypos) +
          scale_x_continuous(breaks = mid(sort(unique(stat_df$x2))), labels = xlabs) 
    }
-   if(logy == "logy"){
+   if(logy %in% c("logy", "log2", "log10")){
       message("log scale")
    }else if(logy == "linear"){
       message("linear scale")
@@ -347,7 +354,7 @@ draw_boxplot_logy <- function(stat_df, xc="Feature", yc="Intensity", fc=xc, comp
       p <- p + coord_cartesian(ylim=lim)
       message("without outliers")
    }else{
-      stop("plot type is not supported, use one of c(linear, logy, wo) only")
+      stop("plot type is not supported, use one of c(linear, logy, log2, log10, wo) only")
    }
    
    return(p)
@@ -435,7 +442,9 @@ draw_boxplot_wo_outlier <- function(stat_df, xc="Feature", yc="Intensity", fc=xc
 #' @param yc a string denoting column name for numeric data to be plotted
 #' @param comp a list of vectors denoting pair-wise comparisons to be performed between groups
 #' @param Ylab a string for y-axis label
-#' @param logy logical, indicating whether to log10 transform yc
+#' @param logy character string in c(linear, logy, log2, log10)
+#' @param nf a integer normalizing factor for correct count of observations when the data table is produced by pivot_longer, equals to the number of columns in cols argument of pivot_longer
+#' @param pc pseudo-count for log transformation
 #'
 #' @return a ggplot object
 #' @note used by \code{plot_reference_locus}, \code{plot_reference_locus_with_random}
@@ -444,11 +453,17 @@ draw_boxplot_wo_outlier <- function(stat_df, xc="Feature", yc="Intensity", fc=xc
 #' @export draw_mean_se_barplot
 #'
 
-draw_mean_se_barplot <- function(stat_df, xc="Feature", yc="Intensity", comp=list(c(1,2)), Xlab=xc, Ylab=yc, logy=FALSE, Ylim=NULL){
+draw_mean_se_barplot <- function(stat_df, xc="Feature", yc="Intensity", comp=list(c(1,2)), Xlab=xc, Ylab=yc, logy="logy", Ylim=NULL, nf=1, pc=1){
    stat_df[[xc]] <- as.factor(stat_df[[xc]])
-   if(logy){
-      stat_df[[yc]] <- log10(stat_df[[yc]] + 1)
-      Ylab <- paste0("log10 (", Ylab, ")")
+   if(logy == "logy"){
+      stat_df[[yc]] <- log(stat_df[[yc]] + pc)
+      Ylab <- paste0("log(", Ylab, ")")
+   }else if(logy == "log2"){
+      stat_df[[yc]] <- log2(stat_df[[yc]] + pc)
+      Ylab <- paste0("log2(", Ylab, ")")
+   }else if(logy == "log10"){
+      stat_df[[yc]] <- log10(stat_df[[yc]] + pc)
+      Ylab <- paste0("log10(", Ylab, ")")
    }
    
    stats <- aov_TukeyHSD(stat_df, xc, yc)
@@ -463,7 +478,7 @@ draw_mean_se_barplot <- function(stat_df, xc="Feature", yc="Intensity", comp=lis
                 lower_limit=mean_Intensity-se
       )
    means_se <- means_se %>%
-      mutate(labelx=paste0(.data[[xc]], "\n(", N_Intensity, ")")) ## now .data is means_se, not stat_df anymore
+      mutate(labelx=paste0(.data[[xc]], "\n(", N_Intensity/nf, ")")) ## now .data is means_se, not stat_df anymore
    levels(means_se[[xc]]) <- levels(stat_df[[xc]])
 
    p <- ggplot(means_se, aes(x=.data[[xc]], y=mean_Intensity, fill=.data[[xc]])) +
@@ -539,7 +554,7 @@ draw_rank_plot <- function(stat_df, xc="Feature", yc="Intensity", Ylab=yc, ecdf=
       if(rank){
          p <- ggplot(data=long_df, aes(x=Rank, y=Fraction, color=.data[[xc]])) +
             scale_color_npg() +
-            geom_line(size=2) +
+            geom_line(size=1) +
             labs(x=paste0("Rank (",Ylab,")"), y="Cumulative fraction") +
             theme_classic() +
             theme(legend.position="top", 
