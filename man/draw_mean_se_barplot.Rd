@@ -11,8 +11,10 @@ draw_mean_se_barplot(
   comp = list(c(1, 2)),
   Xlab = xc,
   Ylab = yc,
-  logy = FALSE,
-  Ylim = NULL
+  logy = "logy",
+  Ylim = NULL,
+  nf = 1,
+  pc = 1
 )
 }
 \arguments{
@@ -26,7 +28,11 @@ draw_mean_se_barplot(
 
 \item{Ylab}{a string for y-axis label}
 
-\item{logy}{logical, indicating whether to log10 transform yc}
+\item{logy}{character string in c(linear, logy, log2, log10)}
+
+\item{nf}{a integer normalizing factor for correct count of observations when the data table is produced by pivot_longer, equals to the number of columns in cols argument of pivot_longer}
+
+\item{pc}{pseudo-count for log transformation}
 }
 \value{
 a ggplot object

@@ -1386,7 +1386,7 @@ plot_reference_region <- function(queryFiles, centerFiles, txdb=NULL, regionName
 
         mplot_df[[paste(ratiolabel,centerLabel,sep=":")]] <- plot_df
         
-        regionMatrix <- as.matrix(scoreMatrix_list[[queryLabel]][[centerLabel]][[regionName]])
+        regionMatrix <- as.matrix(scoreMatrix_list[[ratiolabel]][[centerLabel]][[regionName]])
         regionMatrix <- process_scoreMatrix(regionMatrix, scale=scale, rmOutlier=rmOutlier, transform=transform, verbose=verbose)
         Intensity <- as.numeric(rowMeans(regionMatrix))
         
