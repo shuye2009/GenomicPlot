@@ -10,7 +10,7 @@ plot_5parts_metagene(
   inputFiles = NULL,
   handleInputParams = NULL,
   verbose = FALSE,
-  transform = FALSE,
+  transform = NA,
   smooth = FALSE,
   scale = FALSE,
   stranded = TRUE,
@@ -70,7 +70,7 @@ handleInputParams <- list(CLIP_reads=FALSE, fix_width=150, fix_point="center", n
                           outRle=TRUE, useSizeFactor=FALSE, genome="hg19")
 
 plot_5parts_metagene(queryFiles, gFeatures=gf, inputFiles=NULL, handleInputParams=handleInputParams,
-                     verbose=FALSE, smooth=TRUE, scale=FALSE, stranded=TRUE, outPrefix=op, transform=FALSE,
+                     verbose=FALSE, smooth=TRUE, scale=FALSE, stranded=TRUE, outPrefix=op, transform=NA,
                      heatmap =TRUE,  rmOutlier=TRUE, nc=2)
 
 }

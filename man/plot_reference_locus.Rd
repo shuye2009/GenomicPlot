@@ -24,7 +24,7 @@ plot_reference_locus(
   scale = FALSE,
   outPrefix = NULL,
   rmOutlier = FALSE,
-  transform = FALSE,
+  transform = NA,
   statsMethod = "wilcox.test",
   heatRange = NULL,
   nc = 2
@@ -67,7 +67,7 @@ plot_reference_locus(
 
 \item{rmOutlier}{logical, indicating whether a row with abnormally high values in the score matrix should be removed}
 
-\item{transform}{logical, whether to log2 transform the data matrix}
+\item{transform}{a string in c("log", "log2", "log10"), default = NA indicating no transformation of data matrix}
 
 \item{statsMethod}{a string in c("wilcox.test", "t.test"), for pair-wise group comparisons}
 

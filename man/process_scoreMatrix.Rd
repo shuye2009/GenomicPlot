@@ -8,7 +8,8 @@ process_scoreMatrix(
   fullmatrix,
   scale = FALSE,
   rmOutlier = FALSE,
-  transform = FALSE,
+  transform = NA,
+  pc = 0,
   verbose = FALSE
 )
 }
@@ -19,7 +20,9 @@ process_scoreMatrix(
 
 \item{rmOutlier}{logical, indicating whether a row with abnormally high values in the score matrix should be removed}
 
-\item{transform}{logical, whether to log2 transform the data matrix}
+\item{transform}{a string in c("log", "log2", "log10"), default = NA indicating no transformation of data matrix}
+
+\item{pc}{pseudo-count added to the data matrix before log transformation to avoid taking log of zero}
 
 \item{verbose}{logical, indicating whether to output additional information (data used for plotting or statistical test results)}
 }

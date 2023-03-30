@@ -8,7 +8,7 @@ plot_peak_annotation(
   peakFile,
   gtfFile,
   handleInputParams = NULL,
-  fiveP = 1000,
+  fiveP = -1000,
   dsTSS = 300,
   threeP = 1000,
   simple = FALSE,
@@ -23,9 +23,9 @@ plot_peak_annotation(
 
 \item{handleInputParams}{a list of parameters for \code{handle_input}}
 
-\item{fiveP}{extension out of the 5' boundary of genes for defining promoter: -fiveP TSS + dsTSS}
+\item{fiveP}{extension out of the 5' boundary of genes for defining promoter: fiveP TSS + dsTSS}
 
-\item{dsTSS}{extension downstream of TSS for defining promoter: -fiveP TSS + dsTSS}
+\item{dsTSS}{extension downstream of TSS for defining promoter: fiveP TSS + dsTSS}
 
 \item{threeP}{extension out of the 3' boundary of genes for defining termination region: -0 TTS + threeP}
 

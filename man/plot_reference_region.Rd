@@ -19,7 +19,7 @@ plot_reference_region(
   threeP = 1000,
   smooth = FALSE,
   stranded = TRUE,
-  transform = FALSE,
+  transform = NA,
   outPrefix = "plots",
   rmOutlier = FALSE,
   heatRange = NULL,
@@ -57,7 +57,7 @@ plot_reference_region(
 
 \item{stranded}{logical, indicating whether the strand of the feature should be considered}
 
-\item{transform}{logical, whether to log2 transform the data matrix}
+\item{transform}{a string in c("log", "log2", "log10"), default = NA indicating no transformation of data matrix}
 
 \item{outPrefix}{a string specifying output file prefix for plots (outPrefix.pdf)}
 

@@ -23,6 +23,7 @@
 extract_longest_tx <- function(txdb, plot=FALSE){
    tl <- GenomicFeatures::transcriptLengths(txdb, with.utr5_len = TRUE, with.cds_len = TRUE, with.utr3_len = TRUE)
    pc <- tl[tl$cds_len > 0, ]  ## pc stands for protein-coding
+   
    ## choose tx with longest length for each gene
    longest_tx <- aggregate(pc$tx_len, list(pc$gene_id), max)
    colnames(longest_tx) <- c("gene_id", "tx_len")
@@ -35,6 +36,7 @@ extract_longest_tx <- function(txdb, plot=FALSE){
 
    dup_genes <- longest_cdstx$gene_id[duplicated(longest_cdstx$gene_id)]
    dup_genestx <- longest_cdstx[longest_cdstx$gene_id %in% dup_genes,]
+   
    ## for two tx of the same gene, if both cds_len and tx_len are the same, choose smaller tx_id (this is arbitrary)
    longest_cdstx_id <- aggregate(longest_cdstx$tx_id, list(longest_cdstx$gene_id, longest_cdstx$cds_len, longest_cdstx$tx_len), min)
    colnames(longest_cdstx_id) <- c("gene_id", "cds_len", "tx_len", "tx_id")
@@ -46,7 +48,7 @@ extract_longest_tx <- function(txdb, plot=FALSE){
    npc <- tl %>% 
       filter(!gene_id %in% longest_cdstxid$gene_id) ## npc stands for non-protein-coding
    
-   ## choose tx with longest length for each gene
+   ## choose tx with longest length for each non-protein-coding gene
    longest_npc <- aggregate(npc$tx_len, list(npc$gene_id), max)
    colnames(longest_npc) <- c("gene_id", "tx_len")
    tx_longest <- merge(npc, longest_npc)
@@ -171,14 +173,11 @@ extract_longest_tx <- function(txdb, plot=FALSE){
 
 #' @title Extract genomic features from TxDb object
 #
-#' @description Extract genomic coordinates and make bed and bed 12 files from a TxDb object for a variety of annotated genomic features.
-#' The output of this function is a list. The first element of the list is a GRanges object that provide the start and end information.
-#' The second element is a GRangesList providing information for subcomponents. For "utr3", "utr5", "cds" and "transcript", the returned GRanges
-#' object has only one range for each feature, denoting the start and end of the feature in one transcript, and the range may contain introns;
-#' the returned GrangesList object is a list of exons, belonging to one transcript and indexed on transcript id. The third element is a bed12 file.
-#' For "exon", "intron" and "gene", the GRanges object denotes ranges of individual exon or intron, and the GrangesList object is a list of exons or
-#' introns belonging to one transcript and indexed on transcript id. The third element is a bed6 file.
-#'
+#' @description Extract genomic coordinates and make bed or bed 12 files from a TxDb object for a variety of annotated genomic features. The output of this function is a list. The first element of the list is a GRanges object that provide the start and end information of the feature. The second element is a GRangesList providing information for sub-components. The third element is the name of a bed file. 
+#'      For "utr3", "utr5", "cds" and "transcript", the GRanges object denotes the start and end of the feature in one transcript, and the range is named by the transcript id and may span introns; the GrangesList object is a list of exons comprising each feature and indexed on transcript id. The bed file is in bed12 format.
+#'      For "exon" and "intron", the GRanges object denotes unnamed ranges of individual exon and intron, and the GrangesList object is a list of exons or introns belonging to one transcript and indexed on transcript id. The bed file is in bed6 format.
+#'      For "gene", both GRanges object and GRangesList object have the same ranges and names. The bed file is in bed6 format.
+#'      
 #' @param txdb a TxDb object defined in the GenomicFeatures package
 #' @param featureName one of the gene feature in c("utr3", "utr5", "cds", "intron", "exon", "transcript", "gene")
 #' @param featureSource the name of the gtf/gff3 file or the online database from which txdb is derived, used as name of output file
@@ -209,26 +208,28 @@ get_genomic_feature_coordinates <- function(txdb, featureName, featureSource=NUL
    feature <- NULL
 
    if(featureName == "utr3"){
-      feature <- threeUTRsByTranscript(txdb, use.name=FALSE) # grl
+      feature <- threeUTRsByTranscript(txdb, use.name=TRUE) # grl
    }else if(featureName == "utr5"){
-      feature <- fiveUTRsByTranscript(txdb, use.name=FALSE) # grl
+      feature <- fiveUTRsByTranscript(txdb, use.name=TRUE) # grl
    }else if(featureName == "intron"){
-      feature <- intronsByTranscript(txdb, use.name=FALSE) #grl
-      if(protein_coding) feature <- feature[tl_protein_coding$tx_id]
+      feature <- intronsByTranscript(txdb, use.name=TRUE) #grl
    }else if(featureName == "exon"){
-      feature <- exonsBy(txdb, by="tx", use.name=FALSE) #grl
-      if(protein_coding) feature <- feature[tl_protein_coding$tx_id]
+      feature <- exonsBy(txdb, by="tx", use.name=TRUE) #grl
    }else if(featureName == "cds"){
-      feature <- cdsBy(txdb, by="tx", use.name=FALSE) # grl
+      feature <- cdsBy(txdb, by="tx", use.name=TRUE) # grl
    }else if(featureName == "transcript"){
-      feature <- exonsBy(txdb, by="tx", use.name=FALSE) #grl
-      if(protein_coding) feature <- feature[tl_protein_coding$tx_id]
+      feature <- exonsBy(txdb, by="tx", use.name=TRUE) #grl
    }else if(featureName == "gene"){
       feature <- genes(txdb)                       # gr
       feature <- as(split(feature, f=feature$gene_id), "GRangesList") # grl
-      if(protein_coding) feature <- feature[unique(tl_protein_coding$gene_id)]
    }else {
       stop("Feature is not defined!")
+   }
+   
+   if(featureName == "gene"){
+      if(protein_coding) feature <- feature[unique(tl_protein_coding$gene_id)]
+   }else{
+      if(protein_coding) feature <- feature[names(feature) %in% tl_protein_coding$tx_name]
    }
 
    seqinfo(feature) <- seqInfo
@@ -238,7 +239,7 @@ get_genomic_feature_coordinates <- function(txdb, featureName, featureSource=NUL
          feature_longest <- feature[names(feature) %in% longest_tx$gene_id] # protein-coding
          seqinfo(feature_longest) <- seqInfo
       }else{
-         feature_longest <- feature[names(feature) %in% longest_tx$tx_id]
+         feature_longest <- feature[names(feature) %in% longest_tx$tx_name]
          seqinfo(feature_longest) <- seqInfo
       }
 
@@ -252,7 +253,12 @@ get_genomic_feature_coordinates <- function(txdb, featureName, featureSource=NUL
          }
       }
       if(featureName %in% c("gene", "intron", "exon")){
-         gr_feature_longest <- unlist(feature_longest, use.names=FALSE) ## convert each element of Grangeslist to multiple Granges
+         if(featureName == "gene"){
+            gr_feature_longest <- unlist(feature_longest, use.names=TRUE) ## convert each element of Grangeslist to multiple Granges
+         }else{
+            gr_feature_longest <- unlist(feature_longest, use.names=FALSE) ## convert each element of Grangeslist to multiple Granges
+         }
+         
          seqinfo(gr_feature_longest) <- seqInfo
          if(export){
             outfile <- paste(featureSource, "_", featureName, "_longest.bed", sep="")
@@ -262,7 +268,7 @@ get_genomic_feature_coordinates <- function(txdb, featureName, featureSource=NUL
       invisible(list("GRanges"=gr_feature_longest, "GRangesList"=feature_longest, "Output"=outfile))
    }else{
       if(featureName %in% c("cds", "utr5", "utr3", "transcript")){
-         gr_feature <- asBED(feature) ## convert each element of Grangeslist to one Grange with blocks info as metadata
+         gr_feature <- rtracklayer::asBED(feature) ## convert each element of Grangeslist to one Grange with blocks info as metadata
          names(gr_feature) <- gr_feature$name
          seqinfo(gr_feature) <- seqInfo
          if(export){
@@ -271,7 +277,12 @@ get_genomic_feature_coordinates <- function(txdb, featureName, featureSource=NUL
          }
       }
       if(featureName %in% c("gene", "intron", "exon")){
-         gr_feature <- unlist(feature, use.names=FALSE) ## convert Grangeslist object to GRanges object
+         if(featureName == "gene"){
+            gr_feature <- unlist(feature, use.names=TRUE) ## convert Grangeslist object to GRanges object
+         }else{
+            gr_feature <- unlist(feature, use.names=FALSE) ## convert Grangeslist object to GRanges object
+         }
+         
          seqinfo(gr_feature) <- seqInfo
          if(export){
             outfile <- paste(featureSource, "_", featureName, ".bed", sep="")
@@ -308,7 +319,7 @@ get_genomic_feature_coordinates <- function(txdb, featureName, featureSource=NUL
 #'
 #' @export prepare_3parts_genomic_features
 
-prepare_3parts_genomic_features <- function(txdb, featureName="transcript", meta=TRUE, nbins=100, fiveP=1000, threeP=1000, longest=TRUE, protein_coding=TRUE, verbose=FALSE){
+prepare_3parts_genomic_features <- function(txdb, featureName="transcript", meta=TRUE, nbins=100, fiveP=-1000, threeP=1000, longest=TRUE, protein_coding=TRUE, verbose=FALSE){
    ## prepare transcripts
 
    if(verbose) print("Preparing features ...")
@@ -320,7 +331,7 @@ prepare_3parts_genomic_features <- function(txdb, featureName="transcript", meta
       featureName <- ifelse(meta, featureName, "gene")
    }
 
-   five <- -fiveP/1000
+   five <- fiveP/1000
    five <- paste0(five, "K")
    if(fiveP==0) five=""
    three <- threeP/1000
@@ -338,11 +349,11 @@ prepare_3parts_genomic_features <- function(txdb, featureName="transcript", meta
    }
 
    wf <- vapply(as.list(width(feature)), sum, numeric(1))
-   means <- c(promoter=fiveP, median(wf), TTS=threeP)
+   means <- c(promoter=-fiveP, median(wf), TTS=threeP)
    scaled_bins <- round(means*nbins/sum(means))
    selected_tx <- names(feature[wf > scaled_bins[2]])
 
-   promoter <- flank(gn$GRanges, width=fiveP, both=FALSE, start=TRUE, ignore.strand=FALSE)
+   promoter <- flank(gn$GRanges, width=-fiveP, both=FALSE, start=TRUE, ignore.strand=FALSE)
    TTS <- flank(gn$GRanges, width=threeP, both=FALSE, start=FALSE, ignore.strand=FALSE)
 
    windowRs <- list(as(split(promoter, as.factor(names(promoter))), "GRangesList")[selected_tx],
@@ -386,11 +397,11 @@ prepare_3parts_genomic_features <- function(txdb, featureName="transcript", meta
 #'
 #' @export prepare_5parts_genomic_features
 #'
-prepare_5parts_genomic_features <- function(txdb, meta=TRUE, nbins=100, fiveP=1000, threeP=1000, longest=TRUE, verbose=FALSE, subsetTx=NULL){
+prepare_5parts_genomic_features <- function(txdb, meta=TRUE, nbins=100, fiveP=-1000, threeP=1000, longest=TRUE, verbose=FALSE, subsetTx=NULL){
    ## prepare transcripts
    
    if(verbose) print("Preparing genomic features ... ")
-   five <- -fiveP/1000
+   five <- fiveP/1000
    five <- paste0(five, "K")
    if(fiveP==0) five=""
    three <- threeP/1000
@@ -407,7 +418,7 @@ prepare_5parts_genomic_features <- function(txdb, meta=TRUE, nbins=100, fiveP=10
 
    #feature_coordinates <- parallel_feature_coordinates(txdb, featureNames=featurelist, longest=longest, protein_coding = TRUE)
 
-   promoter <- flank(gn$GRanges, width=fiveP, both=FALSE, start=TRUE, ignore.strand=FALSE)
+   promoter <- flank(gn$GRanges, width=-fiveP, both=FALSE, start=TRUE, ignore.strand=FALSE)
    TTS <- flank(gn$GRanges, width=threeP, both=FALSE, start=FALSE, ignore.strand=FALSE)
 
    if(meta){
@@ -423,7 +434,7 @@ prepare_5parts_genomic_features <- function(txdb, meta=TRUE, nbins=100, fiveP=10
    grls <- list("5'UTR"=utr5_grl, "CDS"=cds_grl, "3'UTR"=utr3_grl)
    l3 <- vapply(grls, function(feature)median(vapply(as.list(width(feature)), sum, numeric(1))), numeric(1))
 
-   means <- c(promoter=fiveP, l3, TTS=threeP)
+   means <- c(promoter=-fiveP, l3, TTS=threeP)
    names(means) <- featureNames
    scaled_bins <- round(means*nbins/sum(means))
    names(scaled_bins) <- featureNames
@@ -480,7 +491,7 @@ prepare_5parts_genomic_features <- function(txdb, meta=TRUE, nbins=100, fiveP=10
 #'
 #' @export get_txdb_features
 #'
-get_txdb_features <- function(txdb, fiveP=1000, dsTSS=300, threeP=1000){
+get_txdb_features <- function(txdb, fiveP=-1000, dsTSS=300, threeP=1000){
    
    utr5 <- get_genomic_feature_coordinates(txdb, "utr5", longest=TRUE, protein_coding=TRUE)
    utr3 <- get_genomic_feature_coordinates(txdb, "utr3", longest=TRUE, protein_coding=TRUE)
@@ -494,8 +505,8 @@ get_txdb_features <- function(txdb, fiveP=1000, dsTSS=300, threeP=1000){
                            "CDS"=unlist(cds$GRangesList, use.names=TRUE),
                            "Intron"=unlist(intron$GRangesList, use.names=TRUE),
                            compress=FALSE)
-   if(fiveP > 0){
-      promoter <- GenomicRanges::promoters(gene_gr, upstream=fiveP, downstream=dsTSS, use.names=TRUE)
+   if(fiveP < 0){
+      promoter <- GenomicRanges::promoters(gene_gr, upstream=-fiveP, downstream=dsTSS, use.names=TRUE)
       features[["Promoter"]] <- promoter
    }else{
       promoter <- NULL
@@ -549,14 +560,16 @@ get_txdb_features <- function(txdb, fiveP=1000, dsTSS=300, threeP=1000){
       TTS <- NULL
    }
    
-   tx <- transcripts(txdb)
-   txmap <- tx$tx_name
-   names(txmap) <- tx$tx_id
+   if(0){
+      tx <- transcripts(txdb)
+      txmap <- tx$tx_name
+      names(txmap) <- tx$tx_id
+   }
    
    for(aname in names(features)){
       f <- features[[aname]]
       mcols(f) <- NULL
-      f$tx_name <- txmap[names(f)]
+      f$tx_name <- names(f)
       features[[aname]] <- f
    }
    

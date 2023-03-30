@@ -2,7 +2,7 @@
 
 export(aov_TukeyHSD)
 export(check_constraints)
-export(draw_boxplot_logy)
+export(draw_boxplot_by_factor)
 export(draw_boxplot_wo_outlier)
 export(draw_locus_profile)
 export(draw_matrix_heatmap)

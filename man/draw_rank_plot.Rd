@@ -10,8 +10,7 @@ draw_rank_plot(
   yc = "Intensity",
   Ylab = yc,
   ecdf = TRUE,
-  rank = FALSE,
-  logy = FALSE
+  rank = FALSE
 )
 }
 \arguments{
