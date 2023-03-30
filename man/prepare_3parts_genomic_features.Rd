@@ -9,7 +9,7 @@ prepare_3parts_genomic_features(
   featureName = "transcript",
   meta = TRUE,
   nbins = 100,
-  fiveP = 1000,
+  fiveP = -1000,
   threeP = 1000,
   longest = TRUE,
   protein_coding = TRUE,

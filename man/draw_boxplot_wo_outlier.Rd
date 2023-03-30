@@ -31,7 +31,7 @@ draw_boxplot_wo_outlier(
 
 \item{Ylab}{a string for y-axis label}
 
-\item{nf}{a integr normalizing factor for correct count of observations when the data table is produced by pivot_longer, equals to the number of columns in cols argument of pivot_longer}
+\item{nf}{a integer normalizing factor for correct count of observations when the data table has two factors, such as those produced by pivot_longer, equals to the number of factors}
 }
 \value{
 a ggplot object

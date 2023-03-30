@@ -8,7 +8,7 @@ prepare_5parts_genomic_features(
   txdb,
   meta = TRUE,
   nbins = 100,
-  fiveP = 1000,
+  fiveP = -1000,
   threeP = 1000,
   longest = TRUE,
   verbose = FALSE,

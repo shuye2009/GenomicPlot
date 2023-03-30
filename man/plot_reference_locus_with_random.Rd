@@ -14,7 +14,7 @@ plot_reference_locus_with_random(
   handleInputParams = NULL,
   verbose = FALSE,
   smooth = FALSE,
-  transform = FALSE,
+  transform = NA,
   binSize = 10,
   refPoint = "center",
   Xlab = "Center",
@@ -48,7 +48,7 @@ plot_reference_locus_with_random(
 
 \item{smooth}{logical, indicating whether the line should smoothed with a spline smoothing algorithm}
 
-\item{transform}{logical, whether to log2 transform the data matrix}
+\item{transform}{a string in c("log", "log2", "log10"), default = NA indicating no transformation of data matrix}
 
 \item{binSize}{an integer defines bin size for intensity calculation}
 

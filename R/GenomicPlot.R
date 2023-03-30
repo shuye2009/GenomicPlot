@@ -23,7 +23,7 @@
 #' @param smooth logical, indicating whether the line should smoothed with a spline smoothing algorithm
 #' @param rmOutlier logical, indicating whether a row with abnormally high values in the score matrix should be removed
 #' @param longest logical, indicating whether the output should be limited to the longest transcript of each gene
-#' @param transform logical, whether to log2 transform the data matrix
+#' @param transform a string in c("log", "log2", "log10"), default = NA indicating no transformation of data matrix
 #' @param outPrefix a string specifying output file prefix for plots (outPrefix.pdf)
 #' @param verbose logical, whether to output additional information (data used for plotting or statistical test results)
 #' @param nc integer, number of cores for parallel processing
@@ -52,7 +52,7 @@
 
 plot_start_end_feature <- function(queryFiles, inputFiles=NULL, txdb, featureName, handleInputParams=NULL, binSize=10,
    insert=0, verbose=FALSE, longest=TRUE, ext=c(-500, 200, -200, 500), hl=c(-50, 50, -50, 50), randomize=FALSE, 
-   stranded=TRUE, scale=FALSE, smooth=FALSE, rmOutlier=FALSE, outPrefix="plots", transform=FALSE, shade=TRUE, nc=2,
+   stranded=TRUE, scale=FALSE, smooth=FALSE, rmOutlier=FALSE, outPrefix="plots", transform=NA, shade=TRUE, nc=2,
    Ylab="Signal intensity"){
 
   queryLabels <- names(queryFiles)
@@ -221,7 +221,7 @@ plot_start_end_feature <- function(queryFiles, inputFiles=NULL, txdb, featureNam
   }
 
   ## plot individual bed line for one feature
- Ylab <- ifelse(transform, paste0("Log2 (", Ylab, ")"), Ylab)
+ Ylab <- ifelse(is.na(transform), Ylab, paste0(transform, " (", Ylab, ")"))
   for (query in unique(plot_df$Query)){
      aplot_df <- plot_df %>%
         filter(Query == query)
@@ -250,7 +250,7 @@ plot_start_end_feature <- function(queryFiles, inputFiles=NULL, txdb, featureNam
   #print(plots)
 
   if(!is.null(inputFiles)){
-    Ylab <- ifelse(transform, "Log2 (Ratio-over-Input)", "Ratio-over-Input")
+    Ylab <- ifelse(is.na(transform), "Ratio-over-Input", paste0(transform, " (Ratio-over-Input)"))
 
     ratiofiles <- queryFiles[!queryFiles %in% inputFiles]
     ratiolabels <- queryLabels[!queryLabels %in% inputLabels]
@@ -402,7 +402,7 @@ plot_start_end_feature <- function(queryFiles, inputFiles=NULL, txdb, featureNam
 #' @param smooth logical, indicating whether the line should smoothed with a spline smoothing algorithm
 #' @param rmOutlier logical, indicating whether a row with abnormally high values in the score matrix should be removed
 #' @param outPrefix a string specifying output file prefix for plots (outPrefix.pdf)
-#' @param transform logical, whether to log2 transform the data matrix
+#' @param transform a string in c("log", "log2", "log10"), default = NA indicating no transformation of data matrix
 #' @param verbose logical, whether to output additional information (data used for plotting or statistical test results)
 #' @param shade logical indicating whether to place a shaded rectangle around the point of interest
 #' @param nc integer, number of cores for parallel processing
@@ -546,7 +546,7 @@ plot_start_end_reference_region <- function(queryFiles, inputFiles=NULL, centerF
       }
    }
 
-   Ylab <- ifelse(transform, paste0("Log2 (", Ylab, ")"), Ylab)
+   Ylab <- ifelse(is.na(transform), Ylab, paste0(transform, " (", Ylab, ")"))
    ## plot multi feature lines for one query
    for (query in unique(plot_df$Query)){
 
@@ -570,7 +570,7 @@ plot_start_end_reference_region <- function(queryFiles, inputFiles=NULL, centerF
 
    ## compute and plot ratio over input
    if(!is.null(inputFiles)){
-      Ylab <- ifelse(transform, "Log2 (Ratio-over-Input)", "Ratio-over-Input")
+      Ylab <- ifelse(is.na(transform), "Ratio-over-Input", paste0(transform, " (Ratio-over-Input)"))
 
       plot_df <- NULL
       for(i in seq_along(featureNames)){
@@ -688,7 +688,7 @@ plot_start_end_reference_region <- function(queryFiles, inputFiles=NULL, centerF
 #' @param heatRange a numerical vector of two elements, defining range for heatmap color ramp generation
 #' @param rmOutlier logical, indicating whether a row with abnormally high values in the score matrix should be removed
 #' @param outPrefix a string specifying output file prefix for plots (outPrefix.pdf)
-#' @param transform logical, whether to log2 transform the data matrix
+#' @param transform a string in c("log", "log2", "log10"), default = NA indicating no transformation of data matrix
 #' @param verbose logical, whether to output additional information (data used for plotting or statistical test results)
 #' @param nc integer, number of cores for parallel processing
 #'
@@ -703,7 +703,7 @@ plot_start_end_reference_region <- function(queryFiles, inputFiles=NULL, centerF
 #' @export plot_3parts_metagene
 
 
-plot_3parts_metagene <- function(queryFiles, gFeatures, inputFiles=NULL, scale=FALSE,  verbose=FALSE, Ylab="Signal intensity", handleInputParams=NULL, smooth=FALSE, stranded=TRUE, outPrefix="plots", heatmap=FALSE, rmOutlier=FALSE, heatRange=NULL, transform=FALSE, nc=2){
+plot_3parts_metagene <- function(queryFiles, gFeatures, inputFiles=NULL, scale=FALSE,  verbose=FALSE, Ylab="Signal intensity", handleInputParams=NULL, smooth=FALSE, stranded=TRUE, outPrefix="plots", heatmap=FALSE, rmOutlier=FALSE, heatRange=NULL, transform=NA, nc=2){
 
 
   queryLabels <- names(queryFiles)
@@ -770,7 +770,7 @@ plot_3parts_metagene <- function(queryFiles, gFeatures, inputFiles=NULL, scale=F
   vx <- c(1, cumsum(scaled_bins[1:(length(scaled_bins)-1)])+1) ## x axis points for vlines that demarcate the genomic features
   names(vx) <- featureNames
 
-  Ylab <- ifelse(transform, paste0("Log2 (", Ylab, ")"), Ylab)
+  Ylab <- ifelse(is.na(transform), Ylab, paste0(transform, " (", Ylab, ")"))
 
   if(heatmap) heatmap_list <- list()
 
@@ -858,7 +858,7 @@ plot_3parts_metagene <- function(queryFiles, gFeatures, inputFiles=NULL, scale=F
 
   if(!is.null(inputFiles)){
     if(verbose) print("computing coverage for ratio over input")
-    Ylab <- ifelse(transform, "Log2 (Ratio-over-Input)", "Ratio-over-Input")
+    Ylab <- ifelse(is.na(transform), "Ratio-over-Input", paste0(transform, " (Ratio-over-Input)"))
     if(heatmap) heatmap_list <- list()
 
     inputMatrix_list <- scoreMatrix_list[inputLabels]
@@ -979,7 +979,7 @@ plot_3parts_metagene <- function(queryFiles, gFeatures, inputFiles=NULL, scale=F
 #' @param handleInputParams a list of parameters for \code{handle_input}
 #' @param outPrefix a string specifying output file prefix for plots (outPrefix.pdf)
 #' @param regionName a string specifying the name of the center region in the plots
-#' @param transform logical, whether to log2 transform the data matrix
+#' @param transform a string in c("log", "log2", "log10"), default = NA indicating no transformation of data matrix
 #' @param statsMethod a string in c("wilcox.test", "t.test"), for pair-wise group comparisons
 #' @param verbose logical, indicating whether to output additional information (data used for plotting or statistical test results)
 #' @param nc integer, number of cores for parallel processing
@@ -994,7 +994,7 @@ plot_3parts_metagene <- function(queryFiles, gFeatures, inputFiles=NULL, scale=F
 #'
 #' @export plot_reference_region
 
-plot_reference_region <- function(queryFiles, centerFiles, txdb=NULL, regionName="region", inputFiles=NULL, nbins=100, handleInputParams=NULL, verbose=FALSE, scale=FALSE, heatmap=FALSE, fiveP=-1000, threeP=1000, smooth=FALSE, stranded=TRUE, transform=FALSE, outPrefix="plots", rmOutlier=FALSE, heatRange=NULL, Ylab="Signal intensity", statsMethod="wilcox.test", nc=2){
+plot_reference_region <- function(queryFiles, centerFiles, txdb=NULL, regionName="region", inputFiles=NULL, nbins=100, handleInputParams=NULL, verbose=FALSE, scale=FALSE, heatmap=FALSE, fiveP=-1000, threeP=1000, smooth=FALSE, stranded=TRUE, transform=NA, outPrefix="plots", rmOutlier=FALSE, heatRange=NULL, Ylab="Signal intensity", statsMethod="wilcox.test", nc=2){
 
   if(!is.null(outPrefix)){
     pdf(paste(outPrefix, "pdf", sep="."), height=8, width=12)
@@ -1147,7 +1147,7 @@ plot_reference_region <- function(queryFiles, centerFiles, txdb=NULL, regionName
   names(vx) <- featureNames
   
   if(heatmap)heatmap_list <- list()
-  Ylab <- ifelse(transform, paste0("Log2 (", Ylab, ")"), Ylab)
+  Ylab <- ifelse(is.na(transform), Ylab, paste0(transform, " (", Ylab, ")"))
 
   if(verbose) print("plotting coverage profiles")
   for(queryFile in queryFiles){
@@ -1256,8 +1256,8 @@ plot_reference_region <- function(queryFiles, centerFiles, txdb=NULL, regionName
                 
                 comp <- combn(seq_along(centers),2, simplify=FALSE)
                 
-                ps1 <- draw_boxplot_logy(stat_df=astat_df, xc="Reference", yc="Intensity",  comp=comp, stats=statsMethod, Ylab=Ylab, logy="linear")
-                ps2 <- draw_boxplot_logy(stat_df=astat_df, xc="Reference", yc="Intensity",  comp=comp, stats=statsMethod, Ylab=Ylab, logy="logy")
+                ps1 <- draw_boxplot_by_factor(stat_df=astat_df, xc="Reference", yc="Intensity",  comp=comp, stats=statsMethod, Ylab=Ylab)
+                
                 ps1_wo_outlier <- draw_boxplot_wo_outlier(stat_df=astat_df, xc="Reference", yc="Intensity", comp=comp, stats=statsMethod, Ylab=Ylab)
                 ps1_mean_se <- draw_mean_se_barplot(stat_df=astat_df, xc="Reference", yc="Intensity", comp=comp, Ylab=Ylab)
                 prank <- draw_rank_plot(stat_df=astat_df, xc="Reference", yc="Intensity", Ylab=Ylab, ecdf=TRUE, rank=FALSE)
@@ -1266,8 +1266,8 @@ plot_reference_region <- function(queryFiles, centerFiles, txdb=NULL, regionName
                 outp <- plot_grid(p, marker, ncol = 1, align = 'v', axis="lr", rel_heights = c(10,1))
                 comp <- combn(seq_along(beds),2, simplify=FALSE)
                 
-                ps1 <- draw_boxplot_logy(stat_df=astat_df, xc="Query", yc="Intensity", comp=comp, stats=statsMethod, Ylab=Ylab, logy="linear")
-                ps2 <- draw_boxplot_logy(stat_df=astat_df, xc="Query", yc="Intensity", comp=comp, stats=statsMethod, Ylab=Ylab, logy="logy")
+                ps1 <- draw_boxplot_by_factor(stat_df=astat_df, xc="Query", yc="Intensity", comp=comp, stats=statsMethod, Ylab=Ylab)
+                
                 ps1_wo_outlier <- draw_boxplot_wo_outlier(stat_df=astat_df, xc="Query", yc="Intensity", comp=comp, stats=statsMethod, Ylab=Ylab)
                 ps1_mean_se <- draw_mean_se_barplot(stat_df=astat_df, xc="Query", yc="Intensity", Ylab=Ylab, comp=comp)
                 prank <- draw_rank_plot(stat_df=astat_df, xc="Query", yc="Intensity", Ylab=Ylab, ecdf=TRUE, rank=FALSE)
@@ -1277,7 +1277,7 @@ plot_reference_region <- function(queryFiles, centerFiles, txdb=NULL, regionName
                 lapply(list(outp, ps1_mean_se, prank, ps1, ps2, ps1_wo_outlier), print)
              }else{
                 comp1 <- plot_grid(outp, ps1_mean_se, prank, ncol = 3, rel_widths = c(1,1,1))
-                comp2 <- plot_grid(ps1, ps2, ps1_wo_outlier, ncol = 3, align='h', axis='b', rel_widths = c(1,1,1))
+                comp2 <- plot_grid(prank, ps1, ps1_wo_outlier, ncol = 3, align='h', axis='b', rel_widths = c(1,1,1))
                 print(plot_grid(comp1, comp2, ncol=1, rel_heights=c(1,1)))
              }
           }else if(i == 1 && j == 1){
@@ -1307,7 +1307,7 @@ plot_reference_region <- function(queryFiles, centerFiles, txdb=NULL, regionName
 
 
   if(!is.null(inputFiles)){
-    Ylab <- ifelse(transform, "Log2 (Ratio-over-Input)", "Ratio-over-Input")
+    Ylab <- ifelse(is.na(transform), "Ratio-over-Input", paste0(transform, " (Ratio-over-Input)"))
 
     ratiofiles <- queryFiles[!queryFiles %in% inputFiles]
     ratiolabels <- queryLabels[!queryLabels %in% inputLabels]
@@ -1434,8 +1434,8 @@ plot_reference_region <- function(queryFiles, centerFiles, txdb=NULL, regionName
                   
                   comp <- combn(seq_along(centers),2, simplify=FALSE)
                   
-                  ps1 <- draw_boxplot_logy(stat_df=astat_df, xc="Reference", yc="Intensity",  comp=comp, stats=statsMethod, Ylab=Ylab, logy="linear")
-                  ps2 <- draw_boxplot_logy(stat_df=astat_df, xc="Reference", yc="Intensity",  comp=comp, stats=statsMethod, Ylab=Ylab, logy="logy")
+                  ps1 <- draw_boxplot_by_factor(stat_df=astat_df, xc="Reference", yc="Intensity",  comp=comp, stats=statsMethod, Ylab=Ylab)
+                  
                   ps1_wo_outlier <- draw_boxplot_wo_outlier(stat_df=astat_df, xc="Reference", yc="Intensity", comp=comp, stats=statsMethod, Ylab=Ylab)
                   ps1_mean_se <- draw_mean_se_barplot(stat_df=astat_df, xc="Reference", yc="Intensity", comp=comp, Ylab=Ylab)
                   prank <- draw_rank_plot(stat_df=astat_df, xc="Reference", yc="Intensity", Ylab=Ylab, ecdf=TRUE, rank=FALSE)
@@ -1444,8 +1444,8 @@ plot_reference_region <- function(queryFiles, centerFiles, txdb=NULL, regionName
                   outp <- plot_grid(p, marker, ncol = 1, align = 'v', axis="lr", rel_heights = c(10,1))
                   comp <- combn(seq_along(beds),2, simplify=FALSE)
                   
-                  ps1 <- draw_boxplot_logy(stat_df=astat_df, xc="Query", yc="Intensity", comp=comp, stats=statsMethod, Ylab=Ylab, logy="linear")
-                  ps2 <- draw_boxplot_logy(stat_df=astat_df, xc="Query", yc="Intensity", comp=comp, stats=statsMethod, Ylab=Ylab, logy="logy")
+                  ps1 <- draw_boxplot_by_factor(stat_df=astat_df, xc="Query", yc="Intensity", comp=comp, stats=statsMethod, Ylab=Ylab)
+                  
                   ps1_wo_outlier <- draw_boxplot_wo_outlier(stat_df=astat_df, xc="Query", yc="Intensity", comp=comp, stats=statsMethod, Ylab=Ylab)
                   ps1_mean_se <- draw_mean_se_barplot(stat_df=astat_df, xc="Query", yc="Intensity", Ylab=Ylab, comp=comp)
                   prank <- draw_rank_plot(stat_df=astat_df, xc="Query", yc="Intensity", Ylab=Ylab, ecdf=TRUE, rank=FALSE)
@@ -1455,7 +1455,7 @@ plot_reference_region <- function(queryFiles, centerFiles, txdb=NULL, regionName
                   lapply(list(outp, ps1_mean_se, prank, ps1, ps2, ps1_wo_outlier), print)
                }else{
                   comp1 <- plot_grid(outp, ps1_mean_se, prank, ncol = 3, rel_widths = c(1,1,1))
-                  comp2 <- plot_grid(ps1, ps2, ps1_wo_outlier, ncol = 3, align='h', axis='b', rel_widths = c(1,1,1))
+                  comp2 <- plot_grid(prank, ps1, ps1_wo_outlier, ncol = 3, align='h', axis='b', rel_widths = c(1,1,1))
                   print(plot_grid(comp1, comp2, ncol=1, rel_heights=c(1,1)))
                }
             }else if(i == 1 && j == 1){
@@ -1526,14 +1526,14 @@ plot_reference_region <- function(queryFiles, centerFiles, txdb=NULL, regionName
 #'                           outRle=TRUE, useSizeFactor=FALSE, genome="hg19")
 #'
 #' plot_5parts_metagene(queryFiles, gFeatures=gf, inputFiles=NULL, handleInputParams=handleInputParams,
-#'                      verbose=FALSE, smooth=TRUE, scale=FALSE, stranded=TRUE, outPrefix=op, transform=FALSE,
+#'                      verbose=FALSE, smooth=TRUE, scale=FALSE, stranded=TRUE, outPrefix=op, transform=NA,
 #'                      heatmap =TRUE,  rmOutlier=TRUE, nc=2)
 #'
 #' @export plot_5parts_metagene
 #'
 
 plot_5parts_metagene <- function(queryFiles, gFeatures_list, inputFiles=NULL, handleInputParams=NULL,
-                                 verbose=FALSE, transform=FALSE, smooth=FALSE, scale=FALSE, stranded=TRUE,
+                                 verbose=FALSE, transform=NA, smooth=FALSE, scale=FALSE, stranded=TRUE,
                                  outPrefix=NULL, heatmap=FALSE, heatRange=NULL, rmOutlier=FALSE,
                                  Ylab="Signal intensity", nc=2){
 
@@ -1611,7 +1611,7 @@ plot_5parts_metagene <- function(queryFiles, gFeatures_list, inputFiles=NULL, ha
      names(vx) <- featureNames
    
      mplot_df <- NULL
-     Ylab <- ifelse(transform, paste0("Log2 (", Ylab, ")"), Ylab)
+     Ylab <- ifelse(is.na(transform), Ylab, paste0(transform, " (", Ylab, ")"))
    
      for(queryLabel in queryLabels){
        plot_df <- NULL
@@ -1664,7 +1664,7 @@ plot_5parts_metagene <- function(queryFiles, gFeatures_list, inputFiles=NULL, ha
    
      if(!is.null(inputFiles)){
        if(verbose) print("Preparing data for ratio plotting")
-       Ylab <- ifelse(transform, "Log2 (Ratio-over-Input)", "Ratio-over-Input")
+       Ylab <- ifelse(is.na(transform), "Ratio-over-Input", paste0(transform, " (Ratio-over-Input)"))
    
        inputMatrix_list <- scoreMatrix_list[inputLabels]
        ratiofiles <- queryFiles[!queryFiles %in% inputFiles]
@@ -1839,7 +1839,7 @@ plot_5parts_metagene <- function(queryFiles, gFeatures_list, inputFiles=NULL, ha
 #' @param Xlab a string denotes the label on x-axis
 #' @param shade logical indicating whether to place a shaded rectangle around the point of interest
 #' @param binSize an integer defines bin size for intensity calculation
-#' @param transform logical, whether to log2 transform the data matrix
+#' @param transform a string in c("log", "log2", "log10"), default = NA indicating no transformation of data matrix
 #' @param statsMethod a string in c("wilcox.test", "t.test"), for pair-wise group comparisons
 #' @param verbose logical, indicating whether to output additional information (data used for plotting or statistical test results)
 #' @param nc integer, number of cores for parallel processing
@@ -1858,7 +1858,7 @@ plot_5parts_metagene <- function(queryFiles, gFeatures_list, inputFiles=NULL, ha
 plot_reference_locus <- function(queryFiles, centerFiles, txdb=NULL, ext=c(-100,100), hl=c(0,0), shade=TRUE, smooth=FALSE,
                                  handleInputParams=NULL, verbose=FALSE, binSize=10, refPoint="center", Xlab="Center", 
                                  Ylab="Signal intensity", inputFiles=NULL, stranded=TRUE, heatmap=TRUE, scale=FALSE,
-                                 outPrefix=NULL, rmOutlier=FALSE, transform=FALSE, statsMethod="wilcox.test", heatRange=NULL,
+                                 outPrefix=NULL, rmOutlier=FALSE, transform=NA, statsMethod="wilcox.test", heatRange=NULL,
                                  nc=2){
 
   queryLabels <- names(queryFiles)
@@ -1977,7 +1977,7 @@ plot_reference_locus <- function(queryFiles, centerFiles, txdb=NULL, ext=c(-100,
   plot_df <- list() # per position, averaged over gene
   stat_df <- list() # per gene, averaged over position
   if(heatmap) heatmap_list <- list()
-  Ylab <- ifelse(transform, paste0("Log2 (", Ylab, ")"), Ylab)
+  Ylab <- ifelse(is.na(transform), Ylab, paste0(transform, " (", Ylab, ")"))
 
   if(verbose) print("collecting coverage data") ## plot multiple bed files on each center
 
@@ -2075,8 +2075,8 @@ plot_reference_locus <- function(queryFiles, centerFiles, txdb=NULL, ext=c(-100,
                  p <- draw_locus_profile(plot_df=aplot_df, cn="Reference", sn="Query", Xlab=Xlab, Ylab=Ylab, shade=shade, hl=hl)
                  comp <- combn(seq_along(centers),2, simplify=FALSE)
 
-                 ps1 <- draw_boxplot_logy(stat_df=astat_df, xc="Reference", yc="Intensity",  comp=comp, stats=statsMethod, Ylab=Ylab, logy="linear")
-                 ps2 <- draw_boxplot_logy(stat_df=astat_df, xc="Reference", yc="Intensity",  comp=comp, stats=statsMethod, Ylab=Ylab, logy="logy")
+                 ps1 <- draw_boxplot_by_factor(stat_df=astat_df, xc="Reference", yc="Intensity",  comp=comp, stats=statsMethod, Ylab=Ylab)
+                 
                  ps1_wo_outlier <- draw_boxplot_wo_outlier(stat_df=astat_df, xc="Reference", yc="Intensity", comp=comp, stats=statsMethod, Ylab=Ylab)
                  ps1_mean_se <- draw_mean_se_barplot(stat_df=astat_df, xc="Reference", yc="Intensity", comp=comp, Ylab=Ylab)
                  prank <- draw_rank_plot(stat_df=astat_df, xc="Reference", yc="Intensity", Ylab=Ylab, ecdf=TRUE, rank=FALSE)
@@ -2084,18 +2084,18 @@ plot_reference_locus <- function(queryFiles, centerFiles, txdb=NULL, ext=c(-100,
                  p <- draw_locus_profile(plot_df=aplot_df, cn="Query", sn="Reference", Xlab=Xlab, Ylab=Ylab, shade=shade, hl=hl)
                  comp <- combn(seq_along(beds),2, simplify=FALSE)
 
-                 ps1 <- draw_boxplot_logy(stat_df=astat_df, xc="Query", yc="Intensity", comp=comp, stats=statsMethod, Ylab=Ylab, logy="linear")
-                 ps2 <- draw_boxplot_logy(stat_df=astat_df, xc="Query", yc="Intensity", comp=comp, stats=statsMethod, Ylab=Ylab, logy="logy")
+                 ps1 <- draw_boxplot_by_factor(stat_df=astat_df, xc="Query", yc="Intensity", comp=comp, stats=statsMethod, Ylab=Ylab)
+                 
                  ps1_wo_outlier <- draw_boxplot_wo_outlier(stat_df=astat_df, xc="Query", yc="Intensity", comp=comp, stats=statsMethod, Ylab=Ylab)
                  ps1_mean_se <- draw_mean_se_barplot(stat_df=astat_df, xc="Query", yc="Intensity", Ylab=Ylab, comp=comp)
                  prank <- draw_rank_plot(stat_df=astat_df, xc="Query", yc="Intensity", Ylab=Ylab, ecdf=TRUE, rank=FALSE)
                }
 
                if(max(i,j)>3){
-                  lapply(list(p, ps1_mean_se, prank, ps1, ps2, ps1_wo_outlier), print)
+                  lapply(list(p, ps1_mean_se, prank, ps1, ps1_wo_outlier), print)
                }else{
-                  comp1 <- plot_grid(p, ps1_mean_se, prank, ncol = 3, rel_widths = c(1,1,1))
-                  comp2 <- plot_grid(ps1, ps2, ps1_wo_outlier, ncol = 3, align='h', axis='b', rel_widths = c(1,1,1))
+                  comp1 <- plot_grid(p, ps1_mean_se,  ncol = 2, rel_widths = c(1,1))
+                  comp2 <- plot_grid(prank, ps1, ps1_wo_outlier, ncol = 3, align='h', axis='b', rel_widths = c(1,1,1))
                   print(plot_grid(comp1, comp2, ncol=1, rel_heights=c(1,1)))
                }
 
@@ -2156,8 +2156,8 @@ plot_reference_locus <- function(queryFiles, centerFiles, txdb=NULL, ext=c(-100,
                           p <- draw_locus_profile(plot_df=aplot_df, cn="Reference", sn="Query", Xlab=Xlab, Ylab=Ylab, shade=shade, hl=hl)
                           comp <- combn(seq_along(centers),2, simplify=FALSE)
 
-                          ps1 <- draw_boxplot_logy(stat_df=astat_df, xc="Reference", yc="Intensity",  comp=comp, stats=statsMethod, Ylab=Ylab, logy="linear")
-                          ps2 <- draw_boxplot_logy(stat_df=astat_df, xc="Reference", yc="Intensity",  comp=comp, stats=statsMethod, Ylab=Ylab, logy="logy")
+                          ps1 <- draw_boxplot_by_factor(stat_df=astat_df, xc="Reference", yc="Intensity",  comp=comp, stats=statsMethod, Ylab=Ylab)
+                          
                           ps1_wo_outlier <- draw_boxplot_wo_outlier(stat_df=astat_df, xc="Reference", yc="Intensity", comp=comp, stats=statsMethod, Ylab=Ylab)
                           ps1_mean_se <- draw_mean_se_barplot(stat_df=astat_df, xc="Reference", yc="Intensity", comp=comp, Ylab=Ylab)
                           prank <- draw_rank_plot(stat_df=astat_df, xc="Reference", yc="Intensity", Ylab=Ylab, ecdf=TRUE, rank=FALSE)
@@ -2165,18 +2165,18 @@ plot_reference_locus <- function(queryFiles, centerFiles, txdb=NULL, ext=c(-100,
                           p <- draw_locus_profile(plot_df=aplot_df, cn="Query", sn="Reference", Xlab=Xlab, Ylab=Ylab, shade=shade, hl=hl)
                           comp <- combn(seq_along(beds),2, simplify=FALSE)
 
-                          ps1 <- draw_boxplot_logy(stat_df=astat_df, xc="Query", yc="Intensity", comp=comp, stats=statsMethod, Ylab=Ylab, logy="linear")
-                          ps2 <- draw_boxplot_logy(stat_df=astat_df, xc="Query", yc="Intensity", comp=comp, stats=statsMethod, Ylab=Ylab, logy="logy")
+                          ps1 <- draw_boxplot_by_factor(stat_df=astat_df, xc="Query", yc="Intensity", comp=comp, stats=statsMethod, Ylab=Ylab)
+                          
                           ps1_wo_outlier <- draw_boxplot_wo_outlier(stat_df=astat_df, xc="Query", yc="Intensity", comp=comp, stats=statsMethod, Ylab=Ylab)
                           ps1_mean_se <- draw_mean_se_barplot(stat_df=astat_df, xc="Query", yc="Intensity", comp=comp, Ylab=Ylab)
                           prank <- draw_rank_plot(stat_df=astat_df, xc="Query", yc="Intensity", Ylab=Ylab, ecdf=TRUE, rank=FALSE)
                        }
 
                        if(max(i,j)>3){
-                          lapply(list(p, ps1_mean_se, prank, ps1, ps2, ps1_wo_outlier), print)
+                          lapply(list(p, ps1_mean_se, prank, ps1, ps1_wo_outlier), print)
                        }else{
-                          comp1 <- plot_grid(p, ps1_mean_se, prank, ncol = 3, rel_widths = c(1,1,1))
-                          comp2 <- plot_grid(ps1, ps2, ps1_wo_outlier, ncol = 3, align='h', axis='b', rel_widths = c(1,1,1))
+                          comp1 <- plot_grid(p, ps1_mean_se,  ncol = 2, rel_widths = c(1,1))
+                          comp2 <- plot_grid(prank, ps1, ps1_wo_outlier, ncol = 3, align='h', axis='b', rel_widths = c(1,1,1))
                           print(plot_grid(comp1, comp2, ncol=1, rel_heights=c(1,1)))
                        }
                        
@@ -2210,7 +2210,7 @@ plot_reference_locus <- function(queryFiles, centerFiles, txdb=NULL, ext=c(-100,
 
 
     if(verbose) print("Computing Ratio over input")
-    Ylab <- ifelse(transform, "Log2 (Ratio-over-Input)", "Ratio-over-Input")
+    Ylab <- ifelse(is.na(transform), "Ratio-over-Input", paste0(transform, " (Ratio-over-Input)"))
 
     inputMatrix_list <- scoreMatrix_list[inputLabels]
     ratiofiles <- queryFiles[!queryFiles %in% inputFiles]
@@ -2321,8 +2321,8 @@ plot_reference_locus <- function(queryFiles, centerFiles, txdb=NULL, ext=c(-100,
                     p <- draw_locus_profile(plot_df=aplot_df, cn="Reference", sn="Query", Xlab=Xlab, Ylab=Ylab, shade=shade, hl=hl)
                     comp <- combn(seq_along(centers),2, simplify=FALSE)
 
-                    ps1 <- draw_boxplot_logy(stat_df=astat_df, xc="Reference", yc="Intensity",  comp=comp, stats=statsMethod, Ylab=Ylab, logy="linear")
-                    ps2 <- draw_boxplot_logy(stat_df=astat_df, xc="Reference", yc="Intensity",  comp=comp, stats=statsMethod, Ylab=Ylab, logy="logy")
+                    ps1 <- draw_boxplot_by_factor(stat_df=astat_df, xc="Reference", yc="Intensity",  comp=comp, stats=statsMethod, Ylab=Ylab)
+                    
                     ps1_wo_outlier <- draw_boxplot_wo_outlier(stat_df=astat_df, xc="Reference", yc="Intensity", comp=comp, stats=statsMethod, Ylab=Ylab)
                     ps1_mean_se <- draw_mean_se_barplot(stat_df=astat_df, xc="Reference", yc="Intensity", comp=comp, Ylab=Ylab)
                     prank <- draw_rank_plot(stat_df=astat_df, xc="Reference", yc="Intensity", Ylab=Ylab, ecdf=TRUE, rank=FALSE)
@@ -2330,18 +2330,18 @@ plot_reference_locus <- function(queryFiles, centerFiles, txdb=NULL, ext=c(-100,
                     p <- draw_locus_profile(plot_df=aplot_df, cn="Query", sn="Reference", Xlab=Xlab, Ylab=Ylab, shade=shade, hl=hl)
                     comp <- combn(seq_along(beds),2, simplify=FALSE)
 
-                    ps1 <- draw_boxplot_logy(stat_df=astat_df, xc="Query", yc="Intensity", comp=comp, stats=statsMethod, Ylab=Ylab, logy="linear")
-                    ps2 <- draw_boxplot_logy(stat_df=astat_df, xc="Query", yc="Intensity", comp=comp, stats=statsMethod, Ylab=Ylab, logy="logy")
+                    ps1 <- draw_boxplot_by_factor(stat_df=astat_df, xc="Query", yc="Intensity", comp=comp, stats=statsMethod, Ylab=Ylab)
+                    
                     ps1_wo_outlier <- draw_boxplot_wo_outlier(stat_df=astat_df, xc="Query", yc="Intensity", comp=comp, stats=statsMethod, Ylab=Ylab)
                     ps1_mean_se <- draw_mean_se_barplot(stat_df=astat_df, xc="Query", yc="Intensity", comp=comp, Ylab=Ylab)
                     prank <- draw_rank_plot(stat_df=astat_df, xc="Query", yc="Intensity", Ylab=Ylab, ecdf=TRUE, rank=FALSE)
                  }
 
                  if(max(i,j)>3){
-                    lapply(list(p, ps1_mean_se, prank, ps1, ps2, ps1_wo_outlier), print)
+                    lapply(list(p, ps1_mean_se, prank, ps1, ps1_wo_outlier), print)
                  }else{
-                    comp1 <- plot_grid(p, ps1_mean_se, prank, ncol = 3, rel_widths = c(1,1,1))
-                    comp2 <- plot_grid(ps1, ps2, ps1_wo_outlier, ncol = 3, align='h', axis='b', rel_widths = c(1,1,1))
+                    comp1 <- plot_grid(p, ps1_mean_se,  ncol = 2, rel_widths = c(1,1))
+                    comp2 <- plot_grid(prank, ps1, ps1_wo_outlier, ncol = 3, align='h', axis='b', rel_widths = c(1,1,1))
                     print(plot_grid(comp1, comp2, ncol=1, rel_heights=c(1,1)))
                  }
                  
@@ -2403,7 +2403,7 @@ plot_reference_locus <- function(queryFiles, centerFiles, txdb=NULL, ext=c(-100,
 #' @param Xlab a string denotes the label on x-axis
 #' @param shade logical indicating whether to place a shaded rectangle around the point of interest
 #' @param binSize an integer defines bin size for intensity calculation
-#' @param transform logical, whether to log2 transform the data matrix
+#' @param transform a string in c("log", "log2", "log10"), default = NA indicating no transformation of data matrix
 #' @param n_random an integer denotes the number of randomization should be formed
 #' @param statsMethod a string in c("wilcox.test", "t.test"), for pair-wise groups comparisons
 #' @param verbose logical, indicating whether to output additional information (data used for plotting or statistical test results)
@@ -2421,7 +2421,7 @@ plot_reference_locus <- function(queryFiles, centerFiles, txdb=NULL, ext=c(-100,
 #' @export plot_reference_locus_with_random
 
 plot_reference_locus_with_random <- function(queryFiles, centerFiles, txdb, ext=c(0,0), hl=c(0,0), shade=FALSE,
-                                             handleInputParams=NULL, verbose=FALSE, smooth=FALSE, transform=FALSE, 
+                                             handleInputParams=NULL, verbose=FALSE, smooth=FALSE, transform=NA, 
                                              binSize=10, refPoint="center", Xlab="Center", Ylab="Signal intensity",
                                              inputFiles=NULL, stranded=TRUE, scale=FALSE, outPrefix=NULL, 
                                              rmOutlier=FALSE, n_random=1, statsMethod="wilcox.test", nc=2){
@@ -2572,7 +2572,7 @@ plot_reference_locus_with_random <- function(queryFiles, centerFiles, txdb, ext=
 
   ## plot reference center and random center for each bed
 
-  Ylab <- ifelse(transform, paste0("Log2 (", Ylab, ")"), Ylab)
+  Ylab <- ifelse(is.na(transform), Ylab, paste0(transform, " (", Ylab, ")"))
   for(queryFile in queryFiles){
 
     if(verbose) print(paste("Processing query", queryFile))
@@ -2643,13 +2643,13 @@ plot_reference_locus_with_random <- function(queryFiles, centerFiles, txdb, ext=
               mutate(Reference=factor(Reference, levels=sort(unique(Reference))))
            comp <- list(c(1, 2))
 
-           ps1 <- draw_boxplot_logy(stat_df=stat_df, xc="Reference", yc="Intensity",  comp=comp, stats=statsMethod, Ylab=Ylab, logy="linear")
-           ps2 <- draw_boxplot_logy(stat_df=stat_df, xc="Reference", yc="Intensity",  comp=comp, stats=statsMethod, Ylab=Ylab, logy="logy")
+           ps1 <- draw_boxplot_by_factor(stat_df=stat_df, xc="Reference", yc="Intensity",  comp=comp, stats=statsMethod, Ylab=Ylab)
+           ps2 <- draw_boxplot_by_factor(stat_df=stat_df, xc="Reference", yc="Intensity",  comp=comp, stats=statsMethod, Ylab=Ylab, logy="logy")
            ps1_wo_outlier <- draw_boxplot_wo_outlier(stat_df=stat_df, xc="Reference", yc="Intensity", comp=comp, stats=statsMethod, Ylab=Ylab)
            ps1_mean_se <- draw_mean_se_barplot(stat_df=stat_df, xc="Reference", yc="Intensity", comp=comp, Ylab=Ylab)
            prank <- draw_rank_plot(stat_df=stat_df, xc="Reference", yc="Intensity", Ylab=Ylab)
 
-           comp1 <- plot_grid(p, ps1_mean_se, prank, ncol = 3, rel_widths = c(1,1,1))
+           comp1 <- plot_grid(p, ps1_mean_se,  ncol = 2, rel_widths = c(1,1))
            comp2 <- plot_grid(ps1, ps2, ps1_wo_outlier, ncol = 3, rel_widths = c(1,1,1))
            print(plot_grid(comp1, comp2, ncol=1, rel_heights=c(1,1)))
         }else{
@@ -2660,7 +2660,7 @@ plot_reference_locus_with_random <- function(queryFiles, centerFiles, txdb, ext=
   }
 
   if(!is.null(inputFiles)){
-    Ylab <- ifelse(transform, "Log2 (Ratio-over-Input)", "Ratio-over-Input")
+    Ylab <- ifelse(is.na(transform), "Ratio-over-Input", paste0(transform, " (Ratio-over-Input)"))
 
     ratiofiles <- queryFiles[!queryFiles %in% inputFiles]
     ratiolabels <- queryLabels[!queryLabels %in% inputLabels]
@@ -2766,13 +2766,13 @@ plot_reference_locus_with_random <- function(queryFiles, centerFiles, txdb, ext=
                 mutate(Reference=factor(Reference, levels=sort(unique(Reference))))
              comp <- list(c(1, 2))
 
-             ps1 <- draw_boxplot_logy(stat_df=stat_df, xc="Reference", yc="Intensity",  comp=comp, stats=statsMethod, Ylab=Ylab, logy="linear") 
-             ps2 <- draw_boxplot_logy(stat_df=stat_df, xc="Reference", yc="Intensity",  comp=comp, stats=statsMethod, Ylab=Ylab, logy="logy") 
+             ps1 <- draw_boxplot_by_factor(stat_df=stat_df, xc="Reference", yc="Intensity",  comp=comp, stats=statsMethod, Ylab=Ylab) 
+             ps2 <- draw_boxplot_by_factor(stat_df=stat_df, xc="Reference", yc="Intensity",  comp=comp, stats=statsMethod, Ylab=Ylab, logy="logy") 
              ps1_wo_outlier <- draw_boxplot_wo_outlier(stat_df=stat_df, xc="Reference", yc="Intensity", comp=comp, stats=statsMethod, Ylab=Ylab)
              ps1_mean_se <- draw_mean_se_barplot(stat_df=stat_df, xc="Reference", yc="Intensity", comp=comp, Ylab=Ylab)
              prank <- draw_rank_plot(stat_df=stat_df, xc="Reference", yc="Intensity", Ylab=Ylab)
 
-             comp1 <- plot_grid(p, ps1_mean_se, prank, ncol = 3, rel_widths = c(1,1,1))
+             comp1 <- plot_grid(p, ps1_mean_se,  ncol = 2, rel_widths = c(1,1))
              comp2 <- plot_grid(ps1, ps2, ps1_wo_outlier, ncol = 3, rel_widths = c(1,1,1))
              print(plot_grid(comp1, comp2, ncol=1, rel_heights=c(1,1)))
 
@@ -2929,8 +2929,8 @@ plot_bam_correlation <- function(bamfiles, binSize=1e6, outPrefix=NULL, handleIn
 #' @param peakFile a string denoting the peak file name, only .bed format is allowed
 #' @param gtfFile path to a gene annotation gtf file with gene_biotype field
 #' @param handleInputParams a list of parameters for \code{handle_input}
-#' @param fiveP extension out of the 5' boundary of genes for defining promoter: -fiveP TSS + dsTSS
-#' @param dsTSS extension downstream of TSS for defining promoter: -fiveP TSS + dsTSS
+#' @param fiveP extension out of the 5' boundary of genes for defining promoter: fiveP TSS + dsTSS
+#' @param dsTSS extension downstream of TSS for defining promoter: fiveP TSS + dsTSS
 #' @param threeP extension out of the 3' boundary of genes for defining termination region: -0 TTS + threeP
 #' @param outPrefix a string denoting output file name in pdf format
 #' @param simple logical, indicating whether 5'UTR and 3'UTR are annotated in the gtffile
@@ -2957,7 +2957,7 @@ plot_bam_correlation <- function(bamfiles, binSize=1e6, outPrefix=NULL, handleIn
 #'
 #' @export plot_peak_annotation
 #'
-plot_peak_annotation <- function(peakFile, gtfFile, handleInputParams=NULL, fiveP=1000, dsTSS=300, threeP=1000, simple=FALSE, outPrefix=NULL, verbose=FALSE){
+plot_peak_annotation <- function(peakFile, gtfFile, handleInputParams=NULL, fiveP=-1000, dsTSS=300, threeP=1000, simple=FALSE, outPrefix=NULL, verbose=FALSE){
 
   peakLabel <- names(peakFile)
   handleInputParams$useScore=FALSE
@@ -2978,7 +2978,7 @@ plot_peak_annotation <- function(peakFile, gtfFile, handleInputParams=NULL, five
     intron <- get_genomic_feature_coordinates(txdb, "intron", longest=FALSE)
     gene <- get_genomic_feature_coordinates(txdb, "gene", longest=FALSE)$GRanges
 
-    promoter <- promoters(gene, upstream=fiveP, downstream=300, use.names=FALSE)
+    promoter <- promoters(gene, upstream=-fiveP, downstream=300, use.names=FALSE)
     names(promoter) <- NULL
     TTS <- flank(gene, width=threeP, both=FALSE, start=FALSE, ignore.strand=FALSE)
     names(TTS) <- NULL
@@ -3135,7 +3135,7 @@ plot_peak_annotation <- function(peakFile, gtfFile, handleInputParams=NULL, five
     
     ## filter based on peak type, for ChIPseq peak, only output genes targeted in promoters,
     ## for CLIPseq peaks only output genes targeted in transcripts(5'UTR, CDS, 3'UTR, intron)
-    if(fiveP > 0){
+    if(fiveP < 0){
        dt_gene <- dt_gene %>%
           #filter(Promoter > 0) %>%
           arrange(desc(Promoter))

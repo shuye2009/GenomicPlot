@@ -28,7 +28,7 @@ The following is a basic example which shows you how to visualize your ChIP-seq 
 library(GenomicPlot)
 
 txdb <- AnnotationDbi::loadDb(system.file("extdata", "txdb_chr19.sql", package="GenomicPlot"))
-gf <- prepare_5parts_genomic_features(txdb, meta=TRUE, nbins=100, fiveP=1000, threeP=1000, longest=TRUE)
+gf <- prepare_5parts_genomic_features(txdb, meta=TRUE, nbins=100, fiveP=-2000, threeP=1000, longest=TRUE)
 
 queryfiles <- c(system.file("extdata", "test_chip_peak_chr19.narrowPeak", package="GenomicPlot"),
                 system.file("extdata", "test_chip_peak_chr19.bed", package="GenomicPlot"),
@@ -49,15 +49,15 @@ plot_5parts_metagene(queryFiles=queryfiles,
                      scale=FALSE, 
                      stranded=TRUE, 
                      outPrefix=op, 
-                     transform=FALSE, 
+                     transform=NA, 
                      heatmap=TRUE,
                      rmOutlier=TRUE, 
                      heatRange=c(0,150),
                      nc=4)
                      
 ```
-![image1](./assets/test_plot_5parts_metagene-1.png)
-![image2](./assets/test_plot_5parts_metagene-2.png)
+![image1](./assets/test_plot_5parts_metagene/test_plot_5parts_metagene-1.png)
+![image2](./assets/test_plot_5parts_metagene/test_plot_5parts_metagene-2.png)
 
 The following example shows you how to visualize your iCLIP_peaks around ChIP-seq peaks. The resulting figure is 'test_plot_reference_locus.pdf'.
 
@@ -84,14 +84,15 @@ plot_reference_locus(queryFiles=queryfiles[c(1,3)],
                      scale=FALSE, 
                      stranded=TRUE, 
                      outPrefix=op, 
-                     transform=FALSE, 
+                     transform=NA, 
                      heatmap=TRUE,
+                     heatRange=c(0,8),
                      rmOutlier=TRUE, 
                      nc=4)
                      
 ```
-![image1](./assets/test_plot_reference_locus-1.png)
-![image2](./assets/test_plot_reference_locus-2.png)
+![image1](./assets/test_plot_reference_locus/test_plot_reference_locus-1.png)
+![image2](./assets/test_plot_reference_locus/test_plot_reference_locus-2.png)
 
 The following example shows you how to annotate ChIP-seq peaks. The resulting figure is 'test_plot_peak_annotation.pdf', and the detailed annotation is in the table "summitPeak_targeted_annotated_gene.tab".
 
@@ -107,15 +108,15 @@ handleInputParams <- list(CLIP_reads=FALSE, fix_width=21, fix_point="center", no
 plot_peak_annotation(peakFile=queryfiles[2], 
                      gtfFile=gtffile, 
                      handleInputParams=handleInputParams, 
-                     fiveP=1000, 
+                     fiveP=-1000, 
                      threeP=1000, 
                      outPrefix=op, 
                      verbose=FALSE)
 
 ```
-![image1](./assets/test_plot_peak_annotation-1.png)
-![image2](./assets/test_plot_peak_annotation-2.png)
-![image3](./assets/test_plot_peak_annotation-3.png)
+![image1](./assets/test_plot_peak_annotation/test_plot_peak_annotation-1.png)
+![image2](./assets/test_plot_peak_annotation/test_plot_peak_annotation-2.png)
+![image3](./assets/test_plot_peak_annotation/test_plot_peak_annotation-3.png)
 
 For more examples, please check out the tests/test_output directory.
 

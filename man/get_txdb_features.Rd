@@ -4,7 +4,7 @@
 \alias{get_txdb_features}
 \title{Get genomic coordinates of features of protein-coding genes}
 \usage{
-get_txdb_features(txdb, fiveP = 1000, dsTSS = 300, threeP = 1000)
+get_txdb_features(txdb, fiveP = -1000, dsTSS = 300, threeP = 1000)
 }
 \arguments{
 \item{txdb}{a TxDb object defined in the GenomicFeatures package}

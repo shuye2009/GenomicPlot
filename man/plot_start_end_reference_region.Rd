@@ -54,7 +54,7 @@ plot_start_end_reference_region(
 
 \item{outPrefix}{a string specifying output file prefix for plots (outPrefix.pdf)}
 
-\item{transform}{logical, whether to log2 transform the data matrix}
+\item{transform}{a string in c("log", "log2", "log10"), default = NA indicating no transformation of data matrix}
 
 \item{shade}{logical indicating whether to place a shaded rectangle around the point of interest}
 

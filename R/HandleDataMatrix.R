@@ -94,7 +94,8 @@ impute_hm <- function(fullmatrix, verbose=FALSE){
 #' @param scale logical, indicating whether the score matrix should be scaled to the range 0:1, so that samples with different baseline can be compared
 #' @param rmOutlier logical, indicating whether a row with abnormally high values in the score matrix should be removed
 #' @param verbose logical, indicating whether to output additional information (data used for plotting or statistical test results)
-#' @param transform logical, whether to log2 transform the data matrix
+#' @param transform a string in c("log", "log2", "log10"), default = NA indicating no transformation of data matrix
+#' @param pc pseudo-count added to the data matrix before log transformation to avoid taking log of zero
 #'
 #' @return a numeric matrix with the same dimension as the fullmatrix
 #' @author Shuye Pu
@@ -103,7 +104,7 @@ impute_hm <- function(fullmatrix, verbose=FALSE){
 #' @export process_scoreMatrix
 #'
 #'
-process_scoreMatrix <- function(fullmatrix, scale=FALSE, rmOutlier=FALSE, transform=FALSE, verbose=FALSE){
+process_scoreMatrix <- function(fullmatrix, scale=FALSE, rmOutlier=FALSE, transform=NA, pc=0, verbose=FALSE){
 
    #rn <- rownames(fullmatrix)
    inspect_matrix(fullmatrix, verbose=verbose)
@@ -115,11 +116,15 @@ process_scoreMatrix <- function(fullmatrix, scale=FALSE, rmOutlier=FALSE, transf
    
    inspect_matrix(fullmatrix, verbose)
 
-   if(transform) {
+   if(!is.na(transform)) {
       if(min(fullmatrix) < 0){
          message("Negative values are found in the matrix, log transformation cannot be applied!")
-      }else{
-         fullmatrix <- log2(fullmatrix)
+      }else if(tranform == "log"){
+         fullmatrix <- log(fullmatrix + pc)
+      }else if(tranform == "log2"){
+         fullmatrix <- log2(fullmatrix + pc)
+      }else if(tranform == "log10"){
+         fullmatrix <- log10(fullmatrix + pc)
       }
    }
    ## remove outliers from reference regions, using Hampel filter with 1000mad instead of 3mad.
