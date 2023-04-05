@@ -723,3 +723,101 @@ draw_stacked_profile <- function(plot_df, xc="Position", yc="Intensity", cn="Que
 
 }
 
+#' @title Plot two-sets Venn diagram
+#'
+#' @description This is a helper function for Venn diagram plot. A Venn diagram is plotted as output.
+#' @param apair a list of two vectors
+#' @param overlap_fun the name of the function that defines overlap, depending on the type of object in the vectors.
+#'
+#' @return NULL
+#' @author Shuye Pu
+#'
+#'
+#' @export overlap_pair
+
+overlap_pair <- function(apair, overlap_fun){
+   sizes <- vapply(apair, length, numeric(1))
+   overlap <- length(Reduce(overlap_fun, apair))
+   jaccard <- round(overlap/(sum(sizes)-overlap), digits=5)
+   venn.plot <- draw.pairwise.venn(sizes[1], sizes[2], overlap, category=names(apair),
+                                   lty=rep("blank",2), fill=c("#0020C2", "#64E986"),
+                                   cat.just = rep(list(c(0.5, 0)),2), cex = rep(2, 3), cat.pos = c(0, 0))
+   
+   grid.draw(venn.plot)
+   grid.text(paste("Jaccard:", jaccard), unit(0.2, "npc"), unit(0.9, "npc"), draw = TRUE)
+   grid.newpage()
+   
+   return(NULL)
+}
+
+#' @title Plot three-sets Venn diagram
+#'
+#' @description This is a helper function for Venn diagram plot. A Venn diagram is plotted as output.
+#' @param atriple a list of three vectors
+#' @param overlap_fun the name of the function that defines overlap
+#'
+#' @return NULL
+#' @author Shuye Pu
+#'
+#'
+#' @export overlap_triple
+
+overlap_triple <- function(atriple, overlap_fun){
+   sizes <- sort(vapply(atriple, length, numeric(1)), decreasing=TRUE)
+   atriple <- atriple[names(sizes)] ## sort the gr by decreasing size to avoid n13 < n123
+   
+   overlap12 <- length(Reduce(overlap_fun, atriple[c(1,2)]))
+   overlap13 <- length(Reduce(overlap_fun, atriple[c(1,3)]))
+   overlap23 <- length(Reduce(overlap_fun, atriple[c(2,3)]))
+   overlap123 <- length(Reduce(overlap_fun, atriple))
+   
+   venn.plot <- draw.triple.venn(sizes[1], sizes[2], sizes[3], overlap12, overlap23, overlap13,
+                                 overlap123, category=names(atriple), lty=rep("blank",3),
+                                 fill=c("#0020C2", "#64E986", "#990012"), cat.just = rep(list(c(0.5, 0)),3),
+                                 cex = rep(2, 7), cat.pos = c(0, 0, 180))
+   
+   grid.draw(venn.plot)
+   grid.newpage()
+   
+   return(NULL)
+}
+
+#' @title Plot four-sets Venn diagram
+#'
+#' @description This is a helper function for Venn diagram plot. A Venn diagram is plotted as output.
+#' @param aquad a list of four vectors
+#' @param overlap_fun the name of the function that defines overlap
+#'
+#' @return NULL
+#' @author Shuye Pu
+#'
+#'
+#' @export overlap_quad
+#'
+overlap_quad <- function(aquad, overlap_fun){
+   sizes <- sort(vapply(aquad, length, numeric(1)), decreasing=TRUE)
+   aquad <- aquad[names(sizes)] ## sort the gr by decreasing size to avoid n13 < n123
+   
+   overlap12 <- length(Reduce(overlap_fun, aquad[c(1,2)]))
+   overlap13 <- length(Reduce(overlap_fun, aquad[c(1,3)]))
+   overlap14 <- length(Reduce(overlap_fun, aquad[c(1,4)]))
+   overlap23 <- length(Reduce(overlap_fun, aquad[c(2,3)]))
+   overlap24 <- length(Reduce(overlap_fun, aquad[c(2,4)]))
+   overlap34 <- length(Reduce(overlap_fun, aquad[c(3,4)]))
+   overlap123 <- length(Reduce(overlap_fun, aquad[c(1,2,3)]))
+   overlap124 <- length(Reduce(overlap_fun, aquad[c(1,2,4)]))
+   overlap134 <- length(Reduce(overlap_fun, aquad[c(1,3,4)]))
+   overlap234 <- length(Reduce(overlap_fun, aquad[c(2,3,4)]))
+   overlap1234 <- length(Reduce(overlap_fun, aquad))
+   
+   venn.plot <- draw.quad.venn(sizes[1], sizes[2], sizes[3], sizes[4], overlap12, overlap13,
+                               overlap14, overlap23, overlap24, overlap34, overlap123, overlap124,
+                               overlap134, overlap234, overlap1234, category=names(aquad),
+                               lty=rep("blank",4), fill=c("#0020C2", "#64E986", "#990012", "#c6dcff"),
+                               cat.just = rep(list(c(0.5, 0)),4), cex = rep(2, 15), cat.pos = c(0, 0, 0, 0))
+   
+   grid.draw(venn.plot)
+   grid.newpage()
+   return(NULL)
+}
+

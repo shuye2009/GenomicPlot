@@ -119,11 +119,11 @@ process_scoreMatrix <- function(fullmatrix, scale=FALSE, rmOutlier=FALSE, transf
    if(!is.na(transform)) {
       if(min(fullmatrix) < 0){
          message("Negative values are found in the matrix, log transformation cannot be applied!")
-      }else if(tranform == "log"){
+      }else if(transform == "log"){
          fullmatrix <- log(fullmatrix + pc)
-      }else if(tranform == "log2"){
+      }else if(transform == "log2"){
          fullmatrix <- log2(fullmatrix + pc)
-      }else if(tranform == "log10"){
+      }else if(transform == "log10"){
          fullmatrix <- log10(fullmatrix + pc)
       }
    }

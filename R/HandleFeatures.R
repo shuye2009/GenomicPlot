@@ -221,7 +221,6 @@ get_genomic_feature_coordinates <- function(txdb, featureName, featureSource=NUL
       feature <- exonsBy(txdb, by="tx", use.name=TRUE) #grl
    }else if(featureName == "gene"){
       feature <- genes(txdb)                       # gr
-      feature <- as(split(feature, f=feature$gene_id), "GRangesList") # grl
    }else {
       stop("Feature is not defined!")
    }
@@ -254,7 +253,9 @@ get_genomic_feature_coordinates <- function(txdb, featureName, featureSource=NUL
       }
       if(featureName %in% c("gene", "intron", "exon")){
          if(featureName == "gene"){
-            gr_feature_longest <- unlist(feature_longest, use.names=TRUE) ## convert each element of Grangeslist to multiple Granges
+            gr_feature_longest <- feature_longest #gr
+            feature_longest <- as(split(feature_longest, f=feature_longest$gene_id), "GRangesList") # grl
+            
          }else{
             gr_feature_longest <- unlist(feature_longest, use.names=FALSE) ## convert each element of Grangeslist to multiple Granges
          }
@@ -278,7 +279,8 @@ get_genomic_feature_coordinates <- function(txdb, featureName, featureSource=NUL
       }
       if(featureName %in% c("gene", "intron", "exon")){
          if(featureName == "gene"){
-            gr_feature <- unlist(feature, use.names=TRUE) ## convert Grangeslist object to GRanges object
+            gr_feature <- feature #gr
+            feature <- as(split(feature, f=feature$gene_id), "GRangesList") # grl
          }else{
             gr_feature <- unlist(feature, use.names=FALSE) ## convert Grangeslist object to GRanges object
          }
@@ -384,7 +386,7 @@ prepare_3parts_genomic_features <- function(txdb, featureName="transcript", meta
 #' @param threeP extension out of the 3' boundary of gene
 #' @param verbose logical, whether to output additional information
 #' @param longest logical, indicating whether the output should be limited to the longest transcript of each gene
-#' @param subsetTx a vector of transcript ids for subseting the genome
+#' @param subsetTx a vector of transcript names for subseting the genome
 #'
 #' @return a named list with the elements c("windowRs", "nbins", "scaled_bins", "fiveP", "threeP", "meta", "longest")
 #' @author Shuye Pu
@@ -445,12 +447,9 @@ prepare_5parts_genomic_features <- function(txdb, meta=TRUE, nbins=100, fiveP=-1
    })
 
    names(selected_tx) <- names(grls)
+   
    if(!is.null(subsetTx)){
-      tl <- transcriptLengths(txdb, with.utr5_len = TRUE, with.cds_len = TRUE, with.utr3_len = TRUE)
-      txids <- tl %>%
-         filter(tx_name %in% subsetTx) %>%
-         select(tx_id)
-      selected_tx[["custom"]] <- as.character(txids[,1])
+      selected_tx[["custom"]] <- subsetTx
    }
    selected_tx <- Reduce(intersect, selected_tx)
 
@@ -681,8 +680,9 @@ get_targeted_genes <- function(peak, features, stranded=TRUE){
 #' @description Make a partial TxDb object given a GTF file and a list of gene names in a file or in a character vector.
 #'
 #' @param gtfFfile path to a GTF file
-#' @param geneList path to a line-delimited text file with one gene name on each line, or a character vector of gene names
-#'
+#' @param geneList path to a tab-delimited text file with one gene name on each line, or a character vector of gene names
+#' @param geneCol the position of the column that containing gene names in the case that geneList is a file
+#' 
 #' @return a TxDb object
 #' @author Shuye Pu
 #' 
@@ -690,7 +690,7 @@ get_targeted_genes <- function(peak, features, stranded=TRUE){
 
 make_subTxDb_from_GTF <- function(gtfFile, geneList, geneCol=1){
    gff <- RCAS::importGtf(saveObjectAsRds = TRUE, filePath = gtfFile)
-   if(length(geneList == 1)){
+   if(length(geneList) == 1){
       aList <- read.delim2(geneList, comment.char = "#")
       geneList <- as.character(aList[, geneCol])
    }
@@ -705,9 +705,10 @@ make_subTxDb_from_GTF <- function(gtfFile, geneList, geneCol=1){
 #' @description Given a list of gene names in a file or in a character vector, turn them into a vector of transcript ids.
 #'
 #' @param gtfFfile path to a GTF file
-#' @param geneList path to a line-delimited text file with one gene name on each line, or a character vector of gene names
+#' @param geneList path to a tab-delimited text file with one gene name on each line, or a character vector of gene names
+#' @param geneCol the position of the column that containing gene names in the case that geneList is a file
 #'
-#' @return a vector
+#' @return a vector of transcript ids
 #' @author Shuye Pu
 #' 
 #' @export gene2tx
@@ -749,3 +750,91 @@ check_constraints <- function(gr, genome, queryRle=NULL){
     
    return(gr)
 }
+
+#' @title Filter GRanges by overlaps in stranded way
+#' @description This function reports all query GRanges that have overlaps in subject GRanges. Strand information is used to define overlap.
+#' @param query a GRanges object
+#' @param subject a GRanges object
+#' @param maxgap an integer denoting the distance that define overlap
+#' @param minoverlap The minimum amount of overlap between intervals as a single integer greater than 0.
+#' If you modify this argument, maxgap must be held fixed.
+#'
+#' @return a GRanges object
+#' @author Shuye Pu
+#'
+#'
+#' @export filter_by_overlaps_stranded
+
+filter_by_overlaps_stranded <- function(query, subject, maxgap=-1L, minoverlap=0L){
+   
+   plus_query <- query[strand(query)=="+"]
+   minus_query <- query[strand(query)=="-"]
+   plus_subject <- subject[strand(subject)=="+"]
+   minus_subject <- subject[strand(subject)=="-"]
+   
+   overlap_plus <- filter_by_overlaps(plus_query, plus_subject, maxgap=maxgap, minoverlap=minoverlap)
+   overlap_minus <- filter_by_overlaps(minus_query, minus_subject, maxgap=maxgap, minoverlap=minoverlap)
+   
+   overlaps <- c(overlap_plus, overlap_minus)
+   
+   if(length(overlaps) > min(length(query), length(subject))){
+      message("Size of overlap is greater than min(sizeOfQuery, sizeOfSubject)!")
+   }
+   invisible(overlaps)
+}
+
+#' @title Filter GRanges by nonoverlaps in stranded way
+#' @description This function reports all query GRanges that do not overlaps GRanges in subject. Strand information is used to define overlap.
+#' @param query a GRanges object
+#' @param subject a GRanges object
+#'
+#' @return a GRanges object
+#' @author Shuye Pu
+#'
+#'
+#' @export filter_by_nonoverlaps_stranded
+#'
+filter_by_nonoverlaps_stranded <- function(query, subject){
+   
+   overlaps <- filter_by_overlaps_stranded(query, subject, maxgap=-1L)
+   if(length(overlaps) > min(length(query), length(subject))){
+      message("Size of overlap is greater than min(sizeOfQuery, sizeOfSubject!")
+   }
+   nonoverlaps <- GenomicRanges::setdiff(query, overlaps)
+   invisible(nonoverlaps)
+}
+
+
+#' @title Format genomic coordinates in GRanges or GRrangesList as strings used in igv
+#' @description This function takes a GRanges or GRangesList object, and transform each range into a string
+#' @param x a GRanges or GRangesList object
+#' @return a vector of strings in the format of 'chr:start-end(strand)'
+#' @author Shuye Pu
+#'
+#' @examples
+#' gr1 <- GenomicRanges::GRanges("chr2", IRanges::IRanges(3, 6))
+#' gr2 <- GenomicRanges::GRanges(c("chr1", "chr1"), IRanges::IRanges(c(7,13), width=3),
+#'  strand=c("+", "-"))
+#' gr3 <- GenomicRanges::GRanges(c("chr1", "chr2"), IRanges::IRanges(c(1, 4), c(3, 9)),
+#'  strand="-")
+#'
+#' grl <- GenomicRanges::GRangesList(gr1= gr1, gr2=gr2, gr3=gr3)
+#' grl
+#'
+#' out <- format_genomic_coordinates(grl)
+#' cat(out)
+#'
+#' @export format_genomic_coordinates
+#'
+format_genomic_coordinates <- function(x){
+   if(grepl("GRangesList", class(x))) x <- unlist(x) ## convert grl to gr
+   
+   chr <- as.vector(seqnames(x)) %>% as.character
+   start <- start(x) %>% as.numeric
+   end <- end(x) %>% as.numeric
+   strand <- strand(x) %>% as.character
+   
+   out <- paste0(chr, ":", start, "-", end, "(", strand, ")")
+   invisible(out)
+}
+

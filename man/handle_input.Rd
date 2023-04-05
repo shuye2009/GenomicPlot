@@ -13,11 +13,11 @@ handle_input(inputFiles, handleInputParams = NULL, verbose = FALSE, nc = 2)
 'CLIP_reads' logical, indicating if the bam reads should be shifted to the -1 position at the 5' of the reads.
 'fix_width' an integer defines how long should the reads should be extended to.
 'fix_point' a string in c("start", "end", "center") denoting the anchor point for extension.
-'useScore' logical, indicating whether the 'score' column of the bed file should be used in the output data structure.
-'outRle' logical, indicating whether the output should be a list of RleList objects or GRanges objects.
+'useScore' logical, indicating whether the 'score' column of the bed file should be used in calculation of coverage.
+'outRle' logical, indicating whether the output should be RleList objects or GRanges objects.
 'norm' logical, indicating whether the output RleList should be normalized to RPM using library sizes.
 'genome' a string denoting the genome name and version.
-'useSizeFactor' logical, indicating whether the library size should be adjusted with a size factor}
+'useSizeFactor' logical, indicating whether the library size should be adjusted with a size factor, using the 'calcNormFactors' function in the edgeR package}
 
 \item{verbose}{logical, whether to output additional information}
 
