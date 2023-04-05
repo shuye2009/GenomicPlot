@@ -7,11 +7,11 @@
 #' 'CLIP_reads' logical, indicating if the bam reads should be shifted to the -1 position at the 5' of the reads.
 #' 'fix_width' an integer defines how long should the reads should be extended to.
 #' 'fix_point' a string in c("start", "end", "center") denoting the anchor point for extension.
-#' 'useScore' logical, indicating whether the 'score' column of the bed file should be used in the output data structure.
-#' 'outRle' logical, indicating whether the output should be a list of RleList objects or GRanges objects.
+#' 'useScore' logical, indicating whether the 'score' column of the bed file should be used in calculation of coverage.
+#' 'outRle' logical, indicating whether the output should be RleList objects or GRanges objects.
 #' 'norm' logical, indicating whether the output RleList should be normalized to RPM using library sizes.
 #' 'genome' a string denoting the genome name and version.
-#' 'useSizeFactor' logical, indicating whether the library size should be adjusted with a size factor
+#' 'useSizeFactor' logical, indicating whether the library size should be adjusted with a size factor, using the 'calcNormFactors' function in the edgeR package
 #' @param nc integer, number of cores for parallel processing
 #' @param verbose logical, whether to output additional information
 #'
@@ -38,33 +38,32 @@ handle_input <- function(inputFiles, handleInputParams=NULL, verbose=FALSE, nc=2
    }
 
    outlist <- lapply(inputFiles, function(inputFile){
-
-      namef <- names(inputFiles)[which(inputFiles==inputFile)]
+      
       if(grepl("\\.bed|BED|Bed|narrowPeak|broadPeak$", inputFile)){
          fileType <- "bed"
-         if(verbose) print(paste("Reading", fileType, "file:", namef))
+         if(verbose) print(paste("Reading", fileType, "file:", inputFile))
          out <- handle_bed(inputFile=inputFile, handleInputParams)
       }else if(grepl("\\.bam|BAM|Bam$", inputFile)){
          fileType <- "bam"
-         if(verbose) print(paste("Reading", fileType, "file:", namef))
+         if(verbose) print(paste("Reading", fileType, "file:", inputFile))
          out <- handle_bam(inputFile=inputFile, handleInputParams)
       }else if(grepl("\\.wig|WIG|Wig$", inputFile)){
          fileType <- "wig"
-         if(verbose) print(paste("Reading", fileType, "file:", namef))
+         if(verbose) print(paste("Reading", fileType, "file:", inputFile))
          out <- handle_wig(inputFile=inputFile, handleInputParams)
       }else if(grepl("\\.bw|bigwig|bigWig|BigWig|BW|BIGWIG$", inputFile)){
          fileType <- "bw"
-         if(verbose) print(paste("Reading", fileType, "file:", namef))
+         if(verbose) print(paste("Reading", fileType, "file:", inputFile))
          out <- handle_bw(inputFile=inputFile, handleInputParams)
       }else{
-         stop(paste("The file format of", namef, "is not supported, please convert it to one of the following format:
+         stop(paste("The file format of", inputFile, "is not supported, please convert it to one of the following format:
                  bed, bam, wig, bigwig"))
       }
 
       out
    })
 
-   names(outlist) <- inputFiles
+   names(outlist) <- names(inputFiles)
    handleInputParams$outRle <- original_outRle #if modified, restore
 
    ## modify library size
@@ -237,7 +236,8 @@ handle_bam <- function(inputFile, handleInputParams=NULL){
    }else{
       param <- ScanBamParam(mapqFilter=10)
    }
-
+   message(paste("\nbam file", inputFile, "is loaded\n"))
+   
    ga <- readGAlignments(inputFile, use.names=TRUE, param=param)
    libsize <- sum(idxstatsBam(inputFile)$mapped)
    if(handleInputParams$CLIP_reads){

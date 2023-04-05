@@ -7,12 +7,14 @@
 gene2tx(gtfFile, geneList, geneCol = 1)
 }
 \arguments{
-\item{geneList}{path to a line-delimited text file with one gene name on each line, or a character vector of gene names}
+\item{geneList}{path to a tab-delimited text file with one gene name on each line, or a character vector of gene names}
+
+\item{geneCol}{the position of the column that containing gene names in the case that geneList is a file}
 
 \item{gtfFfile}{path to a GTF file}
 }
 \value{
-a vector
+a vector of transcript ids
 }
 \description{
 Given a list of gene names in a file or in a character vector, turn them into a vector of transcript ids.

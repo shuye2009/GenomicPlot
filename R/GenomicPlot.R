@@ -1,16 +1,16 @@
 
 
 
-#' @title  Plot signals around the start and the end of genomic features
+#' @title  Plot signals around the start and the end of genomic features and random regions 
 #'
 #' @description   Plot reads or peak signal intensity of samples in the query files around stat, end and center of genomic 
 #' features. The upstream and downstream windows can be given separately. If Input files are provided, ratio over Input is
-#' computed and displayed as well. A random feature can be generated to serve as a background.
+#' computed and displayed as well. A random feature can be generated to serve as a background for contrasting.
 #'
 #' @param queryFiles a vector of sample file names. The file should be in .bam, .bed, .wig or .bw format, mixture of formats is allowed
 #' @param inputFiles a vector of input sample file names. The file should be in .bam, .bed, .wig or .bw format, mixture of formats is allowed
 #' @param txdb a TxDb object defined in the GenomicFeatures package. If featureName is "custom", a bed file that define the feature
-#' @param featureName one of the gene feature in c("utr3", "utr5", "cds", "intron", "exon", "transcript", "gene") or "custom"
+#' @param featureName one of the gene feature in c("utr3", "utr5", "cds", "intron", "exon", "transcript", "gene") or "custom". Only one feature is allowed.
 #' @param handleInputParams a list of parameters for \code{handle_input}
 #' @param binSize an integer defines bin size for intensity calculation
 #' @param ext a vector of four integers defining upstream and downstream boundaries of the plot window, flanking the start and end of features
@@ -46,28 +46,33 @@
 #'  binSize=10, handleInputParams=handleInputParams, longest=TRUE, ext=ext, hl=hl, randomize=FALSE,
 #'  insert=100, stranded=TRUE, scale=FALSE, smooth=TRUE, outPrefix=op, nc=2)
 #'
-#' @export plot_start_end_feature
+#' @export plot_start_end_with_random
 #'
 #'
 
-plot_start_end_feature <- function(queryFiles, inputFiles=NULL, txdb, featureName, handleInputParams=NULL, binSize=10,
+plot_start_end_with_random <- function(queryFiles, inputFiles=NULL, txdb, featureName, handleInputParams=NULL, binSize=10,
    insert=0, verbose=FALSE, longest=TRUE, ext=c(-500, 200, -200, 500), hl=c(-50, 50, -50, 50), randomize=FALSE, 
    stranded=TRUE, scale=FALSE, smooth=FALSE, rmOutlier=FALSE, outPrefix="plots", transform=NA, shade=TRUE, nc=2,
    Ylab="Signal intensity"){
 
-  queryLabels <- names(queryFiles)
-  names(queryLabels) <- queryFiles
-  inputLabels <- names(inputFiles)
-  names(inputLabels) <- inputFiles
-
-  if(!is.null(inputFiles)){
-    if(length(queryFiles) != length(inputFiles)){
-      stop("the number of queryFiles and inputFiles must be the same!")
-    }
-    names(inputLabels) <- inputFiles
-    queryFiles <- c(queryFiles, inputFiles)
-    queryLabels <- c(queryLabels, inputLabels)
-  }
+   if(is.null(inputFiles)){
+      queryInputs <- handle_input(inputFiles=queryFiles, handleInputParams, verbose=verbose, nc=nc)
+   }else{
+      inputLabels <- names(inputFiles)
+      queryLabels <- names(queryFiles)
+      if(length(queryFiles) == length(inputFiles)){
+         queryInputs <- handle_input(inputFiles=c(queryFiles, inputFiles), handleInputParams, verbose=verbose, nc=nc)
+      }else if(length(inputFiles) == 1){
+         queryInputs <- handle_input(inputFiles=c(queryFiles, inputFiles), handleInputParams, verbose=verbose, nc=nc)
+         queryInputs <- queryInputs[c(queryLabels, rep(inputLabels, length(queryLabels)))] # expand the list
+         
+         inputLabels <- paste0(names(inputFiles), seq_along(queryFiles)) # make each inputLabels unique
+         names(queryInputs) <- c(queryLabels, inputLabels) 
+      }else{
+         stop("the number of inputFiles must be 1 or equal to the number of queryFiles!")
+      }
+   }
+   queryLabels <- names(queryInputs)
 
   if(!is.null(outPrefix)){
      while(!is.null(dev.list())){
@@ -121,7 +126,6 @@ plot_start_end_feature <- function(queryFiles, inputFiles=NULL, txdb, featureNam
   mat_list[[paste("Center of", featureName)]] <- list("window"=fc, "rwindow"=rfc,  s=-round(insert/2), e=round(insert/2), "xmin"=0, "xmax"=0, "bin_num"=bin_num_c)
   mat_list[[paste("End of", featureName)]] <- list("window"=fe, "rwindow"=rfe,  s=ext[3], e=ext[4], "xmin"=hl[3], "xmax"=hl[4], "bin_num"=bin_num_e)
 
-  queryInputs <- handle_input(queryFiles, handleInputParams, nc=nc)
 
   scoreMatrix_list <- list()
   scoreMatrix_list_random <- list()
@@ -132,15 +136,13 @@ plot_start_end_feature <- function(queryFiles, inputFiles=NULL, txdb, featureNam
     bin_num <- mat_list[[locus]]$bin_num
     if(bin_num <= 0) next
 
-    for(queryFile in queryFiles){
-
-      queryLabel <- queryLabels[queryFile]
+    for(queryLabel in queryLabels){
       if(verbose) print(queryLabel)
-      queryRegions <- queryInputs[[queryFile]]$query
-      libsize <- queryInputs[[queryFile]]$size
+      queryRegions <- queryInputs[[queryLabel]]$query
+      libsize <- queryInputs[[queryLabel]]$size
 
       bin_op <- "mean"
-      weight_col <- queryInputs[[queryFile]]$weight
+      weight_col <- queryInputs[[queryLabel]]$weight
 
      # fullMatrix1 <- parallel_scoreMatrixBin(queryRegions, windowR, bin_num, bin_op, weight_col, stranded)
       fullMatrix <- parallel_scoreMatrixBin(queryRegions, windowR, bin_num, bin_op, weight_col, stranded, nc=nc)
@@ -164,9 +166,7 @@ plot_start_end_feature <- function(queryFiles, inputFiles=NULL, txdb, featureNam
     end <- mat_list[[locus]]$e
 
     if(bin_num <= 0) next
-    for(queryFile in queryFiles){
-
-      queryLabel <- queryLabels[queryFile]
+    for(queryLabel in queryLabels){
       if(verbose) print(queryLabel)
 
       fullMatrix <- scoreMatrix_list[[queryLabel]][[locus]]
@@ -252,7 +252,6 @@ plot_start_end_feature <- function(queryFiles, inputFiles=NULL, txdb, featureNam
   if(!is.null(inputFiles)){
     Ylab <- ifelse(is.na(transform), "Ratio-over-Input", paste0(transform, " (Ratio-over-Input)"))
 
-    ratiofiles <- queryFiles[!queryFiles %in% inputFiles]
     ratiolabels <- queryLabels[!queryLabels %in% inputLabels]
     inputMatrix_list <- scoreMatrix_list[inputLabels]
     ratioMatrix_list <- scoreMatrix_list[ratiolabels]
@@ -297,9 +296,7 @@ plot_start_end_feature <- function(queryFiles, inputFiles=NULL, txdb, featureNam
       end <- mat_list[[locus]]$e
 
       if(bin_num <= 0) next
-      for(ratiofile in ratiofiles){
-
-        ratiolabel <- ratiolabels[ratiofile]
+      for(ratiolabel in ratiolabels){
         if(verbose) print(ratiolabel)
 
         fullMatrix <- ratioMatrix_list[[ratiolabel]][[locus]]
@@ -382,7 +379,7 @@ plot_start_end_feature <- function(queryFiles, inputFiles=NULL, txdb, featureNam
 }
 
 
-#' @title  Plot signals around the start and the end of custom features
+#' @title  Plot signals around the start and the end of genomic features
 #
 #' @description   Plot reads or peak signal intensity of samples in the query files around start and end of custom features. The upstream and downstream windows
 #' can be given separately, within the window, a smaller window can be defined to highlight region of interest.
@@ -390,7 +387,7 @@ plot_start_end_feature <- function(queryFiles, inputFiles=NULL, txdb, featureNam
 #' computed and displayed as well.
 #'
 #' @param queryFiles a vector of sample file names. The file should be in .bam, .bed, .wig or .bw format, mixture of formats is allowed
-#' @param centerFiles  bed files that define the custom features
+#' @param centerFiles  bed files that define the custom features, or features in c("utr3", "utr5", "cds", "intron", "exon", "transcript", "gene"), mulitple features are allowed.
 #' @param inputFiles a vector of input sample file names. The file should be in .bam, .bed, .wig or .bw format, mixture of formats is allowed
 #' @param handleInputParams a list of parameters for \code{handle_input}
 #' @param binSize an integer defines bin size for intensity calculation
@@ -415,31 +412,33 @@ plot_start_end_feature <- function(queryFiles, inputFiles=NULL, txdb, featureNam
 #' system.file("data", "test_C.bed", package="GenomicPlotData"))
 #' names(centerFiles) <- c("TestB", "TestC")
 #'
-#' @export plot_start_end_reference_region
+#' @export plot_start_end
 #'
 
-plot_start_end_reference_region <- function(queryFiles, inputFiles=NULL, centerFiles, handleInputParams=NULL, binSize=10, insert=0, verbose=FALSE, ext=c(-500,100, -100, 500), hl=c(-50, 50, -50, 50), stranded=TRUE, scale=FALSE, smooth=FALSE, rmOutlier=FALSE, outPrefix="plots", transform=TRUE, shade=TRUE, Ylab="Signal intensity", nc=2){
+plot_start_end <- function(queryFiles, inputFiles=NULL, centerFiles, handleInputParams=NULL, binSize=10, insert=0, verbose=FALSE, ext=c(-500,100, -100, 500), hl=c(-50, 50, -50, 50), stranded=TRUE, scale=FALSE, smooth=FALSE, rmOutlier=FALSE, outPrefix="plots", transform=TRUE, shade=TRUE, Ylab="Signal intensity", nc=2){
 
-   queryLabels <- names(queryFiles)
-   names(queryLabels) <- queryFiles
-   inputLabels <- names(inputFiles)
-   names(inputLabels) <- inputFiles
-
-
-   if(!is.null(inputFiles)){
-      if(length(queryFiles) != length(inputFiles)){
-         stop("the number of queryFiles and inputFiles must be the same!")
+   if(is.null(inputFiles)){
+      queryInputs <- handle_input(inputFiles=queryFiles, handleInputParams, verbose=verbose, nc=nc)
+   }else{
+      inputLabels <- names(inputFiles)
+      queryLabels <- names(queryFiles)
+      if(length(queryFiles) == length(inputFiles)){
+         queryInputs <- handle_input(inputFiles=c(queryFiles, inputFiles), handleInputParams, verbose=verbose, nc=nc)
+      }else if(length(inputFiles) == 1){
+         queryInputs <- handle_input(inputFiles=c(queryFiles, inputFiles), handleInputParams, verbose=verbose, nc=nc)
+         queryInputs <- queryInputs[c(queryLabels, rep(inputLabels, length(queryLabels)))] # expand the list
+         
+         inputLabels <- paste0(names(inputFiles), seq_along(queryFiles)) # make each inputLabels unique
+         names(queryInputs) <- c(queryLabels, inputLabels) 
+      }else{
+         stop("the number of inputFiles must be 1 or equal to the number of queryFiles!")
       }
-      names(inputLabels) <- inputFiles
-      queryFiles <- c(queryFiles, inputFiles)
-      queryLabels <- c(queryLabels, inputLabels)
    }
-
+   queryLabels <- names(queryInputs)
+   
    if(!is.null(outPrefix)){
       pdf(paste0(outPrefix, ".pdf"), height=10, width=8)
    }
-
-   queryInputs <- handle_input(inputFiles=queryFiles, handleInputParams, nc=nc)
 
    bedparam <- handleInputParams
    bedparam$CLIP_reads <- FALSE
@@ -447,9 +446,29 @@ plot_start_end_reference_region <- function(queryFiles, inputFiles=NULL, centerF
    bedparam$useScore <- FALSE
    bedparam$outRle <- FALSE
    bedparam$useSizeFactor <- FALSE
-   features <- handle_input(inputFiles=centerFiles, bedparam)
-   featureNames <- names(centerFiles)
+   
+   features <- list()
+   minimal_width <- ext[2] - ext[3] + insert
+   
+   for(featureName in centerFiles){
+      if(featureName %in% c("utr3", "utr5", "cds", "intron", "exon", "transcript", "gene")){
+         featureGR <- get_genomic_feature_coordinates(txdb, featureName, longest=TRUE, protein_coding=TRUE)[["GRanges"]]
+         featureGR <- featureGR[width(featureGR)>minimal_width]
+         feature <- list("query"=featureGR)
+         features[[featureName]] <- feature
+      }else if(file.exists(featureName)){
+         feature <- handle_input(featureName, bedparam, nc=nc)[[1]]
+         featureGR <- feature$query
+         featureGR <- featureGR[width(featureGR)>minimal_width]
+         feature$query <- featureGR
+         features[[names(feature)]] <- feature
+      }else{
+         stop(paste(featureName, "is not supported!"))
+      }
+   }
 
+   featureNames <- names(features)
+   
    ext[2] <- ext[2] - (ext[2]-ext[1])%%binSize ## to avoid binSize inconsistency, as the final binSize is dictated by bin_num
    bin_num_s <- round((ext[2]-ext[1])/binSize)
    ext[4] <- ext[4] - (ext[4]-ext[3])%%binSize ## to avoid binSize inconsistency, as the final binSize is dictated by bin_num
@@ -459,9 +478,8 @@ plot_start_end_reference_region <- function(queryFiles, inputFiles=NULL, centerF
    scoreMatrix_lists <- list()
    mat_lists <- list()
    plot_df <- NULL
-   for(i in seq_along(featureNames)){
-      feature <- features[[i]]$query
-      featureName <- featureNames[i]
+   for(featureName in featureNames){
+      feature <- features[[featureName]]$query
       nf <- length(feature)
       if(verbose) print(paste("number of features: ", featureName, nf))
 
@@ -483,15 +501,14 @@ plot_start_end_reference_region <- function(queryFiles, inputFiles=NULL, centerF
          bin_num <- mat_list[[locus]]$bin_num
          if(bin_num <= 0) next
 
-         for(queryFile in queryFiles){
+         for(queryLabel in queryLabels){
 
-            queryLabel <- queryLabels[queryFile]
             if(verbose) print(queryLabel)
-            queryRegions <- queryInputs[[queryFile]]$query
-            libsize <- queryInputs[[queryFile]]$size
+            queryRegions <- queryInputs[[queryLabel]]$query
+            libsize <- queryInputs[[queryLabel]]$size
 
             bin_op <- "mean"
-            weight_col <- queryInputs[[queryFile]]$weight
+            weight_col <- queryInputs[[queryLabel]]$weight
 
             fullMatrix <- parallel_scoreMatrixBin(queryRegions, windowR, bin_num, bin_op, weight_col, stranded, nc=nc)
 
@@ -511,9 +528,7 @@ plot_start_end_reference_region <- function(queryFiles, inputFiles=NULL, centerF
          end <- mat_list[[locus]]$e
 
          if(bin_num <= 0) next
-         for(queryFile in queryFiles){
-
-            queryLabel <- queryLabels[queryFile]
+         for(queryLabel in queryLabels){
             if(verbose) print(queryLabel)
 
             fullMatrix <- scoreMatrix_list[[queryLabel]][[locus]]
@@ -573,14 +588,12 @@ plot_start_end_reference_region <- function(queryFiles, inputFiles=NULL, centerF
       Ylab <- ifelse(is.na(transform), "Ratio-over-Input", paste0(transform, " (Ratio-over-Input)"))
 
       plot_df <- NULL
-      for(i in seq_along(featureNames)){
-         feature <- features[[i]]$query
-         featureName <- featureNames[i]
-
+      for(featureName in featureNames){
+         feature <- features[[featureName]]$query
+       
          scoreMatrix_list <- scoreMatrix_lists[[featureName]]
          mat_list <- mat_lists[[featureName]]
 
-         ratiofiles <- queryFiles[!queryFiles %in% inputFiles]
          ratiolabels <- queryLabels[!queryLabels %in% inputLabels]
          inputMatrix_list <- scoreMatrix_list[inputLabels]
          ratioMatrix_list <- scoreMatrix_list[ratiolabels]
@@ -611,9 +624,8 @@ plot_start_end_reference_region <- function(queryFiles, inputFiles=NULL, centerF
             end <- mat_list[[locus]]$e
 
             if(bin_num <= 0) next
-            for(ratiofile in ratiofiles){
+            for(ratiolabel in ratiolabels){
 
-               ratiolabel <- ratiolabels[ratiofile]
                if(verbose) print(ratiolabel)
 
                fullMatrix <- ratioMatrix_list[[ratiolabel]][[locus]]
@@ -705,22 +717,25 @@ plot_start_end_reference_region <- function(queryFiles, inputFiles=NULL, centerF
 
 plot_3parts_metagene <- function(queryFiles, gFeatures, inputFiles=NULL, scale=FALSE,  verbose=FALSE, Ylab="Signal intensity", handleInputParams=NULL, smooth=FALSE, stranded=TRUE, outPrefix="plots", heatmap=FALSE, rmOutlier=FALSE, heatRange=NULL, transform=NA, nc=2){
 
-
-  queryLabels <- names(queryFiles)
-  names(queryLabels) <- queryFiles
-  inputLabels <- names(inputFiles)
-  names(inputLabels) <- inputFiles
-
-  if(!is.null(inputFiles)){
-    if(length(queryFiles) != length(inputFiles)){
-      stop("the number of queryFiles and inputFiles must be the same!")
-    }
-    names(inputLabels) <- inputFiles
-    queryFiles <- c(queryFiles, inputFiles)
-    queryLabels <- c(queryLabels, inputLabels)
-  }
-
-
+   if(is.null(inputFiles)){
+      queryInputs <- handle_input(inputFiles=queryFiles, handleInputParams, verbose=verbose, nc=nc)
+   }else{
+      inputLabels <- names(inputFiles)
+      queryLabels <- names(queryFiles)
+      if(length(queryFiles) == length(inputFiles)){
+         queryInputs <- handle_input(inputFiles=c(queryFiles, inputFiles), handleInputParams, verbose=verbose, nc=nc)
+      }else if(length(inputFiles) == 1){
+         queryInputs <- handle_input(inputFiles=c(queryFiles, inputFiles), handleInputParams, verbose=verbose, nc=nc)
+         queryInputs <- queryInputs[c(queryLabels, rep(inputLabels, length(queryLabels)))] # expand the list
+         
+         inputLabels <- paste0(names(inputFiles), seq_along(queryFiles)) # make each inputLabels unique
+         names(queryInputs) <- c(queryLabels, inputLabels) 
+      }else{
+         stop("the number of inputFiles must be 1 or equal to the number of queryFiles!")
+      }
+   }
+   queryLabels <- names(queryInputs)
+   
   if(!is.null(outPrefix)){
      pdf(paste(outPrefix, "pdf", sep="."), height=8, width=12)
   }
@@ -741,13 +756,8 @@ plot_3parts_metagene <- function(queryFiles, gFeatures, inputFiles=NULL, scale=F
   if(verbose) print("computing coverage for queryFiles")
   scoreMatrix_list <- list()
 
-  queryInputs <- handle_input(queryFiles, handleInputParams, nc=nc)
-
-  for(queryFile in queryFiles){
-
-    queryLabel <- queryLabels[queryFile]
-
-    myInput <- queryInputs[[queryFile]]
+  for(queryLabel in queryLabels){
+    myInput <- queryInputs[[queryLabel]]
     libsize <- myInput$size
     queryRegions <- myInput$query
     fileType <- myInput$type
@@ -774,9 +784,7 @@ plot_3parts_metagene <- function(queryFiles, gFeatures, inputFiles=NULL, scale=F
 
   if(heatmap) heatmap_list <- list()
 
-  for(queryFile in queryFiles){
-    queryLabel <- queryLabels[queryFile]
-
+  for(queryLabel in queryLabels){
     plot_df <- NULL
 
     dims <- vapply(scoreMatrix_list[[queryLabel]], dim, numeric(2))
@@ -862,7 +870,6 @@ plot_3parts_metagene <- function(queryFiles, gFeatures, inputFiles=NULL, scale=F
     if(heatmap) heatmap_list <- list()
 
     inputMatrix_list <- scoreMatrix_list[inputLabels]
-    ratiofiles <- queryFiles[!queryFiles %in% inputFiles]
     ratiolabels <- queryLabels[!queryLabels %in% inputLabels]
     ratioMatrix_list <- scoreMatrix_list[ratiolabels]
     for(w in featureNames){
@@ -874,9 +881,7 @@ plot_3parts_metagene <- function(queryFiles, gFeatures, inputFiles=NULL, scale=F
 
     if(verbose) print("plotting coverage for ratio over input")
     mplot_df <- NULL
-    for(ratiofile in ratiofiles){
-      ratiolabel <- ratiolabels[ratiofile]
-
+    for(ratiolabel in ratiolabels){
       plot_df <- NULL
       dims <- vapply(ratioMatrix_list[[ratiolabel]], dim, numeric(2))
 
@@ -992,30 +997,32 @@ plot_3parts_metagene <- function(queryFiles, gFeatures, inputFiles=NULL, scale=F
 #' system.file("data", "test_C.bed", package="GenomicPlotData"))
 #' names(centerFiles) <- c("TestB", "TestC")
 #'
-#' @export plot_reference_region
+#' @export plot_region
 
-plot_reference_region <- function(queryFiles, centerFiles, txdb=NULL, regionName="region", inputFiles=NULL, nbins=100, handleInputParams=NULL, verbose=FALSE, scale=FALSE, heatmap=FALSE, fiveP=-1000, threeP=1000, smooth=FALSE, stranded=TRUE, transform=NA, outPrefix="plots", rmOutlier=FALSE, heatRange=NULL, Ylab="Signal intensity", statsMethod="wilcox.test", nc=2){
+plot_region <- function(queryFiles, centerFiles, txdb=NULL, regionName="region", inputFiles=NULL, nbins=100, handleInputParams=NULL, verbose=FALSE, scale=FALSE, heatmap=FALSE, fiveP=-1000, threeP=1000, smooth=FALSE, stranded=TRUE, transform=NA, outPrefix="plots", rmOutlier=FALSE, heatRange=NULL, Ylab="Signal intensity", statsMethod="wilcox.test", nc=2){
 
   if(!is.null(outPrefix)){
     pdf(paste(outPrefix, "pdf", sep="."), height=8, width=12)
   }
 
-  queryLabels <- names(queryFiles)
-  names(queryLabels) <- queryFiles
-  inputLabels <- names(inputFiles)
-  names(inputLabels) <- inputFiles
-  
-
-  if(!is.null(inputFiles)){
-    if(length(queryFiles) != length(inputFiles)){
-      stop("the number of queryFiles and inputFiles must be the same!")
-    }
-    names(inputLabels) <- inputFiles
-    queryFiles <- c(queryFiles, inputFiles)
-    queryLabels <- c(queryLabels, inputLabels)
-  }
-
-  queryInputs <- handle_input(queryFiles, handleInputParams, nc=nc)
+   if(is.null(inputFiles)){
+      queryInputs <- handle_input(inputFiles=queryFiles, handleInputParams, verbose=verbose, nc=nc)
+   }else{
+      inputLabels <- names(inputFiles)
+      queryLabels <- names(queryFiles)
+      if(length(queryFiles) == length(inputFiles)){
+         queryInputs <- handle_input(inputFiles=c(queryFiles, inputFiles), handleInputParams, verbose=verbose, nc=nc)
+      }else if(length(inputFiles) == 1){
+         queryInputs <- handle_input(inputFiles=c(queryFiles, inputFiles), handleInputParams, verbose=verbose, nc=nc)
+         queryInputs <- queryInputs[c(queryLabels, rep(inputLabels, length(queryLabels)))] # expand the list
+         
+         inputLabels <- paste0(names(inputFiles), seq_along(queryFiles)) # make each inputLabels unique
+         names(queryInputs) <- c(queryLabels, inputLabels) 
+      }else{
+         stop("the number of inputFiles must be 1 or equal to the number of queryFiles!")
+      }
+   }
+   queryLabels <- names(queryInputs)
 
   bedparam <- handleInputParams
   bedparam$CLIP_reads <- FALSE
@@ -1025,25 +1032,20 @@ plot_reference_region <- function(queryFiles, centerFiles, txdb=NULL, regionName
   bedparam$useSizeFactor <- FALSE
   
   centerInputs <- list()
-  centerLabels <- vector()
-  
+ 
   for(featureName in centerFiles){
      if(featureName %in% c("utr3", "utr5", "cds", "intron", "exon", "transcript", "gene")){
-        feature <- get_genomic_feature_coordinates(txdb, featureName, longest=TRUE, protein_coding=TRUE)[["GRanges"]]
-        featureGR <- list("query"=feature)
-        centerInputs[[featureName]] <- featureGR
-        
-        centerLabels[featureName] <- paste0(featureName, "Region")
-        
+        featureGR <- get_genomic_feature_coordinates(txdb, featureName, longest=TRUE, protein_coding=TRUE)[["GRanges"]]
+        feature <- list("query"=featureGR)
+        centerInputs[[featureName]] <- feature
      }else if(file.exists(featureName)){
         feature <- handle_input(featureName, bedparam, nc=nc)[[1]]
-        centerInputs[[featureName]] <- feature
-        centerLabels[featureName] <- names(centerFiles[centerFiles==featureName])
+        centerInputs[[names(feature)]] <- feature
      }else{
         stop(paste(featureName, "is not supported!"))
      }
    }
-  
+  centerLabels <- names(centerInputs)
 
   five <- fiveP/1000
   five <- paste0(five, "K")
@@ -1068,20 +1070,19 @@ plot_reference_region <- function(queryFiles, centerFiles, txdb=NULL, regionName
   if(verbose) print("computing coverage for Sample")
   scoreMatrix_list <- list()
 
-  for(queryFile in queryFiles){
-    queryLabel <- queryLabels[queryFile]
+  for(queryLabel in queryLabels){
+    
     if(verbose) print(paste("queryLabel", queryLabel))
 
-    myInput <- queryInputs[[queryFile]]
+    myInput <- queryInputs[[queryLabel]]
     libsize <- myInput$size
     queryRegions <- myInput$query
     fileType <- myInput$type
     weight_col <- myInput$weight
 
-    for(centerFile in centerFiles){
-      centerLabel <- centerLabels[centerFile]
+    for(centerLabel in centerLabels){
       if(verbose) print(paste("centerLabel", centerLabel))
-      centerInput <- centerInputs[[centerFile]]
+      centerInput <- centerInputs[[centerLabel]]
       centerGr <- centerInput$query
       centerGr <- check_constraints(centerGr, handleInputParams$genome, queryRegions)
       
@@ -1150,11 +1151,9 @@ plot_reference_region <- function(queryFiles, centerFiles, txdb=NULL, regionName
   Ylab <- ifelse(is.na(transform), Ylab, paste0(transform, " (", Ylab, ")"))
 
   if(verbose) print("plotting coverage profiles")
-  for(queryFile in queryFiles){
-    queryLabel <- queryLabels[queryFile]
+  for(queryLabel in queryLabels){
     if(verbose) print(paste("queryLabel",queryLabel))
-    for(centerFile in centerFiles){
-      centerLabel <- centerLabels[centerFile]
+    for(centerLabel in centerLabels){
       if(verbose) print(paste("centerLabel", centerLabel))
       plot_df <- NULL
 
@@ -1274,9 +1273,9 @@ plot_reference_region <- function(queryFiles, centerFiles, txdb=NULL, regionName
              }
              
              if(max(i,j)>3){
-                lapply(list(outp, ps1_mean_se, prank, ps1, ps2, ps1_wo_outlier), print)
+                lapply(list(outp, ps1_mean_se, prank, ps1, ps1_wo_outlier), print)
              }else{
-                comp1 <- plot_grid(outp, ps1_mean_se, prank, ncol = 3, rel_widths = c(1,1,1))
+                comp1 <- plot_grid(outp, ps1_mean_se, ncol = 2, rel_widths = c(1,1))
                 comp2 <- plot_grid(prank, ps1, ps1_wo_outlier, ncol = 3, align='h', axis='b', rel_widths = c(1,1,1))
                 print(plot_grid(comp1, comp2, ncol=1, rel_heights=c(1,1)))
              }
@@ -1309,13 +1308,11 @@ plot_reference_region <- function(queryFiles, centerFiles, txdb=NULL, regionName
   if(!is.null(inputFiles)){
     Ylab <- ifelse(is.na(transform), "Ratio-over-Input", paste0(transform, " (Ratio-over-Input)"))
 
-    ratiofiles <- queryFiles[!queryFiles %in% inputFiles]
     ratiolabels <- queryLabels[!queryLabels %in% inputLabels]
     inputMatrix_list <- scoreMatrix_list[inputLabels]
     ratioMatrix_list <- scoreMatrix_list[ratiolabels]
 
-    for(centerFile in centerFiles){
-      centerLabel <- centerLabels[centerFile]
+    for(centerLabel in centerLabels){
       for(featureName in featureNames){
          if(scaled_bins[featureName]> 0){
             for(i in seq_along(ratiolabels)){
@@ -1335,11 +1332,10 @@ plot_reference_region <- function(queryFiles, centerFiles, txdb=NULL, regionName
     stat_df <- list()
     if(heatmap)heatmap_list <- list()
     if(verbose) print("plotting coverage profiles")
-    for(ratiofile in ratiofiles){
-      ratiolabel <- ratiolabels[ratiofile]
+    for(ratiolabel in ratiolabels){
       if(verbose) print(paste("ratiolabel", ratiolabel))
-      for(centerFile in centerFiles){
-        centerLabel <- centerLabels[centerFile]
+      for(centerLabel in centerLabels){
+        
         if(verbose) print(paste("centerlabel", centerLabel))
         plot_df <- NULL
         dims <- vapply(scoreMatrix_list[[ratiolabel]][[centerLabel]], dim, numeric(2))
@@ -1452,9 +1448,9 @@ plot_reference_region <- function(queryFiles, centerFiles, txdb=NULL, regionName
                }
                
                if(max(i,j)>3){
-                  lapply(list(outp, ps1_mean_se, prank, ps1, ps2, ps1_wo_outlier), print)
+                  lapply(list(outp, ps1_mean_se, prank, ps1, ps1_wo_outlier), print)
                }else{
-                  comp1 <- plot_grid(outp, ps1_mean_se, prank, ncol = 3, rel_widths = c(1,1,1))
+                  comp1 <- plot_grid(outp, ps1_mean_se, ncol = 2, rel_widths = c(1,1))
                   comp2 <- plot_grid(prank, ps1, ps1_wo_outlier, ncol = 3, align='h', axis='b', rel_widths = c(1,1,1))
                   print(plot_grid(comp1, comp2, ncol=1, rel_heights=c(1,1)))
                }
@@ -1537,21 +1533,24 @@ plot_5parts_metagene <- function(queryFiles, gFeatures_list, inputFiles=NULL, ha
                                  outPrefix=NULL, heatmap=FALSE, heatRange=NULL, rmOutlier=FALSE,
                                  Ylab="Signal intensity", nc=2){
 
-  queryLabels <- names(queryFiles)
-  names(queryLabels) <- queryFiles
-  inputLabels <- names(inputFiles)
-  names(inputLabels) <- inputFiles
-
-  if(!is.null(inputFiles)){
-    if(length(queryFiles) != length(inputFiles)){
-      stop("the number of queryFiles and inputFiles must be the same!")
-    }
-    names(inputLabels) <- inputFiles
-    queryFiles <- c(queryFiles, inputFiles)
-    queryLabels <- c(queryLabels, inputLabels)
+  if(is.null(inputFiles)){
+     queryInputs <- handle_input(inputFiles=queryFiles, handleInputParams, verbose=verbose, nc=nc)
+  }else{
+     inputLabels <- names(inputFiles)
+     queryLabels <- names(queryFiles)
+     if(length(queryFiles) == length(inputFiles)){
+        queryInputs <- handle_input(inputFiles=c(queryFiles, inputFiles), handleInputParams, verbose=verbose, nc=nc)
+     }else if(length(inputFiles) == 1){
+        queryInputs <- handle_input(inputFiles=c(queryFiles, inputFiles), handleInputParams, verbose=verbose, nc=nc)
+        queryInputs <- queryInputs[c(queryLabels, rep(inputLabels, length(queryLabels)))] # expand the list
+        
+        inputLabels <- paste0(names(inputFiles), seq_along(queryFiles)) # make each inputLabels unique
+        names(queryInputs) <- c(queryLabels, inputLabels) 
+     }else{
+        stop("the number of inputFiles must be 1 or equal to the number of queryFiles!")
+     }
   }
-
-  queryInputs <- handle_input(inputFiles=queryFiles, handleInputParams, verbose=verbose, nc=nc)
+  queryLabels <- names(queryInputs)
   
   if(!is.null(outPrefix)) pdf(paste(outPrefix, "pdf", sep="."), height=8, width=12)
 
@@ -1579,10 +1578,10 @@ plot_5parts_metagene <- function(queryFiles, gFeatures_list, inputFiles=NULL, ha
    
      scoreMatrix_list <- list()
 
-     for(queryFile in queryFiles){
-       queryLabel <- queryLabels[queryFile]
-       if(verbose) print(queryFile)
-       Input <- queryInputs[[queryFile]]
+     for(queryLabel in queryLabels){
+       
+       if(verbose) print(queryLabel)
+       Input <- queryInputs[[queryLabel]]
        libsize <- Input$size
        queryRegions <- Input$query
        fileType <- Input$type
@@ -1667,7 +1666,6 @@ plot_5parts_metagene <- function(queryFiles, gFeatures_list, inputFiles=NULL, ha
        Ylab <- ifelse(is.na(transform), "Ratio-over-Input", paste0(transform, " (Ratio-over-Input)"))
    
        inputMatrix_list <- scoreMatrix_list[inputLabels]
-       ratiofiles <- queryFiles[!queryFiles %in% inputFiles]
        ratiolabels <- queryLabels[!queryLabels %in% inputLabels]
        ratioMatrix_list <- scoreMatrix_list[ratiolabels]
        for(w in featureNames){
@@ -1852,29 +1850,33 @@ plot_5parts_metagene <- function(queryFiles, gFeatures_list, inputFiles=NULL, ha
 #' system.file("data", "test_C.bed", package="GenomicPlotData"))
 #' names(centerFiles) <- c("TestB", "TestC")
 #'
-#' @export plot_reference_locus
+#' @export plot_locus
 
 
-plot_reference_locus <- function(queryFiles, centerFiles, txdb=NULL, ext=c(-100,100), hl=c(0,0), shade=TRUE, smooth=FALSE,
+plot_locus <- function(queryFiles, centerFiles, txdb=NULL, ext=c(-100,100), hl=c(0,0), shade=TRUE, smooth=FALSE,
                                  handleInputParams=NULL, verbose=FALSE, binSize=10, refPoint="center", Xlab="Center", 
                                  Ylab="Signal intensity", inputFiles=NULL, stranded=TRUE, heatmap=TRUE, scale=FALSE,
                                  outPrefix=NULL, rmOutlier=FALSE, transform=NA, statsMethod="wilcox.test", heatRange=NULL,
                                  nc=2){
 
-  queryLabels <- names(queryFiles)
-  names(queryLabels) <- queryFiles
-  inputLabels <- names(inputFiles)
-  names(inputLabels) <- inputFiles
-  
-
-  if(!is.null(inputFiles)){
-    if(length(queryFiles) != length(inputFiles)){
-      stop("the number of queryFiles and inputFiles must be the same!")
-    }
-    names(inputLabels) <- inputFiles
-    queryFiles <- c(queryFiles, inputFiles)
-    queryLabels <- c(queryLabels, inputLabels)
-  }
+   if(is.null(inputFiles)){
+      queryInputs <- handle_input(inputFiles=queryFiles, handleInputParams, verbose=verbose, nc=nc)
+   }else{
+      inputLabels <- names(inputFiles)
+      queryLabels <- names(queryFiles)
+      if(length(queryFiles) == length(inputFiles)){
+         queryInputs <- handle_input(inputFiles=c(queryFiles, inputFiles), handleInputParams, verbose=verbose, nc=nc)
+      }else if(length(inputFiles) == 1){
+         queryInputs <- handle_input(inputFiles=c(queryFiles, inputFiles), handleInputParams, verbose=verbose, nc=nc)
+         queryInputs <- queryInputs[c(queryLabels, rep(inputLabels, length(queryLabels)))] # expand the list
+         
+         inputLabels <- paste0(names(inputFiles), seq_along(queryFiles)) # make each inputLabels unique
+         names(queryInputs) <- c(queryLabels, inputLabels) 
+      }else{
+         stop("the number of inputFiles must be 1 or equal to the number of queryFiles!")
+      }
+   }
+   queryLabels <- names(queryInputs)
 
   five <- ext[1]/1000
   five <- paste0(five, "K")
@@ -1898,8 +1900,6 @@ plot_reference_locus <- function(queryFiles, centerFiles, txdb=NULL, ext=c(-100,
 
   scoreMatrix_list <- list()
 
-  queryInputs <- handle_input(queryFiles,  handleInputParams, nc=nc)
-
   bedparam <- handleInputParams
   bedparam$CLIP_reads <- FALSE
   bedparam$fix_width <- 0
@@ -1908,43 +1908,40 @@ plot_reference_locus <- function(queryFiles, centerFiles, txdb=NULL, ext=c(-100,
   bedparam$useSizeFactor <- FALSE
   
   centerInputs <- list()
-  centerLabels <- vector()
   
   for(featureName in centerFiles){
      if(featureName %in% c("utr3", "utr5", "cds", "intron", "exon", "transcript", "gene")){
-        feature <- get_genomic_feature_coordinates(txdb, featureName, longest=TRUE, protein_coding=TRUE)[["GRanges"]]
-        featureGR <- list("query"=feature)
-        centerInputs[[featureName]] <- featureGR
-        
-        centerLabels[featureName] <- paste0(featureName, refPoint)
-        
+        featureGR <- get_genomic_feature_coordinates(txdb, featureName, longest=TRUE, protein_coding=TRUE)[["GRanges"]]
+        feature <- list("query"=featureGR)
+        centerInputs[[featureName]] <- feature
      }else if(file.exists(featureName)){
         feature <- handle_input(featureName, bedparam, nc=nc)[[1]]
-        centerInputs[[featureName]] <- feature
-        centerLabels[featureName] <- names(centerFiles[centerFiles==featureName])
+        centerInputs[[names(feature)]] <- feature
      }else{
         stop(paste(featureName, "is not supported!"))
      }
-  }
+     }
+  centerLabels <- names(centerInputs)
 
   if(verbose) print("computing coverage for Sample")
-  for(queryFile in queryFiles){
-    myInput <- queryInputs[[queryFile]]
+  for(queryLabel in queryLabels){
+    myInput <- queryInputs[[queryLabel]]
     libsize <- myInput$size
     queryRegions <- myInput$query
     fileType <- myInput$type
     weight_col <- myInput$weight
-    if(verbose) print(paste("size of query regions", libsize))
+    if(verbose){
+       print(paste("size of query regions", libsize))
+       print(queryLabel)
+    }
 
-    queryLabel <- queryLabels[queryFile]
-    if(verbose) print(queryLabel)
-
-    for(centerFile in centerFiles){
-      centerLabel <- centerLabels[centerFile]
-      if(verbose) print(centerLabel)
-      centerInput <- centerInputs[[centerFile]]
+    for(centerLabel in centerLabels){
+      centerInput <- centerInputs[[centerLabel]]
       centerGr <- centerInput$query
-      if(verbose) print("preparing window regions")
+      if(verbose){
+         print("preparing window regions")
+         print(centerLabel)
+      }
 
       if(refPoint %in% c("center", "start", "end")){
          windowRegions <- resize(centerGr, width = 1, fix = refPoint)
@@ -1981,12 +1978,9 @@ plot_reference_locus <- function(queryFiles, centerFiles, txdb=NULL, ext=c(-100,
 
   if(verbose) print("collecting coverage data") ## plot multiple bed files on each center
 
-  for(queryFile in queryFiles){
-
-    queryLabel <- queryLabels[queryFile]
+  for(queryLabel in queryLabels){
     if(verbose) print(queryLabel)
-    for(centerFile in centerFiles){
-      centerLabel <- centerLabels[centerFile]
+    for(centerLabel in centerLabels){
       if(verbose) print(centerLabel)
 
       fullMatrix <- scoreMatrix_list[[queryLabel]][[centerLabel]]
@@ -2213,11 +2207,10 @@ plot_reference_locus <- function(queryFiles, centerFiles, txdb=NULL, ext=c(-100,
     Ylab <- ifelse(is.na(transform), "Ratio-over-Input", paste0(transform, " (Ratio-over-Input)"))
 
     inputMatrix_list <- scoreMatrix_list[inputLabels]
-    ratiofiles <- queryFiles[!queryFiles %in% inputFiles]
+    
     ratiolabels <- queryLabels[!queryLabels %in% inputLabels]
     ratioMatrix_list <- scoreMatrix_list[ratiolabels]
-    for(centerFile in centerFiles){
-      centerLabel <- centerLabels[centerFile]
+    for(centerLabel in centerLabels){
       for(i in seq_along(ratiolabels)){
         fullMatrix <- ratioMatrix_list[[ratiolabels[i]]][[centerLabel]]/inputMatrix_list[[inputLabels[i]]][[centerLabel]]
         colnames(fullMatrix) <- as.character(colLabel)
@@ -2235,8 +2228,7 @@ plot_reference_locus <- function(queryFiles, centerFiles, txdb=NULL, ext=c(-100,
     for(ratiolabel in ratiolabels){
 
       if(verbose) print(ratiolabel)
-      for(centerFile in centerFiles){
-        centerLabel <- centerLabels[centerFile]
+      for(centerLabel in centerLabels){
         if(verbose) print(centerLabel)
 
         fullMatrix <- ratioMatrix_list[[ratiolabel]][[centerLabel]]
@@ -2384,8 +2376,7 @@ plot_reference_locus <- function(queryFiles, centerFiles, txdb=NULL, ext=c(-100,
 
 #' @title Plot signal around custom genomic loci and random loci for comparison
 #
-#' @description Plot reads or peak signal intensity of samples in the query files around reference locus defined in the centerFiles. The upstream and downstream windows flanking genes
-#' can be given separately, a smaller window can be defined to allow statistical comparisons between reference and random loci.
+#' @description Plot reads or peak signal intensity of samples in the query files around reference locus defined in the centerFiles. The upstream and downstream windows flanking loci can be given separately, a smaller window can be defined to allow statistical comparisons between reference and random loci. The loci are further divided into sub-groups that are overlapping with c("5'UTR", "CDS", "3'UTR"), "unrestricted" means all loci regardless of overlapping.
 #'
 #' @param queryFiles a vector of sample file names. The file should be in .bam, .bed, .wig or .bw format, mixture of formats is allowed
 #' @param centerFiles a vector of reference file names. The file should be .bed format only
@@ -2418,29 +2409,33 @@ plot_reference_locus <- function(queryFiles, centerFiles, txdb=NULL, ext=c(-100,
 #' inputFiles <- system.file("data", "test_clip_input.bam", package="GenomicPlotData")
 #' names(inputFiles) <- "input"
 #'
-#' @export plot_reference_locus_with_random
+#' @export plot_locus_with_random
 
-plot_reference_locus_with_random <- function(queryFiles, centerFiles, txdb, ext=c(0,0), hl=c(0,0), shade=FALSE,
+plot_locus_with_random <- function(queryFiles, centerFiles, txdb, ext=c(0,0), hl=c(0,0), shade=FALSE,
                                              handleInputParams=NULL, verbose=FALSE, smooth=FALSE, transform=NA, 
                                              binSize=10, refPoint="center", Xlab="Center", Ylab="Signal intensity",
                                              inputFiles=NULL, stranded=TRUE, scale=FALSE, outPrefix=NULL, 
                                              rmOutlier=FALSE, n_random=1, statsMethod="wilcox.test", nc=2){
 
-  queryLabels <- names(queryFiles)
-  names(queryLabels) <- queryFiles
-  inputLabels <- names(inputFiles)
-  names(inputLabels) <- inputFiles
-  centerLabels <- names(centerFiles)
-  names(centerLabels) <- centerFiles
-
-  if(!is.null(inputFiles)){
-    if(length(queryFiles) != length(inputFiles)){
-      stop("the number of queryFiles and inputFiles must be the same!")
-    }
-    names(inputLabels) <- inputFiles
-    queryFiles <- c(queryFiles, inputFiles)
-    queryLabels <- c(queryLabels, inputLabels)
-  }
+   if(is.null(inputFiles)){
+      queryInputs <- handle_input(inputFiles=queryFiles, handleInputParams, verbose=verbose, nc=nc)
+   }else{
+      inputLabels <- names(inputFiles)
+      queryLabels <- names(queryFiles)
+      if(length(queryFiles) == length(inputFiles)){
+         queryInputs <- handle_input(inputFiles=c(queryFiles, inputFiles), handleInputParams, verbose=verbose, nc=nc)
+      }else if(length(inputFiles) == 1){
+         queryInputs <- handle_input(inputFiles=c(queryFiles, inputFiles), handleInputParams, verbose=verbose, nc=nc)
+         queryInputs <- queryInputs[c(queryLabels, rep(inputLabels, length(queryLabels)))] # expand the list
+         
+         inputLabels <- paste0(names(inputFiles), seq_along(queryFiles)) # make each inputLabels unique
+         names(queryInputs) <- c(queryLabels, inputLabels) 
+      }else{
+         stop("the number of inputFiles must be 1 or equal to the number of queryFiles!")
+      }
+   }
+   queryLabels <- names(queryInputs)
+   
 
   if(!is.null(outPrefix)){
      while(!is.null(dev.list())){
@@ -2483,7 +2478,6 @@ plot_reference_locus_with_random <- function(queryFiles, centerFiles, txdb, ext=
   scoreMatrix_list_random <- list()
   quantile_list_random <- list()
 
-  queryInputs <- handle_input(queryFiles, handleInputParams, nc=nc)
 
   bedparam <- handleInputParams
   bedparam$CLIP_reads <- FALSE
@@ -2491,23 +2485,23 @@ plot_reference_locus_with_random <- function(queryFiles, centerFiles, txdb, ext=
   bedparam$useScore <- FALSE
   bedparam$outRle <- FALSE
   bedparam$useSizeFactor <- FALSE
+  
   centerInputs <- handle_input(centerFiles, bedparam)
+  centerLabels <- names(centerInputs)
 
-  for(queryFile in queryFiles){
-    myInput <- queryInputs[[queryFile]]
+  for(queryLabel in queryLabels){
+    myInput <- queryInputs[[queryLabel]]
     libsize <- myInput$size
     queryRegions <- myInput$query
     fileType <- myInput$type
     weight_col <- myInput$weight
 
-    queryLabel <- queryLabels[queryFile]
     if(verbose) print(queryLabel)
     if(verbose) print(libsize)
 
-    for(centerFile in centerFiles){
-      centerLabel <- centerLabels[centerFile]
+    for(centerLabel in centerLabels){
       if(verbose) print(centerLabel)
-      centerInput <- centerInputs[[centerFile]]
+      centerInput <- centerInputs[[centerLabel]]
 
       windowRegionsALL <- centerInput$query
 
@@ -2573,14 +2567,12 @@ plot_reference_locus_with_random <- function(queryFiles, centerFiles, txdb, ext=
   ## plot reference center and random center for each bed
 
   Ylab <- ifelse(is.na(transform), Ylab, paste0(transform, " (", Ylab, ")"))
-  for(queryFile in queryFiles){
+  for(queryLabel in queryLabels){
 
-    if(verbose) print(paste("Processing query", queryFile))
-    queryLabel <- queryLabels[queryFile]
+    if(verbose) print(paste("Processing query", queryLabel))
 
-    for(centerFile in centerFiles){
-      if(verbose) print(paste("Processing reference", centerFile))
-      centerLabel <- centerLabels[centerFile]
+    for(centerLabel in centerLabels){
+      if(verbose) print(paste("Processing reference", centerLabel))
 
       for(regionName in names(region_list)){
         if(verbose) print(paste("Processing genomic region", regionName))
@@ -2662,7 +2654,6 @@ plot_reference_locus_with_random <- function(queryFiles, centerFiles, txdb, ext=
   if(!is.null(inputFiles)){
     Ylab <- ifelse(is.na(transform), "Ratio-over-Input", paste0(transform, " (Ratio-over-Input)"))
 
-    ratiofiles <- queryFiles[!queryFiles %in% inputFiles]
     ratiolabels <- queryLabels[!queryLabels %in% inputLabels]
     inputMatrix_list <- scoreMatrix_list[inputLabels]
     ratioMatrix_list <- scoreMatrix_list[ratiolabels]
@@ -2670,8 +2661,7 @@ plot_reference_locus_with_random <- function(queryFiles, centerFiles, txdb, ext=
     inputMatrix_list_random <- scoreMatrix_list_random[inputLabels]
     ratioMatrix_list_random <- scoreMatrix_list_random[ratiolabels]
 
-    for(centerFile in centerFiles){
-      centerLabel <- centerLabels[centerFile]
+    for(centerLabel in centerLabels){
       for(regionName in names(region_list)){
         for(i in seq_along(ratiolabels)){
           rm <- ratioMatrix_list[[ratiolabels[i]]][[centerLabel]][[regionName]]
@@ -2695,14 +2685,10 @@ plot_reference_locus_with_random <- function(queryFiles, centerFiles, txdb, ext=
       }
     }
 
-    for(ratiofile in ratiofiles){
-      if(verbose) print(paste("Processing ratio for query", ratiofile))
-      ratiolabel <- ratiolabels[ratiofile]
-
-      for(centerFile in centerFiles){
-        if(verbose) print(paste("Processing ratio for reference", centerFile))
-        centerLabel <- centerLabels[centerFile]
-
+    for(ratiolabel in ratiolabels){
+      if(verbose) print(paste("Processing ratio for query", ratiolabel))
+      for(centerLabel in centerLabels){
+        if(verbose) print(paste("Processing ratio for reference", centerLabel))
         for(regionName in names(region_list)){
           if(verbose) print(paste("Processing ratio for genomic region", regionName))
           plot_df <- NULL
@@ -3260,103 +3246,6 @@ plot_peak_annotation <- function(peakFile, gtfFile, handleInputParams=NULL, five
   }
 }
 
-#' @title Plot two-sets Venn diagram
-#'
-#' @description This is a helper function for Venn diagram plot. A Venn diagram is plotted as output.
-#' @param apair a list of two vectors
-#' @param overlap_fun the name of the function that defines overlap, depending on the type of object in the vectors.
-#'
-#' @return NULL
-#' @author Shuye Pu
-#'
-#'
-#' @export overlap_pair
-
-overlap_pair <- function(apair, overlap_fun){
-   sizes <- vapply(apair, length, numeric(1))
-   overlap <- length(Reduce(overlap_fun, apair))
-   jaccard <- round(overlap/(sum(sizes)-overlap), digits=5)
-   venn.plot <- draw.pairwise.venn(sizes[1], sizes[2], overlap, category=names(apair),
-                                   lty=rep("blank",2), fill=c("#0020C2", "#64E986"),
-                                   cat.just = rep(list(c(0.5, 0)),2), cex = rep(2, 3), cat.pos = c(0, 0))
-
-   grid.draw(venn.plot)
-   grid.text(paste("Jaccard:", jaccard), unit(0.2, "npc"), unit(0.9, "npc"), draw = TRUE)
-   grid.newpage()
-
-   return(NULL)
-}
-
-#' @title Plot three-sets Venn diagram
-#'
-#' @description This is a helper function for Venn diagram plot. A Venn diagram is plotted as output.
-#' @param atriple a list of three vectors
-#' @param overlap_fun the name of the function that defines overlap
-#'
-#' @return NULL
-#' @author Shuye Pu
-#'
-#'
-#' @export overlap_triple
-
-overlap_triple <- function(atriple, overlap_fun){
-   sizes <- sort(vapply(atriple, length, numeric(1)), decreasing=TRUE)
-   atriple <- atriple[names(sizes)] ## sort the gr by decreasing size to avoid n13 < n123
-
-   overlap12 <- length(Reduce(overlap_fun, atriple[c(1,2)]))
-   overlap13 <- length(Reduce(overlap_fun, atriple[c(1,3)]))
-   overlap23 <- length(Reduce(overlap_fun, atriple[c(2,3)]))
-   overlap123 <- length(Reduce(overlap_fun, atriple))
-
-   venn.plot <- draw.triple.venn(sizes[1], sizes[2], sizes[3], overlap12, overlap23, overlap13,
-                                 overlap123, category=names(atriple), lty=rep("blank",3),
-                                 fill=c("#0020C2", "#64E986", "#990012"), cat.just = rep(list(c(0.5, 0)),3),
-                                 cex = rep(2, 7), cat.pos = c(0, 0, 180))
-
-   grid.draw(venn.plot)
-   grid.newpage()
-
-   return(NULL)
-}
-
-#' @title Plot four-sets Venn diagram
-#'
-#' @description This is a helper function for Venn diagram plot. A Venn diagram is plotted as output.
-#' @param aquad a list of four vectors
-#' @param overlap_fun the name of the function that defines overlap
-#'
-#' @return NULL
-#' @author Shuye Pu
-#'
-#'
-#' @export overlap_quad
-#'
-overlap_quad <- function(aquad, overlap_fun){
-   sizes <- sort(vapply(aquad, length, numeric(1)), decreasing=TRUE)
-   aquad <- aquad[names(sizes)] ## sort the gr by decreasing size to avoid n13 < n123
-
-   overlap12 <- length(Reduce(overlap_fun, aquad[c(1,2)]))
-   overlap13 <- length(Reduce(overlap_fun, aquad[c(1,3)]))
-   overlap14 <- length(Reduce(overlap_fun, aquad[c(1,4)]))
-   overlap23 <- length(Reduce(overlap_fun, aquad[c(2,3)]))
-   overlap24 <- length(Reduce(overlap_fun, aquad[c(2,4)]))
-   overlap34 <- length(Reduce(overlap_fun, aquad[c(3,4)]))
-   overlap123 <- length(Reduce(overlap_fun, aquad[c(1,2,3)]))
-   overlap124 <- length(Reduce(overlap_fun, aquad[c(1,2,4)]))
-   overlap134 <- length(Reduce(overlap_fun, aquad[c(1,3,4)]))
-   overlap234 <- length(Reduce(overlap_fun, aquad[c(2,3,4)]))
-   overlap1234 <- length(Reduce(overlap_fun, aquad))
-
-   venn.plot <- draw.quad.venn(sizes[1], sizes[2], sizes[3], sizes[4], overlap12, overlap13,
-                               overlap14, overlap23, overlap24, overlap34, overlap123, overlap124,
-                               overlap134, overlap234, overlap1234, category=names(aquad),
-                               lty=rep("blank",4), fill=c("#0020C2", "#64E986", "#990012", "#c6dcff"),
-                               cat.just = rep(list(c(0.5, 0)),4), cex = rep(2, 15), cat.pos = c(0, 0, 0, 0))
-
-   grid.draw(venn.plot)
-   grid.newpage()
-   return(NULL)
-}
 
 #' @title Plot Venn diagrams depicting overlap of genomic regions
 #' @description This function takes a list of bed file names, and produce a Venn diagram
@@ -3498,90 +3387,4 @@ plot_overlap_genes <- function(fileList, columnList, pairOnly=TRUE, outPrefix=NU
    invisible(geneList)
 }
 
-#' @title Filter GRanges by overlaps in stranded way
-#' @description This function reports all query GRanges that have overlaps in subject GRanges. Strand information is used to define overlap.
-#' @param query a GRanges object
-#' @param subject a GRanges object
-#' @param maxgap an integer denoting the distance that define overlap
-#' @param minoverlap The minimum amount of overlap between intervals as a single integer greater than 0.
-#' If you modify this argument, maxgap must be held fixed.
-#'
-#' @return a GRanges object
-#' @author Shuye Pu
-#'
-#'
-#' @export filter_by_overlaps_stranded
-
-filter_by_overlaps_stranded <- function(query, subject, maxgap=-1L, minoverlap=0L){
-
-  plus_query <- query[strand(query)=="+"]
-  minus_query <- query[strand(query)=="-"]
-  plus_subject <- subject[strand(subject)=="+"]
-  minus_subject <- subject[strand(subject)=="-"]
-
-  overlap_plus <- filter_by_overlaps(plus_query, plus_subject, maxgap=maxgap, minoverlap=minoverlap)
-  overlap_minus <- filter_by_overlaps(minus_query, minus_subject, maxgap=maxgap, minoverlap=minoverlap)
-
-  overlaps <- c(overlap_plus, overlap_minus)
-
-  if(length(overlaps) > min(length(query), length(subject))){
-     message("Size of overlap is greater than min(sizeOfQuery, sizeOfSubject)!")
-  }
-  invisible(overlaps)
-}
-
-#' @title Filter GRanges by nonoverlaps in stranded way
-#' @description This function reports all query GRanges that do not overlaps GRanges in subject. Strand information is used to define overlap.
-#' @param query a GRanges object
-#' @param subject a GRanges object
-#'
-#' @return a GRanges object
-#' @author Shuye Pu
-#'
-#'
-#' @export filter_by_nonoverlaps_stranded
-#'
-filter_by_nonoverlaps_stranded <- function(query, subject){
-
-  overlaps <- filter_by_overlaps_stranded(query, subject, maxgap=-1L)
-  if(length(overlaps) > min(length(query), length(subject))){
-     message("Size of overlap is greater than min(sizeOfQuery, sizeOfSubject!")
-  }
-  nonoverlaps <- GenomicRanges::setdiff(query, overlaps)
-  invisible(nonoverlaps)
-}
-
-
-#' @title Format genomic coordinates in GRanges or GRrangesList as strings used in igv
-#' @description This function takes a GRanges or GRangesList object, and transform each range into a string
-#' @param x a GRanges or GRangesList object
-#' @return a vector of strings in the format of 'chr:start-end(strand)'
-#' @author Shuye Pu
-#'
-#' @examples
-#' gr1 <- GenomicRanges::GRanges("chr2", IRanges::IRanges(3, 6))
-#' gr2 <- GenomicRanges::GRanges(c("chr1", "chr1"), IRanges::IRanges(c(7,13), width=3),
-#'  strand=c("+", "-"))
-#' gr3 <- GenomicRanges::GRanges(c("chr1", "chr2"), IRanges::IRanges(c(1, 4), c(3, 9)),
-#'  strand="-")
-#'
-#' grl <- GenomicRanges::GRangesList(gr1= gr1, gr2=gr2, gr3=gr3)
-#' grl
-#'
-#' out <- format_genomic_coordinates(grl)
-#' cat(out)
-#'
-#' @export format_genomic_coordinates
-#'
-format_genomic_coordinates <- function(x){
-   if(grepl("GRangesList", class(x))) x <- unlist(x) ## convert grl to gr
-
-   chr <- as.vector(seqnames(x)) %>% as.character
-   start <- start(x) %>% as.numeric
-   end <- end(x) %>% as.numeric
-   strand <- strand(x) %>% as.character
-
-   out <- paste0(chr, ":", start, "-", end, "(", strand, ")")
-   invisible(out)
-}
 

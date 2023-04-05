@@ -30,7 +30,7 @@ prepare_5parts_genomic_features(
 
 \item{verbose}{logical, whether to output additional information}
 
-\item{subsetTx}{a vector of transcript ids for subseting the genome}
+\item{subsetTx}{a vector of transcript names for subseting the genome}
 }
 \value{
 a named list with the elements c("windowRs", "nbins", "scaled_bins", "fiveP", "threeP", "meta", "longest")

@@ -69,7 +69,7 @@ op <- "test_plot_reference_locus"
 handleInputParams <- list(CLIP_reads=FALSE, fix_width=0, fix_point="center", norm=FALSE, useScore=FALSE,
                           outRle=TRUE, useSizeFactor=FALSE, genome="hg19")
 
-plot_reference_locus(queryFiles=queryfiles[c(1,3)], 
+plot_locus(queryFiles=queryfiles[c(1,3)], 
                      centerFiles=queryfiles[2], 
                      ext=c(-500, 500), 
                      hl=c(-50, 50), 
