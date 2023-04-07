@@ -56,6 +56,7 @@ plot_start_end_with_random <- function(queryFiles, inputFiles=NULL, txdb, featur
    Ylab="Signal intensity"){
 
    if(is.null(inputFiles)){
+      inputLabels <- NULL
       queryInputs <- handle_input(inputFiles=queryFiles, handleInputParams, verbose=verbose, nc=nc)
    }else{
       inputLabels <- names(inputFiles)
@@ -418,6 +419,7 @@ plot_start_end_with_random <- function(queryFiles, inputFiles=NULL, txdb, featur
 plot_start_end <- function(queryFiles, inputFiles=NULL, centerFiles, handleInputParams=NULL, binSize=10, insert=0, verbose=FALSE, ext=c(-500,100, -100, 500), hl=c(-50, 50, -50, 50), stranded=TRUE, scale=FALSE, smooth=FALSE, rmOutlier=FALSE, outPrefix="plots", transform=TRUE, shade=TRUE, Ylab="Signal intensity", nc=2){
 
    if(is.null(inputFiles)){
+      inputLabels <- NULL
       queryInputs <- handle_input(inputFiles=queryFiles, handleInputParams, verbose=verbose, nc=nc)
    }else{
       inputLabels <- names(inputFiles)
@@ -457,11 +459,12 @@ plot_start_end <- function(queryFiles, inputFiles=NULL, centerFiles, handleInput
          feature <- list("query"=featureGR)
          features[[featureName]] <- feature
       }else if(file.exists(featureName)){
-         feature <- handle_input(featureName, bedparam, nc=nc)[[1]]
-         featureGR <- feature$query
+         names(featureName) <- names(centerFiles)[centerFiles == featureName]
+         feature <- handle_input(featureName, bedparam, nc=nc)
+         featureGR <- feature[[1]]$query
          featureGR <- featureGR[width(featureGR)>minimal_width]
-         feature$query <- featureGR
-         features[[names(feature)]] <- feature
+         feature[[1]]$query <- featureGR
+         features[[names(feature)[1]]] <- feature[[1]]
       }else{
          stop(paste(featureName, "is not supported!"))
       }
@@ -718,6 +721,7 @@ plot_start_end <- function(queryFiles, inputFiles=NULL, centerFiles, handleInput
 plot_3parts_metagene <- function(queryFiles, gFeatures, inputFiles=NULL, scale=FALSE,  verbose=FALSE, Ylab="Signal intensity", handleInputParams=NULL, smooth=FALSE, stranded=TRUE, outPrefix="plots", heatmap=FALSE, rmOutlier=FALSE, heatRange=NULL, transform=NA, nc=2){
 
    if(is.null(inputFiles)){
+      inputLabels <- NULL
       queryInputs <- handle_input(inputFiles=queryFiles, handleInputParams, verbose=verbose, nc=nc)
    }else{
       inputLabels <- names(inputFiles)
@@ -866,8 +870,8 @@ plot_3parts_metagene <- function(queryFiles, gFeatures, inputFiles=NULL, scale=F
 
   if(!is.null(inputFiles)){
     if(verbose) print("computing coverage for ratio over input")
-    Ylab <- ifelse(is.na(transform), "Ratio-over-Input", paste0(transform, " (Ratio-over-Input)"))
-    if(heatmap) heatmap_list <- list()
+    Ylabr <- ifelse(is.na(transform), "Ratio-over-Input", paste0(transform, " (Ratio-over-Input)"))
+    if(heatmap) heatmap_list_ratio <- list()
 
     inputMatrix_list <- scoreMatrix_list[inputLabels]
     ratiolabels <- queryLabels[!queryLabels %in% inputLabels]
@@ -880,7 +884,7 @@ plot_3parts_metagene <- function(queryFiles, gFeatures, inputFiles=NULL, scale=F
     }
 
     if(verbose) print("plotting coverage for ratio over input")
-    mplot_df <- NULL
+    mplot_df_ratio <- NULL
     for(ratiolabel in ratiolabels){
       plot_df <- NULL
       dims <- vapply(ratioMatrix_list[[ratiolabel]], dim, numeric(2))
@@ -911,8 +915,8 @@ plot_3parts_metagene <- function(queryFiles, gFeatures, inputFiles=NULL, scale=F
          names(collabel) <- featuretype
 
          if(heatmap){
-            dataname <- paste(Ylab, ratiolabel, "gene", sep=":")
-            heatmap_list[dataname] <- draw_matrix_heatmap(featureMatrix, dataName=dataname, labels_col=collabel, levels_col=featureNames, ranges=heatRange, verbose=verbose)
+            dataname <- paste(Ylabr, ratiolabel, "gene", sep=":")
+            heatmap_list_ratio[dataname] <- draw_matrix_heatmap(featureMatrix, dataName=dataname, labels_col=collabel, levels_col=featureNames, ranges=heatRange, verbose=verbose)
          }
          plot_df <- data.frame("Intensity"=colm, "sd"=colsd, "se"=colse, "Position"=collabel, "Query"=querybed, "Feature"=featuretype)
       }
@@ -922,18 +926,18 @@ plot_3parts_metagene <- function(queryFiles, gFeatures, inputFiles=NULL, scale=F
         plot_df$se <- as.vector(smooth.spline(plot_df$se, df=as.integer(nbins/5))$y)
       }
 
-      mplot_df <- rbind(mplot_df, plot_df)
+      mplot_df_ratio <- rbind(mplot_df_ratio, plot_df)
 
     }
 
-    mplot_df <- mutate(mplot_df, lower=Intensity-se, upper=Intensity+se)
+    mplot_df_ratio <- mutate(mplot_df_ratio, lower=Intensity-se, upper=Intensity+se)
 
     ## plot individual sample lines with error band
     plot_list <- list()
     for(ratiolabel in ratiolabels){
-       aplot_df <- mplot_df %>%
+       aplot_df <- mplot_df_ratio %>%
           filter(Query == ratiolabel)
-       p <- draw_region_profile(plot_df=aplot_df, cn="Query", vx=vx, Ylab=Ylab)
+       p <- draw_region_profile(plot_df=aplot_df, cn="Query", vx=vx, Ylab=Ylabr)
        outp <- plot_grid(p, marker, ncol = 1, align = 'v', axis= "lr", rel_heights = c(10,1))
        plot_list[[ratiolabel]] <- outp
     }
@@ -941,7 +945,7 @@ plot_3parts_metagene <- function(queryFiles, gFeatures, inputFiles=NULL, scale=F
     #print(rowp)
 
     if(heatmap){
-       groblist <- lapply(heatmap_list, function(x)grid.grabExpr(draw(x, heatmap_legend_side = "top")))
+       groblist <- lapply(heatmap_list_ratio, function(x)grid.grabExpr(draw(x, heatmap_legend_side = "top")))
        heatp <- plot_grid(plotlist=groblist, nrow = 1, align = 'h')
        composite <- plot_grid(rowp, heatp, ncol = 1, align = 'v')
        print(composite)
@@ -950,7 +954,7 @@ plot_3parts_metagene <- function(queryFiles, gFeatures, inputFiles=NULL, scale=F
     }
 
     ## plot multi-sample lines with error band
-    p <- draw_region_profile(plot_df=mplot_df, cn="Query", vx=vx, Ylab=Ylab)
+    p <- draw_region_profile(plot_df=mplot_df_ratio, cn="Query", vx=vx, Ylab=Ylabr)
     outp <- plot_grid(p, marker, ncol = 1, align = 'v', axis="lr", rel_heights = c(10,1))
     print(outp)
 
@@ -1006,6 +1010,7 @@ plot_region <- function(queryFiles, centerFiles, txdb=NULL, regionName="region",
   }
 
    if(is.null(inputFiles)){
+      inputLabels <- NULL
       queryInputs <- handle_input(inputFiles=queryFiles, handleInputParams, verbose=verbose, nc=nc)
    }else{
       inputLabels <- names(inputFiles)
@@ -1039,8 +1044,9 @@ plot_region <- function(queryFiles, centerFiles, txdb=NULL, regionName="region",
         feature <- list("query"=featureGR)
         centerInputs[[featureName]] <- feature
      }else if(file.exists(featureName)){
-        feature <- handle_input(featureName, bedparam, nc=nc)[[1]]
-        centerInputs[[names(feature)]] <- feature
+        names(featureName) <- names(centerFiles)[centerFiles == featureName]
+        feature <- handle_input(featureName, bedparam, nc=nc)
+        centerInputs[[names(feature)[1]]] <- feature[[1]]
      }else{
         stop(paste(featureName, "is not supported!"))
      }
@@ -1534,6 +1540,7 @@ plot_5parts_metagene <- function(queryFiles, gFeatures_list, inputFiles=NULL, ha
                                  Ylab="Signal intensity", nc=2){
 
   if(is.null(inputFiles)){
+     inputLabels <- NULL
      queryInputs <- handle_input(inputFiles=queryFiles, handleInputParams, verbose=verbose, nc=nc)
   }else{
      inputLabels <- names(inputFiles)
@@ -1663,7 +1670,7 @@ plot_5parts_metagene <- function(queryFiles, gFeatures_list, inputFiles=NULL, ha
    
      if(!is.null(inputFiles)){
        if(verbose) print("Preparing data for ratio plotting")
-       Ylab <- ifelse(is.na(transform), "Ratio-over-Input", paste0(transform, " (Ratio-over-Input)"))
+       Ylabr <- ifelse(is.na(transform), "Ratio-over-Input", paste0(transform, " (Ratio-over-Input)"))
    
        inputMatrix_list <- scoreMatrix_list[inputLabels]
        ratiolabels <- queryLabels[!queryLabels %in% inputLabels]
@@ -1711,7 +1718,7 @@ plot_5parts_metagene <- function(queryFiles, gFeatures_list, inputFiles=NULL, ha
             names(collabel) <- featuretype
    
             if(heatmap){
-               dataname <- paste(Ylab, ratiolabel, aFeature, sep=":")
+               dataname <- paste(Ylabr, ratiolabel, aFeature, sep=":")
                heatmap_list_ratio[[dataname]] <- draw_matrix_heatmap(featureMatrix, dataName=dataname, labels_col=collabel, levels_col=featureNames, ranges=heatRange, verbose=verbose)
             }
             plot_df <- data.frame("Intensity"=colm, "sd"=colsd, "se"=colse, "Position"=collabel, "Query"=paste(querybed,aFeature,sep=":"), "Feature"=featuretype)
@@ -1778,7 +1785,7 @@ plot_5parts_metagene <- function(queryFiles, gFeatures_list, inputFiles=NULL, ha
        for(aFeature in names(gFeatures_list)){
           aplot_df <- mplot_dfs_ratio %>%
              filter(Query == paste(ratiolabel, aFeature, sep=":"))
-          p <- draw_region_profile(plot_df=aplot_df, cn="Query", vx=vx, Ylab=Ylab)
+          p <- draw_region_profile(plot_df=aplot_df, cn="Query", vx=vx, Ylab=Ylabr)
           outp <- plot_grid(p, pp, ppp, ncol = 1, align = 'v', axis="lr", rel_heights = c(25,1,2))
           plot_list[[paste(ratiolabel, aFeature, sep=":")]] <- outp
        }
@@ -1797,7 +1804,7 @@ plot_5parts_metagene <- function(queryFiles, gFeatures_list, inputFiles=NULL, ha
 
     ## plot multi-sample lines with error band
     if(length(ratiolabels)*length(gFeatures_list)>1){
-       p <- draw_region_profile(plot_df=mplot_dfs_ratio, cn="Query", vx=vx, Ylab=Ylab)
+       p <- draw_region_profile(plot_df=mplot_dfs_ratio, cn="Query", vx=vx, Ylab=Ylabr)
        outp <- plot_grid(p, pp, ppp, ncol = 1, align = 'v', axis="lr", rel_heights = c(25,1,2))
        print(outp)
     }
@@ -1854,12 +1861,13 @@ plot_5parts_metagene <- function(queryFiles, gFeatures_list, inputFiles=NULL, ha
 
 
 plot_locus <- function(queryFiles, centerFiles, txdb=NULL, ext=c(-100,100), hl=c(0,0), shade=TRUE, smooth=FALSE,
-                                 handleInputParams=NULL, verbose=FALSE, binSize=10, refPoint="center", Xlab="Center", 
-                                 Ylab="Signal intensity", inputFiles=NULL, stranded=TRUE, heatmap=TRUE, scale=FALSE,
-                                 outPrefix=NULL, rmOutlier=FALSE, transform=NA, statsMethod="wilcox.test", heatRange=NULL,
-                                 nc=2){
+                     handleInputParams=NULL, verbose=FALSE, binSize=10, refPoint="center", Xlab="Center", 
+                     Ylab="Signal intensity", inputFiles=NULL, stranded=TRUE, heatmap=TRUE, scale=FALSE,
+                     outPrefix=NULL, rmOutlier=FALSE, transform=NA, statsMethod="wilcox.test", 
+                     heatRange=NULL, nc=2){
 
    if(is.null(inputFiles)){
+      inputLabels <- NULL
       queryInputs <- handle_input(inputFiles=queryFiles, handleInputParams, verbose=verbose, nc=nc)
    }else{
       inputLabels <- names(inputFiles)
@@ -1915,8 +1923,9 @@ plot_locus <- function(queryFiles, centerFiles, txdb=NULL, ext=c(-100,100), hl=c
         feature <- list("query"=featureGR)
         centerInputs[[featureName]] <- feature
      }else if(file.exists(featureName)){
-        feature <- handle_input(featureName, bedparam, nc=nc)[[1]]
-        centerInputs[[names(feature)]] <- feature
+        names(featureName) <- names(centerFiles)[centerFiles == featureName]
+        feature <- handle_input(featureName, bedparam, nc=nc)
+        centerInputs[[names(feature)[1]]] <- feature[[1]]
      }else{
         stop(paste(featureName, "is not supported!"))
      }
@@ -2418,6 +2427,7 @@ plot_locus_with_random <- function(queryFiles, centerFiles, txdb, ext=c(0,0), hl
                                              rmOutlier=FALSE, n_random=1, statsMethod="wilcox.test", nc=2){
 
    if(is.null(inputFiles)){
+      inputLabels <- NULL
       queryInputs <- handle_input(inputFiles=queryFiles, handleInputParams, verbose=verbose, nc=nc)
    }else{
       inputLabels <- names(inputFiles)
