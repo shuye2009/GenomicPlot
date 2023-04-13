@@ -42,10 +42,17 @@ handle_input <- function(inputFiles, handleInputParams=NULL, verbose=FALSE, nc=2
       dirName <- dirname(inputFile)
       if(file.exists(file.path(dirName, paste0(fileName, ".rds")))){
          temp <- readRDS(file.path(dirName, paste0(fileName, ".rds")))
-         if(identical(temp$param, handleInputParams)) out <- temp$Rle
+         if(identical(temp$param, handleInputParams)){
+            out <- temp$Rle
+            if(verbose)print("existing rds is used")
+         }else{
+            if(verbose)print("existing rds is modified using new input parameters")
+            out <- funName(inputFile=inputFile, handleInputParams, verbose)
+            saveRDS(temp=list(param=handleInputParams, Rle=out), file.path(dirName, paste0(fileName, ".rds")))
+         }
       }else{
          out <- funName(inputFile=inputFile, handleInputParams, verbose)
-         saveRDS(list(param=handleInputParams, Rle=out), file.path(dirName, paste0(fileName, ".rds")))
+         saveRDS(temp=list(param=handleInputParams, Rle=out), file.path(dirName, paste0(fileName, ".rds")))
       }
       return(out)
    }
