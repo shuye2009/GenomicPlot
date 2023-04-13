@@ -8,6 +8,7 @@ plot_start_end(
   queryFiles,
   inputFiles = NULL,
   centerFiles,
+  txdb = NULL,
   handleInputParams = NULL,
   binSize = 10,
   insert = 0,
@@ -30,7 +31,9 @@ plot_start_end(
 
 \item{inputFiles}{a vector of input sample file names. The file should be in .bam, .bed, .wig or .bw format, mixture of formats is allowed}
 
-\item{centerFiles}{bed files that define the custom features, or features in c("utr3", "utr5", "cds", "intron", "exon", "transcript", "gene"), mulitple features are allowed.}
+\item{centerFiles}{bed files that define the custom features, or features in c("utr3", "utr5", "cds", "intron", "exon", "transcript", "gene"), multiple features are allowed.}
+
+\item{txdb}{a TxDb object defined in the GenomicFeatures package. Default NULL, needed only when genomic features are used in the place of centerFiles.}
 
 \item{handleInputParams}{a list of parameters for \code{handle_input}}
 

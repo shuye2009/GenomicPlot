@@ -35,7 +35,7 @@ plot_locus(
 
 \item{centerFiles}{a named vector of reference file names or genomic features in  c("utr3", "utr5", "cds", "intron", "exon", "transcript", "gene"). The file should be in .bed format only}
 
-\item{txdb}{a TxDb object defined in the GenomicFeatures package.}
+\item{txdb}{a TxDb object defined in the GenomicFeatures package. Default NULL, needed only when genomic features are used in the place of centerFiles.}
 
 \item{ext}{a vector of two integers defining upstream and downstream boundaries of the plot window, flanking the reference locus}
 
@@ -82,7 +82,7 @@ a list of two dataframes containing the data used for plotting and for statistic
 Plot reads or peak signal intensity of samples in the query files around reference locus (start, end or center of a genomic region)
 defined in the centerFiles. The upstream and downstream windows flanking loci can be given separately, a smaller window can be defined to allow
 statistical comparisons between samples for the same reference, or between references for a given sample. If Input files are provided, ratio over
-Input is computed and displaued as well.
+Input is computed and displayed as well.
 }
 \examples{
 centerFiles <- c(system.file("data", "test_B.bed", package="GenomicPlotData"),

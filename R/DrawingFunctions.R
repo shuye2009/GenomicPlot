@@ -25,22 +25,6 @@
 #'
 
 draw_matrix_heatmap <- function(fullMatrix, dataName="geneData", labels_col=NULL, levels_col=NULL, ranking="Sum", ranges=NULL, verbose=FALSE){
-   
-   if(verbose) print("drawing heatmap")
-   #inspect_matrix(fullMatrix, verbose)
-   ## reduce the size by removing rows with all 0s
-   #fullMatrix[is.na(fullMatrix)] <- 0
-   #all0 <- apply(fullMatrix, 1, function(x)all(x == sum(x)/length(x)))
-   #fullMatrix <- data.matrix(fullMatrix[!all0,])
-   #count_all0_rows <- sum(all0)
-   #if(count_all0_rows > 0){
-   #   message(count_all0_rows, " all 0 rows are removed!")
-   #}
-
-   if(verbose){
-      vdataName <- gsub(":", "_", dataName, fixed=TRUE)
-      write.table(fullMatrix, paste(vdataName, "_matrix.tab", sep=""), row.names=TRUE, col.names=TRUE, sep="\t", quote=FALSE)
-   }
 
    if(is.null(labels_col)){
       labels_col <- seq(1, ncol(fullMatrix))
@@ -50,6 +34,12 @@ draw_matrix_heatmap <- function(fullMatrix, dataName="geneData", labels_col=NULL
    colnames(fullMatrix) <- labels_col
 
    fullMatrix <- rank_rows(fullMatrix, ranking)
+   
+   if(verbose){
+      print("drawing heatmap")
+      vdataName <- gsub(":", "_", dataName, fixed=TRUE)
+      write.table(fullMatrix, paste(vdataName, "_matrix.tab", sep=""), row.names=TRUE, col.names=TRUE, sep="\t", quote=FALSE)
+   }
 
    features <- factor(names(labels_col), levels=levels_col)
    cols <- ggsci::pal_npg()(length(levels(features)))
@@ -59,14 +49,16 @@ draw_matrix_heatmap <- function(fullMatrix, dataName="geneData", labels_col=NULL
 
    ha <- HeatmapAnnotation(df = data.frame(feature = features), col=list(feature=mycols), which="column", show_legend=FALSE, annotation_label = "")
    #y <- matrix(as.vector(fullMatrix), ncol=1)
-   if(verbose) print(quantile(fullMatrix, c(seq(0.9, 1, 0.005)), na.rm=TRUE))
+   if(verbose){
+      print("quantile(fullMatrix, c(seq(0.9, 1, 0.005)), na.rm=TRUE)")
+      print(quantile(fullMatrix, c(seq(0.9, 1, 0.005)), na.rm=TRUE))
+   }
    if(is.null(ranges)){
-   ranges <- quantile(fullMatrix, c(0.025, 0.975), na.rm=TRUE)
+      ranges <- quantile(fullMatrix, c(0.025, 0.975), na.rm=TRUE)
       if(ranges[1] == ranges[2]){
          message("97.5% of values are not unique, heatmap may not show signals effectively")
          
-         ranges <- quantile(fullMatrix, c(0, 0.995), na.rm=TRUE) ## Need to have a better way for determine the upper bound
-         ranges[2] <- ranges[2]*2
+         ranges <- quantile(fullMatrix, c(0, 1), na.rm=TRUE) ## Need to have a better way for determine the upper bound
       }
    }
    
