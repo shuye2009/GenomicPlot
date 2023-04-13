@@ -134,9 +134,18 @@ process_scoreMatrix <- function(fullmatrix, scale=FALSE, rmOutlier=FALSE, transf
    }
 
    if(scale){
-      #smc <- t(apply(fullmatrix, 1, scales::rescale)) ## rescale to 0:1 range
-      smc <- t(base::scale(t(fullmatrix))) ## rescale to zscore by row
+      smc <- t(apply(fullmatrix, 1, scales::rescale)) ## rescale to 0:1 range
+      #smc <- t(base::scale(t(fullmatrix))) ## rescale to zscore by row
       fullmatrix <- as.matrix(smc)
+      
+      fullmatrix[is.na(fullmatrix)] <- 0
+      allSame <- apply(fullmatrix, 1, function(x)all(x == mean(x)))
+      fullmatrix[allSame,] <- 0 # rescale will set the entire row to 0.5 if it has only 1 distinct value,
+      # this will distort the downstream analysis
+      count_allSame_rows <- sum(allSame)
+      if(count_allSame_rows > 0 && verbose){
+         message(count_allSame_rows, " rows have only one distinct value in the entire row after rescale!")
+      }
    }
    fullmatrix[is.na(fullmatrix)] <- 0
 

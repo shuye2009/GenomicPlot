@@ -57,7 +57,7 @@ a dataframe containing the data used for plotting
 \description{
 Plot reads or peak signal intensity of samples in the query files around genes. The upstream and downstream windows flanking genes
 can be given separately, the parameter 'meta' controls if gene or metagene plots are generated. If Input files are provided, ratio over Input
-is computed and displaued as well.
+is computed and displayed as well.
 }
 \examples{
 centerFiles <- c(system.file("data", "test_B.bed", package="GenomicPlotData"),

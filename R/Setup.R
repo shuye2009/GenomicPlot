@@ -24,7 +24,7 @@
 #' @importFrom BiocGenerics strand strand<- score score<- append start start<- end end<- Reduce
 #' @importFrom grid grid.grabExpr grid.draw grid.text grid.newpage gpar
 #' @importFrom tidyr pivot_longer
-#' @importFrom scales percent
+#' @importFrom scales percent rescale
 #' @importFrom IRanges mergeByOverlaps width
 #' @importFrom GenomicRanges trim shift resize promoters flank countOverlaps coverage granges grglist tileGenome setdiff narrow
 #' @importFrom GenomicRanges binnedAverage findOverlaps GRanges GRangesList mcols mcols<- makeGRangesFromDataFrame

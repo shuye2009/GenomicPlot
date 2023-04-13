@@ -4,10 +4,12 @@
 \alias{find_mate}
 \title{Find wig/bw file for the negative strand}
 \usage{
-find_mate(inputFile)
+find_mate(inputFile, verbose = FALSE)
 }
 \arguments{
 \item{inputFile}{path to a .wig/bw file, presumably for positive strand}
+
+\item{verbose}{logical, whether to output additional information}
 }
 \value{
 path to the negative .wig/bw file or NULL

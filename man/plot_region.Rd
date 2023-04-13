@@ -33,7 +33,7 @@ plot_region(
 
 \item{centerFiles}{a named vector of reference file names or genomic features in  c("utr3", "utr5", "cds", "intron", "exon", "transcript", "gene"). The file should be in .bed format only}
 
-\item{txdb}{a TxDb object defined in the GenomicFeatures package.}
+\item{txdb}{a TxDb object defined in the GenomicFeatures package. Default NULL, needed only when genomic features are used in the place of centerFiles.}
 
 \item{regionName}{a string specifying the name of the center region in the plots}
 
@@ -73,8 +73,7 @@ plot_region(
 a dataframe containing the data used for plotting
 }
 \description{
-Plot reads or peak signal intensity of samples in the query files inside regions defined in the centerFiles. The upstream and downstream flanking windows
-can be given separately. If Input files are provided, ratio over Input is computed and displaued as well.
+Plot reads or peak signal intensity of samples in the query files inside regions defined in the centerFiles. The upstream and downstream flanking windows can be given separately. If Input files are provided, ratio over Input is computed and displayed as well.
 }
 \examples{
 centerFiles <- c(system.file("data", "test_B.bed", package="GenomicPlotData"),

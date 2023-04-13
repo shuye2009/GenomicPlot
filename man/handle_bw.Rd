@@ -4,12 +4,14 @@
 \alias{handle_bw}
 \title{Handle files in bw|bigwig|bigWig|BigWig|BW|BIGWIG format}
 \usage{
-handle_bw(inputFile, handleInputParams)
+handle_bw(inputFile, handleInputParams, verbose = FALSE)
 }
 \arguments{
 \item{inputFile}{a string denoting path to the input file}
 
 \item{handleInputParams}{a list of parameters for \code{handle_input}}
+
+\item{verbose}{logical, whether to output additional information}
 }
 \value{
 a list object with four elements, 'query' is a list GRanges objects or RleList objects, 'size' is the estimated library size, 'type' is the input file type, weight' is the name of the metadata column to be used as weight for coverage calculation

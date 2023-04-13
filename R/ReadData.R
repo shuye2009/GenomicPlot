@@ -37,24 +37,37 @@ handle_input <- function(inputFiles, handleInputParams=NULL, verbose=FALSE, nc=2
       handleInputParams$outRle <- FALSE ## effective_size only take granges_list which produce more accurate normFactor than RleList
    }
 
+   inputFUN <- function(funName, inputFile, handleInputParams, verbose){
+      fileName <- basename(inputFile)
+      dirName <- dirname(inputFile)
+      if(file.exists(file.path(dirName, paste0(fileName, ".rds")))){
+         temp <- readRDS(file.path(dirName, paste0(fileName, ".rds")))
+         if(identical(temp$param, handleInputParams)) out <- temp$Rle
+      }else{
+         out <- funName(inputFile=inputFile, handleInputParams, verbose)
+         saveRDS(list(param=handleInputParams, Rle=out), file.path(dirName, paste0(fileName, ".rds")))
+      }
+      return(out)
+   }
+   
    outlist <- lapply(inputFiles, function(inputFile){
       
       if(grepl("\\.bed|BED|Bed|narrowPeak|broadPeak$", inputFile)){
          fileType <- "bed"
          if(verbose) print(paste("Reading", fileType, "file:", inputFile))
-         out <- handle_bed(inputFile=inputFile, handleInputParams)
+         out <- inputFUN(handle_bed, inputFile=inputFile, handleInputParams, verbose)
       }else if(grepl("\\.bam|BAM|Bam$", inputFile)){
          fileType <- "bam"
          if(verbose) print(paste("Reading", fileType, "file:", inputFile))
-         out <- handle_bam(inputFile=inputFile, handleInputParams)
+         out <- inputFUN(handle_bam, inputFile=inputFile, handleInputParams, verbose)
       }else if(grepl("\\.wig|WIG|Wig$", inputFile)){
          fileType <- "wig"
          if(verbose) print(paste("Reading", fileType, "file:", inputFile))
-         out <- handle_wig(inputFile=inputFile, handleInputParams)
+         out <- inputFUN(handle_wig,inputFile=inputFile, handleInputParams, verbose)
       }else if(grepl("\\.bw|bigwig|bigWig|BigWig|BW|BIGWIG$", inputFile)){
          fileType <- "bw"
          if(verbose) print(paste("Reading", fileType, "file:", inputFile))
-         out <- handle_bw(inputFile=inputFile, handleInputParams)
+         out <- inputFUN(handle_bw, inputFile=inputFile, handleInputParams, verbose)
       }else{
          stop(paste("The file format of", inputFile, "is not supported, please convert it to one of the following format:
                  bed, bam, wig, bigwig"))
@@ -152,6 +165,7 @@ effective_size <- function(outlist, outRle, genome="hg19", nc=2, verbose=FALSE){
 #'
 #' @param inputFile a string denoting path to the input file
 #' @param handleInputParams a list of parameters for \code{handle_input}
+#' @param verbose logical, whether to output additional information
 #'
 #' @return a list object with four elements, 'query' is a list GRanges objects or RleList objects, 'size' is the library size, 'type' is the input file type, 'weight' is the name of the metadata column to be used as weight for coverage calculation
 #'
@@ -159,14 +173,14 @@ effective_size <- function(outlist, outRle, genome="hg19", nc=2, verbose=FALSE){
 #'
 #' @export handle_bed
 
-handle_bed <- function(inputFile, handleInputParams=NULL){
+handle_bed <- function(inputFile, handleInputParams=NULL, verbose=FALSE){
 
    beddata <- read.delim2(inputFile, header=FALSE, comment.char = "#")
 
    nco <- ncol(beddata)
-   if(nco > 6){
+   if(nco > 6 && verbose){
       message(paste("The input file", inputFile, "have more than 6 columns, only the first 6 columns will be used!"))
-   }else if(nco < 6){
+   }else if(nco < 6 && verbose){
       message(paste("The input file", inputFile, "have only", nco, "columns!"))
    }
 
@@ -217,6 +231,7 @@ handle_bed <- function(inputFile, handleInputParams=NULL){
 #'
 #' @param inputFile a string denoting path to the input file
 #' @param handleInputParams a list of parameters for \code{handle_input}
+#' @param verbose logical, whether to output additional information
 #'
 #' @details The reads are filtered using mapq score >= 10 by default, only mapped reads are counted towards library size.
 #'
@@ -226,17 +241,17 @@ handle_bed <- function(inputFile, handleInputParams=NULL){
 #'
 #' @export handle_bam
 #'
-handle_bam <- function(inputFile, handleInputParams=NULL){
+handle_bam <- function(inputFile, handleInputParams=NULL, verbose=FALSE){
 
    paired.end <- testPairedEndBam(inputFile)
    if(paired.end){
       flag <- scanBamFlag(isPaired=TRUE, isProperPair=TRUE, isUnmappedQuery=FALSE, hasUnmappedMate=FALSE, isSecondMateRead=TRUE)  ## assume the second read in a pair is the sense read for strand-specific RNAseq
       param <- ScanBamParam(mapqFilter=10, flag=flag)
-      message("Paired end bam file detected!")
+      if(verbose) message("Paired end bam file detected!")
    }else{
       param <- ScanBamParam(mapqFilter=10)
    }
-   message(paste("\nbam file", inputFile, "is loaded\n"))
+   if(verbose) message(paste("\nbam file", inputFile, "is loaded\n"))
    
    ga <- readGAlignments(inputFile, use.names=TRUE, param=param)
    libsize <- sum(idxstatsBam(inputFile)$mapped)
@@ -277,6 +292,7 @@ handle_bam <- function(inputFile, handleInputParams=NULL){
 #'
 #' @param inputFile a string denoting path to the input file
 #' @param handleInputParams a list of parameters for \code{handle_input}
+#' @param verbose logical, whether to output additional information
 #'
 #' @details For stranded files, forward and reverse strands are stored in separate files, with '+' or 'p' in the forward strand file name and '-' or 'm' in the reverse strand  file name.
 #'
@@ -286,12 +302,12 @@ handle_bam <- function(inputFile, handleInputParams=NULL){
 #'
 #' @export handle_bw
 #'
-handle_bw <- function(inputFile, handleInputParams){
+handle_bw <- function(inputFile, handleInputParams, verbose=FALSE){
 
    weight_col <- "score"
    libsize <- NULL
 
-   neg_file <- find_mate(inputFile)
+   neg_file <- find_mate(inputFile, verbose)
    stranded <- ifelse(!is.null(neg_file), TRUE, FALSE)
 
    if(stranded){
@@ -333,6 +349,7 @@ handle_bw <- function(inputFile, handleInputParams){
 #'
 #' @param inputFile a string denoting path to the input file
 #' @param handleInputParams a list of parameters for \code{handle_input}
+#' @param verbose logical, whether to output additional information
 #'
 #' @details For stranded files, forward and reverse strands are stored in separate files, with '+' or 'p' in the forward strand file name and '-' or 'm' in the reverse strand file name.
 #'
@@ -342,9 +359,9 @@ handle_bw <- function(inputFile, handleInputParams){
 #'
 #' @export handle_wig
 #'
-handle_wig <- function(inputFile, handleInputParams){
+handle_wig <- function(inputFile, handleInputParams, verbose=FALSE){
 
-   neg_file <- find_mate(inputFile)
+   neg_file <- find_mate(inputFile, verbose)
    stranded <- ifelse(!is.null(neg_file), TRUE, FALSE)
 
    seqinfo <- Seqinfo(genome=handleInputParam$genome)
@@ -356,7 +373,7 @@ handle_wig <- function(inputFile, handleInputParams){
 
    bwfile <- gsub("\\.wig", "\\.bw", inputFile)
 
-   out <- handle_bw(bwfile, handleInputParams)
+   out <- handle_bw(bwfile, handleInputParams, verbose)
 
    invisible(out)
 }
@@ -367,13 +384,14 @@ handle_wig <- function(inputFile, handleInputParams){
 #' If no negative strand file is found, assume the input .wig/bw file is non-stranded
 #'
 #' @param inputFile path to a .wig/bw file, presumably for positive strand
+#' @param verbose logical, whether to output additional information
 #'
 #' @return path to the negative .wig/bw file or NULL
 #'
 #' @keywords internal
 
 
-find_mate <- function(inputFile){
+find_mate <- function(inputFile, verbose=FALSE){
    fileName <- basename(inputFile)
    dirName <- dirname(inputFile)
 
