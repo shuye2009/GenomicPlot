@@ -24,7 +24,11 @@ draw_mean_se_barplot(
 
 \item{comp}{a list of vectors denoting pair-wise comparisons to be performed between groups}
 
+\item{Xlab}{a string for x-axis label}
+
 \item{Ylab}{a string for y-axis label}
+
+\item{Ylim}{a numeric vector of two elements, defining custom limits of y-axis}
 
 \item{nf}{a integer normalizing factor for correct count of observations when the data table has two factors, such as those produced by pivot_longer, equals to the number of factors}
 }

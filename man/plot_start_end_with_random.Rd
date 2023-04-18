@@ -24,7 +24,7 @@ plot_start_end_with_random(
   transform = NA,
   shade = TRUE,
   nc = 2,
-  Ylab = "Signal intensity"
+  Ylab = "Coverage/base/gene"
 )
 }
 \arguments{
@@ -65,26 +65,28 @@ plot_start_end_with_random(
 \item{shade}{logical indicating whether to place a shaded rectangle around the point of interest}
 
 \item{nc}{integer, number of cores for parallel processing}
+
+\item{Ylab}{a string for y-axis label}
 }
 \value{
 a list of two objects, the first is a GRanges object, the second is a GRangesList object
 }
 \description{
-Plot reads or peak signal intensity of samples in the query files around stat, end and center of genomic features or custom feature given in a .bed file. The upstream and downstream windows can be given separately. If Input files are provided, ratio over Input is computed and displayed as well. A random feature can be generated to serve as a background for contrasting.
+Plot reads or peak Coverage/base/gene of samples in the query files around stat, end and center of genomic features or custom feature given in a .bed file. The upstream and downstream windows can be given separately. If Input files are provided, ratio over Input is computed and displayed as well. A random feature can be generated to serve as a background for contrasting.
 }
 \examples{
 txdb <- AnnotationDbi::loadDb(system.file("extdata", "txdb_chr19.sql", package="GenomicPlot"))
-queryFiles <- system.file("extdata", "test_clip_chr19.bam", package="GenomicPlotData")
+queryFiles <- system.file("extdata", "treat_chr19.bam", package="GenomicPlot")
 names(queryFiles) <- "query"
-inputFiles <- system.file("extdata", "test_clip_input_chr19.bam", package="GenomicPlot")
+inputFiles <- system.file("extdata", "input_chr19.bam", package="GenomicPlot")
 names(inputFiles) <- "input"
 ext <- c(-500, 200, -200, 500)
 hl <- c(-50, 50, -50, 50)
 op <- NULL
-handleInputParams <- list(CLIP_reads=FALSE, fix_width=150, fix_point="start", norm=TRUE, useScore=FALSE,
+handleInputParams <- list(CLIP_reads=FALSE, fix_width=150, fix_point="start", norm=FALSE, useScore=FALSE,
  outRle=TRUE, useSizeFactor=TRUE, genome="hg19")
 plot_start_end_with_random(queryFiles=c(queryFiles), inputFiles=c(inputFiles), txdb=txdb, centerFile="intron",
- binSize=10, handleInputParams=handleInputParams, ext=ext, hl=hl, randomize=TRUE,
+ binSize=10, handleInputParams=handleInputParams, ext=ext, hl=hl, randomize=TRUE, verbose=TRUE,
  insert=100, stranded=TRUE, scale=FALSE, smooth=TRUE, outPrefix=op, nc=2)
 
 }

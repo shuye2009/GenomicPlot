@@ -11,7 +11,7 @@ check_constraints(gr, genome, queryRle = NULL)
 
 \item{genome}{genomic version name such as "hg18"}
 
-\item{queryGr}{a RleList object used as a query against gr}
+\item{queryRle}{a RleList object used as a query against gr}
 }
 \value{
 a GRanges object

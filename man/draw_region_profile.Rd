@@ -21,7 +21,9 @@ draw_region_profile(
 
 \item{yc}{a string denoting column name for numeric data to be plotted}
 
-\item{cn}{column name for grouping}
+\item{cn}{column name in plot_df for query samples grouping}
+
+\item{sn}{column name in plot_df for subject name to be shown in plot title}
 
 \item{Ylab}{a string for Y-axis label}
 

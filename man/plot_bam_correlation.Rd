@@ -22,6 +22,8 @@ plot_bam_correlation(
 
 \item{handleInputParams}{a list of parameters for \code{handle_input}}
 
+\item{verbose}{logical, indicating whether to output additional information}
+
 \item{nc}{integer, number of cores for parallel processing}
 }
 \description{

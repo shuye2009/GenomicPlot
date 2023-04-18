@@ -10,7 +10,7 @@ plot_3parts_metagene(
   inputFiles = NULL,
   scale = FALSE,
   verbose = FALSE,
-  Ylab = "Signal intensity",
+  Ylab = "Coverage/base/gene",
   handleInputParams = NULL,
   smooth = FALSE,
   stranded = TRUE,
@@ -32,6 +32,8 @@ plot_3parts_metagene(
 \item{scale}{logical, indicating whether the score matrix should be scaled to the range 0:1, so that samples with different baseline can be compared}
 
 \item{verbose}{logical, whether to output additional information (data used for plotting or statistical test results)}
+
+\item{Ylab}{a string for y-axis label}
 
 \item{handleInputParams}{a list of parameters for \code{handle_input}}
 
@@ -55,14 +57,24 @@ plot_3parts_metagene(
 a dataframe containing the data used for plotting
 }
 \description{
-Plot reads or peak signal intensity of samples in the query files around genes. The upstream and downstream windows flanking genes
+Plot reads or peak Coverage/base/gene of samples in the query files around genes. The upstream and downstream windows flanking genes
 can be given separately, the parameter 'meta' controls if gene or metagene plots are generated. If Input files are provided, ratio over Input
 is computed and displayed as well.
 }
 \examples{
-centerFiles <- c(system.file("data", "test_B.bed", package="GenomicPlotData"),
-system.file("data", "test_C.bed", package="GenomicPlotData"))
-names(centerFiles) <- c("TestB", "TestC")
+txdb <- AnnotationDbi::loadDb(system.file("extdata", "txdb_chr19.sql", package="GenomicPlot"))
+queryfiles <- system.file("extdata", "treat_chr19.bam", package="GenomicPlot")
+names(queryfiles) <- "query"
+inputfiles <- system.file("extdata", "input_chr19.bam", package="GenomicPlot")
+names(inputfiles) <- "input"
+gfeatures <- prepare_3parts_genomic_features(txdb, featureName="transcript", meta=TRUE, nbins=100, 
+fiveP=-1000, threeP=1000, longest=TRUE, protein_coding=TRUE, verbose=FALSE)
+op <- NULL
+handleInputParams <- list(CLIP_reads=FALSE, fix_width=150, fix_point="start", norm=FALSE, useScore=FALSE,
+ outRle=TRUE, useSizeFactor=TRUE, genome="hg19")
+df <- plot_3parts_metagene(queryFiles=queryfiles, gFeatures=gfeatures, inputFiles=inputfiles, scale=FALSE,  
+verbose=TRUE, Ylab="Coverage/base/gene", handleInputParams=handleInputParams, smooth=TRUE, stranded=TRUE, 
+outPrefix=NULL, heatmap=TRUE, rmOutlier=FALSE, heatRange=NULL, transform=NA, nc=2)
 
 }
 \author{

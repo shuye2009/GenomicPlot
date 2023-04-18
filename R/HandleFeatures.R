@@ -14,7 +14,7 @@
 #' @author Shuye Pu
 #'
 #' @examples
-#' txdb <- AnnotationDbi::loadDb(system.file("data", "txdb.sql", package="GenomicPlotData"))
+#' txdb <- AnnotationDbi::loadDb(system.file("extdata", "txdb_chr19_1.sql", package="GenomicPlot"))
 #' longestTx <- extract_longest_tx(txdb, plot=FALSE)
 #'
 #' @export extract_longest_tx
@@ -189,7 +189,7 @@ extract_longest_tx <- function(txdb, plot=FALSE){
 #' @author Shuye Pu
 #'
 #' @examples
-#' txdb <- AnnotationDbi::loadDb(system.file("data", "txdb_chr19.sql", package="GenomicPlotData"))
+#' txdb <- AnnotationDbi::loadDb(system.file("extdata", "txdb_chr19_1.sql", package="GenomicPlot"))
 #' output <- get_genomic_feature_coordinates(txdb, featureName="cds", featureSource="gencode",
 #' export=FALSE, longest=TRUE, protein_coding=TRUE)
 #' @export get_genomic_feature_coordinates
@@ -257,7 +257,10 @@ get_genomic_feature_coordinates <- function(txdb, featureName, featureSource=NUL
             feature_longest <- as(split(feature_longest, f=feature_longest$gene_id), "GRangesList") # grl
             
          }else{
-            gr_feature_longest <- unlist(feature_longest, use.names=FALSE) ## convert each element of Grangeslist to multiple Granges
+            gr_feature_longest <- unlist(feature_longest, use.names=TRUE) ## convert each element of Grangeslist to multiple Granges
+            if(sum(duplicated(names(gr_feature_longest))) > 0){ ## if the names are not unique, force them to be unique
+               names(gr_feature_longest) <- paste(names(gr_feature_longest), seq_along(names(gr_feature_longest)), sep="_")  
+            }
          }
          
          seqinfo(gr_feature_longest) <- seqInfo
@@ -282,7 +285,10 @@ get_genomic_feature_coordinates <- function(txdb, featureName, featureSource=NUL
             gr_feature <- feature #gr
             feature <- as(split(feature, f=feature$gene_id), "GRangesList") # grl
          }else{
-            gr_feature <- unlist(feature, use.names=FALSE) ## convert Grangeslist object to GRanges object
+            gr_feature <- unlist(feature, use.names=TRUE) ## convert Grangeslist object to GRanges object
+            if(sum(duplicated(names(gr_feature))) > 0){ ## if the names are not unique, force them to be unique
+               names(gr_feature) <- paste(names(gr_feature), seq_along(names(gr_feature)), sep="_")  
+            }
          }
          
          seqinfo(gr_feature) <- seqInfo
@@ -679,7 +685,7 @@ get_targeted_genes <- function(peak, features, stranded=TRUE){
 #
 #' @description Make a partial TxDb object given a GTF file and a list of gene names in a file or in a character vector.
 #'
-#' @param gtfFfile path to a GTF file
+#' @param gtfFile path to a GTF file
 #' @param geneList path to a tab-delimited text file with one gene name on each line, or a character vector of gene names
 #' @param geneCol the position of the column that containing gene names in the case that geneList is a file
 #' 
@@ -704,7 +710,7 @@ make_subTxDb_from_GTF <- function(gtfFile, geneList, geneCol=1){
 #
 #' @description Given a list of gene names in a file or in a character vector, turn them into a vector of transcript ids.
 #'
-#' @param gtfFfile path to a GTF file
+#' @param gtfFile path to a GTF file
 #' @param geneList path to a tab-delimited text file with one gene name on each line, or a character vector of gene names
 #' @param geneCol the position of the column that containing gene names in the case that geneList is a file
 #'
@@ -731,7 +737,7 @@ gene2tx <- function(gtfFile, geneList, geneCol=1){
 #' 
 #' @param gr a GenomicRanges object
 #' @param genome genomic version name such as "hg18"
-#' @param queryGr a RleList object used as a query against gr
+#' @param queryRle a RleList object used as a query against gr
 #' 
 #' @return a GRanges object
 #' @author Shuye Pu

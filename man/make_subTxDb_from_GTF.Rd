@@ -7,11 +7,11 @@
 make_subTxDb_from_GTF(gtfFile, geneList, geneCol = 1)
 }
 \arguments{
+\item{gtfFile}{path to a GTF file}
+
 \item{geneList}{path to a tab-delimited text file with one gene name on each line, or a character vector of gene names}
 
 \item{geneCol}{the position of the column that containing gene names in the case that geneList is a file}
-
-\item{gtfFfile}{path to a GTF file}
 }
 \value{
 a TxDb object

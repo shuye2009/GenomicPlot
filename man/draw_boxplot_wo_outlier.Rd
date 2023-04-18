@@ -29,6 +29,8 @@ draw_boxplot_wo_outlier(
 
 \item{stats}{the name of pair-wise statistical tests, like t.test or wilcox.test}
 
+\item{Xlab}{a string for x-axis label}
+
 \item{Ylab}{a string for y-axis label}
 
 \item{nf}{a integer normalizing factor for correct count of observations when the data table has two factors, such as those produced by pivot_longer, equals to the number of factors}

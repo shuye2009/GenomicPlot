@@ -7,6 +7,7 @@
 #' @param labels_col a vector make column annotation
 #' @param levels_col factor levels for labels_col, specifying the order of labels_col
 #' @param ranking method for ranking the rows of the input matrix
+#' @param ranges a numeric vector with two elements, defining custom range for color ramp, default=NULL, i.e. the range is defined automatically based on the range of fullMatrix
 #' @param verbose logical, whether to output the input matrix for inspection
 #' @return NULL
 #'
@@ -24,6 +25,7 @@
 #'
 #'
 
+
 draw_matrix_heatmap <- function(fullMatrix, dataName="geneData", labels_col=NULL, levels_col=NULL, ranking="Sum", ranges=NULL, verbose=FALSE){
 
    if(is.null(labels_col)){
@@ -37,7 +39,7 @@ draw_matrix_heatmap <- function(fullMatrix, dataName="geneData", labels_col=NULL
    
    if(verbose){
       print("drawing heatmap")
-      vdataName <- gsub(":", "_", dataName, fixed=TRUE)
+      vdataName <- gsub(":|/|,|\\.|\\s", "_", dataName, fixed=FALSE) ## replace characters not allowed in file names
       write.table(fullMatrix, paste(vdataName, "_matrix.tab", sep=""), row.names=TRUE, col.names=TRUE, sep="\t", quote=FALSE)
    }
 
@@ -63,10 +65,10 @@ draw_matrix_heatmap <- function(fullMatrix, dataName="geneData", labels_col=NULL
    }
    
    h <- Heatmap(fullMatrix,
-                name = unlist(strsplit(dataName, split=":", fixed=TRUE))[1],
+                name = "Value", #unlist(strsplit(dataName, split=":", fixed=TRUE))[1],
                 col = colorRamp2(ranges, viridis(2)),
                 bottom_annotation = ha,
-                heatmap_legend_param=list(legend_direction = "horizontal"),
+                heatmap_legend_param=list(legend_direction = "vertical"),
                 show_row_names = FALSE,
                 show_column_names = FALSE,
                 show_row_dend = FALSE,
@@ -189,7 +191,8 @@ draw_region_name <- function(featureNames, scaled_bins, xmax){
 #' @param xc a string denoting column name for values on x-axis
 #' @param yc a string denoting column name for numeric data to be plotted
 #' @param vx a vector on integers denoting the x coordinates of start of each sub-region
-#' @param cn column name for grouping
+#' @param cn column name in plot_df for query samples grouping
+#' @param sn column name in plot_df for subject name to be shown in plot title
 #' @param Ylab a string for Y-axis label
 #' @return a ggplot object
 #' @note used by \code{plot_3parts_metagene}, \code{plot_5parts_metagene}, \code{plot_reference_region}
@@ -203,7 +206,7 @@ draw_region_name <- function(featureNames, scaled_bins, xmax){
 draw_region_profile <- function(plot_df, xc="Position", yc="Intensity", cn="Query", sn="Reference", Ylab="Signal Intensity", vx){
 
    p <- ggplot(plot_df, aes(x=.data[[xc]], y=.data[[yc]], color=.data[[cn]])) + scale_fill_npg() + scale_color_npg() +
-      geom_line(size=2) + #geom_point(color="grey30", size=2) +
+      geom_line(size=1.25) + #geom_point(color="grey30", size=2) +
       geom_vline(xintercept = vx[2:length(vx)], linetype="dotted", color = "blue", size=0.5) +
       geom_ribbon(aes(ymin=lower, ymax=upper, fill=.data[[cn]]), linetype=0, alpha=0.3) +
       theme_classic() + ylab(Ylab) +
@@ -240,7 +243,7 @@ draw_locus_profile <- function(plot_df, xc="Position", yc="Intensity", cn="Query
 
    p <- ggplot(plot_df, aes(x=.data[[xc]], y=.data[[yc]], color=.data[[cn]])) +
       scale_fill_npg() + scale_color_npg() +
-      geom_line(size=2) + #geom_point(color="grey30", size=1) +
+      geom_line(size=1.25) + #geom_point(color="grey30", size=1) +
       geom_vline(xintercept = 0, linetype="dotted", color = "blue", size=0.5) +
       geom_ribbon(aes(ymin=lower, ymax=upper, fill=.data[[cn]]), linetype=0, alpha=0.3) +
       theme_classic() + xlab(Xlab) + ylab(Ylab) +
@@ -261,6 +264,7 @@ draw_locus_profile <- function(plot_df, xc="Position", yc="Intensity", cn="Query
 #' @param xc a string denoting column name for grouping
 #' @param fc a string denoting column name for sub-grouping based on an additional factor
 #' @param yc a string denoting column name for numeric data to be plotted
+#' @param Xlab a string for x-axis label
 #' @param Ylab a string for y-axis label
 #' @param comp a list of vectors denoting pair-wise comparisons to be performed between groups
 #' @param stats the name of pair-wise statistical tests, like t.test or wilcox.test
@@ -328,6 +332,7 @@ draw_boxplot_by_factor <- function(stat_df, xc="Feature", yc="Intensity", fc=xc,
 #' @param xc a string denoting column name for grouping
 #' @param fc a string denoting column name for sub-grouping
 #' @param yc a string denoting column name for numeric data to be plotted
+#' @param Xlab a string for x-axis label
 #' @param Ylab a string for y-axis label
 #' @param comp a list of vectors denoting pair-wise comparisons to be performed between groups
 #' @param stats the name of pair-wise statistical tests, like t.test or wilcox.test
@@ -402,7 +407,9 @@ draw_boxplot_wo_outlier <- function(stat_df, xc="Feature", yc="Intensity", fc=xc
 #' @param xc a string denoting column name for grouping
 #' @param yc a string denoting column name for numeric data to be plotted
 #' @param comp a list of vectors denoting pair-wise comparisons to be performed between groups
+#' @param Xlab a string for x-axis label
 #' @param Ylab a string for y-axis label
+#' @param Ylim a numeric vector of two elements, defining custom limits of y-axis
 #' @param nf a integer normalizing factor for correct count of observations when the data table has two factors, such as those produced by pivot_longer, equals to the number of factors
 #'
 #' @return a ggplot object
@@ -468,7 +475,6 @@ draw_mean_se_barplot <- function(stat_df, xc="Feature", yc="Intensity", comp=lis
 #' @param Ylab a string for y-axis label
 #' @param ecdf logical, indicating using quantile instead of cumulative sum as y-axis
 #' @param rank logical, indicating using rank of values instead of value itself as x-axis
-#' @param logy logical, indicating whether to log10 transform yc
 #' 
 #' @return a ggplot object
 #' @note used by \code{plot_reference_locus}, \code{plot_reference_locus_with_random}
@@ -500,7 +506,7 @@ draw_rank_plot <- function(stat_df, xc="Feature", yc="Intensity", Ylab=yc, ecdf=
       if(rank){
          p <- ggplot(data=long_df, aes(x=Rank, y=Fraction, color=.data[[xc]])) +
             scale_color_npg() +
-            geom_line(size=1) +
+            geom_line(size=1.25) +
             labs(x=paste0("Rank (",Ylab,")"), y="Cumulative fraction") +
             theme_classic() +
             theme(legend.position="top", 
@@ -513,7 +519,7 @@ draw_rank_plot <- function(stat_df, xc="Feature", yc="Intensity", Ylab=yc, ecdf=
          
          p <- ggplot(data=long_df, aes(x=.data[[yc]], y=Fraction, color=.data[[xc]])) +
             scale_color_npg() +
-            geom_line(size=2) +
+            geom_line(size=1.25) +
             labs(x=Ylab, y="Cumulative fraction") +
             theme_classic() +
             theme(legend.position="top", 
@@ -538,7 +544,7 @@ draw_rank_plot <- function(stat_df, xc="Feature", yc="Intensity", Ylab=yc, ecdf=
       if(rank){
          p <- ggplot(data=long_df, aes(x=Rank, y=Fraction, color=.data[[xc]])) +
             scale_color_npg() +
-            geom_line(size=2) +
+            geom_line(size=1.25) +
             labs(x=paste0("Rank (",Ylab,")"), y="Cumulative sum fraction") +
             theme_classic() +
             theme(legend.position="top", 
@@ -554,7 +560,7 @@ draw_rank_plot <- function(stat_df, xc="Feature", yc="Intensity", Ylab=yc, ecdf=
       }else{
          p <- ggplot(data=long_df, aes(x=.data[[yc]], y=Fraction, color=.data[[xc]])) +
             scale_color_npg() +
-            geom_line(size=2) +
+            geom_line(size=1.25) +
             labs(x=Ylab, y="Cumulative sum fraction") +
             theme_classic() +
             theme(legend.position="top", 
@@ -620,7 +626,7 @@ draw_stacked_profile <- function(plot_df, xc="Position", yc="Intensity", cn="Que
    if(shade) ps <- ps  + annotate("rect", xmin=hl[1], xmax=hl[2], ymin=-Inf, ymax=Inf, fill="grey", alpha=0.3)
 
    psi <- ggplot(aplot_df_start, aes(x=.data[[xc]], y=Interval, color=.data[[cn]])) + scale_fill_npg() + scale_color_npg() +
-      geom_line(size=1) + ylim(ylimits_intervals) +
+      geom_line(size=1.25) + ylim(ylimits_intervals) +
       geom_vline(xintercept = 0, linetype="dotted", color = "blue", size=0.5) +
       theme_classic() +
       theme(plot.margin = unit(c(0, 0.5, 1.2, 1.2), "lines"),
@@ -647,7 +653,7 @@ draw_stacked_profile <- function(plot_df, xc="Position", yc="Intensity", cn="Que
                plot.margin = unit(c(1.2, 0.5, 0, 0.5), "lines"))
 
       pci <- ggplot(aplot_df_center, aes(x=.data[[xc]], y=Interval, color=.data[[cn]])) + scale_fill_npg() + scale_color_npg() +
-         geom_line(size=1) + ylim(ylimits_intervals) +
+         geom_line(size=1.25) + ylim(ylimits_intervals) +
          geom_vline(xintercept = 0, linetype="dotted", color = "blue", size=0.5) +
          theme_classic() + theme(legend.position="none") + xlab("Center") +
          theme(axis.text.y = element_blank(),
@@ -683,7 +689,7 @@ draw_stacked_profile <- function(plot_df, xc="Position", yc="Intensity", cn="Que
    if(shade) pe <- pe  + annotate("rect", xmin=hl[3], xmax=hl[4], ymin=-Inf, ymax=Inf, fill="grey", alpha=0.3)
 
    pei <- ggplot(aplot_df_end, aes(x=.data[[xc]], y=Interval, color=.data[[cn]])) + scale_fill_npg() + scale_color_npg() +
-      geom_line(size=1) + ylim(ylimits_intervals) + #scale_y_continuous(position = "right") +
+      geom_line(size=1.25) + ylim(ylimits_intervals) + #scale_y_continuous(position = "right") +
       theme_classic() + theme(legend.position="none") + xlab("3'") +
       geom_vline(xintercept = 0, linetype="dotted", color = "blue", size=0.5) +
       scale_x_continuous(limits = c(ext[3], ext[4])) +

@@ -3,7 +3,7 @@
 
 #' @title  Plot signals around the start and the end of genomic features and random regions 
 #'
-#' @description   Plot reads or peak signal intensity of samples in the query files around stat, end and center of genomic features or custom feature given in a .bed file. The upstream and downstream windows can be given separately. If Input files are provided, ratio over Input is computed and displayed as well. A random feature can be generated to serve as a background for contrasting.
+#' @description   Plot reads or peak Coverage/base/gene of samples in the query files around stat, end and center of genomic features or custom feature given in a .bed file. The upstream and downstream windows can be given separately. If Input files are provided, ratio over Input is computed and displayed as well. A random feature can be generated to serve as a background for contrasting.
 #'
 #' @param queryFiles a vector of sample file names. The file should be in .bam, .bed, .wig or .bw format, mixture of formats is allowed
 #' @param inputFiles a vector of input sample file names. The file should be in .bam, .bed, .wig or .bw format, mixture of formats is allowed
@@ -21,6 +21,7 @@
 #' @param smooth logical, indicating whether the line should smoothed with a spline smoothing algorithm
 #' @param rmOutlier logical, indicating whether a row with abnormally high values in the score matrix should be removed
 #' @param transform a string in c("log", "log2", "log10"), default = NA indicating no transformation of data matrix
+#' @param Ylab a string for y-axis label
 #' @param outPrefix a string specifying output file prefix for plots (outPrefix.pdf)
 #' @param verbose logical, whether to output additional information (data used for plotting or statistical test results)
 #' @param nc integer, number of cores for parallel processing
@@ -30,17 +31,17 @@
 #'
 #' @examples
 #' txdb <- AnnotationDbi::loadDb(system.file("extdata", "txdb_chr19.sql", package="GenomicPlot"))
-#' queryFiles <- system.file("extdata", "test_clip_chr19.bam", package="GenomicPlotData")
+#' queryFiles <- system.file("extdata", "treat_chr19.bam", package="GenomicPlot")
 #' names(queryFiles) <- "query"
-#' inputFiles <- system.file("extdata", "test_clip_input_chr19.bam", package="GenomicPlot")
+#' inputFiles <- system.file("extdata", "input_chr19.bam", package="GenomicPlot")
 #' names(inputFiles) <- "input"
 #' ext <- c(-500, 200, -200, 500)
 #' hl <- c(-50, 50, -50, 50)
 #' op <- NULL
-#' handleInputParams <- list(CLIP_reads=FALSE, fix_width=150, fix_point="start", norm=TRUE, useScore=FALSE,
+#' handleInputParams <- list(CLIP_reads=FALSE, fix_width=150, fix_point="start", norm=FALSE, useScore=FALSE,
 #'  outRle=TRUE, useSizeFactor=TRUE, genome="hg19")
 #' plot_start_end_with_random(queryFiles=c(queryFiles), inputFiles=c(inputFiles), txdb=txdb, centerFile="intron",
-#'  binSize=10, handleInputParams=handleInputParams, ext=ext, hl=hl, randomize=TRUE,
+#'  binSize=10, handleInputParams=handleInputParams, ext=ext, hl=hl, randomize=TRUE, verbose=TRUE,
 #'  insert=100, stranded=TRUE, scale=FALSE, smooth=TRUE, outPrefix=op, nc=2)
 #'
 #' @export plot_start_end_with_random
@@ -51,11 +52,12 @@ plot_start_end_with_random <- function(queryFiles, inputFiles=NULL, txdb=NULL, c
                                        binSize=10,insert=0, verbose=FALSE, ext=c(-500, 200, -200, 500), 
                                        hl=c(-50, 50, -50, 50), randomize=FALSE, stranded=TRUE, scale=FALSE, 
                                        smooth=FALSE, rmOutlier=FALSE, outPrefix="plots", transform=NA, shade=TRUE, 
-                                       nc=2, Ylab="Signal intensity"){
+                                       nc=2, Ylab="Coverage/base/gene"){
 
    if(is.null(inputFiles)){
       inputLabels <- NULL
       queryInputs <- handle_input(inputFiles=queryFiles, handleInputParams, verbose=verbose, nc=nc)
+     
    }else{
       inputLabels <- names(inputFiles)
       queryLabels <- names(queryFiles)
@@ -95,7 +97,7 @@ plot_start_end_with_random <- function(queryFiles, inputFiles=NULL, txdb=NULL, c
      bedparam$norm <- FALSE
      bedparam$useScore <- FALSE
      bedparam$outRle <- FALSE
-     feature <- handle_input(inputFiles=centerFile, bedparam, nc=nc)[[1]]$query
+     feature <- handle_input(inputFiles=centerFile, bedparam, verbose=verbose, nc=nc)[[1]]$query
      featureName <- names(centerFile)
   }else{
      stop(paste(centerFile, "does not exit or the feature name is not supported!"))
@@ -381,7 +383,7 @@ plot_start_end_with_random <- function(queryFiles, inputFiles=NULL, txdb=NULL, c
 
 #' @title  Plot signals around the start and the end of genomic features
 #
-#' @description   Plot reads or peak signal intensity of samples in the query files around start and end of custom features. The upstream and downstream windows
+#' @description   Plot reads or peak Coverage/base/gene of samples in the query files around start and end of custom features. The upstream and downstream windows
 #' can be given separately, within the window, a smaller window can be defined to highlight region of interest.
 #' A line plot will be displayed for both start and end of feature. If Input files are provided, ratio over Input is
 #' computed and displayed as well.
@@ -400,8 +402,9 @@ plot_start_end_with_random <- function(queryFiles, inputFiles=NULL, txdb=NULL, c
 #' @param smooth logical, indicating whether the line should smoothed with a spline smoothing algorithm
 #' @param rmOutlier logical, indicating whether a row with abnormally high values in the score matrix should be removed
 #' @param outPrefix a string specifying output file prefix for plots (outPrefix.pdf)
-#' @param transform a string in c("log", "log2", "log10"), default = NA indicating no transformation of data matrix
-#' @param verbose logical, whether to output additional information (data used for plotting or statistical test results)
+#' @param transform a string in c("log", "log2", "log10"), default = NA, indicating no transformation of data matrix
+#' @param verbose logical, whether to output additional information (including data used for plotting or statistical test results)
+#' @param Ylab a string for y-axis label
 #' @param shade logical indicating whether to place a shaded rectangle around the point of interest
 #' @param nc integer, number of cores for parallel processing
 #'
@@ -409,18 +412,31 @@ plot_start_end_with_random <- function(queryFiles, inputFiles=NULL, txdb=NULL, c
 #' @author Shuye Pu
 #'
 #' @examples
-#' centerFiles <- c(system.file("data", "test_B.bed", package="GenomicPlotData"),
-#' system.file("data", "test_C.bed", package="GenomicPlotData"))
-#' names(centerFiles) <- c("TestB", "TestC")
-#'
+#' txdb <- AnnotationDbi::loadDb(system.file("extdata", "txdb_chr19.sql", package="GenomicPlot"))
+#' queryfiles <- system.file("extdata", "treat_chr19.bam", package="GenomicPlot")
+#' names(queryfiles) <- "query"
+#' inputfiles <- system.file("extdata", "input_chr19.bam", package="GenomicPlot")
+#' names(inputfiles) <- "input"
+#' centerfiles <- system.file("extdata", "test_chip_peak_chr19.narrowPeak", package="GenomicPlot")
+#' names(centerfiles) <- "narrowPeak"
+#' op <- NULL
+#' handleInputParams <- list(CLIP_reads=FALSE, fix_width=150, fix_point="start", norm=FALSE, useScore=FALSE,
+#'  outRle=TRUE, useSizeFactor=TRUE, genome="hg19")
+#'  
+#' df <- plot_start_end(queryFiles=queryfiles, inputFiles=inputfiles, centerFiles=c("gene", centerfiles), txdb=txdb, 
+#' handleInputParams=handleInputParams, binSize=10, insert=100, verbose=TRUE, ext=c(-500, 100, -100, 500), 
+#' hl=c(-50, 50, -50, 50), stranded=TRUE, scale=FALSE, smooth=TRUE, rmOutlier=FALSE, outPrefix=op, 
+#' transform=NA, shade=TRUE, Ylab="Coverage/base/gene", nc=2)
+#'  
 #' @export plot_start_end
 #'
 
-plot_start_end <- function(queryFiles, inputFiles=NULL, centerFiles, txdb=NULL, handleInputParams=NULL, binSize=10, insert=0, verbose=FALSE, ext=c(-500,100, -100, 500), hl=c(-50, 50, -50, 50), stranded=TRUE, scale=FALSE, smooth=FALSE, rmOutlier=FALSE, outPrefix="plots", transform=TRUE, shade=TRUE, Ylab="Signal intensity", nc=2){
+plot_start_end <- function(queryFiles, inputFiles=NULL, centerFiles, txdb=NULL, handleInputParams=NULL, binSize=10, insert=0, verbose=FALSE, ext=c(-500,100, -100, 500), hl=c(-50, 50, -50, 50), stranded=TRUE, scale=FALSE, smooth=FALSE, rmOutlier=FALSE, outPrefix="plots", transform=NA, shade=TRUE, Ylab="Coverage/base/gene", nc=2){
 
    if(is.null(inputFiles)){
       inputLabels <- NULL
       queryInputs <- handle_input(inputFiles=queryFiles, handleInputParams, verbose=verbose, nc=nc)
+      
    }else{
       inputLabels <- names(inputFiles)
       queryLabels <- names(queryFiles)
@@ -460,7 +476,7 @@ plot_start_end <- function(queryFiles, inputFiles=NULL, centerFiles, txdb=NULL, 
          features[[featureName]] <- feature
       }else if(file.exists(featureName)){
          names(featureName) <- names(centerFiles)[centerFiles == featureName]
-         feature <- handle_input(featureName, bedparam, nc=nc)
+         feature <- handle_input(featureName, bedparam, verbose=verbose, nc=nc)
          featureGR <- feature[[1]]$query
          featureGR <- featureGR[width(featureGR)>minimal_width]
          feature[[1]]$query <- featureGR
@@ -478,6 +494,7 @@ plot_start_end <- function(queryFiles, inputFiles=NULL, centerFiles, txdb=NULL, 
    bin_num_e <- round((ext[4]-ext[3])/binSize)
    bin_num_c <- round(insert/binSize)
 
+   if(verbose) print(paste("Bin numbers", paste(bin_num_s, bin_num_c, bin_num_e)))
    scoreMatrix_lists <- list()
    mat_lists <- list()
    plot_df <- NULL
@@ -502,8 +519,9 @@ plot_start_end <- function(queryFiles, inputFiles=NULL, centerFiles, txdb=NULL, 
       for(locus in names(mat_list)){
          windowR <- mat_list[[locus]]$window
          bin_num <- mat_list[[locus]]$bin_num
+         if(verbose) print(paste(locus, bin_num, length(windowR)))
          if(bin_num <= 0) next
-
+       
          for(queryLabel in queryLabels){
 
             if(verbose) print(queryLabel)
@@ -516,7 +534,7 @@ plot_start_end <- function(queryFiles, inputFiles=NULL, centerFiles, txdb=NULL, 
             fullMatrix <- parallel_scoreMatrixBin(queryRegions, windowR, bin_num, bin_op, weight_col, stranded, nc=nc)
 
             scoreMatrix_list[[queryLabel]][[locus]] <- fullMatrix
-
+            
          }
       }
 
@@ -688,7 +706,7 @@ plot_start_end <- function(queryFiles, inputFiles=NULL, centerFiles, txdb=NULL, 
 
 #' @title Plot promoter, gene body and TTS
 #
-#' @description Plot reads or peak signal intensity of samples in the query files around genes. The upstream and downstream windows flanking genes
+#' @description Plot reads or peak Coverage/base/gene of samples in the query files around genes. The upstream and downstream windows flanking genes
 #' can be given separately, the parameter 'meta' controls if gene or metagene plots are generated. If Input files are provided, ratio over Input
 #' is computed and displayed as well.
 #'
@@ -704,6 +722,7 @@ plot_start_end <- function(queryFiles, inputFiles=NULL, centerFiles, txdb=NULL, 
 #' @param rmOutlier logical, indicating whether a row with abnormally high values in the score matrix should be removed
 #' @param outPrefix a string specifying output file prefix for plots (outPrefix.pdf)
 #' @param transform a string in c("log", "log2", "log10"), default = NA indicating no transformation of data matrix
+#' @param Ylab a string for y-axis label
 #' @param verbose logical, whether to output additional information (data used for plotting or statistical test results)
 #' @param nc integer, number of cores for parallel processing
 #'
@@ -711,18 +730,29 @@ plot_start_end <- function(queryFiles, inputFiles=NULL, centerFiles, txdb=NULL, 
 #' @author Shuye Pu
 #'
 #' @examples
-#' centerFiles <- c(system.file("data", "test_B.bed", package="GenomicPlotData"),
-#' system.file("data", "test_C.bed", package="GenomicPlotData"))
-#' names(centerFiles) <- c("TestB", "TestC")
+#' txdb <- AnnotationDbi::loadDb(system.file("extdata", "txdb_chr19.sql", package="GenomicPlot"))
+#' queryfiles <- system.file("extdata", "treat_chr19.bam", package="GenomicPlot")
+#' names(queryfiles) <- "query"
+#' inputfiles <- system.file("extdata", "input_chr19.bam", package="GenomicPlot")
+#' names(inputfiles) <- "input"
+#' gfeatures <- prepare_3parts_genomic_features(txdb, featureName="transcript", meta=TRUE, nbins=100, 
+#' fiveP=-1000, threeP=1000, longest=TRUE, protein_coding=TRUE, verbose=FALSE)
+#' op <- NULL
+#' handleInputParams <- list(CLIP_reads=FALSE, fix_width=150, fix_point="start", norm=FALSE, useScore=FALSE,
+#'  outRle=TRUE, useSizeFactor=TRUE, genome="hg19")
+#' df <- plot_3parts_metagene(queryFiles=queryfiles, gFeatures=gfeatures, inputFiles=inputfiles, scale=FALSE,  
+#' verbose=TRUE, Ylab="Coverage/base/gene", handleInputParams=handleInputParams, smooth=TRUE, stranded=TRUE, 
+#' outPrefix=NULL, heatmap=TRUE, rmOutlier=FALSE, heatRange=NULL, transform=NA, nc=2)
 #'
 #' @export plot_3parts_metagene
 
 
-plot_3parts_metagene <- function(queryFiles, gFeatures, inputFiles=NULL, scale=FALSE,  verbose=FALSE, Ylab="Signal intensity", handleInputParams=NULL, smooth=FALSE, stranded=TRUE, outPrefix="plots", heatmap=FALSE, rmOutlier=FALSE, heatRange=NULL, transform=NA, nc=2){
+plot_3parts_metagene <- function(queryFiles, gFeatures, inputFiles=NULL, scale=FALSE,  verbose=FALSE, Ylab="Coverage/base/gene", handleInputParams=NULL, smooth=FALSE, stranded=TRUE, outPrefix="plots", heatmap=FALSE, rmOutlier=FALSE, heatRange=NULL, transform=NA, nc=2){
 
    if(is.null(inputFiles)){
       inputLabels <- NULL
       queryInputs <- handle_input(inputFiles=queryFiles, handleInputParams, verbose=verbose, nc=nc)
+    
    }else{
       inputLabels <- names(inputFiles)
       queryLabels <- names(queryFiles)
@@ -854,7 +884,7 @@ plot_3parts_metagene <- function(queryFiles, gFeatures, inputFiles=NULL, scale=F
   #print(rowp)
 
   if(heatmap){
-     groblist <- lapply(heatmap_list, function(x)grid.grabExpr(draw(x, heatmap_legend_side = "top")))
+     groblist <- lapply(heatmap_list, function(x)grid.grabExpr(draw(x, heatmap_legend_side = "left")))
      heatp <- plot_grid(plotlist=groblist, nrow = 1, align = 'h')
 
      composite <- plot_grid(rowp, heatp, ncol = 1, align = 'v')
@@ -945,7 +975,7 @@ plot_3parts_metagene <- function(queryFiles, gFeatures, inputFiles=NULL, scale=F
     #print(rowp)
 
     if(heatmap){
-       groblist <- lapply(heatmap_list_ratio, function(x)grid.grabExpr(draw(x, heatmap_legend_side = "top")))
+       groblist <- lapply(heatmap_list_ratio, function(x)grid.grabExpr(draw(x, heatmap_legend_side = "left")))
        heatp <- plot_grid(plotlist=groblist, nrow = 1, align = 'h')
        composite <- plot_grid(rowp, heatp, ncol = 1, align = 'v')
        print(composite)
@@ -969,7 +999,7 @@ plot_3parts_metagene <- function(queryFiles, gFeatures, inputFiles=NULL, scale=F
 
 #' @title Plot signal inside as well as around custom genomic regions
 #'
-#' @description Plot reads or peak signal intensity of samples in the query files inside regions defined in the centerFiles. The upstream and downstream flanking windows can be given separately. If Input files are provided, ratio over Input is computed and displayed as well.
+#' @description Plot reads or peak Coverage/base/gene of samples in the query files inside regions defined in the centerFiles. The upstream and downstream flanking windows can be given separately. If Input files are provided, ratio over Input is computed and displayed as well.
 #'
 #' @param queryFiles a named vector of sample file names. The file should be in .bam, .bed, .wig or .bw format, mixture of formats is allowed
 #' @param centerFiles a named vector of reference file names or genomic features in  c("utr3", "utr5", "cds", "intron", "exon", "transcript", "gene"). The file should be in .bed format only
@@ -987,6 +1017,7 @@ plot_3parts_metagene <- function(queryFiles, gFeatures, inputFiles=NULL, scale=F
 #' @param handleInputParams a list of parameters for \code{handle_input}
 #' @param outPrefix a string specifying output file prefix for plots (outPrefix.pdf)
 #' @param regionName a string specifying the name of the center region in the plots
+#' @param Ylab a string for y-axis label
 #' @param transform a string in c("log", "log2", "log10"), default = NA indicating no transformation of data matrix
 #' @param statsMethod a string in c("wilcox.test", "t.test"), for pair-wise group comparisons
 #' @param verbose logical, indicating whether to output additional information (data used for plotting or statistical test results)
@@ -996,13 +1027,25 @@ plot_3parts_metagene <- function(queryFiles, gFeatures, inputFiles=NULL, scale=F
 #' @author Shuye Pu
 #'
 #' @examples
-#' centerFiles <- c(system.file("data", "test_B.bed", package="GenomicPlotData"),
-#' system.file("data", "test_C.bed", package="GenomicPlotData"))
-#' names(centerFiles) <- c("TestB", "TestC")
+#' txdb <- AnnotationDbi::loadDb(system.file("extdata", "txdb_chr19.sql", package="GenomicPlot"))
+#' queryfiles <- system.file("extdata", "treat_chr19.bam", package="GenomicPlot")
+#' names(queryfiles) <- "query"
+#' inputfiles <- system.file("extdata", "input_chr19.bam", package="GenomicPlot")
+#' names(inputfiles) <- "input"
+#' centerfiles <- system.file("extdata", "test_chip_peak_chr19.narrowPeak", package="GenomicPlot")
+#' names(centerfiles) <- "narrowPeak"
+#' op <- NULL
+#' handleInputParams <- list(CLIP_reads=FALSE, fix_width=150, fix_point="start", norm=FALSE, useScore=FALSE,
+#'  outRle=TRUE, useSizeFactor=TRUE, genome="hg19")
+#'  
+#' df <- plot_region(queryFiles=queryfiles, centerFiles=centerfiles, txdb=NULL, regionName="region", 
+#' inputFiles=inputfiles, nbins=100, handleInputParams=handleInputParams, verbose=TRUE, scale=FALSE, 
+#' heatmap=TRUE, fiveP=-1000, threeP=1000, smooth=TRUE, stranded=TRUE, transform=NA, outPrefix=NULL, 
+#' rmOutlier=FALSE, heatRange=NULL, Ylab="Coverage/base/gene", statsMethod="wilcox.test", nc=2)
 #'
 #' @export plot_region
 
-plot_region <- function(queryFiles, centerFiles, txdb=NULL, regionName="region", inputFiles=NULL, nbins=100, handleInputParams=NULL, verbose=FALSE, scale=FALSE, heatmap=FALSE, fiveP=-1000, threeP=1000, smooth=FALSE, stranded=TRUE, transform=NA, outPrefix="plots", rmOutlier=FALSE, heatRange=NULL, Ylab="Signal intensity", statsMethod="wilcox.test", nc=2){
+plot_region <- function(queryFiles, centerFiles, txdb=NULL, regionName="region", inputFiles=NULL, nbins=100, handleInputParams=NULL, verbose=FALSE, scale=FALSE, heatmap=FALSE, fiveP=-1000, threeP=1000, smooth=FALSE, stranded=TRUE, transform=NA, outPrefix="plots", rmOutlier=FALSE, heatRange=NULL, Ylab="Coverage/base/gene", statsMethod="wilcox.test", nc=2){
 
   if(!is.null(outPrefix)){
     pdf(paste(outPrefix, "pdf", sep="."), height=8, width=12)
@@ -1011,6 +1054,7 @@ plot_region <- function(queryFiles, centerFiles, txdb=NULL, regionName="region",
    if(is.null(inputFiles)){
       inputLabels <- NULL
       queryInputs <- handle_input(inputFiles=queryFiles, handleInputParams, verbose=verbose, nc=nc)
+      
    }else{
       inputLabels <- names(inputFiles)
       queryLabels <- names(queryFiles)
@@ -1044,7 +1088,7 @@ plot_region <- function(queryFiles, centerFiles, txdb=NULL, regionName="region",
         centerInputs[[featureName]] <- feature
      }else if(file.exists(featureName)){
         names(featureName) <- names(centerFiles)[centerFiles == featureName]
-        feature <- handle_input(featureName, bedparam, nc=nc)
+        feature <- handle_input(featureName, bedparam, verbose=verbose, nc=nc)
         centerInputs[[names(feature)[1]]] <- feature[[1]]
      }else{
         stop(paste(featureName, "is not supported!"))
@@ -1301,7 +1345,7 @@ plot_region <- function(queryFiles, centerFiles, txdb=NULL, regionName="region",
   #print(rowp)
 
   if(heatmap){
-     groblist <- lapply(heatmap_list, function(x)grid.grabExpr(draw(x, heatmap_legend_side = "top")))
+     groblist <- lapply(heatmap_list, function(x)grid.grabExpr(draw(x, heatmap_legend_side = "left")))
      heatp <- plot_grid(plotlist=groblist, nrow = 1, align = 'h')
      composite <- plot_grid(rowp, heatp, ncol=1, rel_heights=c(1,1))
      print(composite)
@@ -1476,7 +1520,7 @@ plot_region <- function(queryFiles, centerFiles, txdb=NULL, regionName="region",
     #print(rowp)
 
     if(heatmap){
-       groblist <- lapply(heatmap_list, function(x)grid.grabExpr(draw(x, heatmap_legend_side = "top")))
+       groblist <- lapply(heatmap_list, function(x)grid.grabExpr(draw(x, heatmap_legend_side = "left")))
        heatp <- plot_grid(plotlist=groblist, nrow = 1, align = 'h')
        composite <- plot_grid(rowp, heatp, ncol=1, rel_widths=c(2,3))
        print(composite)
@@ -1494,7 +1538,7 @@ plot_region <- function(queryFiles, centerFiles, txdb=NULL, regionName="region",
 
 #' @title Plot promoter, 5'UTR, CDS, 3'UTR and TTS
 #'
-#' @description Plot reads or peak signal intensity of samples in the query files around genes. The upstream and downstream windows flanking genes can be given separately, metagene plots are generated with 5'UTR, CDS and 3'UTR segments. The length of each segments are prorated according to the median length of each segments. If Input files are provided, ratio over Input is computed and displayed as well.
+#' @description Plot reads or peak Coverage/base/gene of samples in the query files around genes. The upstream and downstream windows flanking genes can be given separately, metagene plots are generated with 5'UTR, CDS and 3'UTR segments. The length of each segments are prorated according to the median length of each segments. If Input files are provided, ratio over Input is computed and displayed as well.
 #'
 #' @param queryFiles a vector of sample file names. The file should be in .bam, .bed, .wig or .bw format, mixture of formats is allowed
 #' @param gFeatures_list a list of genomic features as output of the function 'prepare_5parts_genomic_features'
@@ -1509,34 +1553,34 @@ plot_region <- function(queryFiles, centerFiles, txdb=NULL, regionName="region",
 #' @param transform logical, whether to log2 transform the matrix
 #' @param outPrefix a string specifying output file prefix for plots (outPrefix.pdf)
 #' @param verbose logical, indicating whether to output additional information (data used for plotting or statistical test results)
+#' @param Ylab a string for y-axis label
 #' @param nc integer, number of cores for parallel processing
 #'
 #' @return a dataframe containing the data used for plotting
 #' @author Shuye Pu
 #'
 #' @examples
-#' txdb <- AnnotationDbi::loadDb(system.file("data", "txdb_chr19.sql", package="GenomicPlotData"))
-#' gf <- prepare_5parts_genomic_features(txdb, meta=FALSE, nbins=100, fiveP=500, threeP=500, longest=TRUE)
-#' queryFiles <- c(system.file("data", "test_chip_peak_chr19.narrowPeak", package="GenomicPlotData"),
-#' system.file("data", "test_chip_peak_chr19.bed", package="GenomicPlotData"),
-#' system.file("data", "test_clip_peak_chr19.bed", package="GenomicPlotData"))
-#' names(queryFiles) <- c("narrowPeak", "summitPeak", "iCLIPPeak")
+#' txdb <- AnnotationDbi::loadDb(system.file("extdata", "txdb_chr19.sql", package="GenomicPlot"))
+#' queryfiles <- system.file("extdata", "treat_chr19.bam", package="GenomicPlot")
+#' names(queryfiles) <- "query"
+#' inputfiles <- system.file("extdata", "input_chr19.bam", package="GenomicPlot")
+#' names(inputfiles) <- "input"
+#' gfeatures <- prepare_5parts_genomic_features(txdb, meta=TRUE, nbins=100, fiveP=-1000, threeP=1000, 
+#' longest=TRUE, verbose=FALSE)
 #' op <- NULL
-#'
-#' handleInputParams <- list(CLIP_reads=FALSE, fix_width=150, fix_point="center", norm=FALSE, useScore=FALSE,
-#'                           outRle=TRUE, useSizeFactor=FALSE, genome="hg19")
-#'
-#' plot_5parts_metagene(queryFiles, gFeatures=gf, inputFiles=NULL, handleInputParams=handleInputParams,
-#'                      verbose=FALSE, smooth=TRUE, scale=FALSE, stranded=TRUE, outPrefix=op, transform=NA,
-#'                      heatmap =TRUE,  rmOutlier=TRUE, nc=2)
-#'
+#' handleInputParams <- list(CLIP_reads=FALSE, fix_width=150, fix_point="start", norm=FALSE, useScore=FALSE,
+#'  outRle=TRUE, useSizeFactor=TRUE, genome="hg19")
+#' df <- plot_5parts_metagene(queryFiles=queryfiles, gFeatures=list("metagene"=gfeatures), inputFiles=inputfiles, 
+#' scale=FALSE, verbose=TRUE, Ylab="Coverage/base/gene", handleInputParams=handleInputParams, smooth=TRUE, 
+#' stranded=TRUE, outPrefix=NULL, heatmap=TRUE, rmOutlier=FALSE, heatRange=NULL, transform=NA, nc=2)
+#'                
 #' @export plot_5parts_metagene
 #'
 
 plot_5parts_metagene <- function(queryFiles, gFeatures_list, inputFiles=NULL, handleInputParams=NULL,
                                  verbose=FALSE, transform=NA, smooth=FALSE, scale=FALSE, stranded=TRUE,
                                  outPrefix=NULL, heatmap=FALSE, heatRange=NULL, rmOutlier=FALSE,
-                                 Ylab="Signal intensity", nc=2){
+                                 Ylab="Coverage/base/gene", nc=2){
 
   if(is.null(inputFiles)){
      inputLabels <- NULL
@@ -1757,7 +1801,7 @@ plot_5parts_metagene <- function(queryFiles, gFeatures_list, inputFiles=NULL, ha
   rowp <- plot_grid(plotlist=plot_list, nrow = 1, align = 'h', axis= "tb")
   #print(rowp)
   if(heatmap){
-     groblist <- lapply(heatmap_list, function(x)grid.grabExpr(draw(x, heatmap_legend_side = "top")))
+     groblist <- lapply(heatmap_list, function(x)grid.grabExpr(draw(x, heatmap_legend_side = "left")))
      heatp <- plot_grid(plotlist=groblist, nrow = 1, align = 'h')
      composite <- plot_grid(rowp, heatp, ncol=1, align = "v")
      print(composite)
@@ -1793,7 +1837,7 @@ plot_5parts_metagene <- function(queryFiles, gFeatures_list, inputFiles=NULL, ha
     #print(rowp)
 
     if(heatmap){
-       groblist <- lapply(heatmap_list_ratio, function(x)grid.grabExpr(draw(x, heatmap_legend_side = "top")))
+       groblist <- lapply(heatmap_list_ratio, function(x)grid.grabExpr(draw(x, heatmap_legend_side = "left")))
        heatp <- plot_grid(plotlist=groblist, nrow = 1, align = "v")
        composite <- plot_grid(rowp, heatp, ncol=1)
        print(composite)
@@ -1820,7 +1864,7 @@ plot_5parts_metagene <- function(queryFiles, gFeatures_list, inputFiles=NULL, ha
 
 
 #' @title Plot signal around custom genomic loci
-#' @description  Plot reads or peak signal intensity of samples in the query files around reference locus (start, end or center of a genomic region)
+#' @description  Plot reads or peak Coverage/base/gene of samples in the query files around reference locus (start, end or center of a genomic region)
 #' defined in the centerFiles. The upstream and downstream windows flanking loci can be given separately, a smaller window can be defined to allow
 #' statistical comparisons between samples for the same reference, or between references for a given sample. If Input files are provided, ratio over
 #' Input is computed and displayed as well.
@@ -1841,6 +1885,7 @@ plot_5parts_metagene <- function(queryFiles, gFeatures_list, inputFiles=NULL, ha
 #' @param outPrefix a string specifying output file prefix for plots (outPrefix.pdf)
 #' @param refPoint a string in c("start", "center", "end")
 #' @param Xlab a string denotes the label on x-axis
+#' @param Ylab a string for y-axis label
 #' @param shade logical indicating whether to place a shaded rectangle around the point of interest
 #' @param binSize an integer defines bin size for intensity calculation
 #' @param transform a string in c("log", "log2", "log10"), default = NA indicating no transformation of data matrix
@@ -1852,16 +1897,29 @@ plot_5parts_metagene <- function(queryFiles, gFeatures_list, inputFiles=NULL, ha
 #' @author Shuye Pu
 #'
 #' @examples
-#' centerFiles <- c(system.file("data", "test_B.bed", package="GenomicPlotData"),
-#' system.file("data", "test_C.bed", package="GenomicPlotData"))
-#' names(centerFiles) <- c("TestB", "TestC")
+#' txdb <- AnnotationDbi::loadDb(system.file("extdata", "txdb_chr19.sql", package="GenomicPlot"))
+#' queryfiles <- system.file("extdata", "treat_chr19.bam", package="GenomicPlot")
+#' names(queryfiles) <- "query"
+#' inputfiles <- system.file("extdata", "input_chr19.bam", package="GenomicPlot")
+#' names(inputfiles) <- "input"
+#' centerfiles <- system.file("extdata", "test_clip_peak_chr19.bed", package="GenomicPlot")
+#' names(centerfiles) <- "clipPeak"
+#' op <- NULL
+#' handleInputParams <- list(CLIP_reads=TRUE, fix_width=150, fix_point="start", norm=FALSE, useScore=FALSE,
+#'  outRle=TRUE, useSizeFactor=TRUE, genome="hg19")
+#'  
+#' df <- plot_locus(queryFiles=queryfiles, centerFiles=c(centerfiles, "intron"), txdb=txdb, ext=c(-200,200), 
+#' hl=c(-20, 20), shade=TRUE, smooth=FALSE, handleInputParams=handleInputParams, verbose=TRUE, binSize=10,
+#' refPoint="center", Xlab="Center", Ylab="Coverage/base/gene", inputFiles=inputfiles, stranded=TRUE, 
+#' heatmap=TRUE, scale=FALSE, outPrefix=NULL, rmOutlier=FALSE, transform=NA, statsMethod="wilcox.test", 
+#' heatRange=c(0, 0.3), nc=2)
 #'
 #' @export plot_locus
 
 
 plot_locus <- function(queryFiles, centerFiles, txdb=NULL, ext=c(-100,100), hl=c(0,0), shade=TRUE, smooth=FALSE,
                      handleInputParams=NULL, verbose=FALSE, binSize=10, refPoint="center", Xlab="Center", 
-                     Ylab="Signal intensity", inputFiles=NULL, stranded=TRUE, heatmap=TRUE, scale=FALSE,
+                     Ylab="Coverage/base/gene", inputFiles=NULL, stranded=TRUE, heatmap=TRUE, scale=FALSE,
                      outPrefix=NULL, rmOutlier=FALSE, transform=NA, statsMethod="wilcox.test", 
                      heatRange=NULL, nc=2){
 
@@ -1923,12 +1981,12 @@ plot_locus <- function(queryFiles, centerFiles, txdb=NULL, ext=c(-100,100), hl=c
         centerInputs[[featureName]] <- feature
      }else if(file.exists(featureName)){
         names(featureName) <- names(centerFiles)[centerFiles == featureName]
-        feature <- handle_input(featureName, bedparam, nc=nc)
+        feature <- handle_input(featureName, bedparam, verbose=verbose, nc=nc)
         centerInputs[[names(feature)[1]]] <- feature[[1]]
      }else{
-        stop(paste(featureName, "is not supported!"))
+        stop(paste(featureName, "is not supported or the file does not exist, please check your file name and path!"))
      }
-     }
+   }
   centerLabels <- names(centerInputs)
 
   if(verbose) print("computing coverage for Sample")
@@ -2120,7 +2178,7 @@ plot_locus <- function(queryFiles, centerFiles, txdb=NULL, ext=c(-100,100), hl=c
 
    if(heatmap){
       qheatmap_list <- heatmap_list[names(plot_list)]
-      groblist <- lapply(qheatmap_list, function(x)grid.grabExpr(draw(x, heatmap_legend_side = "top")))
+      groblist <- lapply(qheatmap_list, function(x)grid.grabExpr(draw(x, heatmap_legend_side = "left")))
       heatp <- plot_grid(plotlist=groblist, nrow = 1, align = 'h')
       composite <- plot_grid(rowp, heatp, ncol=1, align='v', axis='l', rel_heights=c(1,1))
       print(composite)
@@ -2202,7 +2260,7 @@ plot_locus <- function(queryFiles, centerFiles, txdb=NULL, ext=c(-100,100), hl=c
      #print(rowp)
      if(heatmap){
         iheatmap_list <- heatmap_list[names(plot_list)]
-        groblist <- lapply(iheatmap_list, function(x)grid.grabExpr(draw(x, heatmap_legend_side = "top")))
+        groblist <- lapply(iheatmap_list, function(x)grid.grabExpr(draw(x, heatmap_legend_side = "left")))
         heatp <- plot_grid(plotlist=groblist, nrow = 1, align = 'h')
         composite <- plot_grid(rowp, heatp, ncol=1, align='v', axis='l', rel_widths=c(1,1))
         print(composite)
@@ -2361,7 +2419,7 @@ plot_locus <- function(queryFiles, centerFiles, txdb=NULL, ext=c(-100,100), hl=c
     ## plot ratio profile and heatmap side by side
     if(heatmap){
        rheatmap_list <- heatmap_list[names(plot_list)]
-       groblist <- lapply(rheatmap_list, function(x)grid.grabExpr(draw(x, heatmap_legend_side = "top")))
+       groblist <- lapply(rheatmap_list, function(x)grid.grabExpr(draw(x, heatmap_legend_side = "left")))
        heatp <- plot_grid(plotlist=groblist, nrow = 1, align = 'h')
        #print(heatp)
     }
@@ -2384,7 +2442,7 @@ plot_locus <- function(queryFiles, centerFiles, txdb=NULL, ext=c(-100,100), hl=c
 
 #' @title Plot signal around custom genomic loci and random loci for comparison
 #
-#' @description Plot reads or peak signal intensity of samples in the query files around reference locus defined in the centerFiles. The upstream and downstream windows flanking loci can be given separately, a smaller window can be defined to allow statistical comparisons between reference and random loci. The loci are further divided into sub-groups that are overlapping with c("5'UTR", "CDS", "3'UTR"), "unrestricted" means all loci regardless of overlapping.
+#' @description Plot reads or peak Coverage/base/gene of samples in the query files around reference locus defined in the centerFiles. The upstream and downstream windows flanking loci can be given separately, a smaller window can be defined to allow statistical comparisons between reference and random loci. The loci are further divided into sub-groups that are overlapping with c("5'UTR", "CDS", "3'UTR"), "unrestricted" means all loci regardless of overlapping.
 #'
 #' @param queryFiles a vector of sample file names. The file should be in .bam, .bed, .wig or .bw format, mixture of formats is allowed
 #' @param centerFiles a vector of reference file names. The file should be .bed format only
@@ -2400,6 +2458,7 @@ plot_locus <- function(queryFiles, centerFiles, txdb=NULL, ext=c(-100,100), hl=c
 #' @param outPrefix a string specifying output file prefix for plots (outPrefix.pdf)
 #' @param refPoint a string in c("start", "center", "end")
 #' @param Xlab a string denotes the label on x-axis
+#' @param Ylab a string for y-axis label
 #' @param shade logical indicating whether to place a shaded rectangle around the point of interest
 #' @param binSize an integer defines bin size for intensity calculation
 #' @param transform a string in c("log", "log2", "log10"), default = NA indicating no transformation of data matrix
@@ -2412,18 +2471,29 @@ plot_locus <- function(queryFiles, centerFiles, txdb=NULL, ext=c(-100,100), hl=c
 #' @author Shuye Pu
 #'
 #' @examples
-#' queryFiles <- system.file("data", "test_clip.bam", package="GenomicPlotData")
-#' names(queryFiles) <- "query"
-#' inputFiles <- system.file("data", "test_clip_input.bam", package="GenomicPlotData")
-#' names(inputFiles) <- "input"
+#' txdb <- AnnotationDbi::loadDb(system.file("extdata", "txdb_chr19.sql", package="GenomicPlot"))
+#' queryfiles <- system.file("extdata", "treat_chr19.bam", package="GenomicPlot")
+#' names(queryfiles) <- "query"
+#' inputfiles <- system.file("extdata", "input_chr19.bam", package="GenomicPlot")
+#' names(inputfiles) <- "input"
+#' centerfiles <- system.file("extdata", "test_clip_peak_chr19.bed", package="GenomicPlot")
+#' names(centerfiles) <- "clipPeak"
+#' op <- NULL
+#' handleInputParams <- list(CLIP_reads=TRUE, fix_width=150, fix_point="start", norm=FALSE, useScore=FALSE,
+#'  outRle=TRUE, useSizeFactor=TRUE, genome="hg19")
+#'  
+#' df <- plot_locus_with_random(queryFiles=queryfiles, centerFiles=c(centerfiles), txdb=txdb, ext=c(-200,200), 
+#' hl=c(-20, 20), shade=TRUE, smooth=TRUE, handleInputParams=handleInputParams, verbose=TRUE, binSize=10,
+#' refPoint="center", Xlab="Center", Ylab="Coverage/base/gene", inputFiles=inputfiles, stranded=TRUE, 
+#' scale=FALSE, outPrefix=NULL, rmOutlier=FALSE, transform=NA, statsMethod="wilcox.test", nc=2)
 #'
 #' @export plot_locus_with_random
 
 plot_locus_with_random <- function(queryFiles, centerFiles, txdb, ext=c(0,0), hl=c(0,0), shade=FALSE,
-                                             handleInputParams=NULL, verbose=FALSE, smooth=FALSE, transform=NA, 
-                                             binSize=10, refPoint="center", Xlab="Center", Ylab="Signal intensity",
-                                             inputFiles=NULL, stranded=TRUE, scale=FALSE, outPrefix=NULL, 
-                                             rmOutlier=FALSE, n_random=1, statsMethod="wilcox.test", nc=2){
+                                 handleInputParams=NULL, verbose=FALSE, smooth=FALSE, transform=NA, 
+                                 binSize=10, refPoint="center", Xlab="Center", Ylab="Coverage/base/gene",
+                                 inputFiles=NULL, stranded=TRUE, scale=FALSE, outPrefix=NULL, 
+                                 rmOutlier=FALSE, n_random=1, statsMethod="wilcox.test", nc=2){
 
    if(is.null(inputFiles)){
       inputLabels <- NULL
@@ -2495,7 +2565,7 @@ plot_locus_with_random <- function(queryFiles, centerFiles, txdb, ext=c(0,0), hl
   bedparam$outRle <- FALSE
   bedparam$useSizeFactor <- FALSE
   
-  centerInputs <- handle_input(centerFiles, bedparam)
+  centerInputs <- handle_input(centerFiles, bedparam, verbose=verbose, nc=nc)
   centerLabels <- names(centerInputs)
 
   for(queryLabel in queryLabels){
@@ -2645,7 +2715,7 @@ plot_locus_with_random <- function(queryFiles, centerFiles, txdb, ext=c(0,0), hl
            comp <- list(c(1, 2))
 
            ps1 <- draw_boxplot_by_factor(stat_df=stat_df, xc="Reference", yc="Intensity",  comp=comp, stats=statsMethod, Ylab=Ylab)
-           ps2 <- draw_boxplot_by_factor(stat_df=stat_df, xc="Reference", yc="Intensity",  comp=comp, stats=statsMethod, Ylab=Ylab, logy="logy")
+           ps2 <- draw_boxplot_by_factor(stat_df=stat_df, xc="Reference", yc="Intensity",  comp=comp, stats=statsMethod, Ylab=Ylab)
            ps1_wo_outlier <- draw_boxplot_wo_outlier(stat_df=stat_df, xc="Reference", yc="Intensity", comp=comp, stats=statsMethod, Ylab=Ylab)
            ps1_mean_se <- draw_mean_se_barplot(stat_df=stat_df, xc="Reference", yc="Intensity", comp=comp, Ylab=Ylab)
            prank <- draw_rank_plot(stat_df=stat_df, xc="Reference", yc="Intensity", Ylab=Ylab)
@@ -2762,7 +2832,7 @@ plot_locus_with_random <- function(queryFiles, centerFiles, txdb, ext=c(0,0), hl
              comp <- list(c(1, 2))
 
              ps1 <- draw_boxplot_by_factor(stat_df=stat_df, xc="Reference", yc="Intensity",  comp=comp, stats=statsMethod, Ylab=Ylab) 
-             ps2 <- draw_boxplot_by_factor(stat_df=stat_df, xc="Reference", yc="Intensity",  comp=comp, stats=statsMethod, Ylab=Ylab, logy="logy") 
+             ps2 <- draw_boxplot_by_factor(stat_df=stat_df, xc="Reference", yc="Intensity",  comp=comp, stats=statsMethod, Ylab=Ylab) 
              ps1_wo_outlier <- draw_boxplot_wo_outlier(stat_df=stat_df, xc="Reference", yc="Intensity", comp=comp, stats=statsMethod, Ylab=Ylab)
              ps1_mean_se <- draw_mean_se_barplot(stat_df=stat_df, xc="Reference", yc="Intensity", comp=comp, Ylab=Ylab)
              prank <- draw_rank_plot(stat_df=stat_df, xc="Reference", yc="Intensity", Ylab=Ylab)
@@ -2792,6 +2862,7 @@ plot_locus_with_random <- function(queryFiles, centerFiles, txdb, ext=c(0,0), hl
 #' @param binSize an integer denoting the tile width for tiling the genome, default 1000000
 #' @param outPrefix a string denoting output file name in pdf format
 #' @param handleInputParams a list of parameters for \code{handle_input}
+#' @param verbose logical, indicating whether to output additional information
 #' @param nc integer, number of cores for parallel processing
 #'
 #' @return NULL

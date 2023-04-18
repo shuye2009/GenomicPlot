@@ -41,4 +41,5 @@
 #' @importFrom stats as.formula cor density dist ecdf hclust
 #' @importFrom stats ks.test mad median na.omit qqplot quantile
 #' @importFrom stats reorder sd smooth.spline wilcox.test
+#' @importFrom graphics boxplot
 NULL

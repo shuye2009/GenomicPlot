@@ -23,7 +23,7 @@ gene. The longest transcript is defined as the isoform that has the longest tran
 with longer CDS is selected. If the lengths of CDS tie again, the transcript with smaller id is selected arbitrarily.
 }
 \examples{
-txdb <- AnnotationDbi::loadDb(system.file("data", "txdb.sql", package="GenomicPlotData"))
+txdb <- AnnotationDbi::loadDb(system.file("extdata", "txdb_chr19_1.sql", package="GenomicPlot"))
 longestTx <- extract_longest_tx(txdb, plot=FALSE)
 
 }

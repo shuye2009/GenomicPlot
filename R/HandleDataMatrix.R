@@ -81,7 +81,7 @@ impute_hm <- function(fullmatrix, verbose=FALSE){
    halfmin <- ifelse(minv>0, minv/2, minv*2)
    fullmatrix[fullmatrix < halfmin] <- halfmin ##  to avoid take log of zero and use of pseudo numbers
 
-   if(verbose) print(paste("Imputed value", halfmin, "\n\n"))
+   if(verbose) print(paste("Imputed value", halfmin))
 
    return(fullmatrix)
 }
@@ -113,8 +113,6 @@ process_scoreMatrix <- function(fullmatrix, scale=FALSE, rmOutlier=FALSE, transf
    fullmatrix[is.na(fullmatrix)] <- 0
 
    fullmatrix <- impute_hm(fullmatrix, verbose)
-   
-   inspect_matrix(fullmatrix, verbose)
 
    if(!is.na(transform)) {
       if(min(fullmatrix) < 0){

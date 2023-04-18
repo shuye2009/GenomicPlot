@@ -36,7 +36,7 @@ Extract genomic coordinates and make bed or bed 12 files from a TxDb object for 
      For "gene", both GRanges object and GRangesList object have the same ranges and names. The bed file is in bed6 format.
 }
 \examples{
-txdb <- AnnotationDbi::loadDb(system.file("data", "txdb_chr19.sql", package="GenomicPlotData"))
+txdb <- AnnotationDbi::loadDb(system.file("extdata", "txdb_chr19_1.sql", package="GenomicPlot"))
 output <- get_genomic_feature_coordinates(txdb, featureName="cds", featureSource="gencode",
 export=FALSE, longest=TRUE, protein_coding=TRUE)
 }

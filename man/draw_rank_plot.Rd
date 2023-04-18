@@ -25,8 +25,6 @@ draw_rank_plot(
 \item{ecdf}{logical, indicating using quantile instead of cumulative sum as y-axis}
 
 \item{rank}{logical, indicating using rank of values instead of value itself as x-axis}
-
-\item{logy}{logical, indicating whether to log10 transform yc}
 }
 \value{
 a ggplot object

@@ -23,7 +23,7 @@ plot_region(
   outPrefix = "plots",
   rmOutlier = FALSE,
   heatRange = NULL,
-  Ylab = "Signal intensity",
+  Ylab = "Coverage/base/gene",
   statsMethod = "wilcox.test",
   nc = 2
 )
@@ -65,6 +65,8 @@ plot_region(
 
 \item{heatRange}{a numerical vector of two elements, defining range for heatmap color ramp generation}
 
+\item{Ylab}{a string for y-axis label}
+
 \item{statsMethod}{a string in c("wilcox.test", "t.test"), for pair-wise group comparisons}
 
 \item{nc}{integer, number of cores for parallel processing}
@@ -73,12 +75,24 @@ plot_region(
 a dataframe containing the data used for plotting
 }
 \description{
-Plot reads or peak signal intensity of samples in the query files inside regions defined in the centerFiles. The upstream and downstream flanking windows can be given separately. If Input files are provided, ratio over Input is computed and displayed as well.
+Plot reads or peak Coverage/base/gene of samples in the query files inside regions defined in the centerFiles. The upstream and downstream flanking windows can be given separately. If Input files are provided, ratio over Input is computed and displayed as well.
 }
 \examples{
-centerFiles <- c(system.file("data", "test_B.bed", package="GenomicPlotData"),
-system.file("data", "test_C.bed", package="GenomicPlotData"))
-names(centerFiles) <- c("TestB", "TestC")
+txdb <- AnnotationDbi::loadDb(system.file("extdata", "txdb_chr19.sql", package="GenomicPlot"))
+queryfiles <- system.file("extdata", "treat_chr19.bam", package="GenomicPlot")
+names(queryfiles) <- "query"
+inputfiles <- system.file("extdata", "input_chr19.bam", package="GenomicPlot")
+names(inputfiles) <- "input"
+centerfiles <- system.file("extdata", "test_chip_peak_chr19.narrowPeak", package="GenomicPlot")
+names(centerfiles) <- "narrowPeak"
+op <- NULL
+handleInputParams <- list(CLIP_reads=FALSE, fix_width=150, fix_point="start", norm=FALSE, useScore=FALSE,
+ outRle=TRUE, useSizeFactor=TRUE, genome="hg19")
+ 
+df <- plot_region(queryFiles=queryfiles, centerFiles=centerfiles, txdb=NULL, regionName="region", 
+inputFiles=inputfiles, nbins=100, handleInputParams=handleInputParams, verbose=TRUE, scale=FALSE, 
+heatmap=TRUE, fiveP=-1000, threeP=1000, smooth=TRUE, stranded=TRUE, transform=NA, outPrefix=NULL, 
+rmOutlier=FALSE, heatRange=NULL, Ylab="Coverage/base/gene", statsMethod="wilcox.test", nc=2)
 
 }
 \author{
