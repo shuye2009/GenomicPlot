@@ -25,6 +25,8 @@ draw_matrix_heatmap(
 
 \item{ranking}{method for ranking the rows of the input matrix}
 
+\item{ranges}{a numeric vector with two elements, defining custom range for color ramp, default=NULL, i.e. the range is defined automatically based on the range of fullMatrix}
+
 \item{verbose}{logical, whether to output the input matrix for inspection}
 }
 \description{

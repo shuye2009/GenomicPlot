@@ -18,7 +18,7 @@ plot_locus_with_random(
   binSize = 10,
   refPoint = "center",
   Xlab = "Center",
-  Ylab = "Signal intensity",
+  Ylab = "Coverage/base/gene",
   inputFiles = NULL,
   stranded = TRUE,
   scale = FALSE,
@@ -56,6 +56,8 @@ plot_locus_with_random(
 
 \item{Xlab}{a string denotes the label on x-axis}
 
+\item{Ylab}{a string for y-axis label}
+
 \item{inputFiles}{a vector of input sample file names. The file should be in .bam, .bed, .wig or .bw format, mixture of formats is allowed}
 
 \item{stranded}{logical, indicating whether the strand of the feature should be considered}
@@ -76,7 +78,7 @@ plot_locus_with_random(
 a dataframe containing the data used for plotting
 }
 \description{
-Plot reads or peak signal intensity of samples in the query files around reference locus defined in the centerFiles. The upstream and downstream windows flanking loci can be given separately, a smaller window can be defined to allow statistical comparisons between reference and random loci. The loci are further divided into sub-groups that are overlapping with c("5'UTR", "CDS", "3'UTR"), "unrestricted" means all loci regardless of overlapping.
+Plot reads or peak Coverage/base/gene of samples in the query files around reference locus defined in the centerFiles. The upstream and downstream windows flanking loci can be given separately, a smaller window can be defined to allow statistical comparisons between reference and random loci. The loci are further divided into sub-groups that are overlapping with c("5'UTR", "CDS", "3'UTR"), "unrestricted" means all loci regardless of overlapping.
 }
 \examples{
 queryFiles <- system.file("data", "test_clip.bam", package="GenomicPlotData")

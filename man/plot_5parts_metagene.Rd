@@ -18,7 +18,7 @@ plot_5parts_metagene(
   heatmap = FALSE,
   heatRange = NULL,
   rmOutlier = FALSE,
-  Ylab = "Signal intensity",
+  Ylab = "Coverage/base/gene",
   nc = 2
 )
 }
@@ -49,30 +49,31 @@ plot_5parts_metagene(
 
 \item{rmOutlier}{logical, indicating whether a row with abnormally high values in the score matrix should be removed}
 
+\item{Ylab}{a string for y-axis label}
+
 \item{nc}{integer, number of cores for parallel processing}
 }
 \value{
 a dataframe containing the data used for plotting
 }
 \description{
-Plot reads or peak signal intensity of samples in the query files around genes. The upstream and downstream windows flanking genes can be given separately, metagene plots are generated with 5'UTR, CDS and 3'UTR segments. The length of each segments are prorated according to the median length of each segments. If Input files are provided, ratio over Input is computed and displayed as well.
+Plot reads or peak Coverage/base/gene of samples in the query files around genes. The upstream and downstream windows flanking genes can be given separately, metagene plots are generated with 5'UTR, CDS and 3'UTR segments. The length of each segments are prorated according to the median length of each segments. If Input files are provided, ratio over Input is computed and displayed as well.
 }
 \examples{
-txdb <- AnnotationDbi::loadDb(system.file("data", "txdb_chr19.sql", package="GenomicPlotData"))
-gf <- prepare_5parts_genomic_features(txdb, meta=FALSE, nbins=100, fiveP=500, threeP=500, longest=TRUE)
-queryFiles <- c(system.file("data", "test_chip_peak_chr19.narrowPeak", package="GenomicPlotData"),
-system.file("data", "test_chip_peak_chr19.bed", package="GenomicPlotData"),
-system.file("data", "test_clip_peak_chr19.bed", package="GenomicPlotData"))
-names(queryFiles) <- c("narrowPeak", "summitPeak", "iCLIPPeak")
+txdb <- AnnotationDbi::loadDb(system.file("extdata", "txdb_chr19.sql", package="GenomicPlot"))
+queryfiles <- system.file("extdata", "treat_chr19.bam", package="GenomicPlot")
+names(queryfiles) <- "query"
+inputfiles <- system.file("extdata", "input_chr19.bam", package="GenomicPlot")
+names(inputfiles) <- "input"
+gfeatures <- prepare_5parts_genomic_features(txdb, meta=TRUE, nbins=100, fiveP=-1000, threeP=1000, 
+longest=TRUE, verbose=FALSE)
 op <- NULL
-
-handleInputParams <- list(CLIP_reads=FALSE, fix_width=150, fix_point="center", norm=FALSE, useScore=FALSE,
-                          outRle=TRUE, useSizeFactor=FALSE, genome="hg19")
-
-plot_5parts_metagene(queryFiles, gFeatures=gf, inputFiles=NULL, handleInputParams=handleInputParams,
-                     verbose=FALSE, smooth=TRUE, scale=FALSE, stranded=TRUE, outPrefix=op, transform=NA,
-                     heatmap =TRUE,  rmOutlier=TRUE, nc=2)
-
+handleInputParams <- list(CLIP_reads=FALSE, fix_width=150, fix_point="start", norm=FALSE, useScore=FALSE,
+ outRle=TRUE, useSizeFactor=TRUE, genome="hg19")
+df <- plot_5parts_metagene(queryFiles=queryfiles, gFeatures=list("metagene"=gfeatures), inputFiles=inputfiles, 
+scale=FALSE, verbose=TRUE, Ylab="Coverage/base/gene", handleInputParams=handleInputParams, smooth=TRUE, 
+stranded=TRUE, outPrefix=NULL, heatmap=TRUE, rmOutlier=FALSE, heatRange=NULL, transform=NA, nc=2)
+               
 }
 \author{
 Shuye Pu

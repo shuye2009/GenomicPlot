@@ -17,7 +17,7 @@ plot_locus(
   binSize = 10,
   refPoint = "center",
   Xlab = "Center",
-  Ylab = "Signal intensity",
+  Ylab = "Coverage/base/gene",
   inputFiles = NULL,
   stranded = TRUE,
   heatmap = TRUE,
@@ -55,6 +55,8 @@ plot_locus(
 
 \item{Xlab}{a string denotes the label on x-axis}
 
+\item{Ylab}{a string for y-axis label}
+
 \item{inputFiles}{a vector of input sample file names. The file should be in .bam, .bed, .wig or .bw format, mixture of formats is allowed}
 
 \item{stranded}{logical, indicating whether the strand of the feature should be considered}
@@ -79,15 +81,28 @@ plot_locus(
 a list of two dataframes containing the data used for plotting and for statistical testing
 }
 \description{
-Plot reads or peak signal intensity of samples in the query files around reference locus (start, end or center of a genomic region)
+Plot reads or peak Coverage/base/gene of samples in the query files around reference locus (start, end or center of a genomic region)
 defined in the centerFiles. The upstream and downstream windows flanking loci can be given separately, a smaller window can be defined to allow
 statistical comparisons between samples for the same reference, or between references for a given sample. If Input files are provided, ratio over
 Input is computed and displayed as well.
 }
 \examples{
-centerFiles <- c(system.file("data", "test_B.bed", package="GenomicPlotData"),
-system.file("data", "test_C.bed", package="GenomicPlotData"))
-names(centerFiles) <- c("TestB", "TestC")
+txdb <- AnnotationDbi::loadDb(system.file("extdata", "txdb_chr19.sql", package="GenomicPlot"))
+queryfiles <- system.file("extdata", "treat_chr19.bam", package="GenomicPlot")
+names(queryfiles) <- "query"
+inputfiles <- system.file("extdata", "input_chr19.bam", package="GenomicPlot")
+names(inputfiles) <- "input"
+centerfiles <- system.file("extdata", "test_clip_peak_chr19.bed", package="GenomicPlot")
+names(centerfiles) <- "clipPeak"
+op <- NULL
+handleInputParams <- list(CLIP_reads=TRUE, fix_width=150, fix_point="start", norm=FALSE, useScore=FALSE,
+ outRle=TRUE, useSizeFactor=TRUE, genome="hg19")
+ 
+df <- plot_locus(queryFiles=queryfiles, centerFiles=c(centerfiles, "intron"), txdb=txdb, ext=c(-200,200), 
+hl=c(-100, 100), shade=TRUE, smooth=FALSE, handleInputParams=handleInputParams, verbose=TRUE, binSize=10,
+refPoint="center", Xlab="Center", Ylab="Coverage/base/gene", inputFiles=inputfiles, stranded=TRUE, 
+heatmap=TRUE, scale=FALSE, outPrefix=NULL, rmOutlier=FALSE, transform=NA, statsMethod="wilcox.test", 
+heatRange=NULL, nc=2)
 
 }
 \author{

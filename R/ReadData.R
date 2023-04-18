@@ -30,6 +30,7 @@
 
 handle_input <- function(inputFiles, handleInputParams=NULL, verbose=FALSE, nc=2){
 
+   if(any(is.null(names(inputFiles)))) stop("Each file must have a name attribute!")
    if(is.null(handleInputParams)) handleInputParams=list(CLIP_reads=FALSE, fix_width=0, fix_point="center", useScore=FALSE, outRle=TRUE, norm=TRUE, useSizeFactor=FALSE, genome="hg19")
 
    original_outRle <- handleInputParams$outRle
@@ -44,21 +45,22 @@ handle_input <- function(inputFiles, handleInputParams=NULL, verbose=FALSE, nc=2
          temp <- readRDS(file.path(dirName, paste0(fileName, ".rds")))
          if(identical(temp$param, handleInputParams)){
             out <- temp$Rle
-            if(verbose)print("existing rds is used")
+            if(verbose)message("cached .rds file is used")
          }else{
-            if(verbose)print("existing rds is modified using new input parameters")
             out <- funName(inputFile=inputFile, handleInputParams, verbose)
-            saveRDS(temp=list(param=handleInputParams, Rle=out), file.path(dirName, paste0(fileName, ".rds")))
+            saveRDS(list(param=handleInputParams, Rle=out), file.path(dirName, paste0(fileName, ".rds")))
+            if(verbose)message("cached .rds file is modified using new input parameters")
          }
       }else{
          out <- funName(inputFile=inputFile, handleInputParams, verbose)
-         saveRDS(temp=list(param=handleInputParams, Rle=out), file.path(dirName, paste0(fileName, ".rds")))
+         saveRDS(list(param=handleInputParams, Rle=out), file.path(dirName, paste0(fileName, ".rds")))
+         if(verbose)message("input data is cached as .rds file for fast reloading")
       }
       return(out)
    }
    
    outlist <- lapply(inputFiles, function(inputFile){
-      
+      if(!file.exists(inputFile)) stop(paste(inputFile, "does not exist, please check your file name and path!"))
       if(grepl("\\.bed|BED|Bed|narrowPeak|broadPeak$", inputFile)){
          fileType <- "bed"
          if(verbose) print(paste("Reading", fileType, "file:", inputFile))
@@ -76,8 +78,7 @@ handle_input <- function(inputFiles, handleInputParams=NULL, verbose=FALSE, nc=2
          if(verbose) print(paste("Reading", fileType, "file:", inputFile))
          out <- inputFUN(handle_bw, inputFile=inputFile, handleInputParams, verbose)
       }else{
-         stop(paste("The file format of", inputFile, "is not supported, please convert it to one of the following format:
-                 bed, bam, wig, bigwig"))
+         stop(paste("The format of", inputFile, "is not supported, please convert it to one of the following format: bed, bam, wig, bigwig"))
       }
 
       out
@@ -194,6 +195,10 @@ handle_bed <- function(inputFile, handleInputParams=NULL, verbose=FALSE){
    beddata <- type.convert(beddata[, 1:min(6,nco)], as.is=TRUE)  ## ignore extra columns, which cause problem in import.bed()
    colnames(beddata) <- c("chr", "start", "end", "name", "score", "strand")[1:min(6,ncol(beddata))]
    queryRegions <- makeGRangesFromDataFrame(beddata, keep.extra.columns=TRUE, starts.in.df.are.0based=TRUE)
+   names(queryRegions) <- beddata$name
+   if(sum(duplicated(names(queryRegions))) > 0){ ## if the names are not unique, force them to be unique
+      names(queryRegions) <- paste(names(queryRegions), seq_along(names(queryRegions)), sep="_")  
+   }
    if(ncol(beddata)<6) strand(queryRegions) <- "*"
 
    if(handleInputParams$fix_width > 0) queryRegions <- resize(queryRegions, width=handleInputParams$fix_width,

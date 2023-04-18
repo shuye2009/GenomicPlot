@@ -20,9 +20,9 @@ plot_start_end(
   smooth = FALSE,
   rmOutlier = FALSE,
   outPrefix = "plots",
-  transform = TRUE,
+  transform = NA,
   shade = TRUE,
-  Ylab = "Signal intensity",
+  Ylab = "Coverage/base/gene",
   nc = 2
 )
 }
@@ -41,7 +41,7 @@ plot_start_end(
 
 \item{insert}{an integer specifies the length of the center regions to be included, in addition to the start and end of the feature}
 
-\item{verbose}{logical, whether to output additional information (data used for plotting or statistical test results)}
+\item{verbose}{logical, whether to output additional information (including data used for plotting or statistical test results)}
 
 \item{ext}{a vector of four integers defining upstream and downstream boundaries of the plot window, flanking the start and end of features}
 
@@ -57,9 +57,11 @@ plot_start_end(
 
 \item{outPrefix}{a string specifying output file prefix for plots (outPrefix.pdf)}
 
-\item{transform}{a string in c("log", "log2", "log10"), default = NA indicating no transformation of data matrix}
+\item{transform}{a string in c("log", "log2", "log10"), default = NA, indicating no transformation of data matrix}
 
 \item{shade}{logical indicating whether to place a shaded rectangle around the point of interest}
+
+\item{Ylab}{a string for y-axis label}
 
 \item{nc}{integer, number of cores for parallel processing}
 }
@@ -67,16 +69,28 @@ plot_start_end(
 a list of two objects, the first is a GRanges object, the second is a GRangesList object
 }
 \description{
-Plot reads or peak signal intensity of samples in the query files around start and end of custom features. The upstream and downstream windows
+Plot reads or peak Coverage/base/gene of samples in the query files around start and end of custom features. The upstream and downstream windows
 can be given separately, within the window, a smaller window can be defined to highlight region of interest.
 A line plot will be displayed for both start and end of feature. If Input files are provided, ratio over Input is
 computed and displayed as well.
 }
 \examples{
-centerFiles <- c(system.file("data", "test_B.bed", package="GenomicPlotData"),
-system.file("data", "test_C.bed", package="GenomicPlotData"))
-names(centerFiles) <- c("TestB", "TestC")
-
+txdb <- AnnotationDbi::loadDb(system.file("extdata", "txdb_chr19.sql", package="GenomicPlot"))
+queryfiles <- system.file("extdata", "treat_chr19.bam", package="GenomicPlot")
+names(queryfiles) <- "query"
+inputfiles <- system.file("extdata", "input_chr19.bam", package="GenomicPlot")
+names(inputfiles) <- "input"
+centerfiles <- system.file("extdata", "test_chip_peak_chr19.narrowPeak", package="GenomicPlot")
+names(centerfiles) <- "narrowPeak"
+op <- NULL
+handleInputParams <- list(CLIP_reads=FALSE, fix_width=150, fix_point="start", norm=FALSE, useScore=FALSE,
+ outRle=TRUE, useSizeFactor=TRUE, genome="hg19")
+ 
+df <- plot_start_end(queryFiles=queryfiles, inputFiles=inputfiles, centerFiles=c("gene", centerfiles), txdb=txdb, 
+handleInputParams=handleInputParams, binSize=10, insert=100, verbose=TRUE, ext=c(-500, 100, -100, 500), 
+hl=c(-50, 50, -50, 50), stranded=TRUE, scale=FALSE, smooth=TRUE, rmOutlier=FALSE, outPrefix=op, 
+transform=NA, shade=TRUE, Ylab="Coverage/base/gene", nc=2)
+ 
 }
 \author{
 Shuye Pu
