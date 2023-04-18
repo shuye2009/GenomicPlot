@@ -81,10 +81,24 @@ a dataframe containing the data used for plotting
 Plot reads or peak Coverage/base/gene of samples in the query files around reference locus defined in the centerFiles. The upstream and downstream windows flanking loci can be given separately, a smaller window can be defined to allow statistical comparisons between reference and random loci. The loci are further divided into sub-groups that are overlapping with c("5'UTR", "CDS", "3'UTR"), "unrestricted" means all loci regardless of overlapping.
 }
 \examples{
-queryFiles <- system.file("data", "test_clip.bam", package="GenomicPlotData")
-names(queryFiles) <- "query"
-inputFiles <- system.file("data", "test_clip_input.bam", package="GenomicPlotData")
-names(inputFiles) <- "input"
+txdb <- AnnotationDbi::loadDb(system.file("extdata", "txdb_chr19.sql", package="GenomicPlot"))
+
+queryfiles <- system.file("extdata", "treat_chr19.bam", package="GenomicPlot")
+names(queryfiles) <- "query"
+
+inputfiles <- system.file("extdata", "input_chr19.bam", package="GenomicPlot")
+names(inputfiles) <- "input"
+
+centerfiles <- system.file("extdata", "test_clip_peak_chr19.bed", package="GenomicPlot")
+names(centerfiles) <- "clipPeak"
+
+handleInputParams <- list(CLIP_reads=TRUE, fix_width=150, fix_point="start", norm=FALSE, useScore=FALSE,
+   outRle=TRUE, useSizeFactor=TRUE, genome="hg19")
+ 
+df <- plot_locus_with_random(queryFiles=queryfiles, centerFiles=c(centerfiles), txdb=txdb, ext=c(-200,200), 
+   hl=c(-20, 20), shade=TRUE, smooth=TRUE, handleInputParams=handleInputParams, verbose=TRUE, binSize=10,
+   refPoint="center", Xlab="Center", Ylab="Coverage/base/gene", inputFiles=inputfiles, stranded=TRUE, 
+   scale=FALSE, outPrefix=NULL, rmOutlier=FALSE, transform=NA, statsMethod="wilcox.test", nc=2)
 
 }
 \author{

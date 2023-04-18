@@ -37,7 +37,7 @@ names(queryfiles) <- c("Narrow", "Summit", "iCLIP")
 
 op <- "test_plot_5parts_metagene"
 
-handleInputParams <- list(CLIP_reads=FALSE, fix_width=100, fix_point="center", norm=TRUE, useScore=FALSE,
+handleInputParams <- list(CLIP_reads=FALSE, fix_width=100, fix_point="center", norm=FALSE, useScore=FALSE,
                           outRle=TRUE, useSizeFactor=FALSE, genome="hg19")
 
 plot_5parts_metagene(queryFiles=queryfiles, 
@@ -64,7 +64,7 @@ The following example shows you how to visualize your iCLIP_peaks around ChIP-se
 
 ``` r
 
-op <- "test_plot_reference_locus"
+op <- "test_plot_locus"
 
 handleInputParams <- list(CLIP_reads=FALSE, fix_width=0, fix_point="center", norm=FALSE, useScore=FALSE,
                           outRle=TRUE, useSizeFactor=FALSE, genome="hg19")

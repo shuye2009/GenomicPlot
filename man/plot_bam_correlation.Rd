@@ -30,18 +30,19 @@ plot_bam_correlation(
 plot correlation in reads coverage distributions along the genome for bam files
 }
 \examples{
-queryFiles <- c(system.file("data", "test_chip_chr19.bam", package="GenomicPlotData"),
-system.file("data", "test_clip_chr19.bam", package="GenomicPlotData"))
+queryFiles <- c(system.file("extdata", "chip_treat_chr19.bam", package="GenomicPlot"),
+               system.file("extdata", "treat_chr19.bam", package="GenomicPlot"))
 names(queryFiles) <- c("chip_query", "clip_query")
-inputFiles <- c(system.file("data", "test_chip_input_chr19.bam", package="GenomicPlotData"),
-                system.file("data", "test_clip_input_chr19.bam", package="GenomicPlotData"))
+
+inputFiles <- c(system.file("extdata", "chip_input_chr19.bam", package="GenomicPlot"),
+                system.file("extdata", "input_chr19.bam", package="GenomicPlot"))
 names(inputFiles) <- c("chip_input", "clip_input")
 
-op=NULL
 handleInputParams <- list(CLIP_reads=FALSE, fix_width=0, fix_point="start", norm=FALSE, useScore=FALSE,
-                          outRle=FALSE, useSizeFactor=FALSE, genome="hg19")
-plot_bam_correlation(bamfiles=c(queryFiles[1], inputFiles[1]), binSize=10000, outPrefix=op,
-                     handleInputParams=handleInputParams, nc=2)
+   outRle=FALSE, useSizeFactor=FALSE, genome="hg19")
+                          
+plot_bam_correlation(bamfiles=c(queryFiles, inputFiles), binSize=10000, outPrefix=NULL,
+   handleInputParams=handleInputParams, nc=2)
 
 
 }

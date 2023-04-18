@@ -9,7 +9,8 @@ plot_overlap_bed(
   outPrefix = NULL,
   handleInputParams = NULL,
   pairOnly = TRUE,
-  stranded = TRUE
+  stranded = TRUE,
+  verbose = FALSE
 )
 }
 \arguments{
@@ -22,20 +23,23 @@ plot_overlap_bed(
 \item{pairOnly}{logical, indicating whether only pair-wise overlap is desired}
 
 \item{stranded}{logical, indicating whether the feature is stranded. For nonstranded feature, only "*" is accepted as strand}
+
+\item{verbose}{logical, indicating whether to output additional information}
 }
 \description{
 This function takes a list of bed file names, and produce a Venn diagram
 }
 \examples{
-queryFiles <- c(system.file("data", "test_chip_peak_chr19.narrowPeak", package="GenomicPlotData"),
-system.file("data", "test_chip_peak_chr19.bed", package="GenomicPlotData"),
-system.file("data", "test_clip_peak_chr19.bed", package="GenomicPlotData"))
-names(queryFiles) <- c("narrowPeak", "summitPeak", "iCLIPPeak")
-op <- NULL
+
+queryFiles <- c(system.file("extdata", "test_chip_peak_chr19.narrowPeak", package="GenomicPlot"),
+system.file("extdata", "test_chip_peak_chr19.bed", package="GenomicPlot"),
+system.file("extdata", "test_clip_peak_chr19.bed", package="GenomicPlot"))
+names(queryFiles) <- c("narrowPeak", "summitPeak", "clipPeak")
+
 handleBedParams <- list(fix_width=100, fix_point="center", useScore=FALSE, outRle=FALSE,
                         CLIP_reads=FALSE, norm=FALSE, useSizeFactor=FALSE, genome="hg19")
 
-plot_overlap_bed(bedList=queryFiles, outPrefix=op, handleInputParams=handleBedParams, pairOnly=FALSE, stranded=FALSE)
+plot_overlap_bed(bedList=queryFiles, handleInputParams=handleBedParams, pairOnly=FALSE, stranded=FALSE)
 
 }
 \author{
