@@ -63,18 +63,22 @@ is computed and displayed as well.
 }
 \examples{
 txdb <- AnnotationDbi::loadDb(system.file("extdata", "txdb_chr19.sql", package="GenomicPlot"))
+
 queryfiles <- system.file("extdata", "treat_chr19.bam", package="GenomicPlot")
 names(queryfiles) <- "query"
+
 inputfiles <- system.file("extdata", "input_chr19.bam", package="GenomicPlot")
 names(inputfiles) <- "input"
+
 gfeatures <- prepare_3parts_genomic_features(txdb, featureName="transcript", meta=TRUE, nbins=100, 
 fiveP=-1000, threeP=1000, longest=TRUE, protein_coding=TRUE, verbose=FALSE)
-op <- NULL
+
 handleInputParams <- list(CLIP_reads=FALSE, fix_width=150, fix_point="start", norm=FALSE, useScore=FALSE,
- outRle=TRUE, useSizeFactor=TRUE, genome="hg19")
+   outRle=TRUE, useSizeFactor=TRUE, genome="hg19")
+ 
 df <- plot_3parts_metagene(queryFiles=queryfiles, gFeatures=gfeatures, inputFiles=inputfiles, scale=FALSE,  
-verbose=TRUE, Ylab="Coverage/base/gene", handleInputParams=handleInputParams, smooth=TRUE, stranded=TRUE, 
-outPrefix=NULL, heatmap=TRUE, rmOutlier=FALSE, heatRange=NULL, transform=NA, nc=2)
+   verbose=TRUE, Ylab="Coverage/base/gene", handleInputParams=handleInputParams, smooth=TRUE, stranded=TRUE, 
+   outPrefix=NULL, heatmap=TRUE, rmOutlier=FALSE, heatRange=NULL, transform=NA, nc=2)
 
 }
 \author{

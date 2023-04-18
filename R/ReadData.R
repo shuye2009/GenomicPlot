@@ -60,7 +60,7 @@ handle_input <- function(inputFiles, handleInputParams=NULL, verbose=FALSE, nc=2
    }
    
    outlist <- lapply(inputFiles, function(inputFile){
-      if(!file.exists(inputFile)) stop(paste(inputFile, "does not exist, please check your file name and path!"))
+      if(!file.exists(inputFile)) stop("file does not exist, please check your file name and path!")
       if(grepl("\\.bed|BED|Bed|narrowPeak|broadPeak$", inputFile)){
          fileType <- "bed"
          if(verbose) print(paste("Reading", fileType, "file:", inputFile))
@@ -78,7 +78,7 @@ handle_input <- function(inputFiles, handleInputParams=NULL, verbose=FALSE, nc=2
          if(verbose) print(paste("Reading", fileType, "file:", inputFile))
          out <- inputFUN(handle_bw, inputFile=inputFile, handleInputParams, verbose)
       }else{
-         stop(paste("The format of", inputFile, "is not supported, please convert it to one of the following format: bed, bam, wig, bigwig"))
+         stop("The format of file is not supported, please convert it to one of the following format: bed, bam, wig, bigwig")
       }
 
       out

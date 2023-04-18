@@ -42,21 +42,17 @@ a list of two dataframes, 'annotation' is the annotation per peak, 'stat' is the
 Produce a table of transcripts targeted by peaks, and generate plots for target gene types, and peak distribution in genomic features
 }
 \examples{
-library(BiocFileCache)
-bfc <- BiocFileCache()
-url <- "https://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_19/gencode.v19.annotation.gtf.gz"
-gz <- bfcrpath(bfc, url)
-gtffile <- gsub(".gz", "", gz)
-if(!file.exists(gtffile)) gtffile <- R.utils::gunzip(gz, remove=FALSE)
 
-centerFile <- system.file("data", "test_chip_peak.narrowPeak", package="GenomicPlotData")
-names(centerFile) <- c("narrowPeak")
-op <- "test_plot_peak_annotation"
+gtfFile <- system.file("extdata", "gencode.v19.annotation_chr19.gtf", package="GenomicPlot")
+
+centerFile <- system.file("extdata", "test_chip_peak_chr19.bed", package="GenomicPlot")
+names(centerFile) <- c("summitPeak")
+
 handleBedparams <- list(fix_width=0, fix_point="center", useScore=FALSE, outRle=FALSE, CLIP_reads=FALSE,
                         norm=FALSE, useSizeFactor=FALSE, genome="hg19")
 
-plot_peak_annotation(peakFile=centerFile, gtfFile=gtffile, handleInputParams=handleBedparams, fiveP=0,
-                     threeP=0, simple=FALSE)
+plot_peak_annotation(peakFile=centerFile, gtfFile=gtfFile, handleInputParams=handleBedparams, fiveP=-2000,
+   dsTSS=200, threeP=2000, simple=FALSE)
 
 }
 \author{
