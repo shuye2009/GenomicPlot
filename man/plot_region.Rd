@@ -20,7 +20,7 @@ plot_region(
   smooth = FALSE,
   stranded = TRUE,
   transform = NA,
-  outPrefix = "plots",
+  outPrefix = NULL,
   rmOutlier = FALSE,
   heatRange = NULL,
   Ylab = "Coverage/base/gene",

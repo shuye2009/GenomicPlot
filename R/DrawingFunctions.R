@@ -6,7 +6,7 @@
 #' @param dataName the nature of the numeric data
 #' @param labels_col a vector make column annotation
 #' @param levels_col factor levels for labels_col, specifying the order of labels_col
-#' @param ranking method for ranking the rows of the input matrix
+#' @param ranking method for ranking the rows of the input matrix, options are c("Sum", "Max", "Hierarchical", "None")
 #' @param ranges a numeric vector with two elements, defining custom range for color ramp, default=NULL, i.e. the range is defined automatically based on the range of fullMatrix
 #' @param verbose logical, whether to output the input matrix for inspection
 #' @return NULL
@@ -15,11 +15,13 @@
 #'
 #' @examples
 #' fullMatrix <- matrix(rnorm(10000), ncol=100)
+#' for(i in 1:80){fullMatrix[i,16:75] <- runif(60) + i}
 #' labels_col <- as.character(seq(1:100))
 #' levels_col <- c("start", "center", "end")
 #' names(labels_col) <- rep(levels_col, c(15, 60, 25))
 #'
-#' draw_matrix_heatmap(fullMatrix, dataName="test", labels_col, levels_col, ranking="Sum")
+#' draw_matrix_heatmap(fullMatrix, dataName="test", labels_col, levels_col)
+#' draw_matrix_heatmap(fullMatrix, dataName="test", labels_col, levels_col, ranking="Hierarchical")
 #'
 #' @export draw_matrix_heatmap
 #'
@@ -91,7 +93,7 @@ draw_matrix_heatmap <- function(fullMatrix, dataName="geneData", labels_col=NULL
 #' @param vx a vector on integers denoting the x coordinates of start of each sub-region
 #' @param xmax an integer denoting the left most boundary
 #' @return a ggplot object
-#' @note used by \code{plot_3parts_metagene}, \code{plot_5parts_metagene}, \code{plot_reference_region}
+#' @note used by \code{plot_3parts_metagene}, \code{plot_5parts_metagene}, \code{plot_region}
 #'
 #' @author Shuye Pu
 #'
@@ -146,7 +148,7 @@ draw_region_landmark <- function(featureNames, vx, xmax){
 #' @param scaled_bins a vector on integers denoting the length of each sub-region
 #' @param xmax an integer denoting the left most boundary
 #' @return a ggplot object
-#' @note used by \code{plot_3parts_metagene}, \code{plot_5parts_metagene}, \code{plot_reference_region}
+#' @note used by \code{plot_3parts_metagene}, \code{plot_5parts_metagene}, \code{plot_region}
 #'
 #' @author Shuye Pu
 #'
@@ -195,7 +197,7 @@ draw_region_name <- function(featureNames, scaled_bins, xmax){
 #' @param sn column name in plot_df for subject name to be shown in plot title
 #' @param Ylab a string for Y-axis label
 #' @return a ggplot object
-#' @note used by \code{plot_3parts_metagene}, \code{plot_5parts_metagene}, \code{plot_reference_region}
+#' @note used by \code{plot_3parts_metagene}, \code{plot_5parts_metagene}, \code{plot_region}
 #'
 #' @author Shuye Pu
 #'
@@ -234,7 +236,7 @@ draw_region_profile <- function(plot_df, xc="Position", yc="Intensity", cn="Quer
 #' @param hl a vector of two integers defining upstream and downstream boundaries of the rectangle
 #'
 #' @return a ggplot object
-#' @note used by \code{plot_reference_locus}, \code{plot_reference_locus_with_random}
+#' @note used by \code{plot_locus}, \code{plot_locus_with_random}
 #' @author Shuye Pu
 #' @export draw_locus_profile
 #'
@@ -271,9 +273,14 @@ draw_locus_profile <- function(plot_df, xc="Position", yc="Intensity", cn="Query
 #' @param nf a integer normalizing factor for correct count of observations when the data table has two factors, such as those produced by pivot_longer, equals to the number of factors
 #'
 #' @return a ggplot object
-#' @note used by \code{plot_reference_locus}, \code{plot_reference_locus_with_random}
+#' @note used by \code{plot_locus}, \code{plot_locus_with_random}, \code{plot_region}
 #' @author Shuye Pu
 #'
+#' @example 
+#' stat_df <- data.frame(Feature=rep(c("A", "B"), c(20, 30)), Intensity=c(rnorm(20, 2, 0.5), 
+#'                      rnorm(30, 3, 0.6)))
+#' p <- draw_boxplot_by_factor(stat_df, xc="Feature", yc="Intensity", Ylab="Signal Intensity")
+#' p
 #' @export draw_boxplot_by_factor
 #'
 
@@ -341,7 +348,7 @@ draw_boxplot_by_factor <- function(stat_df, xc="Feature", yc="Intensity", fc=xc,
 #' @return a ggplot object
 #' @export draw_boxplot_wo_outlier
 #' @examples 
-#' stat_df <- data.frame(Feature=rep(c("A", "B"), c(20, 30)), Intensity=rlnorm(50))
+#' stat_df <- data.frame(Feature=rep(c("A", "B"), c(20, 30)), Intensity=c(rnorm(20, 2), rnorm(30, 3)))
 #' p <- draw_boxplot_wo_outlier(stat_df, xc="Feature", yc="Intensity", Ylab="Signal Intensity")
 #' p
 #' 
@@ -413,9 +420,13 @@ draw_boxplot_wo_outlier <- function(stat_df, xc="Feature", yc="Intensity", fc=xc
 #' @param nf a integer normalizing factor for correct count of observations when the data table has two factors, such as those produced by pivot_longer, equals to the number of factors
 #'
 #' @return a ggplot object
-#' @note used by \code{plot_reference_locus}, \code{plot_reference_locus_with_random}
+#' @note used by \code{plot_locus}, \code{plot_locus_with_random}
 #' @author Shuye Pu
 #'
+#' @example 
+#' stat_df <- data.frame(Feature=rep(c("A", "B"), c(20, 30)), Intensity=c(rnorm(20, 2), rnorm(30, 3)))
+#' p <- draw_mean_se_barplot(stat_df, xc="Feature", yc="Intensity", Ylab="Signal Intensity")
+#' p
 #' @export draw_mean_se_barplot
 #'
 
@@ -483,13 +494,17 @@ draw_mean_se_barplot <- function(stat_df, xc="Feature", yc="Intensity", comp=lis
 #' @export draw_rank_plot
 #'
 #' @examples 
-#' stat_df <- data.frame(Feature=rep(c("A", "B"), c(20, 30)), Intensity=c(rlnorm(20, 5, 5), rlnorm(30, 1, 5)))
-#' stat_df1 <- data.frame(Feature=rep(c("A", "B"), c(20, 30)), Intensity=c(rnorm(20, 5, 5), rnorm(30, 1, 5)))
+#' stat_df <- data.frame(Feature=rep(c("A", "B"), c(20, 30)), 
+#'                      Intensity=c(rlnorm(20, 5, 5), rlnorm(30, 1, 5)))
+#' stat_df1 <- data.frame(Feature=rep(c("A", "B"), c(20, 30)), 
+#'                      Height=c(rnorm(20, 5, 5), rnorm(30, 1, 5)))
 #' 
 #' for(e in c(TRUE, FALSE)){
 #'    for (r in c(TRUE, FALSE)){
-#'       draw_rank_plot(stat_df, xc="Feature", yc="Intensity", Ylab="Signal Intensity", ecdf=e, rank=r)
-#'       draw_rank_plot(stat_df1, xc="Feature", yc="Intensity", Ylab="Signal Intensity", ecdf=e, rank=r)
+#'       print(draw_rank_plot(stat_df, xc="Feature", yc="Intensity", 
+#'       Ylab="Signal Intensity", ecdf=e, rank=r))
+#'       print(draw_rank_plot(stat_df1, xc="Feature", yc="Height", 
+#'       Ylab="Height", ecdf=e, rank=r))
 #'    }
 #' }
 #'
@@ -597,7 +612,7 @@ draw_rank_plot <- function(stat_df, xc="Feature", yc="Intensity", Ylab=yc, ecdf=
 #' @param stack logical, indicating whether to plot the number of valid (non-zero) data points in each bin 
 #'
 #' @return a ggplot object
-#' @note used by \code{plot_start_end_feature}, \code{plot_start_end_reference_region}
+#' @note used by \code{plot_start_end}, \code{plot_start_end_with_random}
 #' @author Shuye Pu
 #' @export draw_stacked_profile
 #'

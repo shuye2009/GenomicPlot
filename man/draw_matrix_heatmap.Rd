@@ -23,7 +23,7 @@ draw_matrix_heatmap(
 
 \item{levels_col}{factor levels for labels_col, specifying the order of labels_col}
 
-\item{ranking}{method for ranking the rows of the input matrix}
+\item{ranking}{method for ranking the rows of the input matrix, options are c("Sum", "Max", "Hierarchical", "None")}
 
 \item{ranges}{a numeric vector with two elements, defining custom range for color ramp, default=NULL, i.e. the range is defined automatically based on the range of fullMatrix}
 
@@ -34,11 +34,13 @@ Make a complex heatmap with column annotations
 }
 \examples{
 fullMatrix <- matrix(rnorm(10000), ncol=100)
+for(i in 1:80){fullMatrix[i,16:75] <- runif(60) + i}
 labels_col <- as.character(seq(1:100))
 levels_col <- c("start", "center", "end")
 names(labels_col) <- rep(levels_col, c(15, 60, 25))
 
-draw_matrix_heatmap(fullMatrix, dataName="test", labels_col, levels_col, ranking="Sum")
+draw_matrix_heatmap(fullMatrix, dataName="test", labels_col, levels_col)
+draw_matrix_heatmap(fullMatrix, dataName="test", labels_col, levels_col, ranking="Hierarchical")
 
 }
 \author{

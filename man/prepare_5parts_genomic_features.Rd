@@ -30,7 +30,7 @@ prepare_5parts_genomic_features(
 
 \item{verbose}{logical, whether to output additional information}
 
-\item{subsetTx}{a vector of transcript names for subseting the genome}
+\item{subsetTx}{a vector of transcript names (eg. ENST00000587541.1) for subsetting the genome}
 }
 \value{
 a named list with the elements c("windowRs", "nbins", "scaled_bins", "fiveP", "threeP", "meta", "longest")
@@ -39,9 +39,9 @@ a named list with the elements c("windowRs", "nbins", "scaled_bins", "fiveP", "t
 This is a helper function for 'plot_5parts_metagene', used to speed up plotting of multiple data sets with the same configuration.
 }
 \examples{
-txdb <- AnnotationDbi::loadDb(system.file("data", "txdb_chr19.sql", package="GenomicPlotData"))
+txdb <- AnnotationDbi::loadDb(system.file("extdata", "txdb_chr19.sql", package="GenomicPlot"))
 
-gf <- prepare_5parts_genomic_features(txdb, meta=TRUE, nbins=100, fiveP=1000, threeP=1000,
+gf <- prepare_5parts_genomic_features(txdb, meta=TRUE, nbins=100, fiveP=-1000, threeP=1000,
 longest=TRUE)
 
 }

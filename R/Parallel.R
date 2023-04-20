@@ -61,7 +61,7 @@ stop_parallel <- function(cl){
 #' @author Shuye Pu
 #' @keywords internal
 #'
-#' @note not working because txdb cannot be exported to nodes
+#' @note not working because txdb cannot be exported to nodes, need to find a solution
 #'
 
 parallel_feature_coordinates <- function(txdb, featureNames, longest=TRUE, protein_coding=TRUE, nc=2){
@@ -80,8 +80,7 @@ parallel_feature_coordinates <- function(txdb, featureNames, longest=TRUE, prote
 
 #' @title Parallel execution of scoreMatrixBin on a huge target windows object split into chunks
 #'
-#' @description Function for parallel computation of scoreMatrixBin. The 'windows' parameter of the scoreMatrixBin method is split into 5 chunks,
-#' and scoreMatrixBin is called on each chunk simultaneously to speed up the computation.
+#' @description Function for parallel computation of scoreMatrixBin. The 'windows' parameter of the scoreMatrixBin method is split into 5 chunks, and scoreMatrixBin is called on each chunk simultaneously to speed up the computation.
 #'
 #' @param windowRs, a single GRangesList object.
 #' @param queryRegions, a RleList object or Granges object providing input for the 'target' parameter of the scoreMatrixBin method

@@ -20,7 +20,7 @@ a ggplot object
 Plot sub-region labels under the landmark
 }
 \note{
-used by \code{plot_3parts_metagene}, \code{plot_5parts_metagene}, \code{plot_reference_region}
+used by \code{plot_3parts_metagene}, \code{plot_5parts_metagene}, \code{plot_region}
 }
 \author{
 Shuye Pu

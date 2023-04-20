@@ -7,7 +7,7 @@
 aov_TukeyHSD(df, xc = "Group", yc = "Intensity", op = NULL, verbose = FALSE)
 }
 \arguments{
-\item{df}{a dataframe with c("Intensity", "Group") in column names}
+\item{df}{a dataframe}
 
 \item{xc}{a string denoting column name for grouping}
 
@@ -24,7 +24,7 @@ a list of two elements, the first is the p-value of ANOVA test and the second is
 This is a helper function for performing one-way ANOVA analysis and post hoc Tukey's Honest Significant Differences tests
 }
 \note{
-used in \code{plot_reference_locus}
+used in \code{plot_locus}
 }
 \author{
 Shuye Pu

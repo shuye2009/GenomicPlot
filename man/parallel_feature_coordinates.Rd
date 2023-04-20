@@ -30,7 +30,7 @@ a list of lists(Granges, GRangesList)
 Get genomic coordinates for multiple features at once
 }
 \note{
-not working because txdb cannot be exported to nodes
+not working because txdb cannot be exported to nodes, need to find a solution
 }
 \author{
 Shuye Pu

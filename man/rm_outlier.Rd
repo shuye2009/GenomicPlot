@@ -21,9 +21,11 @@ This is a helper function for dealing with excessively high values using Hampel 
 }
 \examples{
 fullmatrix <- matrix(rnorm(100), ncol=10)
-fullmatrix[3,9] <- max(fullmatrix) + 1000000
-rm_outlier(fullmatrix)
-
+maxm <- max(fullmatrix)
+fullmatrix[3,9] <- maxm + 1000
+fullmatrix[8,1] <- maxm + 500
+rm_outlier(fullmatrix, verbose=TRUE, multiplier=100)
+rm_outlier(fullmatrix, verbose=TRUE, multiplier=1000)
 
 }
 \author{

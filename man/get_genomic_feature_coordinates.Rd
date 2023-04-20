@@ -27,7 +27,7 @@ get_genomic_feature_coordinates(
 \item{protein_coding}{logical, indicating whether to limit to protein_coding genes}
 }
 \value{
-a list of three objects, the first is a GRanges object, the second is a GRangesList object, the last is the output file name
+a list of three objects, the first is a GRanges object, the second is a GRangesList object, the last is the output file name if export is TRUE
 }
 \description{
 Extract genomic coordinates and make bed or bed 12 files from a TxDb object for a variety of annotated genomic features. The output of this function is a list. The first element of the list is a GRanges object that provide the start and end information of the feature. The second element is a GRangesList providing information for sub-components. The third element is the name of a bed file. 
@@ -36,7 +36,7 @@ Extract genomic coordinates and make bed or bed 12 files from a TxDb object for 
      For "gene", both GRanges object and GRangesList object have the same ranges and names. The bed file is in bed6 format.
 }
 \examples{
-txdb <- AnnotationDbi::loadDb(system.file("extdata", "txdb_chr19_1.sql", package="GenomicPlot"))
+txdb <- AnnotationDbi::loadDb(system.file("extdata", "txdb_chr19.sql", package="GenomicPlot"))
 output <- get_genomic_feature_coordinates(txdb, featureName="cds", featureSource="gencode",
 export=FALSE, longest=TRUE, protein_coding=TRUE)
 }

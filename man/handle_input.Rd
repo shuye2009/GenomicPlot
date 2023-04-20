@@ -34,9 +34,17 @@ This is a wrapper function for read NGS data in different file formats, store th
 when 'useScore' is TRUE, the score column of the bed file will be used in the metadata column 'score' of the GRanges object, or the 'Values' field of the RleList object. Otherwise the value 1 will be used instead. When the intended use of the input bed is a reference feature, both 'useScore' and 'outRle' should be set to FALSE.
 }
 \examples{
-centerfiles <- c(system.file("data", "test_B.bed", package="GenomicPlotData"),
-system.file("data", "test_C.bed", package="GenomicPlotData"))
-names(centerfiles) <- c("TestB", "TestC")
+queryFiles <- system.file("extdata", "treat_chr19.bam", package="GenomicPlot")
+names(queryFiles) <- "query"
+
+inputFiles <- system.file("extdata", "input_chr19.bam", package="GenomicPlot")
+names(inputFiles) <- "input"
+
+handleInputParams <- list(CLIP_reads=TRUE, fix_width=0, fix_point="start", norm=TRUE, 
+useScore=FALSE, outRle=TRUE, useSizeFactor=TRUE, genome="hg19")
+
+out_list <- handle_input(inputFiles=c(queryFiles, inputFiles), 
+handleInputParams=handleInputParams, verbose=TRUE, nc=2)
 
 }
 \author{

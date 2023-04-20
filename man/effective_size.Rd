@@ -22,8 +22,7 @@ effective_size(outlist, outRle, genome = "hg19", nc = 2, verbose = FALSE)
 a list object with four elements ('query', 'size', 'type', 'weight'), with the 'size' element modified.
 }
 \description{
-This is a helper function for handle_input. edgeR::calcNormFactors function is used to estimate normalizing factors,
-which is used to multiply library sizes. The function only works for human genome only at present.
+This is a helper function for handle_input. edgeR::calcNormFactors function is used to estimate normalizing factors, which is used to multiply library sizes. The function only works for human genome only at present.
 }
 \author{
 Shuye Pu

@@ -23,7 +23,7 @@ draw_region_profile(
 
 \item{cn}{column name in plot_df for query samples grouping}
 
-\item{sn}{column name in plot_df for subject name to be shown in plot title}
+\item{sn}{column name in plot_df for subject name to be shown in the plot title}
 
 \item{Ylab}{a string for Y-axis label}
 
@@ -36,7 +36,7 @@ a ggplot object
 Plot lines with standard error as the error band
 }
 \note{
-used by \code{plot_3parts_metagene}, \code{plot_5parts_metagene}, \code{plot_reference_region}
+used by \code{plot_3parts_metagene}, \code{plot_5parts_metagene}, \code{plot_region}
 }
 \author{
 Shuye Pu

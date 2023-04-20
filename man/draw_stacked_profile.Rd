@@ -48,7 +48,7 @@ a ggplot object
 Plot lines with standard error as the error band, also plots number of regions having non-zero signals
 }
 \note{
-used by \code{plot_start_end_feature}, \code{plot_start_end_reference_region}
+used by \code{plot_start_end}, \code{plot_start_end_with_random}
 }
 \author{
 Shuye Pu

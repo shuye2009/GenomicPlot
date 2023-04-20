@@ -12,7 +12,8 @@ extract_longest_tx(txdb, plot = FALSE)
 \item{plot}{logical, indicating whether feature length plots should be generated}
 }
 \value{
-a vector of transcript ids
+a dataframe of transcript information with the following columns: "tx_id tx_name
+gene_id nexon tx_len cds_len utr5_len utr3_len"
 }
 \description{
 Gene level computations require selecting one transcript per gene to avoid bias by genes with multiple
@@ -23,7 +24,7 @@ gene. The longest transcript is defined as the isoform that has the longest tran
 with longer CDS is selected. If the lengths of CDS tie again, the transcript with smaller id is selected arbitrarily.
 }
 \examples{
-txdb <- AnnotationDbi::loadDb(system.file("extdata", "txdb_chr19_1.sql", package="GenomicPlot"))
+txdb <- AnnotationDbi::loadDb(system.file("extdata", "txdb_chr19.sql", package="GenomicPlot"))
 longestTx <- extract_longest_tx(txdb, plot=FALSE)
 
 }

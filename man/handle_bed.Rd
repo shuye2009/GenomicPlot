@@ -2,7 +2,7 @@
 % Please edit documentation in R/ReadData.R
 \name{handle_bed}
 \alias{handle_bed}
-\title{Handle files in bed format}
+\title{Handle files in bed|narrowPeak|broadPeak format}
 \usage{
 handle_bed(inputFile, handleInputParams = NULL, verbose = FALSE)
 }
