@@ -1,17 +1,14 @@
 
 #' @title Rank rows of a matrix based on user input
-#' @description The rows of a input numeric matrix is ordered based row sum, row maximum, or hierarchical clustering of the rows with euclidean
-#' distannce and centroid linkage.
+#' @description The rows of a input numeric matrix is ordered based row sum, row maximum, or hierarchical clustering of the rows with euclidean distance and centroid linkage. This a helper function for drawing matrix heatmaps.
 #'
 #' @param fullmatrix a numeric matrix
 #' @param ranking a string in c("Sum", "Max", "Hierarchical", "None")
 #'
-#' @return a numerical matrix
+#' @return a numeric matrix
 #' @author Shuye Pu
 #'
 #' @export rank_rows
-#'
-#'
 
 rank_rows <- function(fullmatrix, ranking="Hierarchical"){
    fullmatrix <- data.matrix(fullmatrix)
@@ -60,17 +57,27 @@ inspect_matrix <- function(fullmatrix, verbose=FALSE){
 }
 
 #' @title Impute missing values
-#' @description Replace 0 and missing values in a matrix with half of minimum, to avoid use of arbitrary pseudo numbers
-#' and to allow log transformation
+#' @description Replace 0 and missing values in a sparse non-negative matrix with half of median of column means, to avoid use of arbitrary pseudo numbers, and to allow computing ratios and log transformation of matrices. When a matrix is sparse (assuming it has many all-zero rows and few all-zero columns), the half of median of column means is a number that is small enough so that is will not distort the data too much (comparing to pseudo count=1), but large enough to avoid huge ratios when used as a denominator.
+#' 
 #' @param fullmatrix a numeric matrix
 #' @param verbose logical, whether to output additional information
 #' 
 #' @return a numeric matrix
+#' @example 
+#' m <- matrix(0, ncol=5, nrow=30)
+#' m[1:4,] <- rexp(20, rate=1)
+#' 
+#' mimp <- impute_hm(m, verbose=TRUE)
 #' @keywords internal
 #'
 
 impute_hm <- function(fullmatrix, verbose=FALSE){
 
+   if(min(fullmatrix) < 0){
+      message("Cannot impute for matrices with negative values, matrix is not modified!")
+      return(fullmatrix)
+   }
+   
    if(verbose){
       message("Imputing missing values. Matrix quartiles:")
       print(quantile(fullmatrix))
@@ -78,10 +85,13 @@ impute_hm <- function(fullmatrix, verbose=FALSE){
 
    #minv <- median(fullmatrix[fullmatrix != 0])
    minv <- median(apply(fullmatrix, 2, mean))
-   halfmin <- ifelse(minv>0, minv/2, minv*2)
+   halfmin <- minv/2
    fullmatrix[fullmatrix < halfmin] <- halfmin ##  to avoid take log of zero and use of pseudo numbers
 
-   if(verbose) print(paste("Imputed value", halfmin))
+   if(verbose){
+      print(paste("Imputed value", halfmin))
+      print(quantile(fullmatrix))
+   }
 
    return(fullmatrix)
 }
@@ -138,7 +148,7 @@ process_scoreMatrix <- function(fullmatrix, scale=FALSE, rmOutlier=FALSE, transf
       
       fullmatrix[is.na(fullmatrix)] <- 0
       allSame <- apply(fullmatrix, 1, function(x)all(x == mean(x)))
-      fullmatrix[allSame,] <- 0 # rescale will set the entire row to 0.5 if it has only 1 distinct value,
+      fullmatrix[allSame,] <- 0 # rescale will set the entire row to 0.5 if all values are 0,
       # this will distort the downstream analysis
       count_allSame_rows <- sum(allSame)
       if(count_allSame_rows > 0 && verbose){
@@ -164,9 +174,11 @@ process_scoreMatrix <- function(fullmatrix, scale=FALSE, rmOutlier=FALSE, transf
 #'
 #' @examples
 #' fullmatrix <- matrix(rnorm(100), ncol=10)
-#' fullmatrix[3,9] <- max(fullmatrix) + 1000000
-#' rm_outlier(fullmatrix)
-#'
+#' maxm <- max(fullmatrix)
+#' fullmatrix[3,9] <- maxm + 1000
+#' fullmatrix[8,1] <- maxm + 500
+#' rm_outlier(fullmatrix, verbose=TRUE, multiplier=100)
+#' rm_outlier(fullmatrix, verbose=TRUE, multiplier=1000)
 #'
 #' @export rm_outlier
 #'
@@ -179,7 +191,7 @@ rm_outlier <- function(fullmatrix, verbose=FALSE, multiplier=1000){
    if(M > 0){
       up_bound <- median(rowmax) + multiplier*M
    }else{
-      up_bound <- rowmax
+      up_bound <- median(rowmax)
    }
 
    fullmatrix <- as.matrix(fullmatrix)
@@ -214,7 +226,7 @@ rm_outlier <- function(fullmatrix, verbose=FALSE, multiplier=1000){
 #'
 #' @description This is a helper function for performing one-way ANOVA analysis and post hoc Tukey's Honest Significant Differences tests
 #'
-#' @param df a dataframe with c("Intensity", "Group") in column names
+#' @param df a dataframe
 #' @param xc a string denoting column name for grouping
 #' @param yc a string denoting column name for numeric data to be plotted
 #' @param op output prefix for statistical analysis results
@@ -223,7 +235,7 @@ rm_outlier <- function(fullmatrix, verbose=FALSE, multiplier=1000){
 #' @return a list of two elements, the first is the p-value of ANOVA test and the second is a matrix of the output of TukeyHSD tests
 #' @author Shuye Pu
 #'
-#' @note used in \code{plot_reference_locus}
+#' @note used in \code{plot_locus}
 #' @export aov_TukeyHSD
 #'
 

@@ -42,7 +42,7 @@ a ggplot object
 Plot lines with standard error as the error band
 }
 \note{
-used by \code{plot_reference_locus}, \code{plot_reference_locus_with_random}
+used by \code{plot_locus}, \code{plot_locus_with_random}
 }
 \author{
 Shuye Pu

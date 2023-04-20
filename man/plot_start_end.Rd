@@ -19,7 +19,7 @@ plot_start_end(
   scale = FALSE,
   smooth = FALSE,
   rmOutlier = FALSE,
-  outPrefix = "plots",
+  outPrefix = NULL,
   transform = NA,
   shade = TRUE,
   Ylab = "Coverage/base/gene",

@@ -23,124 +23,255 @@ Visualization of next generation sequencing (NGS) data at various genomic featur
 
 To meet the diverse needs of experimental biologists, we have developed GenomicPlot using rich resources available on the R platform (particularly, the Bioconductor). Our GenomicPlot has the following major features:
 
--   Generates genomic or metagenomic (without introns) plots around gene body and its upstream and downstream regions, the gene body can be further segmented into 5' UTR, CDS and 3' UTR
--   Plots genomic profiles around the start and end of genomic features (like exon or intron), or custom defined genomic regions
--   Plots distance between sample peaks and genomic features, or distance between one set of peaks to another set of peaks
+-   Generating genomic (with introns) or metagenomic (without introns) plots around gene body and its upstream and downstream regions, the gene body can be further segmented into 5' UTR, CDS and 3' UTR
+-   Plotting genomic profiles around the start and end of genomic features (like exons or introns), or custom defined genomic regions
+-   Plotting distance between sample peaks and genomic features, or distance between one set of peaks to another set of peaks
+-   Plotting peak annotation statistics (distribution in different type of genes, and in different parts of genes)
+-   Plotting peak overlaps as Venn diagrams
 -   All profile line plots have error bands
 -   Random features can be generated and plotted to serve as contrast to real features
 -   Statistical analysis results on user defined regions are plotted along with the profile plots
 
 ## Plot metagene with 5'UTR, CDS and 3'UTR
 
-The lengths of each part of the genes are prorated based on the median length of 5'UTR, CDS and 3'UTR of protein-coding genes in the genome. The total length (including upstream and downstream extensions) are divided into the specified number of bins.
+The lengths of each part of the genes are prorated based on the median length of 5'UTR, CDS and 3'UTR of protein-coding genes in the genome. The total length (including upstream and downstream extensions) are divided into the specified number of bins. Subsets of genes can be plotted as overlays for comparison. 
 
 ```{r, eval=FALSE, fig.show='hold', fig.keep='all', fig.align='center', fig.dim=c(7,7), fig.ncol=1, fig.sep="\n\n"}
 library(GenomicPlot, quietly=TRUE)
-txdb <- AnnotationDbi::loadDb(system.file("data", "txdb_chr19.sql", package="GenomicPlotData"))
-gf <- prepare_5parts_genomic_features(txdb, meta=TRUE, nbins=100, fiveP=500, threeP=500, 
+txdb <- AnnotationDbi::loadDb(system.file("extdata", "txdb_chr19.sql", package="GenomicPlot"))
+gf <- prepare_5parts_genomic_features(txdb, meta=TRUE, nbins=100, fiveP=-500, threeP=500, 
                                       longest=TRUE)
 
-queryfiles <- system.file("data", "test_clip_chr19.bam", package="GenomicPlotData")
+queryfiles <- system.file("extdata", "treat_chr19.bam", package="GenomicPlot")
 names(queryfiles) <- "query"
-inputfiles <- system.file("data", "test_clip_input_chr19.bam", package="GenomicPlotData")
+inputfiles <- system.file("extdata", "input_chr19.bam", package="GenomicPlot")
 names(inputfiles) <- "input"
 
 handleInputParams <- list(CLIP_reads=FALSE, fix_width=150, fix_point="start", norm=TRUE, 
                           useScore=FALSE, outRle=TRUE, useSizeFactor=TRUE, genome="hg19")
 
-plot_5parts_metagene(queryfiles, gFeatures=gf, inputfiles=inputfiles, scale=FALSE, verbose=FALSE, 
-                     transform=FALSE, smooth=TRUE, stranded=TRUE, outPrefix=NULL, 
-                     handleInputParams=handleInputParams, heatmap=TRUE, rmOutlier=TRUE, nc=5)
+plot_5parts_metagene(queryFiles=queryfiles, 
+                     gFeatures=list("metagene"=gf), 
+                     inputFiles=inputfiles, 
+                     scale=FALSE, 
+                     verbose=FALSE, 
+                     transform=NA, 
+                     smooth=TRUE, 
+                     stranded=TRUE, 
+                     outPrefix=NULL, 
+                     handleInputParams=handleInputParams, 
+                     heatmap=TRUE, 
+                     rmOutlier=TRUE, 
+                     nc=5)
 
 ```
+```{r metagene1, echo=FALSE, fig.cap="Individual sample profile and heatmap", out.width = '75%'}
+knitr::include_graphics("../tests/test_output/test_plot_5parts_metagene2_1.png")
+```
+```{r metagene2, echo=FALSE, fig.cap="Profile overlay", out.width = '75%'}
+knitr::include_graphics("../tests/test_output/test_plot_5parts_metagene2_2.png")
+```
+```{r metagene3, echo=FALSE, fig.cap="Ratio-over-input profile and heatmap", out.width = '75%'}
+knitr::include_graphics("../tests/test_output/test_plot_5parts_metagene2_3.png")
+```
+
 
 ## Plot metagene
 
 The lengths of each part of the profile plot are prorated to the lengths of upstream and downstream extensions as well as the median length of protein-coding genes in the genome. The total length (including upstream and downstream extensions) are divided into the specified number of bins.
 
 ```{r, eval=FALSE, fig.show='hold', fig.keep='all', fig.align='center', fig.dim=c(7,7)}
-gf <- prepare_3parts_genomic_features(txdb, meta=FALSE, nbins=100, fiveP=3000, threeP=2000, 
+txdb <- AnnotationDbi::loadDb(system.file("extdata", "txdb_chr19.sql", package="GenomicPlot"))
+gf <- prepare_3parts_genomic_features(txdb, meta=FALSE, nbins=100, fiveP=-3000, threeP=2000, 
                                       longest=TRUE)
 
-queryfiles <- system.file("data", "test_chip_chr19.bam", package="GenomicPlotData")
+queryfiles <- system.file("extdata", "chip_treat_chr19.bam", package="GenomicPlot")
 names(queryfiles) <- "query"
-inputfiles <- system.file("data", "test_chip_input_chr19.bam", package="GenomicPlotData")
+inputfiles <- system.file("extdata", "chip_input_chr19.bam", package="GenomicPlot")
 names(inputfiles) <- "input"
 
 handleInputParams <- list(CLIP_reads=FALSE, fix_width=150, fix_point="start", norm=TRUE, 
                           useScore=FALSE, outRle=TRUE, useSizeFactor=TRUE, genome="hg19")
 
-plot_3parts_metagene(queryfiles, gFeatures=gf, inputfiles=inputfiles, scale=FALSE, verbose=FALSE, 
-                     transform=FALSE, smooth=TRUE, stranded=TRUE, outPrefix=NULL, 
-                     handleInputParams=handleInputParams, heatmap=TRUE, rmOutlier=TRUE, nc=5)
+plot_3parts_metagene(queryFiles=queryfiles, 
+                     gFeatures=gf, 
+                     inputFiles=inputfiles, 
+                     scale=FALSE, 
+                     verbose=FALSE, 
+                     transform=NA, 
+                     smooth=TRUE, 
+                     stranded=TRUE, 
+                     outPrefix=NULL, 
+                     handleInputParams=handleInputParams, 
+                     heatmap=TRUE, 
+                     rmOutlier=TRUE, 
+                     nc=5)
 
+```
+```{r gene1, echo=FALSE, fig.cap="Individual sample profile and heatmap", out.width = '75%'}
+knitr::include_graphics("../tests/test_output/test_plot_3parts_metagene_1.png")
+```
+```{r gene2, echo=FALSE, fig.cap="Profile overlay", out.width = '75%'}
+knitr::include_graphics("../tests/test_output/test_plot_3parts_metagene_2.png")
+```
+```{r gene3, echo=FALSE, fig.cap="Ratio-over-input profile and heatmap", out.width = '75%'}
+knitr::include_graphics("../tests/test_output/test_plot_3parts_metagene_3.png")
 ```
 
 ## Plot user defined regions
 
-Signal profile in user defined regions provided through a .bed file or narrowPeak file along with heatmaps can be plotted. Multiple samples (.bam files) and multiple set of regions (.bed file) can over-layed on the same figure, or can be output as various combinations. When input files (for ChIPseq and CLIPseq) are available, ratio-over-input are displayed as well.
+Signal profile along with heatmaps in genomic features or user defined genomic regions provided through a .bed file or narrowPeak file can be plotted. Multiple samples (.bam files) and multiple set of regions (.bed file) can be overlayed on the same figure, or can be output as various combinations. When input files (for ChIPseq and CLIPseq) are available, ratio-over-input are displayed as well. Statistical comparisons between samples or between features can be plotted as boxplots or barplots of means+/-S.E.
 
 ```{r, eval=FALSE, fig.show='hold', fig.keep='all', fig.align='center', fig.dim=c(7,7)}
-centerfiles <- system.file("data", "test_chip_peak_chr19.narrowPeak", package="GenomicPlotData")
+centerfiles <- system.file("extdata", "test_chip_peak_chr19.narrowPeak", package="GenomicPlot")
  names(centerfiles) <- c("narrowpeak")
- queryfiles <- c(system.file("data", "test_clip_chr19.bam", package="GenomicPlotData"),
-                 system.file("data", "test_chip_chr19.bam", package="GenomicPlotData"))
+ queryfiles <- c(system.file("extdata", "treat_chr19.bam", package="GenomicPlot"),
+                 system.file("extdata", "chip_treat_chr19.bam", package="GenomicPlot"))
  names(queryfiles) <- c("clip_bam", "chip_bam")
- inputfiles <- c(system.file("data", "test_clip_input_chr19.bam", package="GenomicPlotData"),
-                 system.file("data", "test_chip_input_chr19.bam", package="GenomicPlotData"))
+ inputfiles <- c(system.file("extdata", "input_chr19.bam", package="GenomicPlot"),
+                 system.file("extdata", "chip_input_chr19.bam", package="GenomicPlot"))
  names(inputfiles) <- c("clip_input", "chip_input")
 
  handleInputParams <- list(CLIP_reads=FALSE, fix_width=150, fix_point="start", norm=TRUE, useScore=FALSE,
                            outRle=TRUE, useSizeFactor=TRUE, genome="hg19")
 
- plot_reference_region(queryfiles, centerfiles, inputfiles, nbins=100, heatmap=TRUE, scale=FALSE,  
-                       regionName="narrowPeak", handleInputParams=handleInputParams, verbose=FALSE, 
-                       fiveP=500, threeP=500, smooth=TRUE, transform=FALSE, stranded=TRUE, outPrefix=NULL, 
-                       rmOutlier=FALSE, nc=5)
+ plot_region(queryFiles=queryfiles, 
+             centerFiles=centerfiles, 
+             inputFiles=inputfiles, 
+             nbins=100, 
+             heatmap=TRUE, 
+             scale=FALSE,  
+             regionName="narrowPeak", 
+             handleInputParams=handleInputParams, 
+             verbose=FALSE, 
+             fiveP=-500, 
+             threeP=500, 
+             smooth=TRUE, 
+             transform=NA, 
+             stranded=TRUE, 
+             outPrefix=NULL, 
+             rmOutlier=FALSE, 
+             nc=5)
+```
+```{r region1, echo=FALSE, fig.cap="Individual sample profile", out.width = '75%'}
+knitr::include_graphics("../tests/test_output/test_plot_region_11.png")
+```
+```{r region2, echo=FALSE, fig.cap="Individual sample mean signal in narrowPeak", out.width = '75%'}
+knitr::include_graphics("../tests/test_output/test_plot_region_12.png")
+```
+```{r region3, echo=FALSE, fig.cap="Individual sample cumulative signal in narrowPeak", out.width = '75%'}
+knitr::include_graphics("../tests/test_output/test_plot_region_13.png")
+```
+```{r region4, echo=FALSE, fig.cap="Individual sample signal in narrowPeak violin plot", out.width = '75%'}
+knitr::include_graphics("../tests/test_output/test_plot_region_14.png")
+```
+```{r region5, echo=FALSE, fig.cap="Individual sample signal in narrowPeak box plot", out.width = '75%'}
+knitr::include_graphics("../tests/test_output/test_plot_region_15.png")
+```
+```{r region6, echo=FALSE, fig.cap="Individual sample profile and heatmap", out.width = '75%'}
+knitr::include_graphics("../tests/test_output/test_plot_region_16.png")
+```
+```{r region7, echo=FALSE, fig.cap="Ratio-over-input profile and stats plot", out.width = '75%'}
+knitr::include_graphics("../tests/test_output/test_plot_region_17.png")
+```
+```{r region8, echo=FALSE, fig.cap="Ratio-over-input profile and heatmap", out.width = '75%'}
+knitr::include_graphics("../tests/test_output/test_plot_region_18.png")
 ```
 
-## Plot start and end of a genomic feature
+
+
+## Plot start and end of a genomic feature 
 
 When the intron splicing sites are focus of studies, we want to inspect signals at both 5' splicing sites and 3' splicing sites, perhaps want to contrast with the center of introns as well, then displaying all 3 pieces of information in the same panel would be desirable.
 
 ```{r, eval=FALSE, fig.show='hold', fig.keep='all', fig.align='center', fig.dim=c(7,7)}
-txdb <- AnnotationDbi::loadDb(system.file("data", "txdb_chr19.sql", package="GenomicPlotData"))
-queryfiles <- system.file("data", "test_clip_chr19.bam", package="GenomicPlotData")
+txdb <- AnnotationDbi::loadDb(system.file("extdata", "txdb_chr19.sql", package="GenomicPlot"))
+queryfiles <- system.file("extdata", "treat_chr19.bam", package="GenomicPlot")
 names(queryfiles) <- "query"
-inputfiles <- system.file("data", "test_clip_input_chr19.bam", package="GenomicPlotData")
+inputfiles <- system.file("extdata", "input_chr19.bam", package="GenomicPlot")
 names(inputfiles) <- "input"
 ext <- c(-500, 200, -200, 500)
 hl <- c(-50, 50, -50, 50)
 
-handleInputParams <- list(CLIP_reads=FALSE, fix_width=150, fix_point="start", norm=TRUE, useScore=FALSE, 
+handleInputParams <- list(CLIP_reads=TRUE, fix_width=150, fix_point="start", norm=TRUE, useScore=FALSE, 
                           outRle=TRUE, useSizeFactor=TRUE, genome="hg19")
-plot_start_end_feature(queryfiles=queryfiles, inputfiles=inputfiles, txdb=txdb, featureName="intron", 
-                       binsize=10,handleInputParams=handleInputParams, longest=TRUE, ext=ext, hl=hl, 
-                       randomize=TRUE, insert=100, stranded=TRUE, scale=FALSE, smooth=TRUE, 
-                       outPrefix=NULL, nc=5)
+plot_start_end(queryFiles=queryfiles, 
+               inputFiles=inputfiles, 
+               txdb=txdb, 
+               centerFiles="intron", 
+               binSize=10,
+               handleInputParams=handleInputParams, 
+               ext=ext, 
+               hl=hl, 
+               insert=100, 
+               stranded=TRUE, 
+               scale=FALSE, 
+               smooth=TRUE, 
+               outPrefix=NULL, 
+               nc=5)
+```
+```{r intron1, echo=FALSE, fig.cap="Query and input sample profiles in start, center and end of intron", out.width = '75%'}
+knitr::include_graphics("../tests/test_output/test_plot_stat_end_3.png")
+```
+```{r intron2, echo=FALSE, fig.cap="Ratio-over profile in start, center and end of intron", out.width = '75%'}
+knitr::include_graphics("../tests/test_output/test_plot_stat_end_4.png")
 ```
 
 ## Plot reference locus 
 Difference in signal intensity within specific regions around the reference loci can be tested, and the test statistics can be plotted as boxplot and barplot of mean +/- SE. The test can be done among loci or among samples.
 
 ```{r, eval=FALSE, fig.show='hold', fig.keep='all', fig.align='center', fig.dim=c(7,7)}
- centerfiles <- c(system.file("data", "test_clip_peak_chr19.bed", package="GenomicPlotData"),
-                  system.file("data", "test_chip_peak_chr19.bed", package="GenomicPlotData"))
+ centerfiles <- c(system.file("extdata", "test_clip_peak_chr19.bed", package="GenomicPlot"),
+                  system.file("extdata", "test_chip_peak_chr19.bed", package="GenomicPlot"))
  names(centerfiles) <- c("clip_peak", "chip_peak")
- queryfiles <- c(system.file("data", "test_clip_chr19.bam", package="GenomicPlotData"),
-                 system.file("data", "test_chip_chr19.bam", package="GenomicPlotData"))
+ queryfiles <- c(system.file("extdata", "treat_chr19.bam", package="GenomicPlot"),
+                 system.file("extdata", "chip_treat_chr19.bam", package="GenomicPlot"))
  names(queryfiles) <- c("clip_bam", "chip_bam")
- inputfiles <- c(system.file("data", "test_clip_input_chr19.bam", package="GenomicPlotData"),
-                 system.file("data", "test_chip_input_chr19.bam", package="GenomicPlotData"))
+ inputfiles <- c(system.file("extdata", "input_chr19.bam", package="GenomicPlot"),
+                 system.file("extdata", "chip_input_chr19.bam", package="GenomicPlot"))
  names(inputfiles) <- c("clip_input", "chip_input")
 
  handleInputParams <- list(CLIP_reads=FALSE, fix_width=150, fix_point="start", norm=TRUE, useScore=FALSE,
                            outRle=TRUE, useSizeFactor=TRUE, genome="hg19")
 
- plot_reference_locus(queryfiles, centerfiles, ext=c(-500,500), hl=c(-100,100), shade=TRUE, smooth=TRUE,
-                     handleInputParams=handleInputParams, binsize=10, refPoint="center", Xlab="Center",
-                     inputfiles=inputfiles, stranded=TRUE, scale=FALSE, outPrefix=NULL, verbose=FALSE,
-                     transform=FALSE, rmOutlier=FALSE, stats.method="wilcox.test", heatmap=TRUE, nc=5)
+ plot_locus(queryFiles=queryfiles, 
+            centerFiles=centerfiles, 
+            ext=c(-500,500), 
+            hl=c(-100,100), 
+            shade=TRUE, 
+            smooth=TRUE, 
+            handleInputParams=handleInputParams, 
+            binSize=10, 
+            refPoint="center", 
+            Xlab="Center", 
+            inputFiles=inputfiles, 
+            stranded=TRUE, 
+            scale=FALSE, 
+            outPrefix=NULL, 
+            verbose=FALSE, 
+            transform=NA, 
+            rmOutlier=FALSE, 
+            statsMethod="wilcox.test", 
+            heatmap=TRUE, 
+            nc=5)
+```
+```{r locus1, echo=FALSE, fig.cap="Ratio-over-input for clip signal around clip and chip peaks", out.width = '75%'}
+knitr::include_graphics("../tests/test_output/test_plot_locus2_13.png")
+```
+```{r locus2, echo=FALSE, fig.cap="Ratio-over-input for chip signal around clip and chip peaks", out.width = '75%'}
+knitr::include_graphics("../tests/test_output/test_plot_locus2_14.png")
+```
+```{r locus3, echo=FALSE, fig.cap="Ratio-over-input for chip and clip signal around clip peaks", out.width = '75%'}
+knitr::include_graphics("../tests/test_output/test_plot_locus2_15.png")
+```
+```{r locus4, echo=FALSE, fig.cap="Ratio-over-input for chip and clip signal around chip peaks", out.width = '75%'}
+knitr::include_graphics("../tests/test_output/test_plot_locus2_16.png")
+```
+```{r locus5, echo=FALSE, fig.cap="Ratio-over-input profiles for chip and clip signal around clip and chip peaks", out.width = '75%'}
+knitr::include_graphics("../tests/test_output/test_plot_locus2_17.png")
+```
+```{r locus6, echo=FALSE, fig.cap="Ratio-over-input profiles and heatmap for chip and clip signal", out.width = '75%'}
+knitr::include_graphics("../tests/test_output/test_plot_locus2_18.png")
 ```
 
 ## Plot reference loci with random sites as contrast
@@ -148,40 +279,83 @@ Difference in signal intensity within specific regions around the reference loci
 Random sites that deviate from the reference loci within a specified maximum distance can be treated as a control, and the statistical tests will be performed between bona fide and the random sites. Here the reference sites located in different genomic features (5'UTR, CDS, 3'UTR) can tested separately.
 
 ```{r, eval=FALSE, fig.show='hold', fig.keep='all', fig.align='center', fig.dim=c(7,7)}
-txdb <- AnnotationDbi::loadDb(system.file("data", "txdb_chr19.sql", package="GenomicPlotData"))
- centerfiles <- c(system.file("data", "test_clip_peak_chr19.bed", package="GenomicPlotData"))
+txdb <- AnnotationDbi::loadDb(system.file("extdata", "txdb_chr19.sql", package="GenomicPlot"))
+ centerfiles <- c(system.file("extdata", "test_clip_peak_chr19.bed", package="GenomicPlot"))
  names(centerfiles) <- c("clip_peak")
- queryfiles <- c(system.file("data", "test_clip_chr19.bam", package="GenomicPlotData"))
+ queryfiles <- c(system.file("extdata", "treat_chr19.bam", package="GenomicPlot"))
  names(queryfiles) <- c("clip_bam")
- inputfiles <- c(system.file("data", "test_clip_input_chr19.bam", package="GenomicPlotData"))
+ inputfiles <- c(system.file("extdata", "input_chr19.bam", package="GenomicPlot"))
  names(inputfiles) <- c("clip_input")
 
-handleInputParams <- list(CLIP_reads=FALSE, fix_width=150, fix_point="start", norm=TRUE, useScore=FALSE,
+handleInputParams <- list(CLIP_reads=TRUE, fix_width=150, fix_point="start", norm=TRUE, useScore=FALSE,
                           outRle=TRUE, useSizeFactor=TRUE, genome="hg19")
 
-plot_reference_locus_with_random(queryfiles, centerfiles, txdb, ext=c(-500,500), hl=c(-100,100), 
-                                 shade=TRUE, handleInputParams=handleInputParams, binsize=10, 
-                                 refPoint="center", Xlab="Center", smooth=TRUE,inputfiles=inputfiles, 
-                                 stranded=TRUE, scale=FALSE, outPrefix=NULL, verbose=FALSE, 
-                                 transform=FALSE, rmOutlier=FALSE, n_random=1, stats.method="wilcox.test", 
-                                 nc=5)
+plot_locus_with_random(queryFiles=queryfiles, 
+                       centerFiles=centerfiles, 
+                       txdb, 
+                       ext=c(-500,500), 
+                       hl=c(-100,100), 
+                       shade=TRUE, 
+                       handleInputParams=handleInputParams, 
+                       binSize=10, 
+                       refPoint="center", 
+                       Xlab="Center", 
+                       smooth=TRUE,
+                       inputFiles=inputfiles, 
+                       stranded=TRUE, 
+                       scale=FALSE, 
+                       outPrefix=NULL, 
+                       verbose=FALSE, 
+                       transform=NA, 
+                       rmOutlier=FALSE, 
+                       n_random=1, 
+                       statsMethod="wilcox.test", 
+                       nc=5)
+```
+```{r locusr1, echo=FALSE, fig.cap="Ratio-over-input for clip signal around clip peaks in 5' UTR", out.width = '75%'}
+knitr::include_graphics("../tests/test_output/test_plot_locus_with_random_9.png")
+```
+```{r locusr2, echo=FALSE, fig.cap="Ratio-over-input for clip signal around clip peaks in CDS", out.width = '75%'}
+knitr::include_graphics("../tests/test_output/test_plot_locus_with_random_10.png")
+```
+```{r locusr3, echo=FALSE, fig.cap="Ratio-over-input for clip signal around clip peaks in 3' UTR", out.width = '75%'}
+knitr::include_graphics("../tests/test_output/test_plot_locus_with_random_11.png")
+```
+```{r locusr4, echo=FALSE, fig.cap="Ratio-over-input for clip signal around clip peaks", out.width = '75%'}
+knitr::include_graphics("../tests/test_output/test_plot_locus_with_random_12.png")
 ```
 
 ## Plot peak annotation statistics
 
-Aside from reads coverage profiles, distribution of binding peaks in different gene types and genomic features is also important. Peak annotation statistics are plotted as bar chart for distribution in gene types, and as pie charts for distribution in genomic features. The pie charts are plotted in two different ways: either as percentage of absolute counts or as percentage of feature length-normalized counts in each features. For DNA binding samples, the features, in order of precedence, include "Promoter", "TTS", "5'UTR", "CDS", "3'UTR" and "Intron"; for RNA binding samples, "Promoter" and "TTS" are excluded. "Promoter" is defined as regions 2000 bp upstream of transcription start site (TSS), "TTS" is defined as the region 1000 bp downstream transcription termination sites by default, but these lengths can be adjusted.
+Aside from reads coverage profiles, distribution of binding peaks in different gene types and genomic features is also important. Peak annotation statistics are plotted as bar chart for distribution in gene types, and as pie charts for distribution in genomic features. The pie charts are plotted in two different ways: either as percentage of absolute counts or as percentage of feature length-normalized counts in each features. For DNA binding samples, the features, in order of precedence, include "Promoter", "TTS", "5'UTR", "CDS", "3'UTR" and "Intron"; for RNA binding samples, "Promoter" and "TTS" are excluded. "Promoter" is defined as regions 2000 bp upstream of transcription start site (TSS) and 300 bp downstream TSS, "TTS" is defined as the region 1000 bp downstream cleavage site or the length between cleavage site and the start of the next gene, whichever is shorter, but these lengths can be adjusted.
 
 ```{r, eval=FALSE, fig.show='hold', fig.keep='all', fig.align='center', fig.dim=c(7,7)}
 suppressPackageStartupMessages(library(GenomicPlot, quietly=TRUE))
-gtffile <- system.file("data", "gencode.v19.annotation_chr19.gtf", package="GenomicPlotData")
+gtffile <- system.file("extdata", "gencode.v19.annotation_chr19.gtf", package="GenomicPlot")
 
-centerfile <- system.file("data", "test_chip_peak.narrowPeak", package="GenomicPlotData")
-names(centerfile) <- c("narrowPeak")
+centerfile <- system.file("extdata", "test_chip_peak_chr19.bed", package="GenomicPlot")
+names(centerfile) <- c("summitPeak")
 
 handleBedparams <- list(fix_width=0, fix_point="center", useScore=FALSE, outRle=FALSE, CLIP_reads=FALSE,
                         norm=FALSE, useSizeFactor=FALSE, genome="hg19")
 
-pa <- plot_peak_annotation(peakfile=centerfile, gtfFile=gtffile, handleInputParams=handleBedparams, 
-                           fiveP=2000, threeP=1000, simple=FALSE, RNA=FALSE, verbose=TRUE, 
+pa <- plot_peak_annotation(peakFile=centerfile, 
+                           gtfFile=gtffile, 
+                           handleInputParams=handleBedparams, 
+                           fiveP=-2000, 
+                           dsTSS=300, 
+                           threeP=1000, 
+                           simple=FALSE, 
+                           verbose=TRUE, 
                            outPrefix=NULL)
 ```
+```{r annotation1, echo=FALSE, fig.cap="Distribution of chip peak in various types of gene", out.width = '75%'}
+knitr::include_graphics("../tests/test_output/test_plot_peak_annotation1_1.png")
+```
+```{r annotation2, echo=FALSE, fig.cap="Distribution of chip peak in various parts of gene", out.width = '75%'}
+knitr::include_graphics("../tests/test_output/test_plot_peak_annotation1_2.png")
+```
+```{r annotation3, echo=FALSE, fig.cap="Density of chip peak in various parts of gene", out.width = '75%'}
+knitr::include_graphics("../tests/test_output/test_plot_peak_annotation1_3.png")
+```
+

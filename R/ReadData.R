@@ -22,9 +22,17 @@
 #'
 #' @author Shuye Pu
 #' @examples
-#' centerfiles <- c(system.file("data", "test_B.bed", package="GenomicPlotData"),
-#' system.file("data", "test_C.bed", package="GenomicPlotData"))
-#' names(centerfiles) <- c("TestB", "TestC")
+#' queryFiles <- system.file("extdata", "treat_chr19.bam", package="GenomicPlot")
+#' names(queryFiles) <- "query"
+#' 
+#' inputFiles <- system.file("extdata", "input_chr19.bam", package="GenomicPlot")
+#' names(inputFiles) <- "input"
+#'
+#' handleInputParams <- list(CLIP_reads=TRUE, fix_width=0, fix_point="start", norm=TRUE, 
+#' useScore=FALSE, outRle=TRUE, useSizeFactor=TRUE, genome="hg19")
+#' 
+#' out_list <- handle_input(inputFiles=c(queryFiles, inputFiles), 
+#' handleInputParams=handleInputParams, verbose=TRUE, nc=2)
 #'
 #' @export handle_input
 
@@ -109,8 +117,7 @@ handle_input <- function(inputFiles, handleInputParams=NULL, verbose=FALSE, nc=2
 
 #' @title Normalize sample library size to effective size
 #'
-#' @description This is a helper function for handle_input. edgeR::calcNormFactors function is used to estimate normalizing factors,
-#' which is used to multiply library sizes. The function only works for human genome only at present.
+#' @description This is a helper function for handle_input. edgeR::calcNormFactors function is used to estimate normalizing factors, which is used to multiply library sizes. The function only works for human genome only at present.
 #'
 #' @param outlist a list object with four elements, 'query' is a list GRanges objects or RleList objects, 'size' is the library size, 'type' is the input file type,
 #' 'weight' is the name of the metadata column
@@ -167,7 +174,7 @@ effective_size <- function(outlist, outRle, genome="hg19", nc=2, verbose=FALSE){
    invisible(normlist)
 }
 
-#' @title Handle files in bed format
+#' @title Handle files in bed|narrowPeak|broadPeak format
 #'
 #' @description This is a function for read peaks data in bed format, store the input data in a list of GRanges objects or RleList objects.
 #'
@@ -392,8 +399,7 @@ handle_wig <- function(inputFile, handleInputParams, verbose=FALSE){
 
 
 #' @title Find wig/bw file for the negative strand
-#' @description Find the file name of the negative strand, if a .wig/bw file for positive strand if provided, by looking for file names with one character difference.
-#' If no negative strand file is found, assume the input .wig/bw file is non-stranded
+#' @description Find the file name of the negative strand, if a .wig/bw file for positive strand if provided, by looking for file names with one character difference. If no negative strand file is found, assume the input .wig/bw file is non-stranded
 #'
 #' @param inputFile path to a .wig/bw file, presumably for positive strand
 #' @param verbose logical, whether to output additional information

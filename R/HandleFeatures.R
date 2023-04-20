@@ -10,11 +10,12 @@
 #'
 #' @param txdb a TxDb object defined in the GenomicFeatures package
 #' @param plot logical, indicating whether feature length plots should be generated
-#' @return a vector of transcript ids
+#' @return a dataframe of transcript information with the following columns: "tx_id tx_name
+#' gene_id nexon tx_len cds_len utr5_len utr3_len"
 #' @author Shuye Pu
 #'
 #' @examples
-#' txdb <- AnnotationDbi::loadDb(system.file("extdata", "txdb_chr19_1.sql", package="GenomicPlot"))
+#' txdb <- AnnotationDbi::loadDb(system.file("extdata", "txdb_chr19.sql", package="GenomicPlot"))
 #' longestTx <- extract_longest_tx(txdb, plot=FALSE)
 #'
 #' @export extract_longest_tx
@@ -185,11 +186,11 @@ extract_longest_tx <- function(txdb, plot=FALSE){
 #' @param longest logical, indicating whether the output should be limited to the longest transcript of each gene
 #' @param protein_coding logical, indicating whether to limit to protein_coding genes
 #'
-#' @return a list of three objects, the first is a GRanges object, the second is a GRangesList object, the last is the output file name
+#' @return a list of three objects, the first is a GRanges object, the second is a GRangesList object, the last is the output file name if export is TRUE
 #' @author Shuye Pu
 #'
 #' @examples
-#' txdb <- AnnotationDbi::loadDb(system.file("extdata", "txdb_chr19_1.sql", package="GenomicPlot"))
+#' txdb <- AnnotationDbi::loadDb(system.file("extdata", "txdb_chr19.sql", package="GenomicPlot"))
 #' output <- get_genomic_feature_coordinates(txdb, featureName="cds", featureSource="gencode",
 #' export=FALSE, longest=TRUE, protein_coding=TRUE)
 #' @export get_genomic_feature_coordinates
@@ -320,9 +321,9 @@ get_genomic_feature_coordinates <- function(txdb, featureName, featureSource=NUL
 #' @author Shuye Pu
 #'
 #' @examples
-#' txdb <- AnnotationDbi::loadDb(system.file("data", "txdb_chr19.sql", package="GenomicPlotData"))
+#' txdb <- AnnotationDbi::loadDb(system.file("data", "txdb_chr19.sql", package="GenomicPlot"))
 #'
-#' gf <- prepare_3parts_genomic_features(txdb, meta=FALSE, nbins=100, fiveP=1000, threeP=1000,
+#' gf <- prepare_3parts_genomic_features(txdb, meta=FALSE, nbins=100, fiveP=-1000, threeP=1000,
 #' longest=FALSE)
 #'
 #' @export prepare_3parts_genomic_features
@@ -392,15 +393,15 @@ prepare_3parts_genomic_features <- function(txdb, featureName="transcript", meta
 #' @param threeP extension out of the 3' boundary of gene
 #' @param verbose logical, whether to output additional information
 #' @param longest logical, indicating whether the output should be limited to the longest transcript of each gene
-#' @param subsetTx a vector of transcript names for subseting the genome
+#' @param subsetTx a vector of transcript names (eg. ENST00000587541.1) for subsetting the genome
 #'
 #' @return a named list with the elements c("windowRs", "nbins", "scaled_bins", "fiveP", "threeP", "meta", "longest")
 #' @author Shuye Pu
 #'
 #' @examples
-#' txdb <- AnnotationDbi::loadDb(system.file("data", "txdb_chr19.sql", package="GenomicPlotData"))
+#' txdb <- AnnotationDbi::loadDb(system.file("extdata", "txdb_chr19.sql", package="GenomicPlot"))
 #'
-#' gf <- prepare_5parts_genomic_features(txdb, meta=TRUE, nbins=100, fiveP=1000, threeP=1000,
+#' gf <- prepare_5parts_genomic_features(txdb, meta=TRUE, nbins=100, fiveP=-1000, threeP=1000,
 #' longest=TRUE)
 #'
 #' @export prepare_5parts_genomic_features
@@ -479,7 +480,7 @@ prepare_5parts_genomic_features <- function(txdb, meta=TRUE, nbins=100, fiveP=-1
 
 #' @title Get genomic coordinates of features of protein-coding genes
 #
-#' @description Get genomic coordinates of promoter, 5'UTR, CDS, 3'UTR, TTS and intron for the longest transcript of protein-coding genes. The range of promoter is defined by fiveP and dsTSS upstream and downstream TSS, respectively, the TTS ranges from the 3' end of the gene to threeP downstream.
+#' @description Get genomic coordinates of promoter, 5'UTR, CDS, 3'UTR, TTS and intron for the longest transcript of protein-coding genes. The range of promoter is defined by fiveP and dsTSS upstream and downstream TSS, respectively, the TTS ranges from the 3' end of the gene to threeP downstream, or the start of a downstream gene, whichever is closer.
 #'
 #' @param txdb a TxDb object defined in the GenomicFeatures package
 #' @param fiveP extension upstream of the 5' boundary of genes
@@ -490,9 +491,9 @@ prepare_5parts_genomic_features <- function(txdb, meta=TRUE, nbins=100, fiveP=-1
 #' @author Shuye Pu
 #'
 #' @examples
-#' txdb <- AnnotationDbi::loadDb(system.file("data", "txdb_chr19.sql", package="GenomicPlotData"))
+#' txdb <- AnnotationDbi::loadDb(system.file("extdata", "txdb_chr19.sql", package="GenomicPlot"))
 #'
-#' f <- get_txdb_features(txdb, dsTSS=100, fiveP=0, threeP=0)
+#' f <- get_txdb_features(txdb, dsTSS=100, fiveP=-100, threeP=100)
 #'
 #' @export get_txdb_features
 #'
@@ -593,16 +594,16 @@ get_txdb_features <- function(txdb, fiveP=-1000, dsTSS=300, threeP=1000){
 #' @author Shuye Pu
 #'
 #' @examples
-#' txdb <- AnnotationDbi::loadDb(system.file("data", "txdb_chr19.sql", package="GenomicPlotData"))
-#'
+#' txdb <- AnnotationDbi::loadDb(system.file("extdata", "txdb_chr19.sql", package="GenomicPlot"))
 #' f <- get_txdb_features(txdb, dsTSS=100, fiveP=0, threeP=1000)
-#' p <- RCAS::importBed(system.file("data", "test_chip_peak_chr19.bed", package="GenomicPlotData"))
 #' 
+#' p <- RCAS::importBed(system.file("extdata", "test_chip_peak_chr19.bed", package="GenomicPlot"))
 #' ann <- get_targeted_genes(peak=p, features=f, stranded=FALSE)
 #' 
-#' pp <- RCAS::importBed(system.file("data", "test_clip_peak_chr19.bed", package="GenomicPlotData"))
+#' pp <- RCAS::importBed(system.file("extdata", "test_clip_peak_chr19.bed", package="GenomicPlot"))
 #' ann <- get_targeted_genes(peak=pp, features=f, stranded=TRUE)
 #'
+#' @note used in \code{plot_peak_annotation}
 #' @export get_targeted_genes
 
 get_targeted_genes <- function(peak, features, stranded=TRUE){
@@ -711,10 +712,10 @@ make_subTxDb_from_GTF <- function(gtfFile, geneList, geneCol=1){
 #' @description Given a list of gene names in a file or in a character vector, turn them into a vector of transcript ids.
 #'
 #' @param gtfFile path to a GTF file
-#' @param geneList path to a tab-delimited text file with one gene name on each line, or a character vector of gene names
+#' @param geneList path to a tab-delimited text file with one gene name on each line, or a character vector of gene names (eg. RPRD1B)
 #' @param geneCol the position of the column that containing gene names in the case that geneList is a file
 #'
-#' @return a vector of transcript ids
+#' @return a vector of transcript ids (eg. ENST00000577222.1)
 #' @author Shuye Pu
 #' 
 #' @export gene2tx
@@ -733,10 +734,10 @@ gene2tx <- function(gtfFile, geneList, geneCol=1){
 }
 
 #' @title Check constraints of genomic ranges
-#' @description Make sure the coordinates of GRanges are within the boundaries of chromosomes, and trim anything that goes beyound. Also, remove entries whose seqname is not the seqname of a query GRanges.
+#' @description Make sure the coordinates of GRanges are within the boundaries of chromosomes, and trim anything that goes beyond. Also, remove entries whose seqname is not in the seqname of a query GRanges.
 #' 
 #' @param gr a GenomicRanges object
-#' @param genome genomic version name such as "hg18"
+#' @param genome genomic version name such as "hg19"
 #' @param queryRle a RleList object used as a query against gr
 #' 
 #' @return a GRanges object
@@ -757,7 +758,7 @@ check_constraints <- function(gr, genome, queryRle=NULL){
    return(gr)
 }
 
-#' @title Filter GRanges by overlaps in stranded way
+#' @title Filter GRanges by overlaps in a stranded way
 #' @description This function reports all query GRanges that have overlaps in subject GRanges. Strand information is used to define overlap.
 #' @param query a GRanges object
 #' @param subject a GRanges object

@@ -86,8 +86,9 @@ names(inputFiles) <- "input"
 ext <- c(-500, 200, -200, 500)
 hl <- c(-50, 50, -50, 50)
 
-handleInputParams <- list(CLIP_reads=TRUE, fix_width=150, fix_point="start", norm=TRUE, useScore=FALSE,
-   outRle=TRUE, useSizeFactor=TRUE, genome="hg19")
+handleInputParams <- list(CLIP_reads=TRUE, fix_width=150, fix_point="start", norm=TRUE, 
+useScore=FALSE, outRle=TRUE, useSizeFactor=TRUE, genome="hg19")
+
 plot_start_end_with_random(queryFiles=c(queryFiles), inputFiles=c(inputFiles), txdb=txdb, centerFile="intron",
    binSize=10, handleInputParams=handleInputParams, ext=ext, hl=hl, randomize=TRUE, verbose=TRUE,
    insert=100, stranded=TRUE, scale=FALSE, smooth=TRUE, outPrefix=NULL, nc=2)

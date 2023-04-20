@@ -19,15 +19,17 @@ a list object
 \description{
 Annotate each peak with genomic features based on overlap, and produce summary statistics for distribution of peaks in features of protein-coding genes.
 }
+\note{
+used in \code{plot_peak_annotation}
+}
 \examples{
-txdb <- AnnotationDbi::loadDb(system.file("data", "txdb_chr19.sql", package="GenomicPlotData"))
-
+txdb <- AnnotationDbi::loadDb(system.file("extdata", "txdb_chr19.sql", package="GenomicPlot"))
 f <- get_txdb_features(txdb, dsTSS=100, fiveP=0, threeP=1000)
-p <- RCAS::importBed(system.file("data", "test_chip_peak_chr19.bed", package="GenomicPlotData"))
 
+p <- RCAS::importBed(system.file("extdata", "test_chip_peak_chr19.bed", package="GenomicPlot"))
 ann <- get_targeted_genes(peak=p, features=f, stranded=FALSE)
 
-pp <- RCAS::importBed(system.file("data", "test_clip_peak_chr19.bed", package="GenomicPlotData"))
+pp <- RCAS::importBed(system.file("extdata", "test_clip_peak_chr19.bed", package="GenomicPlot"))
 ann <- get_targeted_genes(peak=pp, features=f, stranded=TRUE)
 
 }

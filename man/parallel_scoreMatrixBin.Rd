@@ -33,8 +33,7 @@ parallel_scoreMatrixBin(
 a numeric matrix
 }
 \description{
-Function for parallel computation of scoreMatrixBin. The 'windows' parameter of the scoreMatrixBin method is split into 5 chunks,
-and scoreMatrixBin is called on each chunk simultaneously to speed up the computation.
+Function for parallel computation of scoreMatrixBin. The 'windows' parameter of the scoreMatrixBin method is split into 5 chunks, and scoreMatrixBin is called on each chunk simultaneously to speed up the computation.
 }
 \author{
 Shuye Pu

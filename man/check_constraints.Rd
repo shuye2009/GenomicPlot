@@ -9,7 +9,7 @@ check_constraints(gr, genome, queryRle = NULL)
 \arguments{
 \item{gr}{a GenomicRanges object}
 
-\item{genome}{genomic version name such as "hg18"}
+\item{genome}{genomic version name such as "hg19"}
 
 \item{queryRle}{a RleList object used as a query against gr}
 }
@@ -17,7 +17,7 @@ check_constraints(gr, genome, queryRle = NULL)
 a GRanges object
 }
 \description{
-Make sure the coordinates of GRanges are within the boundaries of chromosomes, and trim anything that goes beyound. Also, remove entries whose seqname is not the seqname of a query GRanges.
+Make sure the coordinates of GRanges are within the boundaries of chromosomes, and trim anything that goes beyond. Also, remove entries whose seqname is not in the seqname of a query GRanges.
 }
 \author{
 Shuye Pu

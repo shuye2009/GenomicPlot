@@ -36,13 +36,17 @@ Plot cumulative sum over rank as line plot, both cumulative sum and rank are sca
 used by \code{plot_reference_locus}, \code{plot_reference_locus_with_random}
 }
 \examples{
-stat_df <- data.frame(Feature=rep(c("A", "B"), c(20, 30)), Intensity=c(rlnorm(20, 5, 5), rlnorm(30, 1, 5)))
-stat_df1 <- data.frame(Feature=rep(c("A", "B"), c(20, 30)), Intensity=c(rnorm(20, 5, 5), rnorm(30, 1, 5)))
+stat_df <- data.frame(Feature=rep(c("A", "B"), c(20, 30)), 
+                     Intensity=c(rlnorm(20, 5, 5), rlnorm(30, 1, 5)))
+stat_df1 <- data.frame(Feature=rep(c("A", "B"), c(20, 30)), 
+                     Height=c(rnorm(20, 5, 5), rnorm(30, 1, 5)))
 
 for(e in c(TRUE, FALSE)){
    for (r in c(TRUE, FALSE)){
-      draw_rank_plot(stat_df, xc="Feature", yc="Intensity", Ylab="Signal Intensity", ecdf=e, rank=r)
-      draw_rank_plot(stat_df1, xc="Feature", yc="Intensity", Ylab="Signal Intensity", ecdf=e, rank=r)
+      print(draw_rank_plot(stat_df, xc="Feature", yc="Intensity", 
+      Ylab="Signal Intensity", ecdf=e, rank=r))
+      print(draw_rank_plot(stat_df1, xc="Feature", yc="Height", 
+      Ylab="Height", ecdf=e, rank=r))
    }
 }
 

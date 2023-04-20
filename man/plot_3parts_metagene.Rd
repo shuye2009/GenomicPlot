@@ -14,7 +14,7 @@ plot_3parts_metagene(
   handleInputParams = NULL,
   smooth = FALSE,
   stranded = TRUE,
-  outPrefix = "plots",
+  outPrefix = NULL,
   heatmap = FALSE,
   rmOutlier = FALSE,
   heatRange = NULL,

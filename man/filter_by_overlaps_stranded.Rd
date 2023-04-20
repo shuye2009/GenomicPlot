@@ -2,7 +2,7 @@
 % Please edit documentation in R/HandleFeatures.R
 \name{filter_by_overlaps_stranded}
 \alias{filter_by_overlaps_stranded}
-\title{Filter GRanges by overlaps in stranded way}
+\title{Filter GRanges by overlaps in a stranded way}
 \usage{
 filter_by_overlaps_stranded(query, subject, maxgap = -1L, minoverlap = 0L)
 }
