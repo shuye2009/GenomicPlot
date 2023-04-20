@@ -266,7 +266,7 @@ knitr::include_graphics("../tests/test_output/test_plot_locus_with_random_11.png
 knitr::include_graphics("../tests/test_output/test_plot_locus_with_random_12.png")
 
 ## ---- eval=FALSE, fig.show='hold', fig.keep='all', fig.align='center', fig.dim=c(7,7)----
-#  suppressPackageStartupMessages(library(GenomicPlot, quietly=TRUE))
+#  
 #  gtffile <- system.file("extdata", "gencode.v19.annotation_chr19.gtf", package="GenomicPlot")
 #  
 #  centerfile <- system.file("extdata", "test_chip_peak_chr19.bed", package="GenomicPlot")

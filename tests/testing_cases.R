@@ -6,7 +6,9 @@ pdf_to_png <- function(op){
    for(i in seq_along(img)){image_write(img[i], path=paste0(op,"_",i, ".png"), format="png")}
 }
 
-outdir <- "tests/test_output"
+outdir <- "./tests/test_output"
+setwd(outdir)
+
 gtffile <- system.file("extdata", "gencode.v19.annotation_chr19.gtf", package="GenomicPlot")
 txdb <- AnnotationDbi::loadDb(system.file("extdata", "txdb_chr19.sql", package="GenomicPlot"))
 
@@ -21,7 +23,7 @@ names(bedQueryFiles) <- c("Narrow", "Summit", "iCLIP")
 bedHandleInputParams <- list(CLIP_reads=FALSE, fix_width=100, fix_point="center", norm=FALSE, 
                              useScore=FALSE, outRle=TRUE, useSizeFactor=FALSE, genome="hg19")
 
-op <- file.path(outdir, "test_plot_5parts_metagene1")
+op <- "test_plot_5parts_metagene1"
 plot_5parts_metagene(queryFiles=bedQueryFiles,
                      gFeatures=list(metaF=gf),
                      inputFiles=NULL,
@@ -47,7 +49,7 @@ names(bamInputFiles) <- "input"
 bamHandleInputParams <- list(CLIP_reads=TRUE, fix_width=0, fix_point="start", norm=TRUE, 
                           useScore=FALSE, outRle=TRUE, useSizeFactor=FALSE, genome="hg19")
 
-op <- file.path(outdir, "test_plot_5parts_metagene2")
+op <- "test_plot_5parts_metagene2"
 plot_5parts_metagene(queryFiles=bamQueryFiles, 
                      gFeatures=list("metagene"=gf), 
                      inputFiles=bamInputFiles, 
@@ -75,7 +77,7 @@ names(chipInputFiles) <- "input"
 chipHandleInputParams <- list(CLIP_reads=FALSE, fix_width=150, fix_point="start", norm=TRUE, 
                           useScore=FALSE, outRle=TRUE, useSizeFactor=TRUE, genome="hg19")
 
-op <- file.path(outdir, "test_plot_3parts_metagene")
+op <- "test_plot_3parts_metagene"
 plot_3parts_metagene(queryFiles=chipQueryFiles, 
                      gFeatures=gf_gene, 
                      inputFiles=chipInputFiles, 
@@ -92,7 +94,7 @@ plot_3parts_metagene(queryFiles=chipQueryFiles,
 pdf_to_png(op)
 
 ## plot_locus ####
-op <- file.path(outdir, "test_plot_locus1")
+op <- "test_plot_locus1"
 plot_locus(queryFiles=bedQueryFiles[c(1,3)],
            centerFiles=bedQueryFiles[2],
            ext=c(-1000, 1000),
@@ -128,7 +130,7 @@ names(inputfiles) <- c("clip_input", "chip_input")
 handleInputParams <- list(CLIP_reads=FALSE, fix_width=150, fix_point="start", norm=TRUE, 
                           useScore=FALSE, outRle=TRUE, useSizeFactor=TRUE, genome="hg19")
 
-op <- file.path(outdir, "test_plot_locus2")
+op <- "test_plot_locus2"
 plot_locus(queryFiles=queryfiles, 
            centerFiles=centerfiles, 
            ext=c(-500,500), 
@@ -152,7 +154,7 @@ plot_locus(queryFiles=queryfiles,
 pdf_to_png(op)
 
 ## plot_peak_annotation ####
-op <- file.path(outdir, "test_plot_peak_annotation1")
+op <- "test_plot_peak_annotation1"
 peakHandleInputParams <- list(CLIP_reads=FALSE, fix_width=100, fix_point="center", norm=FALSE, 
                               useScore=FALSE, outRle=FALSE, useSizeFactor=FALSE, genome="hg19")
 
@@ -166,7 +168,7 @@ plot_peak_annotation(peakFile=bedQueryFiles[2],
                      verbose=FALSE)
 pdf_to_png(op)
 
-op <- file.path(outdir, "test_plot_peak_annotation2")
+op <- "test_plot_peak_annotation2"
 peakHandleInputParams <- list(CLIP_reads=FALSE, fix_width=21, fix_point="center", norm=FALSE, 
                               useScore=FALSE, outRle=FALSE, useSizeFactor=FALSE, genome="hg19")
 
@@ -194,7 +196,7 @@ handleInputParams <- list(CLIP_reads=FALSE, fix_width=150, fix_point="start", no
                           useScore=FALSE, outRle=TRUE, useSizeFactor=FALSE, genome="hg19")
 
 
-op <- file.path(outdir, "test_plot_region")
+op <- "test_plot_region"
 plot_region(queryFiles=queryfiles, 
             centerFiles=centerfiles, 
             inputFiles=inputfiles, 
@@ -215,7 +217,7 @@ plot_region(queryFiles=queryfiles,
 pdf_to_png(op)
 
 ## plot_start_end ####
-op <- file.path(outdir, "test_plot_stat_end")
+op <- "test_plot_stat_end"
 plot_start_end(queryFiles=bamQueryFiles, 
                inputFiles=bamInputFiles, 
                txdb=txdb, 
@@ -243,7 +245,7 @@ names(inputfiles) <- c("clip_input")
 handleInputParams <- list(CLIP_reads=TRUE, fix_width=150, fix_point="start", norm=TRUE, 
                           useScore=FALSE, outRle=TRUE, useSizeFactor=FALSE, genome="hg19")
 
-op <- file.path(outdir, "test_plot_locus_with_random")
+op <- "test_plot_locus_with_random"
 plot_locus_with_random(queryFiles=queryfiles, 
                        centerFiles=centerfiles, 
                        txdb, 
