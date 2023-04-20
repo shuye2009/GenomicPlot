@@ -28,7 +28,13 @@
 #'
 
 
-draw_matrix_heatmap <- function(fullMatrix, dataName="geneData", labels_col=NULL, levels_col=NULL, ranking="Sum", ranges=NULL, verbose=FALSE){
+draw_matrix_heatmap <- function(fullMatrix, 
+                                dataName="geneData", 
+                                labels_col=NULL, 
+                                levels_col=NULL, 
+                                ranking="Sum", 
+                                ranges=NULL, 
+                                verbose=FALSE){
 
    if(is.null(labels_col)){
       labels_col <- seq(1, ncol(fullMatrix))
@@ -100,7 +106,9 @@ draw_matrix_heatmap <- function(fullMatrix, dataName="geneData", labels_col=NULL
 #' @export draw_region_landmark
 
 
-draw_region_landmark <- function(featureNames, vx, xmax){
+draw_region_landmark <- function(featureNames, 
+                                 vx, 
+                                 xmax){
    nfeatures <- length(featureNames)
    if(nfeatures == 5){
       values <- data.frame(id=featureNames, value=c(1.75, 1.5, 1.25, 1.5, 1.75))
@@ -154,7 +162,9 @@ draw_region_landmark <- function(featureNames, vx, xmax){
 #'
 #' @export draw_region_name
 
-draw_region_name <- function(featureNames, scaled_bins, xmax){
+draw_region_name <- function(featureNames, 
+                             scaled_bins, 
+                             xmax){
 
    annotx <- scaled_bins/2
    for(i in 2:length(scaled_bins)){
@@ -194,7 +204,7 @@ draw_region_name <- function(featureNames, scaled_bins, xmax){
 #' @param yc a string denoting column name for numeric data to be plotted
 #' @param vx a vector on integers denoting the x coordinates of start of each sub-region
 #' @param cn column name in plot_df for query samples grouping
-#' @param sn column name in plot_df for subject name to be shown in plot title
+#' @param sn column name in plot_df for subject name to be shown in the plot title
 #' @param Ylab a string for Y-axis label
 #' @return a ggplot object
 #' @note used by \code{plot_3parts_metagene}, \code{plot_5parts_metagene}, \code{plot_region}
@@ -205,7 +215,13 @@ draw_region_name <- function(featureNames, scaled_bins, xmax){
 #'
 #'
 
-draw_region_profile <- function(plot_df, xc="Position", yc="Intensity", cn="Query", sn="Reference", Ylab="Signal Intensity", vx){
+draw_region_profile <- function(plot_df, 
+                                xc="Position", 
+                                yc="Intensity", 
+                                cn="Query", 
+                                sn="Reference", 
+                                Ylab="Signal Intensity", 
+                                vx){
 
    p <- ggplot(plot_df, aes(x=.data[[xc]], y=.data[[yc]], color=.data[[cn]])) + scale_fill_npg() + scale_color_npg() +
       geom_line(size=1.25) + #geom_point(color="grey30", size=2) +
@@ -241,7 +257,15 @@ draw_region_profile <- function(plot_df, xc="Position", yc="Intensity", cn="Quer
 #' @export draw_locus_profile
 #'
 
-draw_locus_profile <- function(plot_df, xc="Position", yc="Intensity", cn="Query", sn="Reference", Xlab="Center", Ylab="Signal Intensity", shade=FALSE, hl=c(0,0)){
+draw_locus_profile <- function(plot_df, 
+                               xc="Position", 
+                               yc="Intensity", 
+                               cn="Query", 
+                               sn="Reference", 
+                               Xlab="Center", 
+                               Ylab="Signal Intensity", 
+                               shade=FALSE, 
+                               hl=c(0,0)){
 
    p <- ggplot(plot_df, aes(x=.data[[xc]], y=.data[[yc]], color=.data[[cn]])) +
       scale_fill_npg() + scale_color_npg() +
@@ -276,7 +300,7 @@ draw_locus_profile <- function(plot_df, xc="Position", yc="Intensity", cn="Query
 #' @note used by \code{plot_locus}, \code{plot_locus_with_random}, \code{plot_region}
 #' @author Shuye Pu
 #'
-#' @example 
+#' @examples 
 #' stat_df <- data.frame(Feature=rep(c("A", "B"), c(20, 30)), Intensity=c(rnorm(20, 2, 0.5), 
 #'                      rnorm(30, 3, 0.6)))
 #' p <- draw_boxplot_by_factor(stat_df, xc="Feature", yc="Intensity", Ylab="Signal Intensity")
@@ -284,7 +308,15 @@ draw_locus_profile <- function(plot_df, xc="Position", yc="Intensity", cn="Query
 #' @export draw_boxplot_by_factor
 #'
 
-draw_boxplot_by_factor <- function(stat_df, xc="Feature", yc="Intensity", fc=xc, comp=list(c(1,2)), stats="wilcox.test", Xlab=xc, Ylab=yc, nf=1){
+draw_boxplot_by_factor <- function(stat_df, 
+                                   xc="Feature", 
+                                   yc="Intensity", 
+                                   fc=xc, 
+                                   comp=list(c(1,2)), 
+                                   stats="wilcox.test", 
+                                   Xlab=xc, 
+                                   Ylab=yc, 
+                                   nf=1){
    
    xlabs <- paste(levels(as.factor(stat_df[[xc]])),"\n(",table(stat_df[[xc]])/nf,")",sep="")
    ypos <- rep(max(stat_df[[yc]]), length(comp))*seq(1, 1+(length(comp)-1)*0.1, 0.1)
@@ -352,7 +384,15 @@ draw_boxplot_by_factor <- function(stat_df, xc="Feature", yc="Intensity", fc=xc,
 #' p <- draw_boxplot_wo_outlier(stat_df, xc="Feature", yc="Intensity", Ylab="Signal Intensity")
 #' p
 #' 
-draw_boxplot_wo_outlier <- function(stat_df, xc="Feature", yc="Intensity", fc=xc, comp=list(c(1,2)), stats="wilcox.test", Xlab=xc, Ylab=yc, nf=1){
+draw_boxplot_wo_outlier <- function(stat_df, 
+                                    xc="Feature", 
+                                    yc="Intensity", 
+                                    fc=xc, 
+                                    comp=list(c(1,2)), 
+                                    stats="wilcox.test", 
+                                    Xlab=xc, 
+                                    Ylab=yc, 
+                                    nf=1){
    
    xlabs <- paste(levels(as.factor(stat_df[[xc]])),"\n(",table(stat_df[[xc]])/nf,")",sep="")
    fomu <- as.formula(paste(yc, "~", xc))
@@ -423,14 +463,21 @@ draw_boxplot_wo_outlier <- function(stat_df, xc="Feature", yc="Intensity", fc=xc
 #' @note used by \code{plot_locus}, \code{plot_locus_with_random}
 #' @author Shuye Pu
 #'
-#' @example 
+#' @examples
 #' stat_df <- data.frame(Feature=rep(c("A", "B"), c(20, 30)), Intensity=c(rnorm(20, 2), rnorm(30, 3)))
 #' p <- draw_mean_se_barplot(stat_df, xc="Feature", yc="Intensity", Ylab="Signal Intensity")
 #' p
 #' @export draw_mean_se_barplot
 #'
 
-draw_mean_se_barplot <- function(stat_df, xc="Feature", yc="Intensity", comp=list(c(1,2)), Xlab=xc, Ylab=yc, Ylim=NULL, nf=1){
+draw_mean_se_barplot <- function(stat_df, 
+                                 xc="Feature", 
+                                 yc="Intensity", 
+                                 comp=list(c(1,2)), 
+                                 Xlab=xc, 
+                                 Ylab=yc, 
+                                 Ylim=NULL, 
+                                 nf=1){
    stat_df[[xc]] <- as.factor(stat_df[[xc]])
    
    stats <- aov_TukeyHSD(stat_df, xc, yc)
@@ -509,7 +556,12 @@ draw_mean_se_barplot <- function(stat_df, xc="Feature", yc="Intensity", comp=lis
 #' }
 #'
 #' 
-draw_rank_plot <- function(stat_df, xc="Feature", yc="Intensity", Ylab=yc, ecdf=TRUE, rank=FALSE){
+draw_rank_plot <- function(stat_df, 
+                           xc="Feature", 
+                           yc="Intensity", 
+                           Ylab=yc, 
+                           ecdf=TRUE, 
+                           rank=FALSE){
    
    if(ecdf){
       long_df <- stat_df %>%
@@ -617,7 +669,17 @@ draw_rank_plot <- function(stat_df, xc="Feature", yc="Intensity", Ylab=yc, ecdf=
 #' @export draw_stacked_profile
 #'
 
-draw_stacked_profile <- function(plot_df, xc="Position", yc="Intensity", cn="Query", ext=c(0,0,0,0), hl=c(0,0,0,0), atitle="title", insert=0, Ylab="Signal Intensity", shade=FALSE, stack=TRUE){
+draw_stacked_profile <- function(plot_df, 
+                                 xc="Position", 
+                                 yc="Intensity", 
+                                 cn="Query", 
+                                 ext=c(0,0,0,0), 
+                                 hl=c(0,0,0,0), 
+                                 atitle="title", 
+                                 insert=0, 
+                                 Ylab="Signal Intensity", 
+                                 shade=FALSE, 
+                                 stack=TRUE){
 
    ylimits <- c(min(plot_df$lower), max(plot_df$upper))
    ylimits_intervals <- c(0, max(plot_df$Interval))
@@ -748,7 +810,8 @@ draw_stacked_profile <- function(plot_df, xc="Position", yc="Intensity", cn="Que
 #'
 #' @export overlap_pair
 
-overlap_pair <- function(apair, overlap_fun){
+overlap_pair <- function(apair, 
+                         overlap_fun){
    sizes <- vapply(apair, length, numeric(1))
    overlap <- length(Reduce(overlap_fun, apair))
    jaccard <- round(overlap/(sum(sizes)-overlap), digits=5)
@@ -775,7 +838,8 @@ overlap_pair <- function(apair, overlap_fun){
 #'
 #' @export overlap_triple
 
-overlap_triple <- function(atriple, overlap_fun){
+overlap_triple <- function(atriple, 
+                           overlap_fun){
    sizes <- sort(vapply(atriple, length, numeric(1)), decreasing=TRUE)
    atriple <- atriple[names(sizes)] ## sort the gr by decreasing size to avoid n13 < n123
    
@@ -807,7 +871,8 @@ overlap_triple <- function(atriple, overlap_fun){
 #'
 #' @export overlap_quad
 #'
-overlap_quad <- function(aquad, overlap_fun){
+overlap_quad <- function(aquad, 
+                         overlap_fun){
    sizes <- sort(vapply(aquad, length, numeric(1)), decreasing=TRUE)
    aquad <- aquad[names(sizes)] ## sort the gr by decreasing size to avoid n13 < n123
    

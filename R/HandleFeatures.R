@@ -21,7 +21,8 @@
 #' @export extract_longest_tx
 #'
 #'
-extract_longest_tx <- function(txdb, plot=FALSE){
+extract_longest_tx <- function(txdb, 
+                               plot=FALSE){
    tl <- GenomicFeatures::transcriptLengths(txdb, with.utr5_len = TRUE, with.cds_len = TRUE, with.utr3_len = TRUE)
    pc <- tl[tl$cds_len > 0, ]  ## pc stands for protein-coding
    
@@ -196,7 +197,12 @@ extract_longest_tx <- function(txdb, plot=FALSE){
 #' @export get_genomic_feature_coordinates
 #'
 #'
-get_genomic_feature_coordinates <- function(txdb, featureName, featureSource=NULL, export=FALSE, longest=FALSE, protein_coding=FALSE){
+get_genomic_feature_coordinates <- function(txdb, 
+                                            featureName, 
+                                            featureSource=NULL, 
+                                            export=FALSE, 
+                                            longest=FALSE, 
+                                            protein_coding=FALSE){
 
    if(is.null(featureSource)){featureSource <- "unknown_source"}
    outfile <- NULL
@@ -328,7 +334,15 @@ get_genomic_feature_coordinates <- function(txdb, featureName, featureSource=NUL
 #'
 #' @export prepare_3parts_genomic_features
 
-prepare_3parts_genomic_features <- function(txdb, featureName="transcript", meta=TRUE, nbins=100, fiveP=-1000, threeP=1000, longest=TRUE, protein_coding=TRUE, verbose=FALSE){
+prepare_3parts_genomic_features <- function(txdb, 
+                                            featureName="transcript", 
+                                            meta=TRUE, 
+                                            nbins=100, 
+                                            fiveP=-1000, 
+                                            threeP=1000, 
+                                            longest=TRUE, 
+                                            protein_coding=TRUE, 
+                                            verbose=FALSE){
    ## prepare transcripts
 
    if(verbose) print("Preparing features ...")
@@ -406,7 +420,14 @@ prepare_3parts_genomic_features <- function(txdb, featureName="transcript", meta
 #'
 #' @export prepare_5parts_genomic_features
 #'
-prepare_5parts_genomic_features <- function(txdb, meta=TRUE, nbins=100, fiveP=-1000, threeP=1000, longest=TRUE, verbose=FALSE, subsetTx=NULL){
+prepare_5parts_genomic_features <- function(txdb, 
+                                            meta=TRUE, 
+                                            nbins=100, 
+                                            fiveP=-1000, 
+                                            threeP=1000, 
+                                            longest=TRUE, 
+                                            verbose=FALSE, 
+                                            subsetTx=NULL){
    ## prepare transcripts
    
    if(verbose) print("Preparing genomic features ... ")
@@ -497,7 +518,10 @@ prepare_5parts_genomic_features <- function(txdb, meta=TRUE, nbins=100, fiveP=-1
 #'
 #' @export get_txdb_features
 #'
-get_txdb_features <- function(txdb, fiveP=-1000, dsTSS=300, threeP=1000){
+get_txdb_features <- function(txdb, 
+                              fiveP=-1000, 
+                              dsTSS=300, 
+                              threeP=1000){
    
    utr5 <- get_genomic_feature_coordinates(txdb, "utr5", longest=TRUE, protein_coding=TRUE)
    utr3 <- get_genomic_feature_coordinates(txdb, "utr3", longest=TRUE, protein_coding=TRUE)
@@ -606,7 +630,9 @@ get_txdb_features <- function(txdb, fiveP=-1000, dsTSS=300, threeP=1000){
 #' @note used in \code{plot_peak_annotation}
 #' @export get_targeted_genes
 
-get_targeted_genes <- function(peak, features, stranded=TRUE){
+get_targeted_genes <- function(peak, 
+                               features, 
+                               stranded=TRUE){
    
    precedence <- function(terms){
       scope <- c("5'UTR", "CDS", "3'UTR", "Intron", "Promoter", "TTS")
@@ -695,7 +721,9 @@ get_targeted_genes <- function(peak, features, stranded=TRUE){
 #' 
 #' @export make_subTxDb_from_GTF
 
-make_subTxDb_from_GTF <- function(gtfFile, geneList, geneCol=1){
+make_subTxDb_from_GTF <- function(gtfFile, 
+                                  geneList, 
+                                  geneCol=1){
    gff <- RCAS::importGtf(saveObjectAsRds = TRUE, filePath = gtfFile)
    if(length(geneList) == 1){
       aList <- read.delim2(geneList, comment.char = "#")
@@ -720,7 +748,9 @@ make_subTxDb_from_GTF <- function(gtfFile, geneList, geneCol=1){
 #' 
 #' @export gene2tx
 
-gene2tx <- function(gtfFile, geneList, geneCol=1){
+gene2tx <- function(gtfFile, 
+                    geneList, 
+                    geneCol=1){
    gff <- RCAS::importGtf(saveObjectAsRds = TRUE, filePath = gtfFile)
    if(length(geneList) == 1){
       aList <- read.delim2(geneList, comment.char = "#")
@@ -745,7 +775,9 @@ gene2tx <- function(gtfFile, geneList, geneCol=1){
 #' 
 #' @export check_constraints
 #' 
-check_constraints <- function(gr, genome, queryRle=NULL){
+check_constraints <- function(gr, 
+                              genome, 
+                              queryRle=NULL){
    seqInfo <- Seqinfo(genome=genome)
    len <- seqlengths(seqInfo)
    
@@ -772,7 +804,10 @@ check_constraints <- function(gr, genome, queryRle=NULL){
 #'
 #' @export filter_by_overlaps_stranded
 
-filter_by_overlaps_stranded <- function(query, subject, maxgap=-1L, minoverlap=0L){
+filter_by_overlaps_stranded <- function(query, 
+                                        subject, 
+                                        maxgap=-1L, 
+                                        minoverlap=0L){
    
    plus_query <- query[strand(query)=="+"]
    minus_query <- query[strand(query)=="-"]
@@ -801,7 +836,8 @@ filter_by_overlaps_stranded <- function(query, subject, maxgap=-1L, minoverlap=0
 #'
 #' @export filter_by_nonoverlaps_stranded
 #'
-filter_by_nonoverlaps_stranded <- function(query, subject){
+filter_by_nonoverlaps_stranded <- function(query, 
+                                           subject){
    
    overlaps <- filter_by_overlaps_stranded(query, subject, maxgap=-1L)
    if(length(overlaps) > min(length(query), length(subject))){

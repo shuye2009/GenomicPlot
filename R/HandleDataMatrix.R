@@ -10,7 +10,8 @@
 #'
 #' @export rank_rows
 
-rank_rows <- function(fullmatrix, ranking="Hierarchical"){
+rank_rows <- function(fullmatrix, 
+                      ranking="Hierarchical"){
    fullmatrix <- data.matrix(fullmatrix)
    if(ranking == "None"){
       invisible(fullmatrix)
@@ -35,7 +36,8 @@ rank_rows <- function(fullmatrix, ranking="Hierarchical"){
 #' @return NULL
 #' @keywords internal
 
-inspect_matrix <- function(fullmatrix, verbose=FALSE){
+inspect_matrix <- function(fullmatrix, 
+                           verbose=FALSE){
 
    if(verbose) print("Inspecting matrix")
    size <- nrow(fullmatrix)*ncol(fullmatrix)
@@ -63,7 +65,10 @@ inspect_matrix <- function(fullmatrix, verbose=FALSE){
 #' @param verbose logical, whether to output additional information
 #' 
 #' @return a numeric matrix
-#' @example 
+#' 
+#' @author Shuye Pu 
+#' 
+#' @examples 
 #' m <- matrix(0, ncol=5, nrow=30)
 #' m[1:4,] <- rexp(20, rate=1)
 #' 
@@ -71,7 +76,8 @@ inspect_matrix <- function(fullmatrix, verbose=FALSE){
 #' @keywords internal
 #'
 
-impute_hm <- function(fullmatrix, verbose=FALSE){
+impute_hm <- function(fullmatrix, 
+                      verbose=FALSE){
 
    if(min(fullmatrix) < 0){
       message("Cannot impute for matrices with negative values, matrix is not modified!")
@@ -114,7 +120,12 @@ impute_hm <- function(fullmatrix, verbose=FALSE){
 #' @export process_scoreMatrix
 #'
 #'
-process_scoreMatrix <- function(fullmatrix, scale=FALSE, rmOutlier=FALSE, transform=NA, pc=0, verbose=FALSE){
+process_scoreMatrix <- function(fullmatrix, 
+                                scale=FALSE, 
+                                rmOutlier=FALSE, 
+                                transform=NA, 
+                                pc=0, 
+                                verbose=FALSE){
 
    #rn <- rownames(fullmatrix)
    inspect_matrix(fullmatrix, verbose=verbose)
@@ -183,7 +194,9 @@ process_scoreMatrix <- function(fullmatrix, scale=FALSE, rmOutlier=FALSE, transf
 #' @export rm_outlier
 #'
 
-rm_outlier <- function(fullmatrix, verbose=FALSE, multiplier=1000){
+rm_outlier <- function(fullmatrix, 
+                       verbose=FALSE, 
+                       multiplier=1000){
 
    fullmatrix[is.na(fullmatrix)] <- 0
    rowmax <- apply(fullmatrix, 1, max)
@@ -239,7 +252,11 @@ rm_outlier <- function(fullmatrix, verbose=FALSE, multiplier=1000){
 #' @export aov_TukeyHSD
 #'
 
-aov_TukeyHSD <- function(df, xc="Group", yc="Intensity", op=NULL, verbose=FALSE){
+aov_TukeyHSD <- function(df, 
+                         xc="Group", 
+                         yc="Intensity", 
+                         op=NULL, 
+                         verbose=FALSE){
    if(verbose){
       sink(file=paste0(op,"_TukeyHSD.txt"), append=TRUE, split=TRUE)
       cat(paste("Performing one-way ANOVA analysis for", op, "\n"))
