@@ -14,7 +14,8 @@
 #'
 #' @export start_parallel
 #'
-start_parallel <- function(nc=2, verbose=FALSE){
+start_parallel <- function(nc=2, 
+                           verbose=FALSE){
 
    n.cores <- detectCores()
    fnc <- min(nc, as.integer(n.cores-1))
@@ -64,7 +65,11 @@ stop_parallel <- function(cl){
 #' @note not working because txdb cannot be exported to nodes, need to find a solution
 #'
 
-parallel_feature_coordinates <- function(txdb, featureNames, longest=TRUE, protein_coding=TRUE, nc=2){
+parallel_feature_coordinates <- function(txdb, 
+                                         featureNames, 
+                                         longest=TRUE, 
+                                         protein_coding=TRUE, 
+                                         nc=2){
    tic()
    force(txdb)
 
@@ -97,7 +102,13 @@ parallel_feature_coordinates <- function(txdb, featureNames, longest=TRUE, prote
 #' @export parallel_scoreMatrixBin
 #'
 #'
-parallel_scoreMatrixBin <- function(queryRegions, windowRs, bin_num, bin_op, weight_col, stranded, nc=2){
+parallel_scoreMatrixBin <- function(queryRegions, 
+                                    windowRs, 
+                                    bin_num, 
+                                    bin_op, 
+                                    weight_col, 
+                                    stranded, 
+                                    nc=2){
 
    call_scoreMatrixBin <- function(windowR){
       ScoreMatrixBin(target = queryRegions, windows = windowR, bin.num=bin_num, bin.op=bin_op, weight.col=weight_col, strand.aware = stranded)
@@ -137,7 +148,9 @@ parallel_scoreMatrixBin <- function(queryRegions, windowRs, bin_num, bin_op, wei
 #' @export parallel_binnedAverage
 #'
 #'
-parallel_binnedAverage <- function(Rle_list, tileBins, nc=2){
+parallel_binnedAverage <- function(Rle_list, 
+                                   tileBins, 
+                                   nc=2){
 
    #print(system.time({
       cl <- start_parallel(min(length(Rle_list), nc))
@@ -170,7 +183,10 @@ parallel_binnedAverage <- function(Rle_list, tileBins, nc=2){
 #' @export parallel_countOverlaps
 #'
 #'
-parallel_countOverlaps <- function(grange_list, tileBins, nc=2, switch=FALSE){
+parallel_countOverlaps <- function(grange_list, 
+                                   tileBins, 
+                                   nc=2, 
+                                   switch=FALSE){
 
    #print(system.time({
       cl <- start_parallel(min(nc,length(grange_list)))

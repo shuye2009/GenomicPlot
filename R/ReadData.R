@@ -21,6 +21,7 @@
 #' 'weight' is the name of the metadata column to be used as weight for coverage calculation
 #'
 #' @author Shuye Pu
+#' 
 #' @examples
 #' queryFiles <- system.file("extdata", "treat_chr19.bam", package="GenomicPlot")
 #' names(queryFiles) <- "query"
@@ -36,7 +37,10 @@
 #'
 #' @export handle_input
 
-handle_input <- function(inputFiles, handleInputParams=NULL, verbose=FALSE, nc=2){
+handle_input <- function(inputFiles, 
+                         handleInputParams=NULL, 
+                         verbose=FALSE, 
+                         nc=2){
 
    if(any(is.null(names(inputFiles)))) stop("Each file must have a name attribute!")
    if(is.null(handleInputParams)) handleInputParams=list(CLIP_reads=FALSE, fix_width=0, fix_point="center", useScore=FALSE, outRle=TRUE, norm=TRUE, useSizeFactor=FALSE, genome="hg19")
@@ -132,7 +136,11 @@ handle_input <- function(inputFiles, handleInputParams=NULL, verbose=FALSE, nc=2
 #'
 #' @export effective_size
 #'
-effective_size <- function(outlist, outRle, genome="hg19", nc=2, verbose=FALSE){
+effective_size <- function(outlist, 
+                           outRle, 
+                           genome="hg19", 
+                           nc=2, 
+                           verbose=FALSE){
    if(verbose) print("Estimating size factor")
 
    seqi <- Seqinfo(genome=genome)
@@ -188,7 +196,9 @@ effective_size <- function(outlist, outRle, genome="hg19", nc=2, verbose=FALSE){
 #'
 #' @export handle_bed
 
-handle_bed <- function(inputFile, handleInputParams=NULL, verbose=FALSE){
+handle_bed <- function(inputFile, 
+                       handleInputParams=NULL, 
+                       verbose=FALSE){
 
    beddata <- read.delim2(inputFile, header=FALSE, comment.char = "#")
 
@@ -260,7 +270,9 @@ handle_bed <- function(inputFile, handleInputParams=NULL, verbose=FALSE){
 #'
 #' @export handle_bam
 #'
-handle_bam <- function(inputFile, handleInputParams=NULL, verbose=FALSE){
+handle_bam <- function(inputFile, 
+                       handleInputParams=NULL, 
+                       verbose=FALSE){
 
    paired.end <- testPairedEndBam(inputFile)
    if(paired.end){
@@ -321,7 +333,9 @@ handle_bam <- function(inputFile, handleInputParams=NULL, verbose=FALSE){
 #'
 #' @export handle_bw
 #'
-handle_bw <- function(inputFile, handleInputParams, verbose=FALSE){
+handle_bw <- function(inputFile, 
+                      handleInputParams, 
+                      verbose=FALSE){
 
    weight_col <- "score"
    libsize <- NULL
@@ -378,7 +392,9 @@ handle_bw <- function(inputFile, handleInputParams, verbose=FALSE){
 #'
 #' @export handle_wig
 #'
-handle_wig <- function(inputFile, handleInputParams, verbose=FALSE){
+handle_wig <- function(inputFile, 
+                       handleInputParams, 
+                       verbose=FALSE){
 
    neg_file <- find_mate(inputFile, verbose)
    stranded <- ifelse(!is.null(neg_file), TRUE, FALSE)
@@ -409,7 +425,8 @@ handle_wig <- function(inputFile, handleInputParams, verbose=FALSE){
 #' @keywords internal
 
 
-find_mate <- function(inputFile, verbose=FALSE){
+find_mate <- function(inputFile, 
+                      verbose=FALSE){
    fileName <- basename(inputFile)
    dirName <- dirname(inputFile)
 

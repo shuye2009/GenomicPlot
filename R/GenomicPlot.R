@@ -52,11 +52,26 @@
 #'
 #'
 
-plot_start_end_with_random <- function(queryFiles, inputFiles=NULL, txdb=NULL, centerFile, handleInputParams=NULL, 
-                                       binSize=10,insert=0, verbose=FALSE, ext=c(-500, 200, -200, 500), 
-                                       hl=c(-50, 50, -50, 50), randomize=FALSE, stranded=TRUE, scale=FALSE, 
-                                       smooth=FALSE, rmOutlier=FALSE, outPrefix="plots", transform=NA, shade=TRUE, 
-                                       nc=2, Ylab="Coverage/base/gene"){
+plot_start_end_with_random <- function(queryFiles, 
+                                       inputFiles=NULL, 
+                                       txdb=NULL, 
+                                       centerFile, 
+                                       handleInputParams=NULL, 
+                                       binSize=10,
+                                       insert=0, 
+                                       verbose=FALSE, 
+                                       ext=c(-500, 200, -200, 500), 
+                                       hl=c(-50, 50, -50, 50), 
+                                       randomize=FALSE, 
+                                       stranded=TRUE, 
+                                       scale=FALSE, 
+                                       smooth=FALSE, 
+                                       rmOutlier=FALSE, 
+                                       outPrefix="plots", 
+                                       transform=NA, 
+                                       shade=TRUE, 
+                                       nc=2, 
+                                       Ylab="Coverage/base/gene"){
 
    if(is.null(inputFiles)){
       inputLabels <- NULL
@@ -438,7 +453,25 @@ plot_start_end_with_random <- function(queryFiles, inputFiles=NULL, txdb=NULL, c
 #' @export plot_start_end
 #'
 
-plot_start_end <- function(queryFiles, inputFiles=NULL, centerFiles, txdb=NULL, handleInputParams=NULL, binSize=10, insert=0, verbose=FALSE, ext=c(-500,100, -100, 500), hl=c(-50, 50, -50, 50), stranded=TRUE, scale=FALSE, smooth=FALSE, rmOutlier=FALSE, outPrefix="plots", transform=NA, shade=TRUE, Ylab="Coverage/base/gene", nc=2){
+plot_start_end <- function(queryFiles, 
+                           inputFiles=NULL, 
+                           centerFiles, 
+                           txdb=NULL, 
+                           handleInputParams=NULL, 
+                           binSize=10, 
+                           insert=0, 
+                           verbose=FALSE, 
+                           ext=c(-500,100, -100, 500), 
+                           hl=c(-50, 50, -50, 50), 
+                           stranded=TRUE, 
+                           scale=FALSE, 
+                           smooth=FALSE, 
+                           rmOutlier=FALSE, 
+                           outPrefix=NULL, 
+                           transform=NA, 
+                           shade=TRUE, 
+                           Ylab="Coverage/base/gene", 
+                           nc=2){
 
    if(is.null(inputFiles)){
       inputLabels <- NULL
@@ -758,7 +791,21 @@ plot_start_end <- function(queryFiles, inputFiles=NULL, centerFiles, txdb=NULL, 
 #' @export plot_3parts_metagene
 
 
-plot_3parts_metagene <- function(queryFiles, gFeatures, inputFiles=NULL, scale=FALSE,  verbose=FALSE, Ylab="Coverage/base/gene", handleInputParams=NULL, smooth=FALSE, stranded=TRUE, outPrefix="plots", heatmap=FALSE, rmOutlier=FALSE, heatRange=NULL, transform=NA, nc=2){
+plot_3parts_metagene <- function(queryFiles, 
+                                 gFeatures, 
+                                 inputFiles=NULL, 
+                                 scale=FALSE,  
+                                 verbose=FALSE, 
+                                 Ylab="Coverage/base/gene", 
+                                 handleInputParams=NULL, 
+                                 smooth=FALSE, 
+                                 stranded=TRUE, 
+                                 outPrefix=NULL, 
+                                 heatmap=FALSE, 
+                                 rmOutlier=FALSE, 
+                                 heatRange=NULL, 
+                                 transform=NA, 
+                                 nc=2){
 
    if(is.null(inputFiles)){
       inputLabels <- NULL
@@ -1056,7 +1103,27 @@ plot_3parts_metagene <- function(queryFiles, gFeatures, inputFiles=NULL, scale=F
 #'
 #' @export plot_region
 
-plot_region <- function(queryFiles, centerFiles, txdb=NULL, regionName="region", inputFiles=NULL, nbins=100, handleInputParams=NULL, verbose=FALSE, scale=FALSE, heatmap=FALSE, fiveP=-1000, threeP=1000, smooth=FALSE, stranded=TRUE, transform=NA, outPrefix="plots", rmOutlier=FALSE, heatRange=NULL, Ylab="Coverage/base/gene", statsMethod="wilcox.test", nc=2){
+plot_region <- function(queryFiles, 
+                        centerFiles, 
+                        txdb=NULL, 
+                        regionName="region", 
+                        inputFiles=NULL, 
+                        nbins=100, 
+                        handleInputParams=NULL, 
+                        verbose=FALSE, 
+                        scale=FALSE, 
+                        heatmap=FALSE, 
+                        fiveP=-1000, 
+                        threeP=1000, 
+                        smooth=FALSE, 
+                        stranded=TRUE, 
+                        transform=NA, 
+                        outPrefix=NULL, 
+                        rmOutlier=FALSE, 
+                        heatRange=NULL, 
+                        Ylab="Coverage/base/gene", 
+                        statsMethod="wilcox.test", 
+                        nc=2){
 
   if(!is.null(outPrefix)){
     pdf(paste(outPrefix, "pdf", sep="."), height=8, width=12)
@@ -1592,10 +1659,21 @@ plot_region <- function(queryFiles, centerFiles, txdb=NULL, regionName="region",
 #' @export plot_5parts_metagene
 #'
 
-plot_5parts_metagene <- function(queryFiles, gFeatures_list, inputFiles=NULL, handleInputParams=NULL,
-                                 verbose=FALSE, transform=NA, smooth=FALSE, scale=FALSE, stranded=TRUE,
-                                 outPrefix=NULL, heatmap=FALSE, heatRange=NULL, rmOutlier=FALSE,
-                                 Ylab="Coverage/base/gene", nc=2){
+plot_5parts_metagene <- function(queryFiles, 
+                                 gFeatures_list, 
+                                 inputFiles=NULL, 
+                                 handleInputParams=NULL,
+                                 verbose=FALSE, 
+                                 transform=NA, 
+                                 smooth=FALSE, 
+                                 scale=FALSE, 
+                                 stranded=TRUE,
+                                 outPrefix=NULL, 
+                                 heatmap=FALSE, 
+                                 heatRange=NULL, 
+                                 rmOutlier=FALSE,
+                                 Ylab="Coverage/base/gene", 
+                                 nc=2){
 
   if(is.null(inputFiles)){
      inputLabels <- NULL
@@ -1935,11 +2013,29 @@ plot_5parts_metagene <- function(queryFiles, gFeatures_list, inputFiles=NULL, ha
 #' @export plot_locus
 
 
-plot_locus <- function(queryFiles, centerFiles, txdb=NULL, ext=c(-100,100), hl=c(0,0), shade=TRUE, smooth=FALSE,
-                     handleInputParams=NULL, verbose=FALSE, binSize=10, refPoint="center", Xlab="Center", 
-                     Ylab="Coverage/base/gene", inputFiles=NULL, stranded=TRUE, heatmap=TRUE, scale=FALSE,
-                     outPrefix=NULL, rmOutlier=FALSE, transform=NA, statsMethod="wilcox.test", 
-                     heatRange=NULL, nc=2){
+plot_locus <- function(queryFiles, 
+                       centerFiles, 
+                       txdb=NULL, 
+                       ext=c(-100,100), 
+                       hl=c(0,0), 
+                       shade=TRUE, 
+                       smooth=FALSE,
+                       handleInputParams=NULL, 
+                       verbose=FALSE, 
+                       binSize=10, 
+                       refPoint="center", 
+                       Xlab="Center", 
+                       Ylab="Coverage/base/gene", 
+                       inputFiles=NULL, 
+                       stranded=TRUE, 
+                       heatmap=TRUE, 
+                       scale=FALSE,
+                       outPrefix=NULL, 
+                       rmOutlier=FALSE, 
+                       transform=NA, 
+                       statsMethod="wilcox.test", 
+                       heatRange=NULL,
+                       nc=2){
 
    if(is.null(inputFiles)){
       inputLabels <- NULL
@@ -2510,11 +2606,28 @@ plot_locus <- function(queryFiles, centerFiles, txdb=NULL, ext=c(-100,100), hl=c
 #'
 #' @export plot_locus_with_random
 
-plot_locus_with_random <- function(queryFiles, centerFiles, txdb, ext=c(0,0), hl=c(0,0), shade=FALSE,
-                                 handleInputParams=NULL, verbose=FALSE, smooth=FALSE, transform=NA, 
-                                 binSize=10, refPoint="center", Xlab="Center", Ylab="Coverage/base/gene",
-                                 inputFiles=NULL, stranded=TRUE, scale=FALSE, outPrefix=NULL, 
-                                 rmOutlier=FALSE, n_random=1, statsMethod="wilcox.test", nc=2){
+plot_locus_with_random <- function(queryFiles, 
+                                   centerFiles, 
+                                   txdb, 
+                                   ext=c(-200, 200), 
+                                   hl=c(-100, 100), 
+                                   shade=FALSE, 
+                                   handleInputParams=NULL, 
+                                   verbose=FALSE, 
+                                   smooth=FALSE, 
+                                   transform=NA, 
+                                   binSize=10, 
+                                   refPoint="center",
+                                   Xlab="Center", 
+                                   Ylab="Coverage/base/gene", 
+                                   inputFiles=NULL, 
+                                   stranded=TRUE, 
+                                   scale=FALSE, 
+                                   outPrefix=NULL, 
+                                   rmOutlier=FALSE, 
+                                   n_random=1, 
+                                   statsMethod="wilcox.test", 
+                                   nc=2){
 
    if(is.null(inputFiles)){
       inputLabels <- NULL
@@ -2736,13 +2849,12 @@ plot_locus_with_random <- function(queryFiles, centerFiles, txdb, ext=c(0,0), hl
            comp <- list(c(1, 2))
 
            ps1 <- draw_boxplot_by_factor(stat_df=stat_df, xc="Reference", yc="Intensity",  comp=comp, stats=statsMethod, Ylab=Ylab)
-           ps2 <- draw_boxplot_by_factor(stat_df=stat_df, xc="Reference", yc="Intensity",  comp=comp, stats=statsMethod, Ylab=Ylab)
            ps1_wo_outlier <- draw_boxplot_wo_outlier(stat_df=stat_df, xc="Reference", yc="Intensity", comp=comp, stats=statsMethod, Ylab=Ylab)
            ps1_mean_se <- draw_mean_se_barplot(stat_df=stat_df, xc="Reference", yc="Intensity", comp=comp, Ylab=Ylab)
            prank <- draw_rank_plot(stat_df=stat_df, xc="Reference", yc="Intensity", Ylab=Ylab)
 
            comp1 <- plot_grid(p, ps1_mean_se,  ncol = 2, rel_widths = c(1,1))
-           comp2 <- plot_grid(ps1, ps2, ps1_wo_outlier, ncol = 3, rel_widths = c(1,1,1))
+           comp2 <- plot_grid(ps1, ps1_wo_outlier, ncol = 2, rel_widths = c(1,1))
            print(plot_grid(comp1, comp2, ncol=1, rel_heights=c(1,1)))
         }else{
            print(p)
@@ -2853,13 +2965,12 @@ plot_locus_with_random <- function(queryFiles, centerFiles, txdb, ext=c(0,0), hl
              comp <- list(c(1, 2))
 
              ps1 <- draw_boxplot_by_factor(stat_df=stat_df, xc="Reference", yc="Intensity",  comp=comp, stats=statsMethod, Ylab=Ylab) 
-             ps2 <- draw_boxplot_by_factor(stat_df=stat_df, xc="Reference", yc="Intensity",  comp=comp, stats=statsMethod, Ylab=Ylab) 
              ps1_wo_outlier <- draw_boxplot_wo_outlier(stat_df=stat_df, xc="Reference", yc="Intensity", comp=comp, stats=statsMethod, Ylab=Ylab)
              ps1_mean_se <- draw_mean_se_barplot(stat_df=stat_df, xc="Reference", yc="Intensity", comp=comp, Ylab=Ylab)
              prank <- draw_rank_plot(stat_df=stat_df, xc="Reference", yc="Intensity", Ylab=Ylab)
 
              comp1 <- plot_grid(p, ps1_mean_se,  ncol = 2, rel_widths = c(1,1))
-             comp2 <- plot_grid(ps1, ps2, ps1_wo_outlier, ncol = 3, rel_widths = c(1,1,1))
+             comp2 <- plot_grid(ps1, ps1_wo_outlier, ncol = 2, rel_widths = c(1,1))
              print(plot_grid(comp1, comp2, ncol=1, rel_heights=c(1,1)))
 
           }else{
@@ -2906,7 +3017,12 @@ plot_locus_with_random <- function(queryFiles, centerFiles, txdb, ext=c(0,0), hl
 #'
 #' @export plot_bam_correlation
 #'
-plot_bam_correlation <- function(bamfiles, binSize=1e6, outPrefix=NULL, handleInputParams=NULL, verbose=FALSE, nc=2){
+plot_bam_correlation <- function(bamfiles, 
+                                 binSize=1e6, 
+                                 outPrefix=NULL, 
+                                 handleInputParams=NULL, 
+                                 verbose=FALSE, 
+                                 nc=2){
 
   bamlabels <- names(bamfiles)
   handleInputParams$outRle <- FALSE # force query to be GRanges
@@ -3041,8 +3157,15 @@ plot_bam_correlation <- function(bamfiles, binSize=1e6, outPrefix=NULL, handleIn
 #'
 #' @export plot_peak_annotation
 #'
-plot_peak_annotation <- function(peakFile, gtfFile, handleInputParams=NULL, fiveP=-1000, dsTSS=300, threeP=1000, 
-                                 simple=FALSE, outPrefix=NULL, verbose=FALSE){
+plot_peak_annotation <- function(peakFile, 
+                                 gtfFile, 
+                                 handleInputParams=NULL, 
+                                 fiveP=-1000, 
+                                 dsTSS=300,
+                                 threeP=1000, 
+                                 simple=FALSE, 
+                                 outPrefix=NULL, 
+                                 verbose=FALSE){
 
   peakLabel <- names(peakFile)
   handleInputParams$useScore=FALSE
@@ -3373,7 +3496,12 @@ plot_peak_annotation <- function(peakFile, gtfFile, handleInputParams=NULL, five
 #' @export plot_overlap_bed
 
 
-plot_overlap_bed <- function(bedList, outPrefix=NULL, handleInputParams=NULL, pairOnly=TRUE, stranded=TRUE, verbose=FALSE){
+plot_overlap_bed <- function(bedList, 
+                             outPrefix=NULL, 
+                             handleInputParams=NULL, 
+                             pairOnly=TRUE, 
+                             stranded=TRUE, 
+                             verbose=FALSE){
 
   inputList <- handle_input(bedList, handleInputParams)
   names(inputList) <- names(bedList)
@@ -3458,7 +3586,10 @@ plot_overlap_bed <- function(bedList, outPrefix=NULL, handleInputParams=NULL, pa
 #'
 #' @export plot_overlap_genes
 
-plot_overlap_genes <- function(fileList, columnList, pairOnly=TRUE, outPrefix=NULL){
+plot_overlap_genes <- function(fileList, 
+                               columnList, 
+                               pairOnly=TRUE, 
+                               outPrefix=NULL){
 
    geneList <- mapply(x=fileList, y=columnList, function(x, y){
       df <- read.delim(x, header=TRUE, sep="\t")
