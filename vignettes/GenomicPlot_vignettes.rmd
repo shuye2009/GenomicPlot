@@ -276,7 +276,7 @@ knitr::include_graphics("../tests/test_output/test_plot_locus2_18.png")
 
 ## Plot reference loci with random sites as contrast
 
-Random sites that deviate from the reference loci within a specified maximum distance can be treated as a control, and the statistical tests will be performed between bona fide and the random sites. Here the reference sites located in different genomic features (5'UTR, CDS, 3'UTR) can tested separately.
+Random sites that deviate from the reference loci within a specified maximum distance can be treated as a control, and the statistical tests will be performed between bona fide and the random sites. Here the reference sites located in different genomic features (5'UTR, CDS, 3'UTR) are tested separately. To avoid sampling bias, increase "n_random".
 
 ```{r, eval=FALSE, fig.show='hold', fig.keep='all', fig.align='center', fig.dim=c(7,7)}
 txdb <- AnnotationDbi::loadDb(system.file("extdata", "txdb_chr19.sql", package="GenomicPlot"))
@@ -327,10 +327,10 @@ knitr::include_graphics("../tests/test_output/test_plot_locus_with_random_12.png
 
 ## Plot peak annotation statistics
 
-Aside from reads coverage profiles, distribution of binding peaks in different gene types and genomic features is also important. Peak annotation statistics are plotted as bar chart for distribution in gene types, and as pie charts for distribution in genomic features. The pie charts are plotted in two different ways: either as percentage of absolute counts or as percentage of feature length-normalized counts in each features. For DNA binding samples, the features, in order of precedence, include "Promoter", "TTS", "5'UTR", "CDS", "3'UTR" and "Intron"; for RNA binding samples, "Promoter" and "TTS" are excluded. "Promoter" is defined as regions 2000 bp upstream of transcription start site (TSS) and 300 bp downstream TSS, "TTS" is defined as the region 1000 bp downstream cleavage site or the length between cleavage site and the start of the next gene, whichever is shorter, but these lengths can be adjusted.
+Aside from reads coverage profiles, distribution of binding peaks in different gene types and genomic features is also important. Peak annotation statistics are plotted as bar chart for distribution in gene types, and as pie charts for distribution in genomic features. The pie charts are plotted in two different ways: either as percentage of absolute counts or as percentage of feature length-normalized counts in each features. For DNA binding samples, the features, in order of precedence, include "Promoter", "TTS", "5'UTR", "CDS", "3'UTR" and "Intron"; for RNA binding samples, "Promoter" and "TTS" are excluded. "Promoter" is defined as regions 2000 bp upstream of transcription start site (TSS) and 300 bp downstream TSS, "TTS" is defined as the region 1000 bp downstream cleavage site or the length between cleavage site and the start of the next gene, whichever is shorter, but these lengths can be adjusted. To save annotation results (both peak-oriented and gene-oriented), set "verbose"=TRUE.
 
 ```{r, eval=FALSE, fig.show='hold', fig.keep='all', fig.align='center', fig.dim=c(7,7)}
-suppressPackageStartupMessages(library(GenomicPlot, quietly=TRUE))
+
 gtffile <- system.file("extdata", "gencode.v19.annotation_chr19.gtf", package="GenomicPlot")
 
 centerfile <- system.file("extdata", "test_chip_peak_chr19.bed", package="GenomicPlot")
