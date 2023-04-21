@@ -21,7 +21,8 @@
 #' names(labels_col) <- rep(levels_col, c(15, 60, 25))
 #'
 #' draw_matrix_heatmap(fullMatrix, dataName="test", labels_col, levels_col)
-#' draw_matrix_heatmap(fullMatrix, dataName="test", labels_col, levels_col, ranking="Hierarchical")
+#' draw_matrix_heatmap(fullMatrix, dataName="test", labels_col, levels_col, 
+#' ranking="Hierarchical")
 #'
 #' @export draw_matrix_heatmap
 #'
@@ -301,9 +302,10 @@ draw_locus_profile <- function(plot_df,
 #' @author Shuye Pu
 #'
 #' @examples 
-#' stat_df <- data.frame(Feature=rep(c("A", "B"), c(20, 30)), Intensity=c(rnorm(20, 2, 0.5), 
-#'                      rnorm(30, 3, 0.6)))
-#' p <- draw_boxplot_by_factor(stat_df, xc="Feature", yc="Intensity", Ylab="Signal Intensity")
+#' stat_df <- data.frame(Feature=rep(c("A", "B"), c(20, 30)), 
+#' Intensity=c(rnorm(20, 2, 0.5), rnorm(30, 3, 0.6)))
+#' p <- draw_boxplot_by_factor(stat_df, xc="Feature", yc="Intensity", 
+#' Ylab="Signal Intensity")
 #' p
 #' @export draw_boxplot_by_factor
 #'
@@ -380,8 +382,10 @@ draw_boxplot_by_factor <- function(stat_df,
 #' @return a ggplot object
 #' @export draw_boxplot_wo_outlier
 #' @examples 
-#' stat_df <- data.frame(Feature=rep(c("A", "B"), c(20, 30)), Intensity=c(rnorm(20, 2), rnorm(30, 3)))
-#' p <- draw_boxplot_wo_outlier(stat_df, xc="Feature", yc="Intensity", Ylab="Signal Intensity")
+#' stat_df <- data.frame(Feature=rep(c("A", "B"), c(20, 30)), Intensity=c(rnorm(20, 2), 
+#' rnorm(30, 3)))
+#' p <- draw_boxplot_wo_outlier(stat_df, xc="Feature", yc="Intensity", 
+#' Ylab="Signal Intensity")
 #' p
 #' 
 draw_boxplot_wo_outlier <- function(stat_df, 
@@ -464,8 +468,10 @@ draw_boxplot_wo_outlier <- function(stat_df,
 #' @author Shuye Pu
 #'
 #' @examples
-#' stat_df <- data.frame(Feature=rep(c("A", "B"), c(20, 30)), Intensity=c(rnorm(20, 2), rnorm(30, 3)))
-#' p <- draw_mean_se_barplot(stat_df, xc="Feature", yc="Intensity", Ylab="Signal Intensity")
+#' stat_df <- data.frame(Feature=rep(c("A", "B"), c(20, 30)), 
+#' Intensity=c(rnorm(20, 2), rnorm(30, 3)))
+#' p <- draw_mean_se_barplot(stat_df, xc="Feature", yc="Intensity", 
+#' Ylab="Signal Intensity")
 #' p
 #' @export draw_mean_se_barplot
 #'

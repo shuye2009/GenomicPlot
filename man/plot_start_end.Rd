@@ -86,13 +86,14 @@ names(inputfiles) <- "input"
 centerfiles <- system.file("extdata", "test_chip_peak_chr19.narrowPeak", package="GenomicPlot")
 names(centerfiles) <- "narrowPeak"
 
-handleInputParams <- list(CLIP_reads=FALSE, fix_width=150, fix_point="start", norm=FALSE, useScore=FALSE,
-   outRle=TRUE, useSizeFactor=TRUE, genome="hg19")
+handleInputParams <- list(CLIP_reads=FALSE, fix_width=150, fix_point="start", norm=FALSE, 
+useScore=FALSE, outRle=TRUE, useSizeFactor=TRUE, genome="hg19")
  
-df <- plot_start_end(queryFiles=queryfiles, inputFiles=inputfiles, centerFiles=c("gene", centerfiles), 
-   txdb=txdb, handleInputParams=handleInputParams, binSize=10, insert=100, verbose=TRUE, 
-   ext=c(-500, 100, -100, 500), hl=c(-50, 50, -50, 50), stranded=TRUE, scale=FALSE, smooth=TRUE, 
-   rmOutlier=FALSE, outPrefix=NULL, transform=NA, shade=TRUE, Ylab="Coverage/base/gene", nc=2)
+df <- plot_start_end(queryFiles=queryfiles, inputFiles=inputfiles, 
+centerFiles=c("gene", centerfiles), txdb=txdb, handleInputParams=handleInputParams, binSize=10,
+insert=100, verbose=TRUE, ext=c(-500, 100, -100, 500), hl=c(-50, 50, -50, 50), stranded=TRUE,
+scale=FALSE, smooth=TRUE, rmOutlier=FALSE, outPrefix=NULL, transform=NA, shade=TRUE, 
+Ylab="Coverage/base/gene", nc=2)
  
 }
 \author{

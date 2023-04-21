@@ -6,7 +6,7 @@ pdf_to_png <- function(op){
    for(i in seq_along(img)){image_write(img[i], path=paste0(op,"_",i, ".png"), format="png")}
 }
 
-outdir <- "./tests/test_output"
+outdir <- "./test_output"
 setwd(outdir)
 
 gtffile <- system.file("extdata", "gencode.v19.annotation_chr19.gtf", package="GenomicPlot")

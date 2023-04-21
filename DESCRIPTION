@@ -3,13 +3,15 @@ Type: Package
 Title: Plot profiles of next generation sequencing data in genomic features
 Version: 0.1.0
 Authors@R: person("Shuye", "Pu", email = "shuye2009@gmail.com", role = c("aut", "cre"), comment = c(ORCID = "0000-0002-6664-8438"))
-Description: Visualization of next generation sequencing (NGS) data is essential for interpreting high-throughput genomics 
-   experiment results. 'GenomicPlot' facilitates plotting of NGS data in various formats (bam, bed, wig and bigwig); 
-   both coverage and enrichment over input can be computed and displayed with respect to genomic features (such as UTR, CDS, enhancer), 
-   and user defined genomic loci or regions. Statistical tests on signal intensity within user defined regions of interest can be 
-   performed and represented as boxplots or bar graphs. Parallel processing is used to speed up computation on multicore platforms. 
-   In addition to genomic plots which is suitable for displaying of coverage of genomic DNA (such as ChIPseq data), metagenomic 
-   (without introns) plots can also be made for RNAseq or CLIPseq data as well. 
+Description: Visualization of next generation sequencing (NGS) data is essential for interpreting
+   high-throughput genomics experiment results. 'GenomicPlot' facilitates plotting of NGS data in
+   various formats (bam, bed, wig and bigwig); both coverage and enrichment over input can be 
+   computed and displayed with respect to genomic features (such as UTR, CDS, enhancer), and user
+   defined genomic loci or regions. Statistical tests on signal intensity within user defined 
+   regions of interest can be performed and represented as boxplots or bar graphs. Parallel 
+   processing is used to speed up computation on multicore platforms. In addition to genomic plots
+   which is suitable for displaying of coverage of genomic DNA (such as ChIPseq data),
+   metagenomic (without introns) plots can also be made for RNAseq or CLIPseq data as well. 
 License: GPL-2
 Encoding: UTF-8
 LazyData: FALSE

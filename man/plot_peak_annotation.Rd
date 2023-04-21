@@ -48,11 +48,11 @@ gtfFile <- system.file("extdata", "gencode.v19.annotation_chr19.gtf", package="G
 centerFile <- system.file("extdata", "test_chip_peak_chr19.bed", package="GenomicPlot")
 names(centerFile) <- c("summitPeak")
 
-handleBedparams <- list(fix_width=0, fix_point="center", useScore=FALSE, outRle=FALSE, CLIP_reads=FALSE,
-                        norm=FALSE, useSizeFactor=FALSE, genome="hg19")
+handleBedparams <- list(fix_width=0, fix_point="center", useScore=FALSE, outRle=FALSE, 
+CLIP_reads=FALSE, norm=FALSE, useSizeFactor=FALSE, genome="hg19")
 
-plot_peak_annotation(peakFile=centerFile, gtfFile=gtfFile, handleInputParams=handleBedparams, fiveP=-2000,
-   dsTSS=200, threeP=2000, simple=FALSE)
+plot_peak_annotation(peakFile=centerFile, gtfFile=gtfFile, handleInputParams=handleBedparams, 
+fiveP=-2000, dsTSS=200, threeP=2000, simple=FALSE)
 
 }
 \author{

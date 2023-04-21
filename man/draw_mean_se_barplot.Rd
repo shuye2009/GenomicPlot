@@ -42,8 +42,10 @@ Plot barplot for mean with standard error bars, no p-value significance levels a
 used by \code{plot_locus}, \code{plot_locus_with_random}
 }
 \examples{
-stat_df <- data.frame(Feature=rep(c("A", "B"), c(20, 30)), Intensity=c(rnorm(20, 2), rnorm(30, 3)))
-p <- draw_mean_se_barplot(stat_df, xc="Feature", yc="Intensity", Ylab="Signal Intensity")
+stat_df <- data.frame(Feature=rep(c("A", "B"), c(20, 30)), 
+Intensity=c(rnorm(20, 2), rnorm(30, 3)))
+p <- draw_mean_se_barplot(stat_df, xc="Feature", yc="Intensity", 
+Ylab="Signal Intensity")
 p
 }
 \author{
