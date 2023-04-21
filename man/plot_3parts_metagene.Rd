@@ -19,6 +19,7 @@ plot_3parts_metagene(
   rmOutlier = FALSE,
   heatRange = NULL,
   transform = NA,
+  hw = c(8, 8),
   nc = 2
 )
 }
@@ -50,6 +51,8 @@ plot_3parts_metagene(
 \item{heatRange}{a numerical vector of two elements, defining range for heatmap color ramp generation}
 
 \item{transform}{a string in c("log", "log2", "log10"), default = NA indicating no transformation of data matrix}
+
+\item{hw}{a vector of two elements specifying the height and width of the output figures}
 
 \item{nc}{integer, number of cores for parallel processing}
 }

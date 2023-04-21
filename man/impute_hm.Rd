@@ -15,7 +15,7 @@ impute_hm(fullmatrix, verbose = FALSE)
 a numeric matrix
 }
 \description{
-Replace 0 and missing values in a sparse non-negative matrix with half of median of column means, to avoid use of arbitrary pseudo numbers, and to allow computing ratios and log transformation of matrices. When a matrix is sparse (assuming it has many all-zero rows and few all-zero columns), the half of median of column means is a number that is small enough so that is will not distort the data too much (comparing to pseudo count=1), but large enough to avoid huge ratios when used as a denominator.
+Replace 0 and missing values in a sparse non-negative matrix with half of minimum of non-zero values, to avoid use of arbitrary pseudo numbers, and to allow computing ratios and log transformation of matrices. When a matrix is sparse (assuming it has many all-zero rows and few all-zero columns), the half of minimum of non-zero values is a number that is small enough so that is will not distort the data too much (comparing to pseudo count=1), but large enough to avoid huge ratios when used as a denominator.
 }
 \author{
 Shuye Pu

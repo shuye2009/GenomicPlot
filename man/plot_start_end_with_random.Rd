@@ -24,6 +24,7 @@ plot_start_end_with_random(
   transform = NA,
   shade = TRUE,
   nc = 2,
+  hw = c(8, 8),
   Ylab = "Coverage/base/gene"
 )
 }
@@ -65,6 +66,8 @@ plot_start_end_with_random(
 \item{shade}{logical indicating whether to place a shaded rectangle around the point of interest}
 
 \item{nc}{integer, number of cores for parallel processing}
+
+\item{hw}{a vector of two elements specifying the height and width of the output figures}
 
 \item{Ylab}{a string for y-axis label}
 }

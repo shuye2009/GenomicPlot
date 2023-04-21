@@ -512,6 +512,7 @@ prepare_5parts_genomic_features <- function(txdb,
 #' @param fiveP extension upstream of the 5' boundary of genes
 #' @param threeP extension downstream of the 3' boundary of genes
 #' @param dsTSS range of promoter extending downstream of TSS
+#' @param nc number of cores for parallel processing
 #'
 #' @return a GRangesList object
 #' @author Shuye Pu
@@ -527,7 +528,8 @@ prepare_5parts_genomic_features <- function(txdb,
 get_txdb_features <- function(txdb, 
                               fiveP=-1000, 
                               dsTSS=300, 
-                              threeP=1000){
+                              threeP=1000,
+                              nc=2){
    
    utr5 <- get_genomic_feature_coordinates(txdb, "utr5", longest=TRUE, protein_coding=TRUE)
    utr3 <- get_genomic_feature_coordinates(txdb, "utr3", longest=TRUE, protein_coding=TRUE)
@@ -553,7 +555,7 @@ get_txdb_features <- function(txdb,
       ol <- GenomicRanges::findOverlaps(TTS, gene_gr)
       queries <- unique(ol@from)
       
-      cl <- start_parallel(nc=2)
+      cl <- start_parallel(nc=nc)
       parallel::clusterEvalQ(cl, library("GenomicRanges"))
       parallel::clusterExport(cl, varlist=c("TTS", "gene_gr", "ol"), envir=environment())
        

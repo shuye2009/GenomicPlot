@@ -25,6 +25,7 @@ plot_region(
   heatRange = NULL,
   Ylab = "Coverage/base/gene",
   statsMethod = "wilcox.test",
+  hw = c(8, 8),
   nc = 2
 )
 }
@@ -68,6 +69,8 @@ plot_region(
 \item{Ylab}{a string for y-axis label}
 
 \item{statsMethod}{a string in c("wilcox.test", "t.test"), for pair-wise group comparisons}
+
+\item{hw}{a vector of two elements specifying the height and width of the output figures}
 
 \item{nc}{integer, number of cores for parallel processing}
 }

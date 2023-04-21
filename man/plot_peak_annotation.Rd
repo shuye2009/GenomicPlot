@@ -13,7 +13,9 @@ plot_peak_annotation(
   threeP = 1000,
   simple = FALSE,
   outPrefix = NULL,
-  verbose = FALSE
+  verbose = FALSE,
+  hw = c(8, 8),
+  nc = 2
 )
 }
 \arguments{
@@ -34,6 +36,10 @@ plot_peak_annotation(
 \item{outPrefix}{a string denoting output file name in pdf format}
 
 \item{verbose, }{logical, to indicate whether to write the annotation results to a file}
+
+\item{hw}{a vector of two elements specifying the height and width of the output figures}
+
+\item{nc}{number of cores for parallel processing}
 }
 \value{
 a list of two dataframes, 'annotation' is the annotation per peak, 'stat' is the summary stats for pie chart

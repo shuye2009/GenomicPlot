@@ -4,7 +4,13 @@
 \alias{plot_overlap_genes}
 \title{Plot Venn diagrams depicting overlap of gene lists}
 \usage{
-plot_overlap_genes(fileList, columnList, pairOnly = TRUE, outPrefix = NULL)
+plot_overlap_genes(
+  fileList,
+  columnList,
+  pairOnly = TRUE,
+  hw = c(8, 8),
+  outPrefix = NULL
+)
 }
 \arguments{
 \item{fileList, }{a named list of tab-dlimited files}
@@ -12,6 +18,8 @@ plot_overlap_genes(fileList, columnList, pairOnly = TRUE, outPrefix = NULL)
 \item{columnList}{a vector of integers denoting the columns that have gene names in the list of files}
 
 \item{pairOnly, }{logical, indicating whether only pair-wise overlap is desired}
+
+\item{hw}{a vector of two elements specifying the height and width of the output figures}
 
 \item{outPrefix, }{a string for plot file name}
 }

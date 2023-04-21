@@ -19,6 +19,7 @@ plot_5parts_metagene(
   heatRange = NULL,
   rmOutlier = FALSE,
   Ylab = "Coverage/base/gene",
+  hw = c(8, 8),
   nc = 2
 )
 }
@@ -50,6 +51,8 @@ plot_5parts_metagene(
 \item{rmOutlier}{logical, indicating whether a row with abnormally high values in the score matrix should be removed}
 
 \item{Ylab}{a string for y-axis label}
+
+\item{hw}{a vector of two elements specifying the height and width of the output figures}
 
 \item{nc}{integer, number of cores for parallel processing}
 }

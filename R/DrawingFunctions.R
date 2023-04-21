@@ -694,7 +694,7 @@ draw_stacked_profile <- function(plot_df,
       filter(grepl("Start", Location))
 
    ps <- ggplot(aplot_df_start, aes(x=.data[[xc]], y=.data[[yc]], color=.data[[cn]])) + scale_fill_npg() + scale_color_npg() +
-      geom_line(size=2) + ylim(ylimits) + #geom_point(color="grey30", size=2) +
+      geom_line(size=1.25) + ylim(ylimits) + #geom_point(color="grey30", size=2) +
       geom_vline(xintercept = 0, linetype="dotted", color = "blue", size=0.5) +
       geom_ribbon(aes(ymin=lower, ymax=upper, fill=.data[[cn]]), linetype=0, alpha=0.3) +
       theme_classic() + theme(legend.position="none") +
@@ -723,7 +723,7 @@ draw_stacked_profile <- function(plot_df,
       aplot_df_center <- plot_df %>%
          filter(grepl("Center", Location))
       pc <- ggplot(aplot_df_center, aes(x=.data[[xc]], y=.data[[yc]], color=.data[[cn]])) + scale_fill_npg() + scale_color_npg() +
-         geom_line(size=2) + ylim(ylimits) + #geom_point(color="grey30", size=2) +
+         geom_line(size=1.25) + ylim(ylimits) + #geom_point(color="grey30", size=2) +
          geom_vline(xintercept = 0, linetype="dotted", color = "blue", size=0.5) +
          geom_ribbon(aes(ymin=lower, ymax=upper, fill=.data[[cn]]), linetype=0, alpha=0.3) +
          #annotate("rect", xmin=unique(Xmin), xmax=unique(Xmax), ymin=-Inf, ymax=Inf, fill="grey", alpha=0.3) +
@@ -751,8 +751,8 @@ draw_stacked_profile <- function(plot_df,
 
    aplot_df_end <- plot_df %>%
       filter(grepl("End", Location))
-   pe <- ggplot(aplot_df_end, aes(x=.data[[xc]], y=.data[[yc]])) + scale_fill_npg() + scale_color_npg() +
-      geom_line(aes(color=.data[[cn]]), size=2) + ylim(ylimits) + #geom_point(color="grey30", size=2) +
+   pe <- ggplot(aplot_df_end, aes(x=.data[[xc]], y=.data[[yc]], color=.data[[cn]])) + scale_fill_npg() + scale_color_npg() +
+      geom_line(size=1.25) + ylim(ylimits) + #geom_point(color="grey30", size=2) +
       geom_vline(xintercept = 0, linetype="dotted", color = "blue", size=0.5) +
       geom_ribbon(aes(ymin=lower, ymax=upper, fill=.data[[cn]]), linetype=0, alpha=0.3) +
       theme_classic() +

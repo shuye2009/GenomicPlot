@@ -25,6 +25,7 @@ plot_locus_with_random(
   outPrefix = NULL,
   rmOutlier = FALSE,
   n_random = 1,
+  hw = c(8, 8),
   statsMethod = "wilcox.test",
   nc = 2
 )
@@ -69,6 +70,8 @@ plot_locus_with_random(
 \item{rmOutlier}{logical, indicating whether a row with abnormally high values in the score matrix should be removed}
 
 \item{n_random}{an integer denotes the number of randomization should be formed}
+
+\item{hw}{a vector of two elements specifying the height and width of the output figures}
 
 \item{statsMethod}{a string in c("wilcox.test", "t.test"), for pair-wise groups comparisons}
 
