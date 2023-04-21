@@ -37,7 +37,7 @@ plot_5parts_metagene(queryFiles=bedQueryFiles,
                      heatmap=TRUE,
                      rmOutlier=TRUE,
                      heatRange=c(0,1),
-                     nc=4)
+                     nc=2)
 pdf_to_png(op)
 
 
@@ -62,7 +62,7 @@ plot_5parts_metagene(queryFiles=bamQueryFiles,
                      handleInputParams=bamHandleInputParams, 
                      heatmap=TRUE, 
                      rmOutlier=TRUE, 
-                     nc=5)
+                     nc=2)
 pdf_to_png(op)
 
 ## plot_3parts_metagene ####
@@ -90,7 +90,7 @@ plot_3parts_metagene(queryFiles=chipQueryFiles,
                      handleInputParams=chipHandleInputParams, 
                      heatmap=TRUE, 
                      rmOutlier=TRUE, 
-                     nc=5)
+                     nc=2)
 pdf_to_png(op)
 
 ## plot_locus ####
@@ -114,7 +114,7 @@ plot_locus(queryFiles=bedQueryFiles[c(1,3)],
            heatmap=TRUE,
            heatRange=c(0,1),
            rmOutlier=TRUE,
-           nc=4)
+           nc=2)
 pdf_to_png(op)
 
 centerfiles <- c(system.file("extdata", "test_clip_peak_chr19.bed", package="GenomicPlot"),
@@ -150,7 +150,7 @@ plot_locus(queryFiles=queryfiles,
            rmOutlier=FALSE, 
            statsMethod="wilcox.test", 
            heatmap=TRUE, 
-           nc=5)
+           nc=2)
 pdf_to_png(op)
 
 ## plot_peak_annotation ####
@@ -213,7 +213,7 @@ plot_region(queryFiles=queryfiles,
             stranded=TRUE, 
             outPrefix=op, 
             rmOutlier=FALSE, 
-            nc=5)
+            nc=2)
 pdf_to_png(op)
 
 ## plot_start_end ####
@@ -231,7 +231,7 @@ plot_start_end(queryFiles=bamQueryFiles,
                scale=FALSE, 
                smooth=TRUE, 
                outPrefix=op, 
-               nc=5)
+               nc=2)
 pdf_to_png(op)
 
 ## plot_locus_with_random ####
@@ -266,5 +266,5 @@ plot_locus_with_random(queryFiles=queryfiles,
                        rmOutlier=FALSE, 
                        n_random=1, 
                        statsMethod="wilcox.test", 
-                       nc=5)
+                       nc=2)
 pdf_to_png(op)

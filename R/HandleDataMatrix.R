@@ -68,11 +68,6 @@ inspect_matrix <- function(fullmatrix,
 #' 
 #' @author Shuye Pu 
 #' 
-#' @examples 
-#' m <- matrix(0, ncol=5, nrow=30)
-#' m[1:4,] <- rexp(20, rate=1)
-#' 
-#' mimp <- impute_hm(m, verbose=TRUE)
 #' @keywords internal
 #'
 

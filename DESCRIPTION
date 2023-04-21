@@ -1,7 +1,7 @@
 Package: GenomicPlot
 Type: Package
 Title: Plot profiles of next generation sequencing data in genomic features
-Version: 0.1.0
+Version: 0.1.1
 Authors@R: person("Shuye", "Pu", email = "shuye2009@gmail.com", role = c("aut", "cre"), comment = c(ORCID = "0000-0002-6664-8438"))
 Description: Visualization of next generation sequencing (NGS) data is essential for interpreting
    high-throughput genomics experiment results. 'GenomicPlot' facilitates plotting of NGS data in
@@ -25,5 +25,5 @@ Imports: methods, Rsamtools, parallel, grid, ggplot2 (>= 3.3.5), tidyr, rtrackla
 RoxygenNote: 7.2.1
 VignetteBuilder: knitr
 Suggests: knitr, rmarkdown, AnnotationHub, AnnotationDbi, R.utils, BSgenome.Hsapiens.UCSC.hg19 (>= 1.4.3), BiocFileCache,
-   TxDb.Hsapiens.UCSC.hg19.knownGene (>= 3.2.2), GenomicPlotData
+   TxDb.Hsapiens.UCSC.hg19.knownGene (>= 3.2.2), magick
    

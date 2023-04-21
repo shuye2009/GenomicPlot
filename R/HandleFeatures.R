@@ -330,7 +330,8 @@ get_genomic_feature_coordinates <- function(txdb,
 #' @author Shuye Pu
 #'
 #' @examples
-#' txdb <- AnnotationDbi::loadDb(system.file("data", "txdb_chr19.sql", package="GenomicPlot"))
+#' txdb <- AnnotationDbi::loadDb(system.file("extdata", "txdb_chr19.sql", 
+#' package="GenomicPlot"))
 #'
 #' gf <- prepare_3parts_genomic_features(txdb, meta=FALSE, nbins=100, fiveP=-1000, threeP=1000,
 #' longest=FALSE)
