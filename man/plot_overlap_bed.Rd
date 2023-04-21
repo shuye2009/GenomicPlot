@@ -10,6 +10,7 @@ plot_overlap_bed(
   handleInputParams = NULL,
   pairOnly = TRUE,
   stranded = TRUE,
+  hw = c(8, 8),
   verbose = FALSE
 )
 }
@@ -23,6 +24,8 @@ plot_overlap_bed(
 \item{pairOnly}{logical, indicating whether only pair-wise overlap is desired}
 
 \item{stranded}{logical, indicating whether the feature is stranded. For nonstranded feature, only "*" is accepted as strand}
+
+\item{hw}{a vector of two elements specifying the height and width of the output figures}
 
 \item{verbose}{logical, indicating whether to output additional information}
 }

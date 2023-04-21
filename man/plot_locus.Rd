@@ -27,6 +27,7 @@ plot_locus(
   transform = NA,
   statsMethod = "wilcox.test",
   heatRange = NULL,
+  hw = c(8, 8),
   nc = 2
 )
 }
@@ -74,6 +75,8 @@ plot_locus(
 \item{statsMethod}{a string in c("wilcox.test", "t.test"), for pair-wise group comparisons}
 
 \item{heatRange}{a numerical vector of two elements, defining range for heatmap color ramp generation}
+
+\item{hw}{a vector of two elements specifying the height and width of the output figures}
 
 \item{nc}{integer, number of cores for parallel processing}
 }

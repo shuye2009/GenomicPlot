@@ -42,7 +42,8 @@ a named list with the elements c("windowRs", "nbins", "scaled_bins", "fiveP", "t
 This is a helper function for 'plot_3parts_metagene', used to speed up plotting of multiple data sets with the same configuration. Use featureName='transcript' and meta=FALSE and longest=TRUE for genes.
 }
 \examples{
-txdb <- AnnotationDbi::loadDb(system.file("data", "txdb_chr19.sql", package="GenomicPlot"))
+txdb <- AnnotationDbi::loadDb(system.file("extdata", "txdb_chr19.sql", 
+package="GenomicPlot"))
 
 gf <- prepare_3parts_genomic_features(txdb, meta=FALSE, nbins=100, fiveP=-1000, threeP=1000,
 longest=FALSE)

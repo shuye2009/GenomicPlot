@@ -23,6 +23,7 @@ plot_start_end(
   transform = NA,
   shade = TRUE,
   Ylab = "Coverage/base/gene",
+  hw = c(8, 8),
   nc = 2
 )
 }
@@ -62,6 +63,8 @@ plot_start_end(
 \item{shade}{logical indicating whether to place a shaded rectangle around the point of interest}
 
 \item{Ylab}{a string for y-axis label}
+
+\item{hw}{a vector of two elements specifying the height and width of the output figures}
 
 \item{nc}{integer, number of cores for parallel processing}
 }

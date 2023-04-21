@@ -24,6 +24,7 @@
 #' @param Ylab a string for y-axis label
 #' @param outPrefix a string specifying output file prefix for plots (outPrefix.pdf)
 #' @param verbose logical, whether to output additional information (data used for plotting or statistical test results)
+#' @param hw a vector of two elements specifying the height and width of the output figures
 #' @param nc integer, number of cores for parallel processing
 #'
 #' @return a list of two objects, the first is a GRanges object, the second is a GRangesList object
@@ -72,6 +73,7 @@ plot_start_end_with_random <- function(queryFiles,
                                        transform=NA, 
                                        shade=TRUE, 
                                        nc=2, 
+                                       hw=c(8,8),
                                        Ylab="Coverage/base/gene"){
 
    if(is.null(inputFiles)){
@@ -99,7 +101,7 @@ plot_start_end_with_random <- function(queryFiles,
      while(!is.null(dev.list())){
         dev.off()
      }
-     pdf(paste0(outPrefix, ".pdf"), width=10, height=8)
+     pdf(paste0(outPrefix, ".pdf"), width=hw[2], height=hw[1])
   }
 
   feature <- rfeature <- NULL
@@ -426,6 +428,7 @@ plot_start_end_with_random <- function(queryFiles,
 #' @param verbose logical, whether to output additional information (including data used for plotting or statistical test results)
 #' @param Ylab a string for y-axis label
 #' @param shade logical indicating whether to place a shaded rectangle around the point of interest
+#' @param hw a vector of two elements specifying the height and width of the output figures
 #' @param nc integer, number of cores for parallel processing
 #'
 #' @return a list of two objects, the first is a GRanges object, the second is a GRangesList object
@@ -473,6 +476,7 @@ plot_start_end <- function(queryFiles,
                            transform=NA, 
                            shade=TRUE, 
                            Ylab="Coverage/base/gene", 
+                           hw=c(8,8),
                            nc=2){
 
    if(is.null(inputFiles)){
@@ -497,14 +501,16 @@ plot_start_end <- function(queryFiles,
    queryLabels <- names(queryInputs)
    
    if(!is.null(outPrefix)){
-      pdf(paste0(outPrefix, ".pdf"), height=10, width=8)
+      pdf(paste0(outPrefix, ".pdf"), height=hw[1], width=hw[2])
    }
 
    bedparam <- handleInputParams
    bedparam$CLIP_reads <- FALSE
    bedparam$fix_width <- 0
+   bedparam$fix_point="start"
    bedparam$useScore <- FALSE
    bedparam$outRle <- FALSE
+   bedparam$norm <- FALSE
    bedparam$useSizeFactor <- FALSE
    
    features <- list()
@@ -615,6 +621,7 @@ plot_start_end <- function(queryFiles,
             if(smooth){
                sub_df$Intensity <- as.vector(smooth.spline(sub_df$Intensity, df=as.integer(bin_num/5))$y)
                sub_df$se <- as.vector(smooth.spline(sub_df$se, df=as.integer(bin_num/5))$y)
+               sub_df$Interval <- as.vector(smooth.spline(sub_df$Interval, df=as.integer(bin_num/5))$y)
             }
             sub_df <- mutate(sub_df, lower=Intensity-se, upper=Intensity+se)
 
@@ -710,6 +717,7 @@ plot_start_end <- function(queryFiles,
                if(smooth){
                   sub_df$Intensity <- as.vector(smooth.spline(sub_df$Intensity, df=as.integer(bin_num/5))$y)
                   sub_df$se <- as.vector(smooth.spline(sub_df$se, df=as.integer(bin_num/5))$y)
+                  sub_df$Interval <- as.vector(smooth.spline(sub_df$Interval, df=as.integer(bin_num/5))$y)
                }
                sub_df <- mutate(sub_df, lower=Intensity-se, upper=Intensity+se)
                plot_df <- rbind(plot_df, sub_df)
@@ -766,6 +774,7 @@ plot_start_end <- function(queryFiles,
 #' @param transform a string in c("log", "log2", "log10"), default = NA indicating no transformation of data matrix
 #' @param Ylab a string for y-axis label
 #' @param verbose logical, whether to output additional information (data used for plotting or statistical test results)
+#' @param hw a vector of two elements specifying the height and width of the output figures
 #' @param nc integer, number of cores for parallel processing
 #'
 #' @return a dataframe containing the data used for plotting
@@ -810,7 +819,8 @@ plot_3parts_metagene <- function(queryFiles,
                                  heatmap=FALSE, 
                                  rmOutlier=FALSE, 
                                  heatRange=NULL, 
-                                 transform=NA, 
+                                 transform=NA,
+                                 hw=c(8,8),
                                  nc=2){
 
    if(is.null(inputFiles)){
@@ -835,7 +845,7 @@ plot_3parts_metagene <- function(queryFiles,
    queryLabels <- names(queryInputs)
    
   if(!is.null(outPrefix)){
-     pdf(paste(outPrefix, "pdf", sep="."), height=8, width=12)
+     pdf(paste(outPrefix, "pdf", sep="."), height=hw[1], width=hw[2])
   }
 
   windowRs <- gFeatures$windowRs
@@ -1085,6 +1095,7 @@ plot_3parts_metagene <- function(queryFiles,
 #' @param transform a string in c("log", "log2", "log10"), default = NA indicating no transformation of data matrix
 #' @param statsMethod a string in c("wilcox.test", "t.test"), for pair-wise group comparisons
 #' @param verbose logical, indicating whether to output additional information (data used for plotting or statistical test results)
+#' @param hw a vector of two elements specifying the height and width of the output figures
 #' @param nc integer, number of cores for parallel processing
 #'
 #' @return a dataframe containing the data used for plotting
@@ -1130,10 +1141,11 @@ plot_region <- function(queryFiles,
                         heatRange=NULL, 
                         Ylab="Coverage/base/gene", 
                         statsMethod="wilcox.test", 
+                        hw=c(8,8),
                         nc=2){
 
   if(!is.null(outPrefix)){
-    pdf(paste(outPrefix, "pdf", sep="."), height=8, width=12)
+    pdf(paste(outPrefix, "pdf", sep="."), height=hw[1], width=hw[2])
   }
 
    if(is.null(inputFiles)){
@@ -1639,6 +1651,7 @@ plot_region <- function(queryFiles,
 #' @param outPrefix a string specifying output file prefix for plots (outPrefix.pdf)
 #' @param verbose logical, indicating whether to output additional information (data used for plotting or statistical test results)
 #' @param Ylab a string for y-axis label
+#' @param hw a vector of two elements specifying the height and width of the output figures
 #' @param nc integer, number of cores for parallel processing
 #'
 #' @return a dataframe containing the data used for plotting
@@ -1681,6 +1694,7 @@ plot_5parts_metagene <- function(queryFiles,
                                  heatRange=NULL, 
                                  rmOutlier=FALSE,
                                  Ylab="Coverage/base/gene", 
+                                 hw=c(8,8),
                                  nc=2){
 
   if(is.null(inputFiles)){
@@ -1703,7 +1717,7 @@ plot_5parts_metagene <- function(queryFiles,
   }
   queryLabels <- names(queryInputs)
   
-  if(!is.null(outPrefix)) pdf(paste(outPrefix, "pdf", sep="."), height=8, width=12)
+  if(!is.null(outPrefix)) pdf(paste(outPrefix, "pdf", sep="."), height=hw[1], width=hw[2])
 
   mplot_dfs <- NULL
   mplot_dfs_ratio <- NULL
@@ -1992,6 +2006,7 @@ plot_5parts_metagene <- function(queryFiles,
 #' @param transform a string in c("log", "log2", "log10"), default = NA indicating no transformation of data matrix
 #' @param statsMethod a string in c("wilcox.test", "t.test"), for pair-wise group comparisons
 #' @param verbose logical, indicating whether to output additional information (data used for plotting or statistical test results)
+#' @param hw a vector of two elements specifying the height and width of the output figures
 #' @param nc integer, number of cores for parallel processing
 #'
 #' @return a list of two dataframes containing the data used for plotting and for statistical testing
@@ -2043,6 +2058,7 @@ plot_locus <- function(queryFiles,
                        transform=NA, 
                        statsMethod="wilcox.test", 
                        heatRange=NULL,
+                       hw=c(8,8),
                        nc=2){
 
    if(is.null(inputFiles)){
@@ -2082,7 +2098,7 @@ plot_locus <- function(queryFiles,
      while(!is.null(dev.list())){
         dev.off()
      }
-     pdf(paste(outPrefix, "pdf", sep="."), height=12, width=12)
+     pdf(paste(outPrefix, "pdf", sep="."), height=hw[1], width=hw[2])
   }
 
   scoreMatrix_list <- list()
@@ -2587,6 +2603,7 @@ plot_locus <- function(queryFiles,
 #' @param n_random an integer denotes the number of randomization should be formed
 #' @param statsMethod a string in c("wilcox.test", "t.test"), for pair-wise groups comparisons
 #' @param verbose logical, indicating whether to output additional information (data used for plotting or statistical test results)
+#' @param hw a vector of two elements specifying the height and width of the output figures
 #' @param nc integer, number of cores for parallel processing
 #'
 #' @return a dataframe containing the data used for plotting
@@ -2635,6 +2652,7 @@ plot_locus_with_random <- function(queryFiles,
                                    outPrefix=NULL, 
                                    rmOutlier=FALSE, 
                                    n_random=1, 
+                                   hw=c(8,8),
                                    statsMethod="wilcox.test", 
                                    nc=2){
 
@@ -2663,7 +2681,7 @@ plot_locus_with_random <- function(queryFiles,
      while(!is.null(dev.list())){
         dev.off()
      }
-     pdf(paste(outPrefix, "pdf", sep="."), height=8, width=12)
+     pdf(paste(outPrefix, "pdf", sep="."), height=hw[1], width=hw[2])
   }
 
   ext[2] <- ext[2] - (ext[2]-ext[1])%%binSize ## to avoid binSize inconsistency, as the final binSize is dictated by bin_num
@@ -3004,6 +3022,7 @@ plot_locus_with_random <- function(queryFiles,
 #' @param outPrefix a string denoting output file name in pdf format
 #' @param handleInputParams a list of parameters for \code{handle_input}
 #' @param verbose logical, indicating whether to output additional information
+#' @param hw a vector of two elements specifying the height and width of the output figures
 #' @param nc integer, number of cores for parallel processing
 #'
 #' @return NULL
@@ -3031,6 +3050,7 @@ plot_bam_correlation <- function(bamfiles,
                                  outPrefix=NULL, 
                                  handleInputParams=NULL, 
                                  verbose=FALSE, 
+                                 wh=c(8,8),
                                  nc=2){
 
   bamlabels <- names(bamfiles)
@@ -3067,7 +3087,7 @@ plot_bam_correlation <- function(bamfiles,
      mutate(Rank=order(cumCount)) %>%
      mutate(Fraction=cumCount/max(cumCount), Rank=Rank/max(Rank))
 
-  if(!is.null(outPrefix)) pdf(paste0(outPrefix, ".pdf"), width=10, height=8)
+  if(!is.null(outPrefix)) pdf(paste0(outPrefix, ".pdf"), width=hw[2], height=hw[1])
 
   p1 <- ggplot(data=long_df, aes(x=Rank, y=Fraction, color=Sample)) +
      geom_line() +
@@ -3148,6 +3168,8 @@ plot_bam_correlation <- function(bamfiles,
 #' @param outPrefix a string denoting output file name in pdf format
 #' @param simple logical, indicating whether 5'UTR and 3'UTR are annotated in the gtffile
 #' @param verbose, logical, to indicate whether to write the annotation results to a file
+#' @param hw a vector of two elements specifying the height and width of the output figures
+#' @param nc number of cores for parallel processing
 #'
 #' @return a list of two dataframes, 'annotation' is the annotation per peak, 'stat' is the summary stats for pie chart
 #' @author Shuye Pu
@@ -3174,7 +3196,9 @@ plot_peak_annotation <- function(peakFile,
                                  threeP=1000, 
                                  simple=FALSE, 
                                  outPrefix=NULL, 
-                                 verbose=FALSE){
+                                 verbose=FALSE,
+                                 hw=c(8,8),
+                                 nc=2){
 
   peakLabel <- names(peakFile)
   handleInputParams$useScore=FALSE
@@ -3187,6 +3211,7 @@ plot_peak_annotation <- function(peakFile,
      stranded <- FALSE
   }
   
+  if(!is.null(outPrefix)) pdf(paste0(outPrefix, ".pdf"), height=hw[1], width=hw[2])
   suppressWarnings(suppressMessages(txdb <- makeTxDbFromGFF(gtfFile)))
 
   if(simple){
@@ -3217,8 +3242,6 @@ plot_peak_annotation <- function(peakFile,
                             "Exon"=unlist(exon$GRangesList, use.names=FALSE),
                             "Intron"=unlist(intron$GRangesList, use.names=FALSE),
                             compress=FALSE)
-
-    if(!is.null(outPrefix)) pdf(paste0(outPrefix, ".pdf"), height=8, width=12)
 
     suppressWarnings(annot <- annotateWithFeatures(peak, features, strand.aware=TRUE, intersect.chr=FALSE))
     if(verbose) print(annot)
@@ -3324,7 +3347,6 @@ plot_peak_annotation <- function(peakFile,
       arrange(desc(count))
     rownames(dfs) <- as.character(dfs$feature)
 
-    if(!is.null(outPrefix)) pdf(paste0(outPrefix, ".pdf"), height=8, width=12)
     pbar <- ggplot(dfs, aes(x = reorder(feature, -percent), y = percent)) +
       geom_bar(stat = 'identity', aes(fill = feature)) +
       scale_fill_viridis(discrete=TRUE) +
@@ -3339,7 +3361,7 @@ plot_peak_annotation <- function(peakFile,
     
     ## get targeted genes table
     
-    features <- get_txdb_features(txdb, fiveP=fiveP, dsTSS=dsTSS, threeP=threeP) # utr5, utr3 and cds here do not contain introns
+    features <- get_txdb_features(txdb, fiveP=fiveP, dsTSS=dsTSS, threeP=threeP, nc=nc) # utr5, utr3 and cds here do not contain introns
     dt <- get_targeted_genes(peak, features, stranded=stranded)
 
     if(verbose) write.table(dt$peak_table, paste(peakLabel, "_peak_annotations.tab", sep=""), sep="\t", row.names=FALSE, quote=FALSE)
@@ -3486,6 +3508,7 @@ plot_peak_annotation <- function(peakFile,
 #' @param stranded logical, indicating whether the feature is stranded. For nonstranded feature, only "*" is accepted as strand
 #' @param pairOnly logical, indicating whether only pair-wise overlap is desired
 #' @param verbose logical, indicating whether to output additional information
+#' @param hw a vector of two elements specifying the height and width of the output figures
 #'
 #' @return NULL
 #' @author Shuye Pu
@@ -3510,7 +3533,8 @@ plot_overlap_bed <- function(bedList,
                              outPrefix=NULL, 
                              handleInputParams=NULL, 
                              pairOnly=TRUE, 
-                             stranded=TRUE, 
+                             stranded=TRUE,
+                             hw=c(8,8),
                              verbose=FALSE){
 
   inputList <- handle_input(bedList, handleInputParams)
@@ -3538,7 +3562,7 @@ plot_overlap_bed <- function(bedList,
 
   pairs <- combn(grList, 2, simplify = FALSE)
 
-  if(!is.null(outPrefix)) pdf(paste0(outPrefix, ".pdf"), width=8, height=8)
+  if(!is.null(outPrefix)) pdf(paste0(outPrefix, ".pdf"), width=hw[2], height=hw[1])
 
   g <- ggplot(counts_long, aes(X, Y)) +
      geom_tile(aes(fill = count)) +
@@ -3589,6 +3613,7 @@ plot_overlap_bed <- function(bedList,
 #' @param columnList a vector of integers denoting the columns that have gene names in the list of files
 #' @param outPrefix, a string for plot file name
 #' @param pairOnly, logical, indicating whether only pair-wise overlap is desired
+#' @param hw a vector of two elements specifying the height and width of the output figures
 #'
 #' @return a list of vectors of gene names
 #' @author Shuye Pu
@@ -3598,7 +3623,8 @@ plot_overlap_bed <- function(bedList,
 
 plot_overlap_genes <- function(fileList, 
                                columnList, 
-                               pairOnly=TRUE, 
+                               pairOnly=TRUE,
+                               hw=c(8,8),
                                outPrefix=NULL){
 
    geneList <- mapply(x=fileList, y=columnList, function(x, y){
@@ -3609,7 +3635,7 @@ plot_overlap_genes <- function(fileList,
 
 
    if(!is.null(outPrefix)){
-      pdf(paste0(outPrefix, ".pdf"), width=8, height=8)
+      pdf(paste0(outPrefix, ".pdf"), width=hw[2], height=hw[1])
       pairs <- combn(geneList, 2, simplify = FALSE)
 
       lapply(pairs, overlap_pair, intersect)

@@ -59,7 +59,7 @@ inspect_matrix <- function(fullmatrix,
 }
 
 #' @title Impute missing values
-#' @description Replace 0 and missing values in a sparse non-negative matrix with half of median of column means, to avoid use of arbitrary pseudo numbers, and to allow computing ratios and log transformation of matrices. When a matrix is sparse (assuming it has many all-zero rows and few all-zero columns), the half of median of column means is a number that is small enough so that is will not distort the data too much (comparing to pseudo count=1), but large enough to avoid huge ratios when used as a denominator.
+#' @description Replace 0 and missing values in a sparse non-negative matrix with half of minimum of non-zero values, to avoid use of arbitrary pseudo numbers, and to allow computing ratios and log transformation of matrices. When a matrix is sparse (assuming it has many all-zero rows and few all-zero columns), the half of minimum of non-zero values is a number that is small enough so that is will not distort the data too much (comparing to pseudo count=1), but large enough to avoid huge ratios when used as a denominator.
 #' 
 #' @param fullmatrix a numeric matrix
 #' @param verbose logical, whether to output additional information
@@ -73,25 +73,25 @@ inspect_matrix <- function(fullmatrix,
 
 impute_hm <- function(fullmatrix, 
                       verbose=FALSE){
-
    if(min(fullmatrix) < 0){
-      message("Cannot impute for matrices with negative values, matrix is not modified!")
+      message("cannot impute because the matrix has negative values")
       return(fullmatrix)
    }
-   
    if(verbose){
       message("Imputing missing values. Matrix quartiles:")
       print(quantile(fullmatrix))
    }
 
-   #minv <- median(fullmatrix[fullmatrix != 0])
-   minv <- median(apply(fullmatrix, 2, mean))
+   #fullmatrix[fullmatrix == 0] <- NA
+   minv <- min(fullmatrix[fullmatrix != 0])
+   #minv <- min(apply(fullmatrix, 2, mean))
    halfmin <- minv/2
    fullmatrix[fullmatrix < halfmin] <- halfmin ##  to avoid take log of zero and use of pseudo numbers
 
    if(verbose){
-      print(paste("Imputed value", halfmin))
+      message("Matrix quantiles after imputing:")
       print(quantile(fullmatrix))
+      print(paste("The imputed value is:", halfmin))
    }
 
    return(fullmatrix)

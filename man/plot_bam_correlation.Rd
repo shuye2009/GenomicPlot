@@ -10,6 +10,7 @@ plot_bam_correlation(
   outPrefix = NULL,
   handleInputParams = NULL,
   verbose = FALSE,
+  wh = c(8, 8),
   nc = 2
 )
 }
@@ -25,6 +26,8 @@ plot_bam_correlation(
 \item{verbose}{logical, indicating whether to output additional information}
 
 \item{nc}{integer, number of cores for parallel processing}
+
+\item{hw}{a vector of two elements specifying the height and width of the output figures}
 }
 \description{
 plot correlation in reads coverage distributions along the genome for bam files
