@@ -44,9 +44,10 @@
 #' handleInputParams <- list(CLIP_reads=TRUE, fix_width=150, fix_point="start", norm=TRUE, 
 #' useScore=FALSE, outRle=TRUE, useSizeFactor=TRUE, genome="hg19")
 #' 
-#' plot_start_end_with_random(queryFiles=c(queryFiles), inputFiles=c(inputFiles), txdb=txdb, centerFile="intron",
-#'    binSize=10, handleInputParams=handleInputParams, ext=ext, hl=hl, randomize=TRUE, verbose=TRUE,
-#'    insert=100, stranded=TRUE, scale=FALSE, smooth=TRUE, outPrefix=NULL, nc=2)
+#' plot_start_end_with_random(queryFiles=c(queryFiles), inputFiles=c(inputFiles), txdb=txdb, 
+#' centerFile="intron", binSize=10, handleInputParams=handleInputParams, ext=ext, hl=hl, 
+#' randomize=TRUE, verbose=TRUE, insert=100, stranded=TRUE, scale=FALSE, smooth=TRUE, 
+#' outPrefix=NULL, nc=2)
 #'
 #' @export plot_start_end_with_random
 #'
@@ -442,13 +443,14 @@ plot_start_end_with_random <- function(queryFiles,
 #' centerfiles <- system.file("extdata", "test_chip_peak_chr19.narrowPeak", package="GenomicPlot")
 #' names(centerfiles) <- "narrowPeak"
 #' 
-#' handleInputParams <- list(CLIP_reads=FALSE, fix_width=150, fix_point="start", norm=FALSE, useScore=FALSE,
-#'    outRle=TRUE, useSizeFactor=TRUE, genome="hg19")
+#' handleInputParams <- list(CLIP_reads=FALSE, fix_width=150, fix_point="start", norm=FALSE, 
+#' useScore=FALSE, outRle=TRUE, useSizeFactor=TRUE, genome="hg19")
 #'  
-#' df <- plot_start_end(queryFiles=queryfiles, inputFiles=inputfiles, centerFiles=c("gene", centerfiles), 
-#'    txdb=txdb, handleInputParams=handleInputParams, binSize=10, insert=100, verbose=TRUE, 
-#'    ext=c(-500, 100, -100, 500), hl=c(-50, 50, -50, 50), stranded=TRUE, scale=FALSE, smooth=TRUE, 
-#'    rmOutlier=FALSE, outPrefix=NULL, transform=NA, shade=TRUE, Ylab="Coverage/base/gene", nc=2)
+#' df <- plot_start_end(queryFiles=queryfiles, inputFiles=inputfiles, 
+#' centerFiles=c("gene", centerfiles), txdb=txdb, handleInputParams=handleInputParams, binSize=10,
+#' insert=100, verbose=TRUE, ext=c(-500, 100, -100, 500), hl=c(-50, 50, -50, 50), stranded=TRUE,
+#' scale=FALSE, smooth=TRUE, rmOutlier=FALSE, outPrefix=NULL, transform=NA, shade=TRUE, 
+#' Ylab="Coverage/base/gene", nc=2)
 #'  
 #' @export plot_start_end
 #'
@@ -770,7 +772,8 @@ plot_start_end <- function(queryFiles,
 #' @author Shuye Pu
 #'
 #' @examples
-#' txdb <- AnnotationDbi::loadDb(system.file("extdata", "txdb_chr19.sql", package="GenomicPlot"))
+#' txdb <- AnnotationDbi::loadDb(system.file("extdata", "txdb_chr19.sql", 
+#'                               package="GenomicPlot"))
 #' 
 #' queryfiles <- system.file("extdata", "treat_chr19.bam", package="GenomicPlot")
 #' names(queryfiles) <- "query"
@@ -778,15 +781,18 @@ plot_start_end <- function(queryFiles,
 #' inputfiles <- system.file("extdata", "input_chr19.bam", package="GenomicPlot")
 #' names(inputfiles) <- "input"
 #' 
-#' gfeatures <- prepare_3parts_genomic_features(txdb, featureName="transcript", meta=TRUE, nbins=100, 
-#' fiveP=-1000, threeP=1000, longest=TRUE, protein_coding=TRUE, verbose=FALSE)
+#' gfeatures <- prepare_3parts_genomic_features(txdb, featureName="transcript", meta=TRUE, 
+#' nbins=100, fiveP=-1000, threeP=1000, longest=TRUE, protein_coding=TRUE, verbose=FALSE)
 #' 
-#' handleInputParams <- list(CLIP_reads=FALSE, fix_width=150, fix_point="start", norm=FALSE, useScore=FALSE,
-#'    outRle=TRUE, useSizeFactor=TRUE, genome="hg19")
+#' handleInputParams <- list(CLIP_reads=FALSE, fix_width=150, fix_point="start", norm=FALSE,
+#' useScore=FALSE, outRle=TRUE, useSizeFactor=TRUE, genome="hg19")
 #'  
-#' df <- plot_3parts_metagene(queryFiles=queryfiles, gFeatures=gfeatures, inputFiles=inputfiles, scale=FALSE,  
-#'    verbose=TRUE, Ylab="Coverage/base/gene", handleInputParams=handleInputParams, smooth=TRUE, stranded=TRUE, 
-#'    outPrefix=NULL, heatmap=TRUE, rmOutlier=FALSE, heatRange=NULL, transform=NA, nc=2)
+#' df <- plot_3parts_metagene(queryFiles=queryfiles, gFeatures=gfeatures, inputFiles
+#'                            =inputfiles, scale=FALSE, verbose=TRUE, 
+#'                            Ylab="Coverage/base/gene", handleInputParams
+#'                            =handleInputParams, smooth=TRUE, stranded=TRUE, 
+#'                            outPrefix=NULL, heatmap=TRUE, rmOutlier=FALSE, heatRange=NULL,
+#'                            transform=NA, nc=2)
 #'
 #' @export plot_3parts_metagene
 
@@ -1093,13 +1099,14 @@ plot_3parts_metagene <- function(queryFiles,
 #' centerfiles <- system.file("extdata", "test_chip_peak_chr19.narrowPeak", package="GenomicPlot")
 #' names(centerfiles) <- "narrowPeak"
 #' op <- NULL
-#' handleInputParams <- list(CLIP_reads=FALSE, fix_width=150, fix_point="start", norm=FALSE, useScore=FALSE,
-#'  outRle=TRUE, useSizeFactor=TRUE, genome="hg19")
+#' handleInputParams <- list(CLIP_reads=FALSE, fix_width=150, fix_point="start", norm=FALSE,
+#' useScore=FALSE, outRle=TRUE, useSizeFactor=TRUE, genome="hg19")
 #'  
-#' df <- plot_region(queryFiles=queryfiles, centerFiles=centerfiles, txdb=NULL, regionName="region", 
-#' inputFiles=inputfiles, nbins=100, handleInputParams=handleInputParams, verbose=TRUE, scale=FALSE, 
-#' heatmap=TRUE, fiveP=-1000, threeP=1000, smooth=TRUE, stranded=TRUE, transform=NA, outPrefix=NULL, 
-#' rmOutlier=FALSE, heatRange=NULL, Ylab="Coverage/base/gene", statsMethod="wilcox.test", nc=2)
+#' plot_region(queryFiles=queryfiles, centerFiles=centerfiles, txdb=NULL, regionName="region", 
+#' inputFiles=inputfiles, nbins=100, handleInputParams=handleInputParams, verbose=TRUE, 
+#' scale=FALSE, heatmap=TRUE, fiveP=-1000, threeP=1000, smooth=TRUE, stranded=TRUE, transform=NA,
+#' outPrefix=NULL, rmOutlier=FALSE, heatRange=NULL, Ylab="Coverage/base/gene", 
+#' statsMethod="wilcox.test", nc=2)
 #'
 #' @export plot_region
 
@@ -1646,15 +1653,16 @@ plot_region <- function(queryFiles,
 #' inputfiles <- system.file("extdata", "input_chr19.bam", package="GenomicPlot")
 #' names(inputfiles) <- "input"
 #' 
-#' gfeatures <- prepare_5parts_genomic_features(txdb, meta=TRUE, nbins=100, fiveP=-1000, threeP=1000, 
-#' longest=TRUE, verbose=FALSE)
+#' gfeatures <- prepare_5parts_genomic_features(txdb, meta=TRUE, nbins=100, fiveP=-1000, 
+#' threeP=1000, longest=TRUE, verbose=FALSE)
 #' 
-#' handleInputParams <- list(CLIP_reads=FALSE, fix_width=150, fix_point="start", norm=FALSE, useScore=FALSE,
-#'    outRle=TRUE, useSizeFactor=TRUE, genome="hg19")
+#' handleInputParams <- list(CLIP_reads=FALSE, fix_width=150, fix_point="start", norm=FALSE,
+#' useScore=FALSE, outRle=TRUE, useSizeFactor=TRUE, genome="hg19")
 #'    
-#' df <- plot_5parts_metagene(queryFiles=queryfiles, gFeatures=list("metagene"=gfeatures), inputFiles=inputfiles, 
-#'    scale=FALSE, verbose=TRUE, Ylab="Coverage/base/gene", handleInputParams=handleInputParams, smooth=TRUE, 
-#'    stranded=TRUE, outPrefix=NULL, heatmap=TRUE, rmOutlier=FALSE, heatRange=NULL, transform=NA, nc=2)
+#' df <- plot_5parts_metagene(queryFiles=queryfiles, gFeatures=list("metagene"=gfeatures), 
+#' inputFiles=inputfiles, scale=FALSE, verbose=TRUE, Ylab="Coverage/base/gene", 
+#' handleInputParams=handleInputParams, smooth=TRUE,  stranded=TRUE, outPrefix=NULL, heatmap=TRUE,
+#'  rmOutlier=FALSE, heatRange=NULL, transform=NA, nc=2)
 #'                
 #' @export plot_5parts_metagene
 #'
@@ -2001,14 +2009,14 @@ plot_5parts_metagene <- function(queryFiles,
 #' centerfiles <- system.file("extdata", "test_clip_peak_chr19.bed", package="GenomicPlot")
 #' names(centerfiles) <- "clipPeak"
 #' 
-#' handleInputParams <- list(CLIP_reads=TRUE, fix_width=150, fix_point="start", norm=FALSE, useScore=FALSE,
-#'    outRle=TRUE, useSizeFactor=TRUE, genome="hg19")
+#' handleInputParams <- list(CLIP_reads=TRUE, fix_width=150, fix_point="start", norm=FALSE, 
+#' useScore=FALSE, outRle=TRUE, useSizeFactor=TRUE, genome="hg19")
 #'  
-#' df <- plot_locus(queryFiles=queryfiles, centerFiles=c(centerfiles, "intron"), txdb=txdb, ext=c(-200,200), 
-#'    hl=c(-20, 20), shade=TRUE, smooth=FALSE, handleInputParams=handleInputParams, verbose=TRUE, binSize=10,
-#'    refPoint="center", Xlab="Center", Ylab="Coverage/base/gene", inputFiles=inputfiles, stranded=TRUE, 
-#'    heatmap=TRUE, scale=FALSE, outPrefix=NULL, rmOutlier=FALSE, transform=NA, statsMethod="wilcox.test", 
-#'    heatRange=c(0, 0.3), nc=2)
+#' df <- plot_locus(queryFiles=queryfiles, centerFiles=c(centerfiles, "intron"), txdb=txdb, 
+#' ext=c(-200,200), hl=c(-20, 20), shade=TRUE, smooth=FALSE, handleInputParams=handleInputParams, 
+#' verbose=TRUE, binSize=10, refPoint="center", Xlab="Center", Ylab="Coverage/base/gene", 
+#' inputFiles=inputfiles, stranded=TRUE, heatmap=TRUE, scale=FALSE, outPrefix=NULL, 
+#' rmOutlier=FALSE, transform=NA, statsMethod="wilcox.test", heatRange=c(0, 0.3), nc=2)
 #'
 #' @export plot_locus
 
@@ -2596,13 +2604,14 @@ plot_locus <- function(queryFiles,
 #' centerfiles <- system.file("extdata", "test_clip_peak_chr19.bed", package="GenomicPlot")
 #' names(centerfiles) <- "clipPeak"
 #' 
-#' handleInputParams <- list(CLIP_reads=TRUE, fix_width=150, fix_point="start", norm=FALSE, useScore=FALSE,
-#'    outRle=TRUE, useSizeFactor=TRUE, genome="hg19")
+#' handleInputParams <- list(CLIP_reads=TRUE, fix_width=150, fix_point="start", norm=FALSE, 
+#' useScore=FALSE, outRle=TRUE, useSizeFactor=TRUE, genome="hg19")
 #'  
-#' df <- plot_locus_with_random(queryFiles=queryfiles, centerFiles=c(centerfiles), txdb=txdb, ext=c(-200,200), 
-#'    hl=c(-20, 20), shade=TRUE, smooth=TRUE, handleInputParams=handleInputParams, verbose=TRUE, binSize=10,
-#'    refPoint="center", Xlab="Center", Ylab="Coverage/base/gene", inputFiles=inputfiles, stranded=TRUE, 
-#'    scale=FALSE, outPrefix=NULL, rmOutlier=FALSE, transform=NA, statsMethod="wilcox.test", nc=2)
+#' df <- plot_locus_with_random(queryFiles=queryfiles, centerFiles=c(centerfiles), txdb=txdb, 
+#' ext=c(-200,200), hl=c(-20, 20), shade=TRUE, smooth=TRUE, handleInputParams=handleInputParams, 
+#' verbose=TRUE, binSize=10, refPoint="center", Xlab="Center", Ylab="Coverage/base/gene", 
+#' inputFiles=inputfiles, stranded=TRUE, scale=FALSE, outPrefix=NULL, rmOutlier=FALSE, 
+#' transform=NA, statsMethod="wilcox.test", nc=2)
 #'
 #' @export plot_locus_with_random
 
@@ -3008,8 +3017,8 @@ plot_locus_with_random <- function(queryFiles,
 #'                 system.file("extdata", "input_chr19.bam", package="GenomicPlot"))
 #' names(inputFiles) <- c("chip_input", "clip_input")
 #'
-#' handleInputParams <- list(CLIP_reads=FALSE, fix_width=0, fix_point="start", norm=FALSE, useScore=FALSE,
-#'    outRle=FALSE, useSizeFactor=FALSE, genome="hg19")
+#' handleInputParams <- list(CLIP_reads=FALSE, fix_width=0, fix_point="start", norm=FALSE, 
+#' useScore=FALSE, outRle=FALSE, useSizeFactor=FALSE, genome="hg19")
 #'                           
 #' plot_bam_correlation(bamfiles=c(queryFiles, inputFiles), binSize=10000, outPrefix=NULL,
 #'    handleInputParams=handleInputParams, nc=2)
@@ -3149,11 +3158,11 @@ plot_bam_correlation <- function(bamfiles,
 #' centerFile <- system.file("extdata", "test_chip_peak_chr19.bed", package="GenomicPlot")
 #' names(centerFile) <- c("summitPeak")
 #' 
-#' handleBedparams <- list(fix_width=0, fix_point="center", useScore=FALSE, outRle=FALSE, CLIP_reads=FALSE,
-#'                         norm=FALSE, useSizeFactor=FALSE, genome="hg19")
+#' handleBedparams <- list(fix_width=0, fix_point="center", useScore=FALSE, outRle=FALSE, 
+#' CLIP_reads=FALSE, norm=FALSE, useSizeFactor=FALSE, genome="hg19")
 #'
-#' plot_peak_annotation(peakFile=centerFile, gtfFile=gtfFile, handleInputParams=handleBedparams, fiveP=-2000,
-#'    dsTSS=200, threeP=2000, simple=FALSE)
+#' plot_peak_annotation(peakFile=centerFile, gtfFile=gtfFile, handleInputParams=handleBedparams, 
+#' fiveP=-2000, dsTSS=200, threeP=2000, simple=FALSE)
 #'
 #' @export plot_peak_annotation
 #'
@@ -3491,7 +3500,8 @@ plot_peak_annotation <- function(peakFile,
 #' handleBedParams <- list(fix_width=100, fix_point="center", useScore=FALSE, outRle=FALSE,
 #'                         CLIP_reads=FALSE, norm=FALSE, useSizeFactor=FALSE, genome="hg19")
 #'
-#' plot_overlap_bed(bedList=queryFiles, handleInputParams=handleBedParams, pairOnly=FALSE, stranded=FALSE)
+#' plot_overlap_bed(bedList=queryFiles, handleInputParams=handleBedParams, pairOnly=FALSE, 
+#' stranded=FALSE)
 #'
 #' @export plot_overlap_bed
 

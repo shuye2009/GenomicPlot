@@ -15,7 +15,8 @@
 #' @author Shuye Pu
 #'
 #' @examples
-#' txdb <- AnnotationDbi::loadDb(system.file("extdata", "txdb_chr19.sql", package="GenomicPlot"))
+#' txdb <- AnnotationDbi::loadDb(system.file("extdata", "txdb_chr19.sql", 
+#' package="GenomicPlot"))
 #' longestTx <- extract_longest_tx(txdb, plot=FALSE)
 #'
 #' @export extract_longest_tx
@@ -191,9 +192,11 @@ extract_longest_tx <- function(txdb,
 #' @author Shuye Pu
 #'
 #' @examples
-#' txdb <- AnnotationDbi::loadDb(system.file("extdata", "txdb_chr19.sql", package="GenomicPlot"))
+#' txdb <- AnnotationDbi::loadDb(system.file("extdata", "txdb_chr19.sql", 
+#' package="GenomicPlot"))
 #' output <- get_genomic_feature_coordinates(txdb, featureName="cds", featureSource="gencode",
 #' export=FALSE, longest=TRUE, protein_coding=TRUE)
+#' 
 #' @export get_genomic_feature_coordinates
 #'
 #'
@@ -413,7 +416,8 @@ prepare_3parts_genomic_features <- function(txdb,
 #' @author Shuye Pu
 #'
 #' @examples
-#' txdb <- AnnotationDbi::loadDb(system.file("extdata", "txdb_chr19.sql", package="GenomicPlot"))
+#' txdb <- AnnotationDbi::loadDb(system.file("extdata", "txdb_chr19.sql", 
+#' package="GenomicPlot"))
 #'
 #' gf <- prepare_5parts_genomic_features(txdb, meta=TRUE, nbins=100, fiveP=-1000, threeP=1000,
 #' longest=TRUE)
@@ -512,7 +516,8 @@ prepare_5parts_genomic_features <- function(txdb,
 #' @author Shuye Pu
 #'
 #' @examples
-#' txdb <- AnnotationDbi::loadDb(system.file("extdata", "txdb_chr19.sql", package="GenomicPlot"))
+#' txdb <- AnnotationDbi::loadDb(system.file("extdata", "txdb_chr19.sql", 
+#' package="GenomicPlot"))
 #'
 #' f <- get_txdb_features(txdb, dsTSS=100, fiveP=-100, threeP=100)
 #'
@@ -547,7 +552,7 @@ get_txdb_features <- function(txdb,
       ol <- GenomicRanges::findOverlaps(TTS, gene_gr)
       queries <- unique(ol@from)
       
-      cl <- start_parallel(nc=20)
+      cl <- start_parallel(nc=2)
       parallel::clusterEvalQ(cl, library("GenomicRanges"))
       parallel::clusterExport(cl, varlist=c("TTS", "gene_gr", "ol"), envir=environment())
        

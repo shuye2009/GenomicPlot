@@ -40,7 +40,8 @@ levels_col <- c("start", "center", "end")
 names(labels_col) <- rep(levels_col, c(15, 60, 25))
 
 draw_matrix_heatmap(fullMatrix, dataName="test", labels_col, levels_col)
-draw_matrix_heatmap(fullMatrix, dataName="test", labels_col, levels_col, ranking="Hierarchical")
+draw_matrix_heatmap(fullMatrix, dataName="test", labels_col, levels_col, 
+ranking="Hierarchical")
 
 }
 \author{

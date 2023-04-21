@@ -39,7 +39,8 @@ names(queryFiles) <- c("narrowPeak", "summitPeak", "clipPeak")
 handleBedParams <- list(fix_width=100, fix_point="center", useScore=FALSE, outRle=FALSE,
                         CLIP_reads=FALSE, norm=FALSE, useSizeFactor=FALSE, genome="hg19")
 
-plot_overlap_bed(bedList=queryFiles, handleInputParams=handleBedParams, pairOnly=FALSE, stranded=FALSE)
+plot_overlap_bed(bedList=queryFiles, handleInputParams=handleBedParams, pairOnly=FALSE, 
+stranded=FALSE)
 
 }
 \author{
