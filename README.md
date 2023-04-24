@@ -16,7 +16,7 @@ You can install the development version of GenomicPlot from [GitHub](https://git
 
 ``` r
 # install.packages("devtools")
-devtools::install_github("shuye2009/GenomicPlot")
+devtools::install_github("shuye2009/GenomicPlot", build_manual=TRUE, build_vignettes=TRUE)
 ```
 
 ## Examples
