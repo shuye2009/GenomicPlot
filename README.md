@@ -37,11 +37,11 @@ names(queryfiles) <- c("Narrow", "Summit", "iCLIP")
 
 op <- "test_plot_5parts_metagene"
 
-handleInputParams <- list(CLIP_reads=FALSE, fix_width=100, fix_point="center", norm=FALSE, useScore=FALSE,
+handleInputParams <- list(offset=0, fix_width=100, fix_point="center", norm=FALSE, useScore=FALSE,
                           outRle=TRUE, useSizeFactor=FALSE, genome="hg19")
 
 plot_5parts_metagene(queryFiles=queryfiles, 
-                     gFeatures_list=list(metaF=gf), 
+                     gFeatures=list(metaF=gf), 
                      inputFiles=NULL, 
                      handleInputParams=handleInputParams,
                      verbose=FALSE, 
@@ -65,7 +65,7 @@ The following example shows you how to visualize distance between iCLIP_peaks/Ch
 
 op <- "test_plot_locus"
 
-handleInputParams <- list(CLIP_reads=FALSE, fix_width=0, fix_point="center", norm=FALSE, useScore=FALSE,
+handleInputParams <- list(offset=0, fix_width=0, fix_point="center", norm=FALSE, useScore=FALSE,
                           outRle=TRUE, useSizeFactor=FALSE, genome="hg19")
 
 plot_locus(queryFiles=queryfiles[c(1,3)], 
@@ -101,7 +101,7 @@ op <- "test_plot_peak_annotation"
 
 gtffile <- system.file("extdata", "gencode.v19.annotation_chr19.gtf", package="GenomicPlot")
 
-handleInputParams <- list(CLIP_reads=FALSE, fix_width=21, fix_point="center", norm=FALSE, useScore=FALSE,
+handleInputParams <- list(offset=0, fix_width=21, fix_point="center", norm=FALSE, useScore=FALSE,
                           outRle=FALSE, useSizeFactor=FALSE, genome="hg19")
                           
 plot_peak_annotation(peakFile=queryfiles[2], 

@@ -23,7 +23,7 @@ test_that("plotting works", {
                       system.file("extdata", "test_clip_peak_chr19.bed", package="GenomicPlot"))
    names(bedQueryFiles) <- c("Narrow", "Summit", "iCLIP")
    
-   bedHandleInputParams <- list(CLIP_reads=FALSE, fix_width=100, fix_point="center", norm=FALSE, 
+   bedHandleInputParams <- list(offset=0, fix_width=100, fix_point="center", norm=FALSE, 
                                 useScore=FALSE, outRle=TRUE, useSizeFactor=FALSE, genome="hg19")
    
    op <- "test_plot_5parts_metagene1"
@@ -49,7 +49,7 @@ test_that("plotting works", {
    bamInputFiles <- system.file("extdata", "input_chr19.bam", package="GenomicPlot")
    names(bamInputFiles) <- "input"
    
-   bamHandleInputParams <- list(CLIP_reads=TRUE, fix_width=0, fix_point="start", norm=TRUE, 
+   bamHandleInputParams <- list(offset=-1, fix_width=0, fix_point="start", norm=TRUE, 
                                 useScore=FALSE, outRle=TRUE, useSizeFactor=FALSE, genome="hg19")
    
    op <- "test_plot_5parts_metagene2"
@@ -77,7 +77,7 @@ test_that("plotting works", {
    chipInputFiles <- system.file("extdata", "chip_input_chr19.bam", package="GenomicPlot")
    names(chipInputFiles) <- "input"
    
-   chipHandleInputParams <- list(CLIP_reads=FALSE, fix_width=150, fix_point="start", norm=TRUE, 
+   chipHandleInputParams <- list(offset=0, fix_width=150, fix_point="start", norm=TRUE, 
                                  useScore=FALSE, outRle=TRUE, useSizeFactor=TRUE, genome="hg19")
    
    op <- "test_plot_3parts_metagene"
@@ -130,7 +130,7 @@ test_that("plotting works", {
                    system.file("extdata", "chip_input_chr19.bam", package="GenomicPlot"))
    names(inputfiles) <- c("clip_input", "chip_input")
    
-   handleInputParams <- list(CLIP_reads=FALSE, fix_width=150, fix_point="start", norm=TRUE, 
+   handleInputParams <- list(offset=0, fix_width=150, fix_point="start", norm=TRUE, 
                              useScore=FALSE, outRle=TRUE, useSizeFactor=TRUE, genome="hg19")
    
    op <- "test_plot_locus2"
@@ -158,7 +158,7 @@ test_that("plotting works", {
    
    ## plot_peak_annotation ####
    op <- "test_plot_peak_annotation1"
-   peakHandleInputParams <- list(CLIP_reads=FALSE, fix_width=100, fix_point="center", norm=FALSE, 
+   peakHandleInputParams <- list(offset=0, fix_width=100, fix_point="center", norm=FALSE, 
                                  useScore=FALSE, outRle=FALSE, useSizeFactor=FALSE, genome="hg19")
    
    plot_peak_annotation(peakFile=bedQueryFiles[2],
@@ -172,7 +172,7 @@ test_that("plotting works", {
    pdf_to_png(op)
    
    op <- "test_plot_peak_annotation2"
-   peakHandleInputParams <- list(CLIP_reads=FALSE, fix_width=21, fix_point="center", norm=FALSE, 
+   peakHandleInputParams <- list(offset=0, fix_width=21, fix_point="center", norm=FALSE, 
                                  useScore=FALSE, outRle=FALSE, useSizeFactor=FALSE, genome="hg19")
    
    plot_peak_annotation(peakFile=bedQueryFiles[3],
@@ -195,7 +195,7 @@ test_that("plotting works", {
                    system.file("extdata", "chip_input_chr19.bam", package="GenomicPlot"))
    names(inputfiles) <- c("clip_input", "chip_input")
    
-   handleInputParams <- list(CLIP_reads=FALSE, fix_width=150, fix_point="start", norm=TRUE, 
+   handleInputParams <- list(offset=0, fix_width=150, fix_point="start", norm=TRUE, 
                              useScore=FALSE, outRle=TRUE, useSizeFactor=FALSE, genome="hg19")
    
    
@@ -245,7 +245,7 @@ test_that("plotting works", {
    inputfiles <- c(system.file("extdata", "input_chr19.bam", package="GenomicPlot"))
    names(inputfiles) <- c("clip_input")
    
-   handleInputParams <- list(CLIP_reads=TRUE, fix_width=150, fix_point="start", norm=TRUE, 
+   handleInputParams <- list(offset=-1, fix_width=150, fix_point="start", norm=TRUE, 
                              useScore=FALSE, outRle=TRUE, useSizeFactor=FALSE, genome="hg19")
    
    op <- "test_plot_locus_with_random"
