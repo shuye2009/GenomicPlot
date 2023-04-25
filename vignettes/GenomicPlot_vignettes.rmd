@@ -47,7 +47,7 @@ names(queryfiles) <- "query"
 inputfiles <- system.file("extdata", "input_chr19.bam", package="GenomicPlot")
 names(inputfiles) <- "input"
 
-handleInputParams <- list(CLIP_reads=FALSE, fix_width=150, fix_point="start", norm=TRUE, 
+handleInputParams <- list(offset=0, fix_width=150, fix_point="start", norm=TRUE, 
                           useScore=FALSE, outRle=TRUE, useSizeFactor=TRUE, genome="hg19")
 
 plot_5parts_metagene(queryFiles=queryfiles, 
@@ -90,7 +90,7 @@ names(queryfiles) <- "query"
 inputfiles <- system.file("extdata", "chip_input_chr19.bam", package="GenomicPlot")
 names(inputfiles) <- "input"
 
-handleInputParams <- list(CLIP_reads=FALSE, fix_width=150, fix_point="start", norm=TRUE, 
+handleInputParams <- list(offset=0, fix_width=150, fix_point="start", norm=TRUE, 
                           useScore=FALSE, outRle=TRUE, useSizeFactor=TRUE, genome="hg19")
 
 plot_3parts_metagene(queryFiles=queryfiles, 
@@ -132,7 +132,7 @@ centerfiles <- system.file("extdata", "test_chip_peak_chr19.narrowPeak", package
                  system.file("extdata", "chip_input_chr19.bam", package="GenomicPlot"))
  names(inputfiles) <- c("clip_input", "chip_input")
 
- handleInputParams <- list(CLIP_reads=FALSE, fix_width=150, fix_point="start", norm=TRUE, 
+ handleInputParams <- list(offset=0, fix_width=150, fix_point="start", norm=TRUE, 
                            useScore=FALSE, outRle=TRUE, useSizeFactor=TRUE, genome="hg19")
 
  plot_region(queryFiles=queryfiles, 
@@ -193,7 +193,7 @@ names(inputfiles) <- "input"
 ext <- c(-500, 200, -200, 500)
 hl <- c(-50, 50, -50, 50)
 
-handleInputParams <- list(CLIP_reads=TRUE, fix_width=150, fix_point="start", norm=TRUE, 
+handleInputParams <- list(offset=-1, fix_width=150, fix_point="start", norm=TRUE, 
                           useScore=FALSE, outRle=TRUE, useSizeFactor=TRUE, genome="hg19")
 plot_start_end(queryFiles=queryfiles, 
                inputFiles=inputfiles, 
@@ -231,7 +231,7 @@ Difference in signal intensity within specific regions around the reference loci
                  system.file("extdata", "chip_input_chr19.bam", package="GenomicPlot"))
  names(inputfiles) <- c("clip_input", "chip_input")
 
- handleInputParams <- list(CLIP_reads=FALSE, fix_width=150, fix_point="start", norm=TRUE, 
+ handleInputParams <- list(offset=0, fix_width=150, fix_point="start", norm=TRUE, 
                            useScore=FALSE, outRle=TRUE, useSizeFactor=TRUE, genome="hg19")
 
  plot_locus(queryFiles=queryfiles, 
@@ -287,7 +287,7 @@ txdb <- AnnotationDbi::loadDb(system.file("extdata", "txdb_chr19.sql", package="
  inputfiles <- c(system.file("extdata", "input_chr19.bam", package="GenomicPlot"))
  names(inputfiles) <- c("clip_input")
 
-handleInputParams <- list(CLIP_reads=TRUE, fix_width=150, fix_point="start", norm=TRUE, 
+handleInputParams <- list(offset=-1, fix_width=150, fix_point="start", norm=TRUE, 
                           useScore=FALSE, outRle=TRUE, useSizeFactor=TRUE, genome="hg19")
 
 plot_locus_with_random(queryFiles=queryfiles, 
@@ -337,7 +337,7 @@ centerfile <- system.file("extdata", "test_chip_peak_chr19.bed", package="Genomi
 names(centerfile) <- c("summitPeak")
 
 handleBedparams <- list(fix_width=0, fix_point="center", useScore=FALSE, outRle=FALSE, 
-                        CLIP_reads=FALSE, norm=FALSE, useSizeFactor=FALSE, genome="hg19")
+                        offset=0, norm=FALSE, useSizeFactor=FALSE, genome="hg19")
 
 pa <- plot_peak_annotation(peakFile=centerfile, 
                            gtfFile=gtffile, 

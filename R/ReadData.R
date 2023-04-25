@@ -4,7 +4,7 @@
 #'
 #' @param inputFiles a vector of strings denoting file names
 #' @param handleInputParams a list with the following elements:
-#' 'CLIP_reads' logical, indicating if the bam reads should be shifted to the -1 position at the 5' of the reads.
+#' 'offset' integer, -1 indicating the bam reads should be shrunk to the -1 position at the 5'end of the reads, which corresponds to the cross link site in iCLIP
 #' 'fix_width' an integer defines how long should the reads should be extended to.
 #' 'fix_point' a string in c("start", "end", "center") denoting the anchor point for extension.
 #' 'useScore' logical, indicating whether the 'score' column of the bed file should be used in calculation of coverage.
@@ -29,7 +29,7 @@
 #' inputFiles <- system.file("extdata", "input_chr19.bam", package="GenomicPlot")
 #' names(inputFiles) <- "input"
 #'
-#' handleInputParams <- list(CLIP_reads=TRUE, fix_width=0, fix_point="start", norm=TRUE, 
+#' handleInputParams <- list(offset=-1, fix_width=0, fix_point="start", norm=TRUE, 
 #' useScore=FALSE, outRle=TRUE, useSizeFactor=TRUE, genome="hg19")
 #' 
 #' out_list <- handle_input(inputFiles=c(queryFiles, inputFiles), 
@@ -43,7 +43,7 @@ handle_input <- function(inputFiles,
                          nc=2){
 
    if(any(is.null(names(inputFiles)))) stop("Each file must have a name attribute!")
-   if(is.null(handleInputParams)) handleInputParams=list(CLIP_reads=FALSE, fix_width=0, fix_point="center", useScore=FALSE, outRle=TRUE, norm=TRUE, useSizeFactor=FALSE, genome="hg19")
+   if(is.null(handleInputParams)) handleInputParams=list(offset=0, fix_width=0, fix_point="center", useScore=FALSE, outRle=TRUE, norm=TRUE, useSizeFactor=FALSE, genome="hg19")
 
    original_outRle <- handleInputParams$outRle
    if(handleInputParams$useSizeFactor && length(inputFiles)>1){
@@ -286,12 +286,13 @@ handle_bam <- function(inputFile,
    
    ga <- readGAlignments(inputFile, use.names=TRUE, param=param)
    libsize <- sum(idxstatsBam(inputFile)$mapped)
-   if(handleInputParams$CLIP_reads){
-      ## get the 5'-end -1 position of the reads, which is the crosslink sites for iCLIP reads
-      queryRegions <- flank(granges(ga), width=1, both=FALSE, start=TRUE, ignore.strand=FALSE)
+   if(handleInputParams$offset != 0){
+      ## for iCLIP, use offset = -1 to get the 5'-end -1 position of the reads, which is the crosslink sites for iCLIP reads
+      queryRegions <- resize(granges(ga), width=width(granges(ga))-handleInputParams$offset, fix="end", ignore.strand=FALSE)
+      queryRegions <- resize(queryRegions, width=1, fix="start", ignore.strand=FALSE)
       score(queryRegions) <- 1
    }else if(handleInputParams$fix_width > 0){
-      queryRegions <- resize(granges(ga), width=handleInputParams$fix_width, fix=rep("start", length(granges(ga))), ignore.strand=FALSE)
+      queryRegions <- resize(granges(ga), width=handleInputParams$fix_width, fix="start", ignore.strand=FALSE)
       score(queryRegions) <- 1
    }else{
       queryRegions <- unlist(grglist(ga))

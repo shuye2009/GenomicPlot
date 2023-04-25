@@ -42,7 +42,7 @@
 #' ext <- c(-500, 200, -200, 500)
 #' hl <- c(-50, 50, -50, 50)
 #'
-#' handleInputParams <- list(CLIP_reads=TRUE, fix_width=150, fix_point="start", norm=TRUE, 
+#' handleInputParams <- list(offset=-1, fix_width=150, fix_point="start", norm=TRUE, 
 #' useScore=FALSE, outRle=TRUE, useSizeFactor=TRUE, genome="hg19")
 #' 
 #' plot_start_end_with_random(queryFiles=c(queryFiles), inputFiles=c(inputFiles), txdb=txdb, 
@@ -451,7 +451,7 @@ plot_start_end_with_random <- function(queryFiles,
 #' centerfiles <- system.file("extdata", "test_chip_peak_chr19.narrowPeak", package="GenomicPlot")
 #' names(centerfiles) <- "narrowPeak"
 #' 
-#' handleInputParams <- list(CLIP_reads=FALSE, fix_width=150, fix_point="start", norm=FALSE, 
+#' handleInputParams <- list(offset=0, fix_width=150, fix_point="start", norm=FALSE, 
 #' useScore=FALSE, outRle=TRUE, useSizeFactor=TRUE, genome="hg19")
 #'  
 #' df <- plot_start_end(queryFiles=queryfiles, inputFiles=inputfiles, 
@@ -803,7 +803,7 @@ plot_start_end <- function(queryFiles,
 #' gfeatures <- prepare_3parts_genomic_features(txdb, featureName="transcript", meta=TRUE, 
 #' nbins=100, fiveP=-1000, threeP=1000, longest=TRUE, protein_coding=TRUE, verbose=FALSE)
 #' 
-#' handleInputParams <- list(CLIP_reads=FALSE, fix_width=150, fix_point="start", norm=FALSE,
+#' handleInputParams <- list(offset=0, fix_width=150, fix_point="start", norm=FALSE,
 #' useScore=FALSE, outRle=TRUE, useSizeFactor=TRUE, genome="hg19")
 #'  
 #' df <- plot_3parts_metagene(queryFiles=queryfiles, gFeatures=gfeatures, inputFiles
@@ -1124,7 +1124,7 @@ plot_3parts_metagene <- function(queryFiles,
 #' centerfiles <- system.file("extdata", "test_chip_peak_chr19.narrowPeak", package="GenomicPlot")
 #' names(centerfiles) <- "narrowPeak"
 #' op <- NULL
-#' handleInputParams <- list(CLIP_reads=FALSE, fix_width=150, fix_point="start", norm=FALSE,
+#' handleInputParams <- list(offset=0, fix_width=150, fix_point="start", norm=FALSE,
 #' useScore=FALSE, outRle=TRUE, useSizeFactor=TRUE, genome="hg19")
 #'  
 #' plot_region(queryFiles=queryfiles, centerFiles=centerfiles, txdb=NULL, regionName="region", 
@@ -1688,7 +1688,7 @@ plot_region <- function(queryFiles,
 #' gfeatures <- prepare_5parts_genomic_features(txdb, meta=TRUE, nbins=100, fiveP=-1000, 
 #' threeP=1000, longest=TRUE, verbose=FALSE)
 #' 
-#' handleInputParams <- list(CLIP_reads=FALSE, fix_width=150, fix_point="start", norm=FALSE,
+#' handleInputParams <- list(offset=0, fix_width=150, fix_point="start", norm=FALSE,
 #' useScore=FALSE, outRle=TRUE, useSizeFactor=TRUE, genome="hg19")
 #'    
 #' df <- plot_5parts_metagene(queryFiles=queryfiles, gFeatures=list("metagene"=gfeatures), 
@@ -2047,7 +2047,7 @@ plot_5parts_metagene <- function(queryFiles,
 #' centerfiles <- system.file("extdata", "test_clip_peak_chr19.bed", package="GenomicPlot")
 #' names(centerfiles) <- "clipPeak"
 #' 
-#' handleInputParams <- list(CLIP_reads=TRUE, fix_width=150, fix_point="start", norm=FALSE, 
+#' handleInputParams <- list(offset=-1, fix_width=150, fix_point="start", norm=FALSE, 
 #' useScore=FALSE, outRle=TRUE, useSizeFactor=TRUE, genome="hg19")
 #'  
 #' df <- plot_locus(queryFiles=queryfiles, centerFiles=c(centerfiles, "intron"), txdb=txdb, 
@@ -2649,7 +2649,7 @@ plot_locus <- function(queryFiles,
 #' centerfiles <- system.file("extdata", "test_clip_peak_chr19.bed", package="GenomicPlot")
 #' names(centerfiles) <- "clipPeak"
 #' 
-#' handleInputParams <- list(CLIP_reads=TRUE, fix_width=150, fix_point="start", norm=FALSE, 
+#' handleInputParams <- list(offset=-1, fix_width=150, fix_point="start", norm=FALSE, 
 #' useScore=FALSE, outRle=TRUE, useSizeFactor=TRUE, genome="hg19")
 #'  
 #' df <- plot_locus_with_random(queryFiles=queryfiles, centerFiles=c(centerfiles), txdb=txdb, 
@@ -3071,7 +3071,7 @@ plot_locus_with_random <- function(queryFiles,
 #'                 system.file("extdata", "input_chr19.bam", package="GenomicPlot"))
 #' names(inputFiles) <- c("chip_input", "clip_input")
 #'
-#' handleInputParams <- list(CLIP_reads=FALSE, fix_width=0, fix_point="start", norm=FALSE, 
+#' handleInputParams <- list(offset=0, fix_width=0, fix_point="start", norm=FALSE, 
 #' useScore=FALSE, outRle=FALSE, useSizeFactor=FALSE, genome="hg19")
 #'                           
 #' plot_bam_correlation(bamfiles=c(queryFiles, inputFiles), binSize=10000, outPrefix=NULL,
@@ -3216,7 +3216,7 @@ plot_bam_correlation <- function(bamfiles,
 #' names(centerFile) <- c("summitPeak")
 #' 
 #' handleBedparams <- list(fix_width=0, fix_point="center", useScore=FALSE, outRle=FALSE, 
-#' CLIP_reads=FALSE, norm=FALSE, useSizeFactor=FALSE, genome="hg19")
+#' offset=0, norm=FALSE, useSizeFactor=FALSE, genome="hg19")
 #'
 #' plot_peak_annotation(peakFile=centerFile, gtfFile=gtfFile, handleInputParams=handleBedparams, 
 #' fiveP=-2000, dsTSS=200, threeP=2000, simple=FALSE)
@@ -3556,7 +3556,7 @@ plot_peak_annotation <- function(peakFile,
 #' names(queryFiles) <- c("narrowPeak", "summitPeak", "clipPeak")
 #' 
 #' handleBedParams <- list(fix_width=100, fix_point="center", useScore=FALSE, outRle=FALSE,
-#'                         CLIP_reads=FALSE, norm=FALSE, useSizeFactor=FALSE, genome="hg19")
+#'                         offset=0, norm=FALSE, useSizeFactor=FALSE, genome="hg19")
 #'
 #' plot_overlap_bed(bedList=queryFiles, handleInputParams=handleBedParams, pairOnly=FALSE, 
 #' stranded=FALSE)
