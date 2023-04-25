@@ -41,7 +41,7 @@ handleInputParams <- list(CLIP_reads=FALSE, fix_width=100, fix_point="center", n
                           outRle=TRUE, useSizeFactor=FALSE, genome="hg19")
 
 plot_5parts_metagene(queryFiles=queryfiles, 
-                     gFeatures=list(metaF=gf), 
+                     gFeatures_list=list(metaF=gf), 
                      inputFiles=NULL, 
                      handleInputParams=handleInputParams,
                      verbose=FALSE, 

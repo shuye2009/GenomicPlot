@@ -69,12 +69,15 @@ plot_start_end_with_random <- function(queryFiles,
                                        scale=FALSE, 
                                        smooth=FALSE, 
                                        rmOutlier=FALSE, 
-                                       outPrefix="plots", 
+                                       outPrefix=NULL, 
                                        transform=NA, 
                                        shade=TRUE, 
                                        nc=2, 
                                        hw=c(8,8),
                                        Ylab="Coverage/base/gene"){
+   functionName <- as.character(match.call()[[1]])
+   params <- plot_named_list(as.list(environment()))
+   print(params)
 
    if(is.null(inputFiles)){
       inputLabels <- NULL
@@ -112,7 +115,7 @@ plot_start_end_with_random <- function(queryFiles,
      feature <- get_genomic_feature_coordinates(txdb, featureName, longest=TRUE, protein_coding=TRUE)[["GRanges"]]
      minimal_width <- ext[2] - ext[3] + insert
      feature <- feature[width(feature)>minimal_width]
-  }else if(file.exits(centerFile)){
+  }else if(file.exists(centerFile)){
      bedparam <- handleInputParams
      # the input bed is going to be used as center, so the handleInputParams has to be modified accordingly
      bedparam$fix_width <- 0
@@ -395,7 +398,9 @@ plot_start_end_with_random <- function(queryFiles,
 
     print(plots)
   }
+  
   if(!is.null(outPrefix)){
+     print(params)
     on.exit(dev.off(), add=TRUE)
   }
 
@@ -478,6 +483,9 @@ plot_start_end <- function(queryFiles,
                            Ylab="Coverage/base/gene", 
                            hw=c(8,8),
                            nc=2){
+   functionName <- as.character(match.call()[[1]])
+   params <- plot_named_list(as.list(environment()))
+   print(params)
 
    if(is.null(inputFiles)){
       inputLabels <- NULL
@@ -746,7 +754,9 @@ plot_start_end <- function(queryFiles,
          print(plots)
       }
    }
+   
    if(!is.null(outPrefix)){
+      print(params)
       on.exit(dev.off(), add=TRUE)
    }
 
@@ -822,7 +832,10 @@ plot_3parts_metagene <- function(queryFiles,
                                  transform=NA,
                                  hw=c(8,8),
                                  nc=2){
-
+   functionName <- as.character(match.call()[[1]])
+   params <- plot_named_list(as.list(environment()))
+   print(params)
+   
    if(is.null(inputFiles)){
       inputLabels <- NULL
       queryInputs <- handle_input(inputFiles=queryFiles, handleInputParams, verbose=verbose, nc=nc)
@@ -1063,8 +1076,9 @@ plot_3parts_metagene <- function(queryFiles,
     print(outp)
 
   }
-
+  
   if(!is.null(outPrefix)){
+     print(params)
     on.exit(dev.off(), add=TRUE)
   }
 
@@ -1144,6 +1158,10 @@ plot_region <- function(queryFiles,
                         hw=c(8,8),
                         nc=2){
 
+   functionName <- as.character(match.call()[[1]])
+   params <- plot_named_list(as.list(environment()))
+   print(params)
+   
   if(!is.null(outPrefix)){
     pdf(paste(outPrefix, "pdf", sep="."), height=hw[1], width=hw[2])
   }
@@ -1627,6 +1645,7 @@ plot_region <- function(queryFiles,
   }
 
   if(!is.null(outPrefix)){
+     print(params)
     on.exit(dev.off(), add=TRUE)
   }
 
@@ -1696,6 +1715,9 @@ plot_5parts_metagene <- function(queryFiles,
                                  Ylab="Coverage/base/gene", 
                                  hw=c(8,8),
                                  nc=2){
+   functionName <- as.character(match.call()[[1]])
+   params <- plot_named_list(as.list(environment()))
+   print(params)
 
   if(is.null(inputFiles)){
      inputLabels <- NULL
@@ -1969,6 +1991,7 @@ plot_5parts_metagene <- function(queryFiles,
   }
 
   if(!is.null(outPrefix)){
+     print(params)
     on.exit(dev.off(), add=TRUE)
   }
 
@@ -2060,6 +2083,10 @@ plot_locus <- function(queryFiles,
                        heatRange=NULL,
                        hw=c(8,8),
                        nc=2){
+   
+   functionName <- as.character(match.call()[[1]])
+   params <- plot_named_list(as.list(environment()))
+   print(params)
 
    if(is.null(inputFiles)){
       inputLabels <- NULL
@@ -2572,6 +2599,7 @@ plot_locus <- function(queryFiles,
   }
 
   if(!is.null(outPrefix)){
+     print(params)
     on.exit(dev.off(), add=TRUE)
   }
 
@@ -2656,6 +2684,10 @@ plot_locus_with_random <- function(queryFiles,
                                    statsMethod="wilcox.test", 
                                    nc=2){
 
+   functionName <- as.character(match.call()[[1]])
+   params <- plot_named_list(as.list(environment()))
+   print(params)
+   
    if(is.null(inputFiles)){
       inputLabels <- NULL
       queryInputs <- handle_input(inputFiles=queryFiles, handleInputParams, verbose=verbose, nc=nc)
@@ -3008,7 +3040,10 @@ plot_locus_with_random <- function(queryFiles,
     }
   }
 
-  if(!is.null(outPrefix)) on.exit(dev.off(), add=TRUE)
+  if(!is.null(outPrefix)){
+     print(params)
+     on.exit(dev.off(), add=TRUE)
+  } 
 }
 
 
@@ -3050,7 +3085,7 @@ plot_bam_correlation <- function(bamfiles,
                                  outPrefix=NULL, 
                                  handleInputParams=NULL, 
                                  verbose=FALSE, 
-                                 wh=c(8,8),
+                                 hw=c(8,8),
                                  nc=2){
 
   bamlabels <- names(bamfiles)
@@ -3655,4 +3690,31 @@ plot_overlap_genes <- function(fileList,
    invisible(geneList)
 }
 
+#' @title plot a named list as a figure
+#' @description This is a helper function for displaying function arguments for a plotting function
+#' 
+#' @param params a list produced by as.list(environment()), with names being the arguments and values being the runtime values when the function is called, 
+#' 
+#' @return a ggplot object
+#' 
+#' @author Shuye Pu
+#' 
+#' @keywords  internal
+
+plot_named_list <- function(params){
+   
+   s <- "Plotting parameters:\n"
+   for (aname in names(params)) { 
+      s <- paste(s, paste0(aname, ":\t", paste(strwrap(deparse1(params[[aname]]), width=80), 
+                                              collapse="\n")), sep="\n")
+   }
+   p <- ggplot() +
+      annotate("text",
+               x=0.5,
+               y=0.5, 
+               label=s) +
+      theme_void()
+   
+   return(p)
+}
 

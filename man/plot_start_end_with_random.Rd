@@ -20,7 +20,7 @@ plot_start_end_with_random(
   scale = FALSE,
   smooth = FALSE,
   rmOutlier = FALSE,
-  outPrefix = "plots",
+  outPrefix = NULL,
   transform = NA,
   shade = TRUE,
   nc = 2,
