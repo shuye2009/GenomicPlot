@@ -95,7 +95,7 @@ names(inputfiles) <- "input"
 centerfiles <- system.file("extdata", "test_clip_peak_chr19.bed", package="GenomicPlot")
 names(centerfiles) <- "clipPeak"
 
-handleInputParams <- list(CLIP_reads=TRUE, fix_width=150, fix_point="start", norm=FALSE, 
+handleInputParams <- list(offset=-1, fix_width=150, fix_point="start", norm=FALSE, 
 useScore=FALSE, outRle=TRUE, useSizeFactor=TRUE, genome="hg19")
  
 df <- plot_locus_with_random(queryFiles=queryfiles, centerFiles=c(centerfiles), txdb=txdb, 

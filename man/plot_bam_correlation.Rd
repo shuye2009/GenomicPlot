@@ -41,7 +41,7 @@ inputFiles <- c(system.file("extdata", "chip_input_chr19.bam", package="GenomicP
                 system.file("extdata", "input_chr19.bam", package="GenomicPlot"))
 names(inputFiles) <- c("chip_input", "clip_input")
 
-handleInputParams <- list(CLIP_reads=FALSE, fix_width=0, fix_point="start", norm=FALSE, 
+handleInputParams <- list(offset=0, fix_width=0, fix_point="start", norm=FALSE, 
 useScore=FALSE, outRle=FALSE, useSizeFactor=FALSE, genome="hg19")
                           
 plot_bam_correlation(bamfiles=c(queryFiles, inputFiles), binSize=10000, outPrefix=NULL,

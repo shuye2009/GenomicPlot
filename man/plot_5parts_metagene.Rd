@@ -74,7 +74,7 @@ names(inputfiles) <- "input"
 gfeatures <- prepare_5parts_genomic_features(txdb, meta=TRUE, nbins=100, fiveP=-1000, 
 threeP=1000, longest=TRUE, verbose=FALSE)
 
-handleInputParams <- list(CLIP_reads=FALSE, fix_width=150, fix_point="start", norm=FALSE,
+handleInputParams <- list(offset=0, fix_width=150, fix_point="start", norm=FALSE,
 useScore=FALSE, outRle=TRUE, useSizeFactor=TRUE, genome="hg19")
    
 df <- plot_5parts_metagene(queryFiles=queryfiles, gFeatures=list("metagene"=gfeatures), 

@@ -40,7 +40,7 @@ system.file("extdata", "test_clip_peak_chr19.bed", package="GenomicPlot"))
 names(queryFiles) <- c("narrowPeak", "summitPeak", "clipPeak")
 
 handleBedParams <- list(fix_width=100, fix_point="center", useScore=FALSE, outRle=FALSE,
-                        CLIP_reads=FALSE, norm=FALSE, useSizeFactor=FALSE, genome="hg19")
+                        offset=0, norm=FALSE, useSizeFactor=FALSE, genome="hg19")
 
 plot_overlap_bed(bedList=queryFiles, handleInputParams=handleBedParams, pairOnly=FALSE, 
 stranded=FALSE)
