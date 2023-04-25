@@ -19,7 +19,7 @@ knitr::opts_chunk$set(
 #                            useScore=FALSE, outRle=TRUE, useSizeFactor=TRUE, genome="hg19")
 #  
 #  plot_5parts_metagene(queryFiles=queryfiles,
-#                       gFeatures=list("metagene"=gf),
+#                       gFeatures_list=list("metagene"=gf),
 #                       inputFiles=inputfiles,
 #                       scale=FALSE,
 #                       verbose=FALSE,

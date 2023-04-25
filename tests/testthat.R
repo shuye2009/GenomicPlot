@@ -1,6 +1,8 @@
 library(GenomicPlot)
 library(magick)
 
+Sys.setenv("R_TESTS" = "")
+
 pdf_to_png <- function(op){
    img <- image_read_pdf(paste0(op,".pdf"))
    for(i in seq_along(img)){image_write(img[i], path=paste0(op,"_",i, ".png"), format="png")}
@@ -25,7 +27,7 @@ bedHandleInputParams <- list(CLIP_reads=FALSE, fix_width=100, fix_point="center"
 
 op <- "test_plot_5parts_metagene1"
 plot_5parts_metagene(queryFiles=bedQueryFiles,
-                     gFeatures=list(metaF=gf),
+                     gFeatures_list=list(metaF=gf),
                      inputFiles=NULL,
                      handleInputParams=bedHandleInputParams,
                      verbose=FALSE,
