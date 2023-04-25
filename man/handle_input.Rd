@@ -10,7 +10,7 @@ handle_input(inputFiles, handleInputParams = NULL, verbose = FALSE, nc = 2)
 \item{inputFiles}{a vector of strings denoting file names}
 
 \item{handleInputParams}{a list with the following elements:
-'CLIP_reads' logical, indicating if the bam reads should be shifted to the -1 position at the 5' of the reads.
+'offset' integer, -1 indicating the bam reads should be shrunk to the -1 position at the 5'end of the reads, which corresponds to the cross link site in iCLIP
 'fix_width' an integer defines how long should the reads should be extended to.
 'fix_point' a string in c("start", "end", "center") denoting the anchor point for extension.
 'useScore' logical, indicating whether the 'score' column of the bed file should be used in calculation of coverage.
@@ -40,7 +40,7 @@ names(queryFiles) <- "query"
 inputFiles <- system.file("extdata", "input_chr19.bam", package="GenomicPlot")
 names(inputFiles) <- "input"
 
-handleInputParams <- list(CLIP_reads=TRUE, fix_width=0, fix_point="start", norm=TRUE, 
+handleInputParams <- list(offset=-1, fix_width=0, fix_point="start", norm=TRUE, 
 useScore=FALSE, outRle=TRUE, useSizeFactor=TRUE, genome="hg19")
 
 out_list <- handle_input(inputFiles=c(queryFiles, inputFiles), 

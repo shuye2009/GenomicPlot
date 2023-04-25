@@ -55,7 +55,7 @@ centerFile <- system.file("extdata", "test_chip_peak_chr19.bed", package="Genomi
 names(centerFile) <- c("summitPeak")
 
 handleBedparams <- list(fix_width=0, fix_point="center", useScore=FALSE, outRle=FALSE, 
-CLIP_reads=FALSE, norm=FALSE, useSizeFactor=FALSE, genome="hg19")
+offset=0, norm=FALSE, useSizeFactor=FALSE, genome="hg19")
 
 plot_peak_annotation(peakFile=centerFile, gtfFile=gtfFile, handleInputParams=handleBedparams, 
 fiveP=-2000, dsTSS=200, threeP=2000, simple=FALSE)

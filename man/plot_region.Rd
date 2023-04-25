@@ -89,7 +89,7 @@ names(inputfiles) <- "input"
 centerfiles <- system.file("extdata", "test_chip_peak_chr19.narrowPeak", package="GenomicPlot")
 names(centerfiles) <- "narrowPeak"
 op <- NULL
-handleInputParams <- list(CLIP_reads=FALSE, fix_width=150, fix_point="start", norm=FALSE,
+handleInputParams <- list(offset=0, fix_width=150, fix_point="start", norm=FALSE,
 useScore=FALSE, outRle=TRUE, useSizeFactor=TRUE, genome="hg19")
  
 plot_region(queryFiles=queryfiles, centerFiles=centerfiles, txdb=NULL, regionName="region", 

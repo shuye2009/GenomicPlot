@@ -89,7 +89,7 @@ names(inputFiles) <- "input"
 ext <- c(-500, 200, -200, 500)
 hl <- c(-50, 50, -50, 50)
 
-handleInputParams <- list(CLIP_reads=TRUE, fix_width=150, fix_point="start", norm=TRUE, 
+handleInputParams <- list(offset=-1, fix_width=150, fix_point="start", norm=TRUE, 
 useScore=FALSE, outRle=TRUE, useSizeFactor=TRUE, genome="hg19")
 
 plot_start_end_with_random(queryFiles=c(queryFiles), inputFiles=c(inputFiles), txdb=txdb, 
