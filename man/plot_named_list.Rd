@@ -13,7 +13,7 @@ plot_named_list(params)
 a ggplot object
 }
 \description{
-This is a helper function for displaying function arguments for a plotting function
+This is a helper function for displaying function arguments for a plotting function. If the runtime value of the argument is a small object, its values is displayed, otherwise, only the name of the value of the argument is displayed.
 }
 \author{
 Shuye Pu

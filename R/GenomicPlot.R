@@ -3691,7 +3691,7 @@ plot_overlap_genes <- function(fileList,
 }
 
 #' @title plot a named list as a figure
-#' @description This is a helper function for displaying function arguments for a plotting function
+#' @description This is a helper function for displaying function arguments for a plotting function. If the runtime value of the argument is a small object, its values is displayed, otherwise, only the name of the value of the argument is displayed.
 #' 
 #' @param params a list produced by as.list(environment()), with names being the arguments and values being the runtime values when the function is called, 
 #' 
@@ -3705,7 +3705,13 @@ plot_named_list <- function(params){
    
    s <- "Plotting parameters:\n"
    for (aname in names(params)) { 
-      s <- paste(s, paste0(aname, ":\t", paste(strwrap(deparse1(params[[aname]]), width=80), 
+      value_length <- length(unlist(strsplit(deparse1(params[[aname]]), split=",")))
+      if(value_length > 20){
+         value <- deparse1(substitute(params[[aname]]))
+      }else{
+         value <- deparse1(params[[aname]])
+      }
+      s <- paste(s, paste0(aname, ":\t", paste(strwrap(value, width=80), 
                                               collapse="\n")), sep="\n")
    }
    p <- ggplot() +
