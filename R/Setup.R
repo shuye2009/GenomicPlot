@@ -10,7 +10,7 @@
 #' @importFrom dplyr rename_with summarize n_distinct lead n
 #' @importFrom plyranges filter_by_overlaps
 #' @importFrom GenomicAlignments readGAlignments
-#' @importFrom GenomeInfoDb Seqinfo seqinfo seqlevels seqnames seqinfo<- seqlevels<- seqnames<-
+#' @importFrom GenomeInfoDb Seqinfo seqinfo seqlevels seqnames seqinfo<- seqlevels<- seqnames<- keepStandardChromosomes
 #' @importFrom rtracklayer export.bed import.bw wigToBigWig asBED
 #' @importFrom RCAS importGtf queryGff
 #' @importFrom ggpubr ggtexttable
