@@ -292,7 +292,7 @@ aov_TukeyHSD <- function(df,
 gr2df <- function(gr){
 
    chr <- as.vector(seqnames(gr))
-   start <- start(gr)
+   start <- start(gr)-1 # convert to 0-based for bed
    end <- end(gr)
    width <- width(gr)
    strand <- as.vector(strand(gr))
