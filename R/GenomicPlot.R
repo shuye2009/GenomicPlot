@@ -297,7 +297,7 @@ plot_start_end_with_random <- function(queryFiles,
         im <- inputMatrix_list[[inputLabels[i]]][[locus]]
         minrow <- min(nrow(rm), nrow(im))
 
-        fullMatrix <- rm[1:minrow,]/im[1:minrow,]
+        fullMatrix <- ifelse(is.na(transform), rm[1:minrow,]/im[1:minrow,], rm[1:minrow,] - im[1:minrow,])
         ratioMatrix_list[[ratiolabels[i]]][[locus]] <- fullMatrix
 
         ## for random feature
@@ -306,7 +306,7 @@ plot_start_end_with_random <- function(queryFiles,
           imr <- inputMatrix_list_random[[inputLabels[i]]][[locus]]
           minrowr <- min(nrow(rmr), nrow(imr))
 
-          fullMatrix <- rmr[1:minrowr,]/imr[1:minrowr,]
+          fullMatrix <- ifelse(is.na(transform), rmr[1:minrowr,]/imr[1:minrowr,], rmr[1:minrowr,] - imr[1:minrowr,])
           ratioMatrix_list_random[[ratiolabels[i]]][[locus]] <- fullMatrix
         }
       }
@@ -686,8 +686,8 @@ plot_start_end <- function(queryFiles,
                im <- inputMatrix_list[[inputLabels[i]]][[locus]]
                minrow <- min(nrow(rm), nrow(im))
 
-               fullMatrix <- rm[1:minrow,]/im[1:minrow,]
-               fullMatrix <- process_scoreMatrix(fullMatrix, scale=FALSE, rmOutlier, transform=transform, verbose=verbose)
+               fullMatrix <- ifelse(is.na(transform), rm[1:minrow,]/im[1:minrow,], rm[1:minrow,] - im[1:minrow,])
+               #fullMatrix <- process_scoreMatrix(fullMatrix, scale=FALSE, rmOutlier, transform=transform, verbose=verbose)
 
                ratioMatrix_list[[ratiolabels[i]]][[locus]] <- fullMatrix
             }
@@ -995,6 +995,11 @@ plot_3parts_metagene <- function(queryFiles,
     ratioMatrix_list <- scoreMatrix_list[ratiolabels]
     for(w in featureNames){
       for(i in seq_along(ratiolabels)){
+         if(is.na(transform)){
+            fullMatrix <- ratioMatrix_list[[ratiolabels[i]]][[w]]/inputMatrix_list[[inputLabels[i]]][[w]]
+         }else{
+            fullMatrix <- ratioMatrix_list[[ratiolabels[i]]][[w]] - inputMatrix_list[[inputLabels[i]]][[w]]
+         }
         fullMatrix <- ratioMatrix_list[[ratiolabels[i]]][[w]]/inputMatrix_list[[inputLabels[i]]][[w]]
         ratioMatrix_list[[ratiolabels[i]]][[w]] <- fullMatrix
       }
@@ -1484,7 +1489,7 @@ plot_region <- function(queryFiles,
                im <- inputMatrix_list[[inputLabels[i]]][[centerLabel]][[featureName]]
                commonrow <- intersect(rownames(rm), rownames(im))
                
-               fullMatrix <- rm[commonrow,]/im[commonrow,]
+               fullMatrix <- ifelse(is.na(transform), rm[commonrow,]/im[commonrow,], rm[commonrow,] - im[commonrow,])
                
                ratioMatrix_list[[ratiolabels[i]]][[centerLabel]][[featureName]] <- fullMatrix
             }
@@ -1858,7 +1863,12 @@ plot_5parts_metagene <- function(queryFiles,
        for(w in featureNames){
          if(scaled_bins[w] > 0){
             for(i in seq_along(ratiolabels)){
-              fullMatrix <- ratioMatrix_list[[ratiolabels[i]]][[w]]/inputMatrix_list[[inputLabels[i]]][[w]]
+               if(is.na(transform)){
+                  fullMatrix <- ratioMatrix_list[[ratiolabels[i]]][[w]]/inputMatrix_list[[inputLabels[i]]][[w]]
+               }else{
+                  fullMatrix <- ratioMatrix_list[[ratiolabels[i]]][[w]] - inputMatrix_list[[inputLabels[i]]][[w]]
+               }
+              
               ratioMatrix_list[[ratiolabels[i]]][[w]] <- fullMatrix
             }
          }else{
@@ -2443,7 +2453,12 @@ plot_locus <- function(queryFiles,
     ratioMatrix_list <- scoreMatrix_list[ratiolabels]
     for(centerLabel in centerLabels){
       for(i in seq_along(ratiolabels)){
-        fullMatrix <- ratioMatrix_list[[ratiolabels[i]]][[centerLabel]]/inputMatrix_list[[inputLabels[i]]][[centerLabel]]
+         if(is.na(transform)){
+            fullMatrix <- ratioMatrix_list[[ratiolabels[i]]][[centerLabel]]/inputMatrix_list[[inputLabels[i]]][[centerLabel]]
+         }else{
+            fullMatrix <- ratioMatrix_list[[ratiolabels[i]]][[centerLabel]] - inputMatrix_list[[inputLabels[i]]][[centerLabel]]
+         }
+        
         colnames(fullMatrix) <- as.character(colLabel)
 
         ratioMatrix_list[[ratiolabels[i]]][[centerLabel]] <- fullMatrix
@@ -2463,7 +2478,7 @@ plot_locus <- function(queryFiles,
         if(verbose) print(centerLabel)
 
         fullMatrix <- ratioMatrix_list[[ratiolabel]][[centerLabel]]
-        fullMatrix <- process_scoreMatrix(fullMatrix, scale=FALSE, rmOutlier=rmOutlier, transform=transform, verbose=verbose)
+        #fullMatrix <- process_scoreMatrix(fullMatrix, scale=FALSE, rmOutlier=rmOutlier, transform=transform, verbose=verbose)
 
         colm <- apply(fullMatrix, 2, mean)
         colsd <- apply(fullMatrix, 2, sd)
@@ -2938,8 +2953,8 @@ plot_locus_with_random <- function(queryFiles,
           rm <- ratioMatrix_list[[ratiolabels[i]]][[centerLabel]][[regionName]]
           im <- inputMatrix_list[[inputLabels[i]]][[centerLabel]][[regionName]]
 
-          fullMatrix <- rm/im
-          fullMatrix <- process_scoreMatrix(fullMatrix, scale=FALSE, rmOutlier=rmOutlier, transform=transform, verbose=verbose)
+          fullMatrix <- ifelse(is.na(transform), rm/im, rm - im)
+          #fullMatrix <- process_scoreMatrix(fullMatrix, scale=FALSE, rmOutlier=rmOutlier, transform=transform, verbose=verbose)
 
           ratioMatrix_list[[ratiolabels[i]]][[centerLabel]][[regionName]] <- fullMatrix
 
@@ -2948,8 +2963,8 @@ plot_locus_with_random <- function(queryFiles,
           imr <- inputMatrix_list_random[[inputLabels[i]]][[centerLabel]][[regionName]]
           minrowr <- min(nrow(rmr), nrow(imr))
 
-          fullMatrix <- rmr[1:minrowr,]/imr[1:minrowr,]
-          fullMatrix <- process_scoreMatrix(fullMatrix, scale=FALSE, rmOutlier=rmOutlier, transform=transform, verbose=verbose)
+          fullMatrix <- ifelse(is.na(transform), rmr[1:minrowr,]/imr[1:minrowr,], rmr[1:minrowr,] - imr[1:minrowr,])
+          #fullMatrix <- process_scoreMatrix(fullMatrix, scale=FALSE, rmOutlier=rmOutlier, transform=transform, verbose=verbose)
 
           ratioMatrix_list_random[[ratiolabels[i]]][[centerLabel]][[regionName]] <- fullMatrix
         }
@@ -3706,12 +3721,12 @@ plot_named_list <- function(params){
    s <- "Plotting parameters:\n"
    for (aname in names(params)) { 
       value_length <- length(unlist(strsplit(deparse1(params[[aname]]), split=",")))
-      if(value_length > 20){
+      if(value_length > 10){
          value <- deparse1(substitute(params[[aname]]))
       }else{
          value <- deparse1(params[[aname]])
       }
-      s <- paste(s, paste0(aname, ":\t", paste(strwrap(value, width=80), 
+      s <- paste(s, paste0(aname, ": ", paste(strwrap(value, width=80), 
                                               collapse="\n")), sep="\n")
    }
    p <- ggplot() +
