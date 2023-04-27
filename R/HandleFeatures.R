@@ -245,7 +245,7 @@ get_genomic_feature_coordinates <- function(txdb,
    if(longest){
       longest_tx <- extract_longest_tx(txdb)
       if(featureName == "gene"){
-         feature_longest <- feature[names(feature) %in% longest_tx$gene_id] # protein-coding
+         feature_longest <- feature[names(feature) %in% longest_tx$gene_id] 
          seqinfo(feature_longest) <- seqInfo
       }else{
          feature_longest <- feature[names(feature) %in% longest_tx$tx_name]
