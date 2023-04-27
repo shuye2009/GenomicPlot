@@ -296,8 +296,13 @@ plot_start_end_with_random <- function(queryFiles,
         rm <- ratioMatrix_list[[ratiolabels[i]]][[locus]]
         im <- inputMatrix_list[[inputLabels[i]]][[locus]]
         minrow <- min(nrow(rm), nrow(im))
-
-        fullMatrix <- ifelse(is.na(transform), rm[1:minrow,]/im[1:minrow,], rm[1:minrow,] - im[1:minrow,])
+   
+        if(is.na(transform)){
+           fullMatrix <- rm[1:minrow,]/im[1:minrow,]   
+        }else{
+           fullMatrix <- rm[1:minrow,] - im[1:minrow,]
+        }
+        
         ratioMatrix_list[[ratiolabels[i]]][[locus]] <- fullMatrix
 
         ## for random feature
@@ -306,7 +311,12 @@ plot_start_end_with_random <- function(queryFiles,
           imr <- inputMatrix_list_random[[inputLabels[i]]][[locus]]
           minrowr <- min(nrow(rmr), nrow(imr))
 
-          fullMatrix <- ifelse(is.na(transform), rmr[1:minrowr,]/imr[1:minrowr,], rmr[1:minrowr,] - imr[1:minrowr,])
+          if(is.na(transform)){
+             fullMatrix <- rmr[1:minrowr,]/imr[1:minrowr,]   
+          }else{
+             fullMatrix <- rmr[1:minrowr,] - imr[1:minrowr,]
+          }
+          
           ratioMatrix_list_random[[ratiolabels[i]]][[locus]] <- fullMatrix
         }
       }
@@ -685,8 +695,13 @@ plot_start_end <- function(queryFiles,
                rm <- ratioMatrix_list[[ratiolabels[i]]][[locus]]
                im <- inputMatrix_list[[inputLabels[i]]][[locus]]
                minrow <- min(nrow(rm), nrow(im))
-
-               fullMatrix <- ifelse(is.na(transform), rm[1:minrow,]/im[1:minrow,], rm[1:minrow,] - im[1:minrow,])
+               
+               if(is.na(transform)){
+                  fullMatrix <- rm[1:minrow,]/im[1:minrow,]   
+               }else{
+                  fullMatrix <- rm[1:minrow,] - im[1:minrow,]
+               }
+               
                #fullMatrix <- process_scoreMatrix(fullMatrix, scale=FALSE, rmOutlier, transform=transform, verbose=verbose)
 
                ratioMatrix_list[[ratiolabels[i]]][[locus]] <- fullMatrix
@@ -1489,7 +1504,12 @@ plot_region <- function(queryFiles,
                im <- inputMatrix_list[[inputLabels[i]]][[centerLabel]][[featureName]]
                commonrow <- intersect(rownames(rm), rownames(im))
                
-               fullMatrix <- ifelse(is.na(transform), rm[commonrow,]/im[commonrow,], rm[commonrow,] - im[commonrow,])
+               if(is.na(transform)){
+                  fullMatrix <- rm[commonrow,]/im[commonrow,]   
+               }else{
+                  fullMatrix <- rm[commonrow,] - im[commonrow,]
+               }
+               
                
                ratioMatrix_list[[ratiolabels[i]]][[centerLabel]][[featureName]] <- fullMatrix
             }
@@ -2743,18 +2763,18 @@ plot_locus_with_random <- function(queryFiles,
   ## get protein-coding genes features
 
   if(verbose) print("Collecting protein_coding gene features")
-  #exons <- get_genomic_feature_coordinates(txdb, "exon", longest=TRUE)
+  exons <- get_genomic_feature_coordinates(txdb, "exon", longest=TRUE)
   utr5 <- get_genomic_feature_coordinates(txdb, "utr5", longest=TRUE)
   utr3 <- get_genomic_feature_coordinates(txdb, "utr3", longest=TRUE)
   cds <- get_genomic_feature_coordinates(txdb, "cds", longest=TRUE)
-  #gene <- get_genomic_feature_coordinates(txdb, "transcript", longest=TRUE)
+  gene <- get_genomic_feature_coordinates(txdb, "gene", longest=TRUE)
 
 
-  region_list <- list(#"Transcript" = exons$GRanges,
+  region_list <- list("Transcript" = exons$GRanges,
                       "5'UTR" = utr5$GRanges,
                       "CDS" = cds$GRanges,
                       "3'UTR" = utr3$GRanges,
-                      #"Gene" = gene$GRanges,
+                      "Gene" = gene$GRanges,
                       "unrestricted" = NULL)
 
   if(verbose) print(lapply(region_list, length))
@@ -2952,8 +2972,13 @@ plot_locus_with_random <- function(queryFiles,
         for(i in seq_along(ratiolabels)){
           rm <- ratioMatrix_list[[ratiolabels[i]]][[centerLabel]][[regionName]]
           im <- inputMatrix_list[[inputLabels[i]]][[centerLabel]][[regionName]]
-
-          fullMatrix <- ifelse(is.na(transform), rm/im, rm - im)
+            
+          if(is.na(transform)){
+             fullMatrix <- rm/im
+          }else{
+             fullMatrix <- rm - im
+          }
+          
           #fullMatrix <- process_scoreMatrix(fullMatrix, scale=FALSE, rmOutlier=rmOutlier, transform=transform, verbose=verbose)
 
           ratioMatrix_list[[ratiolabels[i]]][[centerLabel]][[regionName]] <- fullMatrix
@@ -2963,7 +2988,12 @@ plot_locus_with_random <- function(queryFiles,
           imr <- inputMatrix_list_random[[inputLabels[i]]][[centerLabel]][[regionName]]
           minrowr <- min(nrow(rmr), nrow(imr))
 
-          fullMatrix <- ifelse(is.na(transform), rmr[1:minrowr,]/imr[1:minrowr,], rmr[1:minrowr,] - imr[1:minrowr,])
+          if(is.na(transform)){
+             fullMatrix <- rmr[1:minrowr,]/imr[1:minrowr,]
+          }else{
+             fullMatrix <- rmr[1:minrowr,] - imr[1:minrowr,]
+          }
+          
           #fullMatrix <- process_scoreMatrix(fullMatrix, scale=FALSE, rmOutlier=rmOutlier, transform=transform, verbose=verbose)
 
           ratioMatrix_list_random[[ratiolabels[i]]][[centerLabel]][[regionName]] <- fullMatrix
