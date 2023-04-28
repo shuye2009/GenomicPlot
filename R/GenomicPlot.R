@@ -1443,7 +1443,7 @@ plot_region <- function(queryFiles,
                 
                 ps1_wo_outlier <- draw_boxplot_wo_outlier(stat_df=astat_df, xc="Reference", yc="Intensity", comp=comp, stats=statsMethod, Ylab=Ylab)
                 ps1_mean_se <- draw_mean_se_barplot(stat_df=astat_df, xc="Reference", yc="Intensity", comp=comp, Ylab=Ylab)
-                prank <- draw_rank_plot(stat_df=astat_df, xc="Reference", yc="Intensity", Ylab=Ylab, ecdf=TRUE, rank=FALSE)
+                prank <- draw_quantile_plot(stat_df=astat_df, xc="Reference", yc="Intensity", Ylab=Ylab)
              }else{
                 p <- draw_region_profile(plot_df=aplot_df, cn="Query", sn="Reference", vx=vx, Ylab=Ylab)
                 outp <- plot_grid(p, marker, ncol = 1, align = 'v', axis="lr", rel_heights = c(10,1))
@@ -1453,7 +1453,7 @@ plot_region <- function(queryFiles,
                 
                 ps1_wo_outlier <- draw_boxplot_wo_outlier(stat_df=astat_df, xc="Query", yc="Intensity", comp=comp, stats=statsMethod, Ylab=Ylab)
                 ps1_mean_se <- draw_mean_se_barplot(stat_df=astat_df, xc="Query", yc="Intensity", Ylab=Ylab, comp=comp)
-                prank <- draw_rank_plot(stat_df=astat_df, xc="Query", yc="Intensity", Ylab=Ylab, ecdf=TRUE, rank=FALSE)
+                prank <- draw_quantile_plot(stat_df=astat_df, xc="Query", yc="Intensity", Ylab=Ylab)
              }
              
              if(max(i,j)>3){
@@ -1509,7 +1509,6 @@ plot_region <- function(queryFiles,
                }else{
                   fullMatrix <- rm[commonrow,] - im[commonrow,]
                }
-               
                
                ratioMatrix_list[[ratiolabels[i]]][[centerLabel]][[featureName]] <- fullMatrix
             }
@@ -1623,7 +1622,7 @@ plot_region <- function(queryFiles,
                   
                   ps1_wo_outlier <- draw_boxplot_wo_outlier(stat_df=astat_df, xc="Reference", yc="Intensity", comp=comp, stats=statsMethod, Ylab=Ylab)
                   ps1_mean_se <- draw_mean_se_barplot(stat_df=astat_df, xc="Reference", yc="Intensity", comp=comp, Ylab=Ylab)
-                  prank <- draw_rank_plot(stat_df=astat_df, xc="Reference", yc="Intensity", Ylab=Ylab, ecdf=TRUE, rank=FALSE)
+                  prank <- draw_quantile_plot(stat_df=astat_df, xc="Reference", yc="Intensity", Ylab=Ylab)
                }else{
                   p <- draw_region_profile(plot_df=aplot_df, cn="Query", sn="Reference", vx=vx, Ylab=Ylab)
                   outp <- plot_grid(p, marker, ncol = 1, align = 'v', axis="lr", rel_heights = c(10,1))
@@ -1633,7 +1632,7 @@ plot_region <- function(queryFiles,
                   
                   ps1_wo_outlier <- draw_boxplot_wo_outlier(stat_df=astat_df, xc="Query", yc="Intensity", comp=comp, stats=statsMethod, Ylab=Ylab)
                   ps1_mean_se <- draw_mean_se_barplot(stat_df=astat_df, xc="Query", yc="Intensity", Ylab=Ylab, comp=comp)
-                  prank <- draw_rank_plot(stat_df=astat_df, xc="Query", yc="Intensity", Ylab=Ylab, ecdf=TRUE, rank=FALSE)
+                  prank <- draw_quantile_plot(stat_df=astat_df, xc="Query", yc="Intensity", Ylab=Ylab)
                }
                
                if(max(i,j)>3){
@@ -2334,7 +2333,7 @@ plot_locus <- function(queryFiles,
                  
                  ps1_wo_outlier <- draw_boxplot_wo_outlier(stat_df=astat_df, xc="Reference", yc="Intensity", comp=comp, stats=statsMethod, Ylab=Ylab)
                  ps1_mean_se <- draw_mean_se_barplot(stat_df=astat_df, xc="Reference", yc="Intensity", comp=comp, Ylab=Ylab)
-                 prank <- draw_rank_plot(stat_df=astat_df, xc="Reference", yc="Intensity", Ylab=Ylab, ecdf=TRUE, rank=FALSE)
+                 prank <- draw_quantile_plot(stat_df=astat_df, xc="Reference", yc="Intensity", Ylab=Ylab)
                }else{
                  p <- draw_locus_profile(plot_df=aplot_df, cn="Query", sn="Reference", Xlab=Xlab, Ylab=Ylab, shade=shade, hl=hl)
                  comp <- combn(seq_along(beds),2, simplify=FALSE)
@@ -2343,7 +2342,7 @@ plot_locus <- function(queryFiles,
                  
                  ps1_wo_outlier <- draw_boxplot_wo_outlier(stat_df=astat_df, xc="Query", yc="Intensity", comp=comp, stats=statsMethod, Ylab=Ylab)
                  ps1_mean_se <- draw_mean_se_barplot(stat_df=astat_df, xc="Query", yc="Intensity", Ylab=Ylab, comp=comp)
-                 prank <- draw_rank_plot(stat_df=astat_df, xc="Query", yc="Intensity", Ylab=Ylab, ecdf=TRUE, rank=FALSE)
+                 prank <- draw_quantile_plot(stat_df=astat_df, xc="Query", yc="Intensity", Ylab=Ylab)
                }
 
                if(max(i,j)>3){
@@ -2415,7 +2414,7 @@ plot_locus <- function(queryFiles,
                           
                           ps1_wo_outlier <- draw_boxplot_wo_outlier(stat_df=astat_df, xc="Reference", yc="Intensity", comp=comp, stats=statsMethod, Ylab=Ylab)
                           ps1_mean_se <- draw_mean_se_barplot(stat_df=astat_df, xc="Reference", yc="Intensity", comp=comp, Ylab=Ylab)
-                          prank <- draw_rank_plot(stat_df=astat_df, xc="Reference", yc="Intensity", Ylab=Ylab, ecdf=TRUE, rank=FALSE)
+                          prank <- draw_quantile_plot(stat_df=astat_df, xc="Reference", yc="Intensity", Ylab=Ylab)
                        }else{
                           p <- draw_locus_profile(plot_df=aplot_df, cn="Query", sn="Reference", Xlab=Xlab, Ylab=Ylab, shade=shade, hl=hl)
                           comp <- combn(seq_along(beds),2, simplify=FALSE)
@@ -2424,7 +2423,7 @@ plot_locus <- function(queryFiles,
                           
                           ps1_wo_outlier <- draw_boxplot_wo_outlier(stat_df=astat_df, xc="Query", yc="Intensity", comp=comp, stats=statsMethod, Ylab=Ylab)
                           ps1_mean_se <- draw_mean_se_barplot(stat_df=astat_df, xc="Query", yc="Intensity", comp=comp, Ylab=Ylab)
-                          prank <- draw_rank_plot(stat_df=astat_df, xc="Query", yc="Intensity", Ylab=Ylab, ecdf=TRUE, rank=FALSE)
+                          prank <- draw_quantile_plot(stat_df=astat_df, xc="Query", yc="Intensity", Ylab=Ylab)
                        }
 
                        if(max(i,j)>3){
@@ -2583,7 +2582,7 @@ plot_locus <- function(queryFiles,
                     
                     ps1_wo_outlier <- draw_boxplot_wo_outlier(stat_df=astat_df, xc="Reference", yc="Intensity", comp=comp, stats=statsMethod, Ylab=Ylab)
                     ps1_mean_se <- draw_mean_se_barplot(stat_df=astat_df, xc="Reference", yc="Intensity", comp=comp, Ylab=Ylab)
-                    prank <- draw_rank_plot(stat_df=astat_df, xc="Reference", yc="Intensity", Ylab=Ylab, ecdf=TRUE, rank=FALSE)
+                    prank <- draw_quantile_plot(stat_df=astat_df, xc="Reference", yc="Intensity", Ylab=Ylab)
                  }else{
                     p <- draw_locus_profile(plot_df=aplot_df, cn="Query", sn="Reference", Xlab=Xlab, Ylab=Ylab, shade=shade, hl=hl)
                     comp <- combn(seq_along(beds),2, simplify=FALSE)
@@ -2592,7 +2591,7 @@ plot_locus <- function(queryFiles,
                     
                     ps1_wo_outlier <- draw_boxplot_wo_outlier(stat_df=astat_df, xc="Query", yc="Intensity", comp=comp, stats=statsMethod, Ylab=Ylab)
                     ps1_mean_se <- draw_mean_se_barplot(stat_df=astat_df, xc="Query", yc="Intensity", comp=comp, Ylab=Ylab)
-                    prank <- draw_rank_plot(stat_df=astat_df, xc="Query", yc="Intensity", Ylab=Ylab, ecdf=TRUE, rank=FALSE)
+                    prank <- draw_quantile_plot(stat_df=astat_df, xc="Query", yc="Intensity", Ylab=Ylab)
                  }
 
                  if(max(i,j)>3){
@@ -2945,7 +2944,7 @@ plot_locus_with_random <- function(queryFiles,
            ps1 <- draw_boxplot_by_factor(stat_df=stat_df, xc="Reference", yc="Intensity",  comp=comp, stats=statsMethod, Ylab=Ylab)
            ps1_wo_outlier <- draw_boxplot_wo_outlier(stat_df=stat_df, xc="Reference", yc="Intensity", comp=comp, stats=statsMethod, Ylab=Ylab)
            ps1_mean_se <- draw_mean_se_barplot(stat_df=stat_df, xc="Reference", yc="Intensity", comp=comp, Ylab=Ylab)
-           prank <- draw_rank_plot(stat_df=stat_df, xc="Reference", yc="Intensity", Ylab=Ylab)
+           prank <- draw_quantile_plot(stat_df=stat_df, xc="Reference", yc="Intensity", Ylab=Ylab)
 
            comp1 <- plot_grid(p, ps1_mean_se,  ncol = 2, rel_widths = c(1,1))
            comp2 <- plot_grid(ps1, ps1_wo_outlier, ncol = 2, rel_widths = c(1,1))
@@ -3071,7 +3070,7 @@ plot_locus_with_random <- function(queryFiles,
              ps1 <- draw_boxplot_by_factor(stat_df=stat_df, xc="Reference", yc="Intensity",  comp=comp, stats=statsMethod, Ylab=Ylab) 
              ps1_wo_outlier <- draw_boxplot_wo_outlier(stat_df=stat_df, xc="Reference", yc="Intensity", comp=comp, stats=statsMethod, Ylab=Ylab)
              ps1_mean_se <- draw_mean_se_barplot(stat_df=stat_df, xc="Reference", yc="Intensity", comp=comp, Ylab=Ylab)
-             prank <- draw_rank_plot(stat_df=stat_df, xc="Reference", yc="Intensity", Ylab=Ylab)
+             prank <- draw_quantile_plot(stat_df=stat_df, xc="Reference", yc="Intensity", Ylab=Ylab)
 
              comp1 <- plot_grid(p, ps1_mean_se,  ncol = 2, rel_widths = c(1,1))
              comp2 <- plot_grid(ps1, ps1_wo_outlier, ncol = 2, rel_widths = c(1,1))
