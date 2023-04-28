@@ -2,16 +2,9 @@
 % Please edit documentation in R/DrawingFunctions.R
 \name{draw_rank_plot}
 \alias{draw_rank_plot}
-\title{Plot cumulative sum or quantile over rank}
+\title{Plot fraction of cumulative sum over rank}
 \usage{
-draw_rank_plot(
-  stat_df,
-  xc = "Feature",
-  yc = "Intensity",
-  Ylab = yc,
-  ecdf = TRUE,
-  rank = FALSE
-)
+draw_rank_plot(stat_df, xc = "Feature", yc = "Intensity", Ylab = yc)
 }
 \arguments{
 \item{stat_df}{a dataframe with column names c(xc, yc)}
@@ -21,19 +14,12 @@ draw_rank_plot(
 \item{yc}{a string denoting column name for numeric data to be plotted}
 
 \item{Ylab}{a string for y-axis label}
-
-\item{ecdf}{logical, indicating using quantile instead of cumulative sum as y-axis}
-
-\item{rank}{logical, indicating using rank of values instead of value itself as x-axis}
 }
 \value{
 a ggplot object
 }
 \description{
-Plot cumulative sum over rank as line plot, both cumulative sum and rank are scaled between 0 and 1. This is the same as the fingerprint plot of the deepTools. Quantiles can also be used as y-axis, and values can also be used as x-axis. If the curve is skewed toward ends, the x-axis is truncated for better visualization.
-}
-\note{
-used by \code{plot_reference_locus}, \code{plot_reference_locus_with_random}
+Plot cumulative sum over rank as line plot, both cumulative sum and rank are scaled between 0 and 1. This is the same as the fingerprint plot of the deepTools.
 }
 \examples{
 stat_df <- data.frame(Feature=rep(c("A", "B"), c(20, 30)), 
@@ -41,14 +27,8 @@ stat_df <- data.frame(Feature=rep(c("A", "B"), c(20, 30)),
 stat_df1 <- data.frame(Feature=rep(c("A", "B"), c(20, 30)), 
                      Height=c(rnorm(20, 5, 5), rnorm(30, 1, 5)))
 
-for(e in c(TRUE, FALSE)){
-   for (r in c(TRUE, FALSE)){
-      print(draw_rank_plot(stat_df, xc="Feature", yc="Intensity", 
-      Ylab="Signal Intensity", ecdf=e, rank=r))
-      print(draw_rank_plot(stat_df1, xc="Feature", yc="Height", 
-      Ylab="Height", ecdf=e, rank=r))
-   }
-}
+print(draw_rank_plot(stat_df, xc="Feature", yc="Intensity", Ylab="Intensity"))
+print(draw_rank_plot(stat_df1, xc="Feature", yc="Height", Ylab="Height"))
 
 
 }
