@@ -173,11 +173,13 @@ plot_start_end_with_random <- function(queryFiles,
 
      # fullMatrix1 <- parallel_scoreMatrixBin(queryRegions, windowR, bin_num, bin_op, weight_col, stranded)
       fullMatrix <- parallel_scoreMatrixBin(queryRegions, windowR, bin_num, bin_op, weight_col, stranded, nc=nc)
+      fullMatrix <- process_scoreMatrix(fullMatrix, scale, rmOutlier, transform=transform, verbose=verbose)
       scoreMatrix_list[[queryLabel]][[locus]] <- fullMatrix
 
       if(randomize){
        # rfullMatrix1 <- parallel_scoreMatrixBin(queryRegions, rwindowR, bin_num, bin_op, weight_col, stranded)
         rfullMatrix <- parallel_scoreMatrixBin(queryRegions, rwindowR, bin_num, bin_op, weight_col, stranded, nc=nc)
+        rfullMatrix <- process_scoreMatrix(rfullMatrix, scale, rmOutlier, transform=transform, verbose=verbose)
         scoreMatrix_list_random[[queryLabel]][[locus]] <- rfullMatrix
       }
     }
@@ -197,7 +199,6 @@ plot_start_end_with_random <- function(queryFiles,
       if(verbose) print(queryLabel)
 
       fullMatrix <- scoreMatrix_list[[queryLabel]][[locus]]
-      fullMatrix <- process_scoreMatrix(fullMatrix, scale, rmOutlier, transform=transform, verbose=verbose)
 
       colm <- apply(fullMatrix, 2, mean)
       colsd <- apply(fullMatrix, 2, sd)
@@ -221,7 +222,6 @@ plot_start_end_with_random <- function(queryFiles,
       if(randomize){
 
         rfullMatrix <- scoreMatrix_list_random[[queryLabel]][[locus]]
-        rfullMatrix <- process_scoreMatrix(rfullMatrix, scale, rmOutlier, transform=transform, verbose=verbose)
 
         rcolm <- apply(rfullMatrix, 2, mean)
         rcolsd <- apply(rfullMatrix, 2, sd)
@@ -598,6 +598,7 @@ plot_start_end <- function(queryFiles,
             weight_col <- queryInputs[[queryLabel]]$weight
 
             fullMatrix <- parallel_scoreMatrixBin(queryRegions, windowR, bin_num, bin_op, weight_col, stranded, nc=nc)
+            fullMatrix <- process_scoreMatrix(fullMatrix, scale, rmOutlier, transform=transform, verbose=verbose)
 
             scoreMatrix_list[[queryLabel]][[locus]] <- fullMatrix
             
@@ -619,7 +620,6 @@ plot_start_end <- function(queryFiles,
             if(verbose) print(queryLabel)
 
             fullMatrix <- scoreMatrix_list[[queryLabel]][[locus]]
-            fullMatrix <- process_scoreMatrix(fullMatrix, scale, rmOutlier, transform=transform, verbose=verbose)
 
             colm <- apply(fullMatrix, 2, mean)
             colsd <- apply(fullMatrix, 2, sd)
@@ -920,6 +920,7 @@ plot_3parts_metagene <- function(queryFiles,
 
   if(heatmap) heatmap_list <- list()
 
+  processed_matrix <- list()
   for(queryLabel in queryLabels){
     plot_df <- NULL
 
@@ -932,6 +933,8 @@ plot_3parts_metagene <- function(queryFiles,
     }else{
        featureMatrix <- as.matrix(bind_cols(scoreMatrix_list[[queryLabel]]))
        featureMatrix <- process_scoreMatrix(featureMatrix, scale=scale, rmOutlier=rmOutlier, transform=transform, verbose=verbose)
+       processed_matrix[[queryLabel]] <- featureMatrix
+       
        colm <- apply(featureMatrix, 2, mean)
        colsd <- apply(featureMatrix, 2, sd)
        colse <- colsd/sqrt(nrow(featureMatrix))
@@ -1005,20 +1008,20 @@ plot_3parts_metagene <- function(queryFiles,
     Ylabr <- ifelse(is.na(transform), "Ratio-over-Input", paste0(transform, " (Ratio-over-Input)"))
     if(heatmap) heatmap_list_ratio <- list()
 
-    inputMatrix_list <- scoreMatrix_list[inputLabels]
+    inputMatrix_list <- processed_matrix[inputLabels]
     ratiolabels <- queryLabels[!queryLabels %in% inputLabels]
-    ratioMatrix_list <- scoreMatrix_list[ratiolabels]
-    for(w in featureNames){
-      for(i in seq_along(ratiolabels)){
-         if(is.na(transform)){
-            fullMatrix <- ratioMatrix_list[[ratiolabels[i]]][[w]]/inputMatrix_list[[inputLabels[i]]][[w]]
-         }else{
-            fullMatrix <- ratioMatrix_list[[ratiolabels[i]]][[w]] - inputMatrix_list[[inputLabels[i]]][[w]]
-         }
-        fullMatrix <- ratioMatrix_list[[ratiolabels[i]]][[w]]/inputMatrix_list[[inputLabels[i]]][[w]]
-        ratioMatrix_list[[ratiolabels[i]]][[w]] <- fullMatrix
+    ratioMatrix_list <- processed_matrix[ratiolabels]
+    
+   for(i in seq_along(ratiolabels)){
+      if(is.na(transform)){
+         fullMatrix <- ratioMatrix_list[[ratiolabels[i]]]/inputMatrix_list[[inputLabels[i]]]
+      }else{
+         fullMatrix <- ratioMatrix_list[[ratiolabels[i]]] - inputMatrix_list[[inputLabels[i]]]
       }
-    }
+     
+     ratioMatrix_list[[ratiolabels[i]]] <- fullMatrix
+   }
+    
 
     if(verbose) print("plotting coverage for ratio over input")
     mplot_df_ratio <- NULL
@@ -1031,8 +1034,8 @@ plot_3parts_metagene <- function(queryFiles,
          stop("Number of genes are not equal among features, make sure all feature windows are within chromosome lengths of query regions,
             as genomation will remvove all feature windows outside chromosome boundaries")
       }else{
-         featureMatrix <- as.matrix(bind_cols(ratioMatrix_list[[ratiolabel]]))
-         featureMatrix <- process_scoreMatrix(featureMatrix, scale=FALSE, rmOutlier=rmOutlier, transform=transform, verbose=verbose) # do not scale ration over input
+         featureMatrix <- ratioMatrix_list[[ratiolabel]]
+         
          colm <- apply(featureMatrix, 2, mean)
          colsd <- apply(featureMatrix, 2, sd)
          colse <- colsd/sqrt(nrow(featureMatrix))
@@ -1334,6 +1337,8 @@ plot_region <- function(queryFiles,
   if(heatmap)heatmap_list <- list()
   Ylab <- ifelse(is.na(transform), Ylab, paste0(transform, " (", Ylab, ")"))
 
+  processed_matrix <- list()
+  processed_region_matrix <- list()
   if(verbose) print("plotting coverage profiles")
   for(queryLabel in queryLabels){
     if(verbose) print(paste("queryLabel",queryLabel))
@@ -1351,6 +1356,8 @@ plot_region <- function(queryFiles,
          featureMatrix <- as.matrix(bind_cols(scoreMatrix_list[[queryLabel]][[centerLabel]]))
          rownames(featureMatrix) <- rownames(scoreMatrix_list[[queryLabel]][[centerLabel]][[1]])
          featureMatrix <- process_scoreMatrix(featureMatrix, scale=scale, rmOutlier=rmOutlier, transform=transform, verbose=verbose)
+         processed_matrix[[queryLabel]][[centerLabel]] <- featureMatrix
+         
          colm <- apply(featureMatrix, 2, mean)
          colsd <- apply(featureMatrix, 2, sd)
          colse <- colsd/sqrt(nrow(featureMatrix))
@@ -1388,6 +1395,8 @@ plot_region <- function(queryFiles,
       
       regionMatrix <- as.matrix(scoreMatrix_list[[queryLabel]][[centerLabel]][[regionName]])
       regionMatrix <- process_scoreMatrix(regionMatrix, scale=scale, rmOutlier=rmOutlier, transform=transform, verbose=verbose)
+      processed_region_matrix[[queryLabel]][[centerLabel]] <- regionMatrix
+      
       Intensity <- as.numeric(rowMeans(regionMatrix))
       
       Query <- as.factor(rep(queryLabel, length(Intensity)))
@@ -1493,27 +1502,41 @@ plot_region <- function(queryFiles,
     Ylab <- ifelse(is.na(transform), "Ratio-over-Input", paste0(transform, " (Ratio-over-Input)"))
 
     ratiolabels <- queryLabels[!queryLabels %in% inputLabels]
-    inputMatrix_list <- scoreMatrix_list[inputLabels]
-    ratioMatrix_list <- scoreMatrix_list[ratiolabels]
+    inputMatrix_list <- processed_matrix[inputLabels]
+    ratioMatrix_list <- processed_matrix[ratiolabels]
 
     for(centerLabel in centerLabels){
-      for(featureName in featureNames){
-         if(scaled_bins[featureName]> 0){
-            for(i in seq_along(ratiolabels)){
-               rm <- ratioMatrix_list[[ratiolabels[i]]][[centerLabel]][[featureName]]
-               im <- inputMatrix_list[[inputLabels[i]]][[centerLabel]][[featureName]]
-               commonrow <- intersect(rownames(rm), rownames(im))
-               
-               if(is.na(transform)){
-                  fullMatrix <- rm[commonrow,]/im[commonrow,]   
-               }else{
-                  fullMatrix <- rm[commonrow,] - im[commonrow,]
-               }
-               
-               ratioMatrix_list[[ratiolabels[i]]][[centerLabel]][[featureName]] <- fullMatrix
-            }
+      for(i in seq_along(ratiolabels)){
+         rm <- ratioMatrix_list[[ratiolabels[i]]][[centerLabel]]
+         im <- inputMatrix_list[[inputLabels[i]]][[centerLabel]]
+         commonrow <- intersect(rownames(rm), rownames(im))
+         
+         if(is.na(transform)){
+            fullMatrix <- rm[commonrow,]/im[commonrow,]   
+         }else{
+            fullMatrix <- rm[commonrow,] - im[commonrow,]
          }
+         
+         ratioMatrix_list[[ratiolabels[i]]][[centerLabel]] <- fullMatrix
       }
+    }
+    
+    inputMatrix_region_list <- processed_region_matrix[inputLabels]
+    ratioMatrix_region_list <- processed_region_matrix[ratiolabels]
+    for(centerLabel in centerLabels){
+       for(i in seq_along(ratiolabels)){
+          rm <- ratioMatrix_region_list[[ratiolabels[i]]][[centerLabel]]
+          im <- inputMatrix_region_list[[inputLabels[i]]][[centerLabel]]
+          commonrow <- intersect(rownames(rm), rownames(im))
+          
+          if(is.na(transform)){
+             fullMatrix <- rm[commonrow,]/im[commonrow,]   
+          }else{
+             fullMatrix <- rm[commonrow,] - im[commonrow,]
+          }
+          
+          ratioMatrix_region_list[[ratiolabels[i]]][[centerLabel]] <- fullMatrix
+       }
     }
 
     mplot_df <- list()
@@ -1526,16 +1549,15 @@ plot_region <- function(queryFiles,
         
         if(verbose) print(paste("centerlabel", centerLabel))
         plot_df <- NULL
-        dims <- vapply(scoreMatrix_list[[ratiolabel]][[centerLabel]], dim, numeric(2))
+        dims <- vapply(ratioMatrix_list[[ratiolabel]][[centerLabel]], dim, numeric(2))
 
         if(any(dims[1,] != dims[1,1])){
            message(paste(dims[1,], collapse = " "))
            stop("Number of genes are not equal among features, make sure all feature windows are within chromosome lengths of query regions,
             as genomation will remvove all feature windows outside chromosome boundaries")
         }else{
-           featureMatrix <- as.matrix(bind_cols(scoreMatrix_list[[ratiolabel]][[centerLabel]]))
-           rownames(featureMatrix) <- rownames(scoreMatrix_list[[ratiolabel]][[centerLabel]][[1]])
-           featureMatrix <- process_scoreMatrix(featureMatrix, scale=scale, rmOutlier=rmOutlier, transform=transform, verbose=verbose)
+           featureMatrix <- ratioMatrix_list[[ratiolabel]][[centerLabel]]
+           
            colm <- apply(featureMatrix, 2, mean)
            colsd <- apply(featureMatrix, 2, sd)
            colse <- colsd/sqrt(nrow(featureMatrix))
@@ -1570,8 +1592,8 @@ plot_region <- function(queryFiles,
 
         mplot_df[[paste(ratiolabel,centerLabel,sep=":")]] <- plot_df
         
-        regionMatrix <- as.matrix(scoreMatrix_list[[ratiolabel]][[centerLabel]][[regionName]])
-        regionMatrix <- process_scoreMatrix(regionMatrix, scale=scale, rmOutlier=rmOutlier, transform=transform, verbose=verbose)
+        regionMatrix <- as.matrix(ratioMatrix_region_list[[ratiolabel]][[centerLabel]])
+        
         Intensity <- as.numeric(rowMeans(regionMatrix))
         
         Query <- as.factor(rep(ratiolabel, length(Intensity)))
@@ -1820,6 +1842,7 @@ plot_5parts_metagene <- function(queryFiles,
      vx <- c(1, cumsum(scaled_bins[1:(length(scaled_bins)-1)])+1) ## x axis points for vlines that demarcate the genomic features
      names(vx) <- featureNames
    
+     processed_matrix <- list()
      mplot_df <- NULL
      Ylab <- ifelse(is.na(transform), Ylab, paste0(transform, " (", Ylab, ")"))
    
@@ -1834,6 +1857,8 @@ plot_5parts_metagene <- function(queryFiles,
        }else{
           featureMatrix <- as.matrix(bind_cols(scoreMatrix_list[[queryLabel]]))
           featureMatrix <- process_scoreMatrix(featureMatrix, scale=scale, rmOutlier=rmOutlier, transform=transform, verbose=verbose)
+          processed_matrix[[queryLabel]] <- featureMatrix
+          
           colm <- apply(featureMatrix, 2, mean)
           colsd <- apply(featureMatrix, 2, sd)
           colse <- colsd/sqrt(nrow(featureMatrix))
@@ -1876,26 +1901,22 @@ plot_5parts_metagene <- function(queryFiles,
        if(verbose) print("Preparing data for ratio plotting")
        Ylabr <- ifelse(is.na(transform), "Ratio-over-Input", paste0(transform, " (Ratio-over-Input)"))
    
-       inputMatrix_list <- scoreMatrix_list[inputLabels]
        ratiolabels <- queryLabels[!queryLabels %in% inputLabels]
-       ratioMatrix_list <- scoreMatrix_list[ratiolabels]
-       for(w in featureNames){
-         if(scaled_bins[w] > 0){
-            for(i in seq_along(ratiolabels)){
-               if(is.na(transform)){
-                  fullMatrix <- ratioMatrix_list[[ratiolabels[i]]][[w]]/inputMatrix_list[[inputLabels[i]]][[w]]
-               }else{
-                  fullMatrix <- ratioMatrix_list[[ratiolabels[i]]][[w]] - inputMatrix_list[[inputLabels[i]]][[w]]
-               }
-              
-              ratioMatrix_list[[ratiolabels[i]]][[w]] <- fullMatrix
+       inputMatrix_list <- processed_matrix[inputLabels]
+       ratioMatrix_list <- processed_matrix[ratiolabels]
+  
+       for(i in seq_along(ratiolabels)){
+            if(is.na(transform)){
+               fullMatrix <- ratioMatrix_list[[ratiolabels[i]]]/inputMatrix_list[[inputLabels[i]]]
+            }else{
+               fullMatrix <- ratioMatrix_list[[ratiolabels[i]]] - inputMatrix_list[[inputLabels[i]]]
             }
-         }else{
-            ratioMatrix_list[[ratiolabels[i]]][[w]] <- NULL
-         }
+           
+           ratioMatrix_list[[ratiolabels[i]]] <- fullMatrix
        }
 
        mplot_df <- NULL
+       
        for(ratiolabel in ratiolabels){
          plot_df <- NULL
    
@@ -1906,8 +1927,8 @@ plot_5parts_metagene <- function(queryFiles,
             stop("Number of genes are not equal among features, make sure all feature windows are within chromosome lengths of query regions,
                as genomation will remvove all feature windows outside chromosome boundaries")
          }else{
-            featureMatrix <- as.matrix(bind_cols(ratioMatrix_list[[ratiolabel]]))
-            featureMatrix <- process_scoreMatrix(featureMatrix, scale=FALSE, rmOutlier=rmOutlier, transform=transform, verbose=verbose)  # do not scale ratio over input
+            featureMatrix <- as.matrix(ratioMatrix_list[[ratiolabel]])
+            
             colm <- apply(featureMatrix, 2, mean)
             colsd <- apply(featureMatrix, 2, sd)
             colse <- colsd/sqrt(nrow(featureMatrix))
@@ -2076,14 +2097,14 @@ plot_5parts_metagene <- function(queryFiles,
 #' centerfiles <- system.file("extdata", "test_clip_peak_chr19.bed", package="GenomicPlot")
 #' names(centerfiles) <- "clipPeak"
 #' 
-#' handleInputParams <- list(offset=-1, fix_width=150, fix_point="start", norm=FALSE, 
-#' useScore=FALSE, outRle=TRUE, useSizeFactor=TRUE, genome="hg19")
+#' handleInputParams <- list(offset=-1, fix_width=0, fix_point="start", norm=TRUE, 
+#' useScore=FALSE, outRle=TRUE, useSizeFactor=FALSE, genome="hg19")
 #'  
-#' df <- plot_locus(queryFiles=queryfiles, centerFiles=c(centerfiles, "intron"), txdb=txdb, 
-#' ext=c(-200,200), hl=c(-20, 20), shade=TRUE, smooth=FALSE, handleInputParams=handleInputParams, 
+#' df <- plot_locus(queryFiles=queryfiles, centerFiles=c(centerfiles, "exon"), txdb=txdb, 
+#' ext=c(-200,200), hl=c(-50, 50), shade=TRUE, smooth=FALSE, handleInputParams=handleInputParams, 
 #' verbose=TRUE, binSize=10, refPoint="center", Xlab="Center", Ylab="Coverage/base/gene", 
 #' inputFiles=inputfiles, stranded=TRUE, heatmap=TRUE, scale=FALSE, outPrefix=NULL, 
-#' rmOutlier=FALSE, transform=NA, statsMethod="wilcox.test", heatRange=c(0, 0.3), nc=2)
+#' rmOutlier=FALSE, transform=NA, statsMethod="wilcox.test", heatRange=NULL, nc=2)
 #'
 #' @export plot_locus
 
@@ -2217,13 +2238,16 @@ plot_locus <- function(queryFiles,
       bin_op <- "mean"
 
       fullMatrix <- parallel_scoreMatrixBin(queryRegions, windowRs, bin_num, bin_op, weight_col, stranded, nc=nc)
+      fullMatrix <- process_scoreMatrix(fullMatrix, scale=scale, rmOutlier=rmOutlier, transform=transform, verbose=verbose)
       colnames(fullMatrix) <- as.character(colLabel)
       rownames(fullMatrix) <- names(windowRegions)
 
       scoreMatrix_list[[queryLabel]][[centerLabel]] <- fullMatrix
 
       if(verbose){
+         print("Dimension of fullMatrix")
          print(dim(fullMatrix))
+         print("Number of unique window regions")
          print(length(unique(format_genomic_coordinates(windowRs))))
          #rownames(fullMatrix) <- format_genomic_coordinates(windowRs)
          #write.table(fullMatrix, paste0(queryLabel, "_", centerLabel, "_scoreMatrix.tab"), col.names=NA, sep="\t", quote=FALSE)
@@ -2243,9 +2267,8 @@ plot_locus <- function(queryFiles,
     for(centerLabel in centerLabels){
       if(verbose) print(centerLabel)
 
-      fullMatrixo <- scoreMatrix_list[[queryLabel]][[centerLabel]]
-      fullMatrix <- process_scoreMatrix(fullMatrixo, scale=scale, rmOutlier=rmOutlier, transform=transform, verbose=verbose)
-
+      fullMatrix <- scoreMatrix_list[[queryLabel]][[centerLabel]]
+      
       colm <- apply(fullMatrix, 2, mean)
       colsd <- apply(fullMatrix, 2, sd)
       colse <- colsd/sqrt(apply(fullMatrix, 2, length))
