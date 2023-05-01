@@ -472,8 +472,7 @@ draw_boxplot_wo_outlier <- function(stat_df,
 #' @examples
 #' stat_df <- data.frame(Feature=rep(c("A", "B"), c(20, 30)), 
 #' Intensity=c(rnorm(20, 2), rnorm(30, 3)))
-#' p <- draw_mean_se_barplot(stat_df, xc="Feature", yc="Intensity", 
-#' Ylab="Signal Intensity")
+#' p <- draw_mean_se_barplot(stat_df, xc="Feature", yc="Intensity", Ylab="Intensity")
 #' p
 #' @export draw_mean_se_barplot
 #'
@@ -515,9 +514,9 @@ draw_mean_se_barplot <- function(stat_df,
                axis.title.x = element_blank(),
                axis.text = element_text(face="plain", size=12, color="black"),
                legend.position = "none") +
-         labs(y=Ylab, x=Xlab) +
+         labs(y=paste0(Ylab, "(mean±SE)"), x=Xlab) +
          scale_x_discrete(labels = means_se$labelx) +
-         ggtitle(label="Mean + SE" , subtitle=paste("ANOVA p-value =",format(stats$ANOVA, digits=3)))
+         ggtitle(label=paste("ANOVA p-value =",format(stats$ANOVA, digits=3)))
       
       if(!is.null(Ylim)){
          p <- p + coord_cartesian(ylim=Ylim)
@@ -529,7 +528,7 @@ draw_mean_se_barplot <- function(stat_df,
       comp_row <- sapply(comp, function(x){arow <- paste0(levels(stat_df[[xc]])[x[2]], "-", levels(stat_df[[xc]])[x[1]])})
       stats_selected <- as.data.frame(stats$HSD) %>%
          filter(row.names(stats$HSD) %in% comp_row)
-      ptable <- tab_add_title(ggtexttable(stats_selected, theme=ttheme(base_size=10)), text="post hoc TukeyHSD test")
+      ptable <- tab_add_title(ggtexttable(stats_selected, theme=ttheme(base_size=9)), text="post hoc TukeyHSD test", padding = unit(1.0, "line"), just = "left")
       
       outp <- cowplot::plot_grid(p, ptable, ncol=1, align="l", rel_heights = c(3,2))
    
@@ -562,9 +561,9 @@ draw_mean_se_barplot <- function(stat_df,
                axis.title.x = element_blank(),
                axis.text = element_text(face="plain", size=12, color="black"),
                legend.position = "none") +
-         labs(y=Ylab, x=Xlab) +
+         labs(y=paste0(Ylab, "(mean±SE)"), x=Xlab) +
          scale_x_discrete(labels = means_se$labelx) +
-         ggtitle(label="Mean + SE" , subtitle=paste("ANOVA p-value =",format(stats$ANOVA, digits=3)))
+         ggtitle(label=paste("ANOVA p-value =",format(stats$ANOVA, digits=3)))
       
       if(!is.null(Ylim)){
          p <- p + coord_cartesian(ylim=Ylim)
@@ -576,7 +575,7 @@ draw_mean_se_barplot <- function(stat_df,
       comp_row <- sapply(comp, function(x){arow <- paste0(levels(stat_df[["x2"]])[x[2]], "-", levels(stat_df[["x2"]])[x[1]])})
       stats_selected <- as.data.frame(stats$HSD) %>%
          filter(row.names(stats$HSD) %in% comp_row)
-      ptable <- tab_add_title(ggtexttable(stats_selected, theme=ttheme(base_size=10)), text="post hoc TukeyHSD test")
+      ptable <- tab_add_title(ggtexttable(stats_selected, theme=ttheme(base_size=9)), text="post hoc TukeyHSD test", padding = unit(1.0, "line"), just = "left")
       
       outp <- cowplot::plot_grid(p, ptable, ncol=1, align="l", rel_heights = c(3,2))
    }
@@ -629,9 +628,8 @@ draw_quantile_plot <- function(stat_df,
             theme(legend.position="top", 
                   legend.title=element_blank(),
                   axis.text=element_text(angle=0, size=12, vjust=0),
-                  axis.title=element_text(face="bold", color="black", size=14, vjust=0.25) 
-            ) +
-            ggtitle(paste("Cumulative fraction of ", Ylab))
+                  axis.title=element_text(face="bold", color="black", size=14, vjust=0.25)
+            )
 
    }else{
       stat_df <- stat_df %>%
@@ -649,8 +647,7 @@ draw_quantile_plot <- function(stat_df,
                legend.title=element_blank(),
                axis.text=element_text(angle=0, size=12, vjust=0),
                axis.title=element_text(face="bold", color="black", size=14, vjust=0.25) 
-         ) +
-         ggtitle(paste("Cumulative fraction of ", Ylab))
+         )
    }
       
    return(p)
@@ -723,6 +720,15 @@ draw_rank_plot <- function(stat_df,
 #' 
 #' @author Shuye Pu
 #' 
+#' @examples 
+#' stat_df <- data.frame(Feature=rep(c("A", "B"), c(200, 300)), 
+#'                      Intensity=c(rnorm(200, 2, 5), rnorm(300, 3, 5)),
+#'                      Height=c(rnorm(200, 5, 5), rnorm(300, 1, 5)))
+#' stat_df_long <- tidyr::pivot_longer(stat_df, cols=c(Intensity, Height), 
+#' names_to="type", values_to="value")
+#' 
+#' print(draw_combo_plot(stat_df_long, xc="Feature", yc="value", fc="type", 
+#' Ylab="value", comp=list(c(1,2), c(3,4), c(1,3), c(2,4)), nf=2))
 #' @export draw_combo_plot
 
 draw_combo_plot <- function(stat_df, 

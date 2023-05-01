@@ -101,14 +101,14 @@ names(inputfiles) <- "input"
 centerfiles <- system.file("extdata", "test_clip_peak_chr19.bed", package="GenomicPlot")
 names(centerfiles) <- "clipPeak"
 
-handleInputParams <- list(offset=-1, fix_width=150, fix_point="start", norm=FALSE, 
-useScore=FALSE, outRle=TRUE, useSizeFactor=TRUE, genome="hg19")
+handleInputParams <- list(offset=-1, fix_width=0, fix_point="start", norm=TRUE, 
+useScore=FALSE, outRle=TRUE, useSizeFactor=FALSE, genome="hg19")
  
-df <- plot_locus(queryFiles=queryfiles, centerFiles=c(centerfiles, "intron"), txdb=txdb, 
-ext=c(-200,200), hl=c(-20, 20), shade=TRUE, smooth=FALSE, handleInputParams=handleInputParams, 
+df <- plot_locus(queryFiles=queryfiles, centerFiles=c(centerfiles, "exon"), txdb=txdb, 
+ext=c(-200,200), hl=c(-50, 50), shade=TRUE, smooth=FALSE, handleInputParams=handleInputParams, 
 verbose=TRUE, binSize=10, refPoint="center", Xlab="Center", Ylab="Coverage/base/gene", 
 inputFiles=inputfiles, stranded=TRUE, heatmap=TRUE, scale=FALSE, outPrefix=NULL, 
-rmOutlier=FALSE, transform=NA, statsMethod="wilcox.test", heatRange=c(0, 0.3), nc=2)
+rmOutlier=FALSE, transform=NA, statsMethod="wilcox.test", heatRange=NULL, nc=2)
 
 }
 \author{

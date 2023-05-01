@@ -44,7 +44,7 @@ inspect_matrix <- function(fullmatrix,
    n_infinite <- sum(is.infinite(fullmatrix))
    n_NA <- sum(is.na(fullmatrix))
    n_NaN <- sum(is.nan(fullmatrix))
-   n_zero <- sum(fullmatrix == 0)
+   n_zero <- sum(fullmatrix == 0.0, na.rm=TRUE)
 
    n_invalid <- c(n_infinite, n_NA, n_NaN, n_zero)
    fraction_invalid <- n_invalid/size
