@@ -23,7 +23,7 @@ plot_locus_with_random(
   stranded = TRUE,
   scale = FALSE,
   outPrefix = NULL,
-  rmOutlier = FALSE,
+  rmOutlier = 0,
   n_random = 1,
   hw = c(8, 8),
   statsMethod = "wilcox.test",
@@ -67,7 +67,7 @@ plot_locus_with_random(
 
 \item{outPrefix}{a string specifying output file prefix for plots (outPrefix.pdf)}
 
-\item{rmOutlier}{logical, indicating whether a row with abnormally high values in the score matrix should be removed}
+\item{rmOutlier}{a numeric value serving as a multiplier of the MAD in Hampel filter for outliers identification, 0 indicating not removing outliers. For Gaussian distribution, use 3, adjust based on data distribution}
 
 \item{n_random}{an integer denotes the number of randomization should be formed}
 
@@ -101,7 +101,7 @@ useScore=FALSE, outRle=TRUE, useSizeFactor=TRUE, genome="hg19")
 df <- plot_locus_with_random(queryFiles=queryfiles, centerFiles=c(centerfiles), txdb=txdb, 
 ext=c(-200,200), hl=c(-20, 20), shade=TRUE, smooth=TRUE, handleInputParams=handleInputParams, 
 verbose=TRUE, binSize=10, refPoint="center", Xlab="Center", Ylab="Coverage/base/gene", 
-inputFiles=inputfiles, stranded=TRUE, scale=FALSE, outPrefix=NULL, rmOutlier=FALSE, 
+inputFiles=inputfiles, stranded=TRUE, scale=FALSE, outPrefix=NULL, rmOutlier=0, 
 transform=NA, statsMethod="wilcox.test", nc=2)
 
 }

@@ -15,7 +15,7 @@ knitr::opts_chunk$set(
 #  inputfiles <- system.file("extdata", "input_chr19.bam", package="GenomicPlot")
 #  names(inputfiles) <- "input"
 #  
-#  handleInputParams <- list(CLIP_reads=FALSE, fix_width=150, fix_point="start", norm=TRUE,
+#  handleInputParams <- list(offset=0, fix_width=150, fix_point="start", norm=TRUE,
 #                            useScore=FALSE, outRle=TRUE, useSizeFactor=TRUE, genome="hg19")
 #  
 #  plot_5parts_metagene(queryFiles=queryfiles,
@@ -29,7 +29,7 @@ knitr::opts_chunk$set(
 #                       outPrefix=NULL,
 #                       handleInputParams=handleInputParams,
 #                       heatmap=TRUE,
-#                       rmOutlier=TRUE,
+#                       rmOutlier=0,
 #                       nc=5)
 #  
 
@@ -52,7 +52,7 @@ knitr::include_graphics("../tests/test_output/test_plot_5parts_metagene2_3.png")
 #  inputfiles <- system.file("extdata", "chip_input_chr19.bam", package="GenomicPlot")
 #  names(inputfiles) <- "input"
 #  
-#  handleInputParams <- list(CLIP_reads=FALSE, fix_width=150, fix_point="start", norm=TRUE,
+#  handleInputParams <- list(offset=0, fix_width=150, fix_point="start", norm=TRUE,
 #                            useScore=FALSE, outRle=TRUE, useSizeFactor=TRUE, genome="hg19")
 #  
 #  plot_3parts_metagene(queryFiles=queryfiles,
@@ -66,7 +66,7 @@ knitr::include_graphics("../tests/test_output/test_plot_5parts_metagene2_3.png")
 #                       outPrefix=NULL,
 #                       handleInputParams=handleInputParams,
 #                       heatmap=TRUE,
-#                       rmOutlier=TRUE,
+#                       rmOutlier=0,
 #                       nc=5)
 #  
 
@@ -89,7 +89,7 @@ knitr::include_graphics("../tests/test_output/test_plot_3parts_metagene_3.png")
 #                   system.file("extdata", "chip_input_chr19.bam", package="GenomicPlot"))
 #   names(inputfiles) <- c("clip_input", "chip_input")
 #  
-#   handleInputParams <- list(CLIP_reads=FALSE, fix_width=150, fix_point="start", norm=TRUE,
+#   handleInputParams <- list(offset=0, fix_width=150, fix_point="start", norm=TRUE,
 #                             useScore=FALSE, outRle=TRUE, useSizeFactor=TRUE, genome="hg19")
 #  
 #   plot_region(queryFiles=queryfiles,
@@ -107,7 +107,7 @@ knitr::include_graphics("../tests/test_output/test_plot_3parts_metagene_3.png")
 #               transform=NA,
 #               stranded=TRUE,
 #               outPrefix=NULL,
-#               rmOutlier=FALSE,
+#               rmOutlier=0,
 #               nc=5)
 
 ## ----region1, echo=FALSE, fig.cap="Individual sample profile", out.width = '75%'----
@@ -143,7 +143,7 @@ knitr::include_graphics("../tests/test_output/test_plot_region_18.png")
 #  ext <- c(-500, 200, -200, 500)
 #  hl <- c(-50, 50, -50, 50)
 #  
-#  handleInputParams <- list(CLIP_reads=TRUE, fix_width=150, fix_point="start", norm=TRUE,
+#  handleInputParams <- list(offset=-1, fix_width=150, fix_point="start", norm=TRUE,
 #                            useScore=FALSE, outRle=TRUE, useSizeFactor=TRUE, genome="hg19")
 #  plot_start_end(queryFiles=queryfiles,
 #                 inputFiles=inputfiles,
@@ -177,7 +177,7 @@ knitr::include_graphics("../tests/test_output/test_plot_stat_end_4.png")
 #                   system.file("extdata", "chip_input_chr19.bam", package="GenomicPlot"))
 #   names(inputfiles) <- c("clip_input", "chip_input")
 #  
-#   handleInputParams <- list(CLIP_reads=FALSE, fix_width=150, fix_point="start", norm=TRUE,
+#   handleInputParams <- list(offset=0, fix_width=150, fix_point="start", norm=TRUE,
 #                             useScore=FALSE, outRle=TRUE, useSizeFactor=TRUE, genome="hg19")
 #  
 #   plot_locus(queryFiles=queryfiles,
@@ -196,7 +196,7 @@ knitr::include_graphics("../tests/test_output/test_plot_stat_end_4.png")
 #              outPrefix=NULL,
 #              verbose=FALSE,
 #              transform=NA,
-#              rmOutlier=FALSE,
+#              rmOutlier=0,
 #              statsMethod="wilcox.test",
 #              heatmap=TRUE,
 #              nc=5)
@@ -228,7 +228,7 @@ knitr::include_graphics("../tests/test_output/test_plot_locus2_18.png")
 #   inputfiles <- c(system.file("extdata", "input_chr19.bam", package="GenomicPlot"))
 #   names(inputfiles) <- c("clip_input")
 #  
-#  handleInputParams <- list(CLIP_reads=TRUE, fix_width=150, fix_point="start", norm=TRUE,
+#  handleInputParams <- list(offset=-1, fix_width=150, fix_point="start", norm=TRUE,
 #                            useScore=FALSE, outRle=TRUE, useSizeFactor=TRUE, genome="hg19")
 #  
 #  plot_locus_with_random(queryFiles=queryfiles,
@@ -248,7 +248,7 @@ knitr::include_graphics("../tests/test_output/test_plot_locus2_18.png")
 #                         outPrefix=NULL,
 #                         verbose=FALSE,
 #                         transform=NA,
-#                         rmOutlier=FALSE,
+#                         rmOutlier=0,
 #                         n_random=1,
 #                         statsMethod="wilcox.test",
 #                         nc=5)
@@ -273,7 +273,7 @@ knitr::include_graphics("../tests/test_output/test_plot_locus_with_random_12.png
 #  names(centerfile) <- c("summitPeak")
 #  
 #  handleBedparams <- list(fix_width=0, fix_point="center", useScore=FALSE, outRle=FALSE,
-#                          CLIP_reads=FALSE, norm=FALSE, useSizeFactor=FALSE, genome="hg19")
+#                          offset=0, norm=FALSE, useSizeFactor=FALSE, genome="hg19")
 #  
 #  pa <- plot_peak_annotation(peakFile=centerfile,
 #                             gtfFile=gtffile,

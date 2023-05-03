@@ -61,7 +61,7 @@ plot_5parts_metagene(queryFiles=queryfiles,
                      outPrefix=NULL, 
                      handleInputParams=handleInputParams, 
                      heatmap=TRUE, 
-                     rmOutlier=TRUE, 
+                     rmOutlier=0, 
                      nc=5)
 
 ```
@@ -104,7 +104,7 @@ plot_3parts_metagene(queryFiles=queryfiles,
                      outPrefix=NULL, 
                      handleInputParams=handleInputParams, 
                      heatmap=TRUE, 
-                     rmOutlier=TRUE, 
+                     rmOutlier=0, 
                      nc=5)
 
 ```
@@ -150,7 +150,7 @@ centerfiles <- system.file("extdata", "test_chip_peak_chr19.narrowPeak", package
              transform=NA, 
              stranded=TRUE, 
              outPrefix=NULL, 
-             rmOutlier=FALSE, 
+             rmOutlier=0, 
              nc=5)
 ```
 ```{r region1, echo=FALSE, fig.cap="Individual sample profile", out.width = '75%'}
@@ -250,7 +250,7 @@ Difference in signal intensity within specific regions around the reference loci
             outPrefix=NULL, 
             verbose=FALSE, 
             transform=NA, 
-            rmOutlier=FALSE, 
+            rmOutlier=0, 
             statsMethod="wilcox.test", 
             heatmap=TRUE, 
             nc=5)
@@ -307,7 +307,7 @@ plot_locus_with_random(queryFiles=queryfiles,
                        outPrefix=NULL, 
                        verbose=FALSE, 
                        transform=NA, 
-                       rmOutlier=FALSE, 
+                       rmOutlier=0, 
                        n_random=1, 
                        statsMethod="wilcox.test", 
                        nc=5)

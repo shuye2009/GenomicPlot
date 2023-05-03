@@ -19,7 +19,7 @@ plot_start_end_with_random(
   stranded = TRUE,
   scale = FALSE,
   smooth = FALSE,
-  rmOutlier = FALSE,
+  rmOutlier = 0,
   outPrefix = NULL,
   transform = NA,
   shade = TRUE,
@@ -57,7 +57,7 @@ plot_start_end_with_random(
 
 \item{smooth}{logical, indicating whether the line should smoothed with a spline smoothing algorithm}
 
-\item{rmOutlier}{logical, indicating whether a row with abnormally high values in the score matrix should be removed}
+\item{rmOutlier}{a numeric value serving as a multiplier of the MAD in Hampel filter for outliers identification, 0 indicating not removing outliers. For Gaussian distribution, use 3, adjust based on data distribution}
 
 \item{outPrefix}{a string specifying output file prefix for plots (outPrefix.pdf)}
 

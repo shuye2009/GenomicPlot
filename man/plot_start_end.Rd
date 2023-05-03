@@ -18,7 +18,7 @@ plot_start_end(
   stranded = TRUE,
   scale = FALSE,
   smooth = FALSE,
-  rmOutlier = FALSE,
+  rmOutlier = 0,
   outPrefix = NULL,
   transform = NA,
   shade = TRUE,
@@ -54,7 +54,7 @@ plot_start_end(
 
 \item{smooth}{logical, indicating whether the line should smoothed with a spline smoothing algorithm}
 
-\item{rmOutlier}{logical, indicating whether a row with abnormally high values in the score matrix should be removed}
+\item{rmOutlier}{a numeric value serving as a multiplier of the MAD in Hampel filter for outliers identification, 0 indicating not removing outliers. For Gaussian distribution, use 3, adjust based on data distribution}
 
 \item{outPrefix}{a string specifying output file prefix for plots (outPrefix.pdf)}
 
@@ -95,7 +95,7 @@ useScore=FALSE, outRle=TRUE, useSizeFactor=TRUE, genome="hg19")
 df <- plot_start_end(queryFiles=queryfiles, inputFiles=inputfiles, 
 centerFiles=c("gene", centerfiles), txdb=txdb, handleInputParams=handleInputParams, binSize=10,
 insert=100, verbose=TRUE, ext=c(-500, 100, -100, 500), hl=c(-50, 50, -50, 50), stranded=TRUE,
-scale=FALSE, smooth=TRUE, rmOutlier=FALSE, outPrefix=NULL, transform=NA, shade=TRUE, 
+scale=FALSE, smooth=TRUE, rmOutlier=0, outPrefix=NULL, transform=NA, shade=TRUE, 
 Ylab="Coverage/base/gene", nc=2)
  
 }

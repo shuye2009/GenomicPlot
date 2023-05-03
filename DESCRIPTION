@@ -1,7 +1,7 @@
 Package: GenomicPlot
 Type: Package
 Title: Plot profiles of next generation sequencing data in genomic features
-Version: 0.1.3
+Version: 0.1.4
 Authors@R: person("Shuye", "Pu", email = "shuye2009@gmail.com", role = c("aut", "cre"), comment = c(ORCID = "0000-0002-6664-8438"))
 Description: Visualization of next generation sequencing (NGS) data is essential for interpreting
    high-throughput genomics experiment results. 'GenomicPlot' facilitates plotting of NGS data in

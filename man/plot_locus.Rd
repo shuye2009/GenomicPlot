@@ -23,7 +23,7 @@ plot_locus(
   heatmap = TRUE,
   scale = FALSE,
   outPrefix = NULL,
-  rmOutlier = FALSE,
+  rmOutlier = 0,
   transform = NA,
   statsMethod = "wilcox.test",
   heatRange = NULL,
@@ -68,7 +68,7 @@ plot_locus(
 
 \item{outPrefix}{a string specifying output file prefix for plots (outPrefix.pdf)}
 
-\item{rmOutlier}{logical, indicating whether a row with abnormally high values in the score matrix should be removed}
+\item{rmOutlier}{a numeric value serving as a multiplier of the MAD in Hampel filter for outliers identification, 0 indicating not removing outliers. For Gaussian distribution, use 3, adjust based on data distribution.}
 
 \item{transform}{a string in c("log", "log2", "log10"), default = NA indicating no transformation of data matrix}
 
@@ -108,7 +108,7 @@ df <- plot_locus(queryFiles=queryfiles, centerFiles=c(centerfiles, "exon"), txdb
 ext=c(-200,200), hl=c(-50, 50), shade=TRUE, smooth=FALSE, handleInputParams=handleInputParams, 
 verbose=TRUE, binSize=10, refPoint="center", Xlab="Center", Ylab="Coverage/base/gene", 
 inputFiles=inputfiles, stranded=TRUE, heatmap=TRUE, scale=FALSE, outPrefix=NULL, 
-rmOutlier=FALSE, transform=NA, statsMethod="wilcox.test", heatRange=NULL, nc=2)
+rmOutlier=0, transform="log2", statsMethod="wilcox.test", heatRange=NULL, nc=2)
 
 }
 \author{
