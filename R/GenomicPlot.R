@@ -19,7 +19,7 @@
 #' @param scale logical, indicating whether the score matrix should be scaled to the range 0:1, so that samples with different baseline can be compared
 #' @param shade logical indicating whether to place a shaded rectangle around the point of interest
 #' @param smooth logical, indicating whether the line should smoothed with a spline smoothing algorithm
-#' @param rmOutlier logical, indicating whether a row with abnormally high values in the score matrix should be removed
+#' @param rmOutlier a numeric value serving as a multiplier of the MAD in Hampel filter for outliers identification, 0 indicating not removing outliers. For Gaussian distribution, use 3, adjust based on data distribution
 #' @param transform a string in c("log", "log2", "log10"), default = NA indicating no transformation of data matrix
 #' @param Ylab a string for y-axis label
 #' @param outPrefix a string specifying output file prefix for plots (outPrefix.pdf)
@@ -68,7 +68,7 @@ plot_start_end_with_random <- function(queryFiles,
                                        stranded=TRUE, 
                                        scale=FALSE, 
                                        smooth=FALSE, 
-                                       rmOutlier=FALSE, 
+                                       rmOutlier=0, 
                                        outPrefix=NULL, 
                                        transform=NA, 
                                        shade=TRUE, 
@@ -173,13 +173,22 @@ plot_start_end_with_random <- function(queryFiles,
 
      # fullMatrix1 <- parallel_scoreMatrixBin(queryRegions, windowR, bin_num, bin_op, weight_col, stranded)
       fullMatrix <- parallel_scoreMatrixBin(queryRegions, windowR, bin_num, bin_op, weight_col, stranded, nc=nc)
-      fullMatrix <- process_scoreMatrix(fullMatrix, scale, rmOutlier, transform=transform, verbose=verbose)
+      if(is.null(inputFiles)){
+         fullMatrix <- process_scoreMatrix(fullMatrix, scale, rmOutlier, transform=transform, verbose=verbose)
+      }else{
+         fullMatrix <- process_scoreMatrix(fullMatrix, scale=FALSE, rmOutlier=rmOutlier, transform=NA, verbose=verbose)
+      }
+      
       scoreMatrix_list[[queryLabel]][[locus]] <- fullMatrix
 
       if(randomize){
        # rfullMatrix1 <- parallel_scoreMatrixBin(queryRegions, rwindowR, bin_num, bin_op, weight_col, stranded)
         rfullMatrix <- parallel_scoreMatrixBin(queryRegions, rwindowR, bin_num, bin_op, weight_col, stranded, nc=nc)
-        rfullMatrix <- process_scoreMatrix(rfullMatrix, scale, rmOutlier, transform=transform, verbose=verbose)
+        if(is.null(inputFiles)){
+           rfullMatrix <- process_scoreMatrix(rfullMatrix, scale, rmOutlier, transform=transform, verbose=verbose)
+        }else{
+           rfullMatrix <- process_scoreMatrix(rfullMatrix, scale=FALSE, rmOutlier=rmOutlier, transform=NA, verbose=verbose)
+        }
         scoreMatrix_list_random[[queryLabel]][[locus]] <- rfullMatrix
       }
     }
@@ -248,7 +257,7 @@ plot_start_end_with_random <- function(queryFiles,
   }
 
   ## plot individual bed line for one feature
- Ylab <- ifelse(is.na(transform), Ylab, paste0(transform, " (", Ylab, ")"))
+ Ylab <- ifelse(!is.na(transform)&&is.null(inputFiles), paste0(transform, " (", Ylab, ")"), Ylab)
   for (query in unique(plot_df$Query)){
      aplot_df <- plot_df %>%
         filter(Query == query)
@@ -297,11 +306,9 @@ plot_start_end_with_random <- function(queryFiles,
         im <- inputMatrix_list[[inputLabels[i]]][[locus]]
         minrow <- min(nrow(rm), nrow(im))
    
-        if(is.na(transform)){
-           fullMatrix <- rm[1:minrow,]/im[1:minrow,]   
-        }else{
-           fullMatrix <- rm[1:minrow,] - im[1:minrow,]
-        }
+        fullMatrix <- ratio_over_input(rm[1:minrow,], im[1:minrow,], verbose)
+       
+        fullMatrix <- process_scoreMatrix(fullMatrix, scale, rmOutlier, transform=transform, verbose=verbose)
         
         ratioMatrix_list[[ratiolabels[i]]][[locus]] <- fullMatrix
 
@@ -311,12 +318,10 @@ plot_start_end_with_random <- function(queryFiles,
           imr <- inputMatrix_list_random[[inputLabels[i]]][[locus]]
           minrowr <- min(nrow(rmr), nrow(imr))
 
-          if(is.na(transform)){
-             fullMatrix <- rmr[1:minrowr,]/imr[1:minrowr,]   
-          }else{
-             fullMatrix <- rmr[1:minrowr,] - imr[1:minrowr,]
-          }
+          fullMatrix <- ratio_over_input(rmr[1:minrowr,], imr[1:minrowr,], verbose) 
           
+          fullMatrix <- process_scoreMatrix(fullMatrix, scale, rmOutlier, transform=transform, verbose=verbose)
+         
           ratioMatrix_list_random[[ratiolabels[i]]][[locus]] <- fullMatrix
         }
       }
@@ -437,7 +442,7 @@ plot_start_end_with_random <- function(queryFiles,
 #' @param stranded logical, indicating whether the strand of the feature should be considered
 #' @param scale logical, indicating whether the score matrix should be scaled to the range 0:1, so that samples with different baseline can be compared
 #' @param smooth logical, indicating whether the line should smoothed with a spline smoothing algorithm
-#' @param rmOutlier logical, indicating whether a row with abnormally high values in the score matrix should be removed
+#' @param rmOutlier a numeric value serving as a multiplier of the MAD in Hampel filter for outliers identification, 0 indicating not removing outliers. For Gaussian distribution, use 3, adjust based on data distribution
 #' @param outPrefix a string specifying output file prefix for plots (outPrefix.pdf)
 #' @param transform a string in c("log", "log2", "log10"), default = NA, indicating no transformation of data matrix
 #' @param verbose logical, whether to output additional information (including data used for plotting or statistical test results)
@@ -467,7 +472,7 @@ plot_start_end_with_random <- function(queryFiles,
 #' df <- plot_start_end(queryFiles=queryfiles, inputFiles=inputfiles, 
 #' centerFiles=c("gene", centerfiles), txdb=txdb, handleInputParams=handleInputParams, binSize=10,
 #' insert=100, verbose=TRUE, ext=c(-500, 100, -100, 500), hl=c(-50, 50, -50, 50), stranded=TRUE,
-#' scale=FALSE, smooth=TRUE, rmOutlier=FALSE, outPrefix=NULL, transform=NA, shade=TRUE, 
+#' scale=FALSE, smooth=TRUE, rmOutlier=0, outPrefix=NULL, transform=NA, shade=TRUE, 
 #' Ylab="Coverage/base/gene", nc=2)
 #'  
 #' @export plot_start_end
@@ -486,7 +491,7 @@ plot_start_end <- function(queryFiles,
                            stranded=TRUE, 
                            scale=FALSE, 
                            smooth=FALSE, 
-                           rmOutlier=FALSE, 
+                           rmOutlier=0, 
                            outPrefix=NULL, 
                            transform=NA, 
                            shade=TRUE, 
@@ -598,7 +603,11 @@ plot_start_end <- function(queryFiles,
             weight_col <- queryInputs[[queryLabel]]$weight
 
             fullMatrix <- parallel_scoreMatrixBin(queryRegions, windowR, bin_num, bin_op, weight_col, stranded, nc=nc)
-            fullMatrix <- process_scoreMatrix(fullMatrix, scale, rmOutlier, transform=transform, verbose=verbose)
+            if(is.null(inputFiles)){
+               fullMatrix <- process_scoreMatrix(fullMatrix, scale, rmOutlier, transform=transform, verbose=verbose)
+            }else{
+               fullMatrix <- process_scoreMatrix(fullMatrix, scale=FALSE, rmOutlier=rmOutlier, transform=NA, verbose=verbose)
+            }
 
             scoreMatrix_list[[queryLabel]][[locus]] <- fullMatrix
             
@@ -649,7 +658,7 @@ plot_start_end <- function(queryFiles,
       }
    }
 
-   Ylab <- ifelse(is.na(transform), Ylab, paste0(transform, " (", Ylab, ")"))
+   Ylab <- ifelse(!is.na(transform)&&is.null(inputFiles), paste0(transform, " (", Ylab, ")"), Ylab)
    ## plot multi feature lines for one query
    for (query in unique(plot_df$Query)){
 
@@ -696,13 +705,8 @@ plot_start_end <- function(queryFiles,
                im <- inputMatrix_list[[inputLabels[i]]][[locus]]
                minrow <- min(nrow(rm), nrow(im))
                
-               if(is.na(transform)){
-                  fullMatrix <- rm[1:minrow,]/im[1:minrow,]   
-               }else{
-                  fullMatrix <- rm[1:minrow,] - im[1:minrow,]
-               }
-               
-               #fullMatrix <- process_scoreMatrix(fullMatrix, scale=FALSE, rmOutlier, transform=transform, verbose=verbose)
+               fullMatrix <- ratio_over_input(rm[1:minrow,], im[1:minrow,], verbose)   
+               fullMatrix <- process_scoreMatrix(fullMatrix, scale, rmOutlier, transform, verbose=verbose)
 
                ratioMatrix_list[[ratiolabels[i]]][[locus]] <- fullMatrix
             }
@@ -794,7 +798,7 @@ plot_start_end <- function(queryFiles,
 #' @param smooth logical, indicating whether the line should smoothed with a spline smoothing algorithm
 #' @param heatmap logical, indicating whether a heatmap of the score matrix should be generated
 #' @param heatRange a numerical vector of two elements, defining range for heatmap color ramp generation
-#' @param rmOutlier logical, indicating whether a row with abnormally high values in the score matrix should be removed
+#' @param rmOutlier a numeric value serving as a multiplier of the MAD in Hampel filter for outliers identification, 0 indicating not removing outliers. For Gaussian distribution, use 3, adjust based on data distribution
 #' @param outPrefix a string specifying output file prefix for plots (outPrefix.pdf)
 #' @param transform a string in c("log", "log2", "log10"), default = NA indicating no transformation of data matrix
 #' @param Ylab a string for y-axis label
@@ -818,15 +822,15 @@ plot_start_end <- function(queryFiles,
 #' gfeatures <- prepare_3parts_genomic_features(txdb, featureName="transcript", meta=TRUE, 
 #' nbins=100, fiveP=-1000, threeP=1000, longest=TRUE, protein_coding=TRUE, verbose=FALSE)
 #' 
-#' handleInputParams <- list(offset=0, fix_width=150, fix_point="start", norm=FALSE,
-#' useScore=FALSE, outRle=TRUE, useSizeFactor=TRUE, genome="hg19")
+#' handleInputParams <- list(offset=0, fix_width=150, fix_point="start", norm=TRUE,
+#' useScore=FALSE, outRle=TRUE, useSizeFactor=FALSE, genome="hg19")
 #'  
 #' df <- plot_3parts_metagene(queryFiles=queryfiles, gFeatures=gfeatures, inputFiles
 #'                            =inputfiles, scale=FALSE, verbose=TRUE, 
 #'                            Ylab="Coverage/base/gene", handleInputParams
 #'                            =handleInputParams, smooth=TRUE, stranded=TRUE, 
-#'                            outPrefix=NULL, heatmap=TRUE, rmOutlier=FALSE, heatRange=NULL,
-#'                            transform=NA, nc=2)
+#'                            outPrefix=NULL, heatmap=TRUE, rmOutlier=0, heatRange=NULL,
+#'                            transform="log2", nc=2)
 #'
 #' @export plot_3parts_metagene
 
@@ -842,7 +846,7 @@ plot_3parts_metagene <- function(queryFiles,
                                  stranded=TRUE, 
                                  outPrefix=NULL, 
                                  heatmap=FALSE, 
-                                 rmOutlier=FALSE, 
+                                 rmOutlier=0, 
                                  heatRange=NULL, 
                                  transform=NA,
                                  hw=c(8,8),
@@ -916,7 +920,7 @@ plot_3parts_metagene <- function(queryFiles,
   vx <- c(1, cumsum(scaled_bins[1:(length(scaled_bins)-1)])+1) ## x axis points for vlines that demarcate the genomic features
   names(vx) <- featureNames
 
-  Ylab <- ifelse(is.na(transform), Ylab, paste0(transform, " (", Ylab, ")"))
+  Ylab <- ifelse(!is.na(transform)&&is.null(inputFiles), paste0(transform, " (", Ylab, ")"), Ylab)
 
   if(heatmap) heatmap_list <- list()
 
@@ -932,7 +936,11 @@ plot_3parts_metagene <- function(queryFiles,
             as genomation will remvove all feature windows outside chromosome boundaries")
     }else{
        featureMatrix <- as.matrix(bind_cols(scoreMatrix_list[[queryLabel]]))
-       featureMatrix <- process_scoreMatrix(featureMatrix, scale=scale, rmOutlier=rmOutlier, transform=transform, verbose=verbose)
+       if(is.null(inputFiles)){
+          fullMatrix <- process_scoreMatrix(fullMatrix, scale, rmOutlier, transform=transform, verbose=verbose)
+       }else{
+          fullMatrix <- process_scoreMatrix(fullMatrix, scale=FALSE, rmOutlier=rmOutlier, transform=NA, verbose=verbose)
+       }
        processed_matrix[[queryLabel]] <- featureMatrix
        
        colm <- apply(featureMatrix, 2, mean)
@@ -1013,11 +1021,9 @@ plot_3parts_metagene <- function(queryFiles,
     ratioMatrix_list <- processed_matrix[ratiolabels]
     
    for(i in seq_along(ratiolabels)){
-      if(is.na(transform)){
-         fullMatrix <- ratioMatrix_list[[ratiolabels[i]]]/inputMatrix_list[[inputLabels[i]]]
-      }else{
-         fullMatrix <- ratioMatrix_list[[ratiolabels[i]]] - inputMatrix_list[[inputLabels[i]]]
-      }
+      
+     fullMatrix <- ratio_over_input(ratioMatrix_list[[ratiolabels[i]]], inputMatrix_list[[inputLabels[i]]], verbose)
+     fullMatrix <- process_scoreMatrix(fullMatrix, scale, rmOutlier, transform, verbose)
      
      ratioMatrix_list[[ratiolabels[i]]] <- fullMatrix
    }
@@ -1027,39 +1033,32 @@ plot_3parts_metagene <- function(queryFiles,
     mplot_df_ratio <- NULL
     for(ratiolabel in ratiolabels){
       plot_df <- NULL
-      dims <- vapply(ratioMatrix_list[[ratiolabel]], dim, numeric(2))
-
-      if(any(dims[1,] != dims[1,1])){
-         message(paste(dims[1,], collapse = " "))
-         stop("Number of genes are not equal among features, make sure all feature windows are within chromosome lengths of query regions,
-            as genomation will remvove all feature windows outside chromosome boundaries")
-      }else{
-         featureMatrix <- ratioMatrix_list[[ratiolabel]]
-         
-         colm <- apply(featureMatrix, 2, mean)
-         colsd <- apply(featureMatrix, 2, sd)
-         colse <- colsd/sqrt(nrow(featureMatrix))
-         querybed <- rep(ratiolabel, ncol(featureMatrix))
-         collabel <- list()
-         featuretype <- list()
-         for(w in featureNames){
-            if(verbose) print(w)
-            if(scaled_bins[w] > 0){
-               bin_num <- scaled_bins[w]
-               collabel[[w]] <- seq(vx[w], vx[w]+bin_num-1)
-               featuretype[[w]] <- rep(w, bin_num)
-            }
+      
+      featureMatrix <- ratioMatrix_list[[ratiolabel]]
+      
+      colm <- apply(featureMatrix, 2, mean)
+      colsd <- apply(featureMatrix, 2, sd)
+      colse <- colsd/sqrt(nrow(featureMatrix))
+      querybed <- rep(ratiolabel, ncol(featureMatrix))
+      collabel <- list()
+      featuretype <- list()
+      for(w in featureNames){
+         if(verbose) print(w)
+         if(scaled_bins[w] > 0){
+            bin_num <- scaled_bins[w]
+            collabel[[w]] <- seq(vx[w], vx[w]+bin_num-1)
+            featuretype[[w]] <- rep(w, bin_num)
          }
-         collabel <- unlist(collabel)
-         featuretype <- unlist(featuretype)
-         names(collabel) <- featuretype
-
-         if(heatmap){
-            dataname <- paste(Ylabr, ratiolabel, "gene", sep=":")
-            heatmap_list_ratio[dataname] <- draw_matrix_heatmap(featureMatrix, dataName=dataname, labels_col=collabel, levels_col=featureNames, ranges=heatRange, verbose=verbose)
-         }
-         plot_df <- data.frame("Intensity"=colm, "sd"=colsd, "se"=colse, "Position"=collabel, "Query"=querybed, "Feature"=featuretype)
       }
+      collabel <- unlist(collabel)
+      featuretype <- unlist(featuretype)
+      names(collabel) <- featuretype
+
+      if(heatmap){
+         dataname <- paste(Ylabr, ratiolabel, "gene", sep=":")
+         heatmap_list_ratio[dataname] <- draw_matrix_heatmap(featureMatrix, dataName=dataname, labels_col=collabel, levels_col=featureNames, ranges=heatRange, verbose=verbose)
+      }
+      plot_df <- data.frame("Intensity"=colm, "sd"=colsd, "se"=colse, "Position"=collabel, "Query"=querybed, "Feature"=featuretype)
 
       if(smooth){
         plot_df$Intensity <- as.vector(smooth.spline(plot_df$Intensity, df=as.integer(nbins/5))$y)
@@ -1124,7 +1123,7 @@ plot_3parts_metagene <- function(queryFiles,
 #' @param smooth logical, indicating whether the line should smoothed with a spline smoothing algorithm
 #' @param heatmap logical, indicating whether a heatmap of the score matrix should be generated
 #' @param heatRange a numerical vector of two elements, defining range for heatmap color ramp generation
-#' @param rmOutlier logical, indicating whether a row with abnormally high values in the score matrix should be removed
+#' @param rmOutlier a numeric value serving as a multiplier of the MAD in Hampel filter for outliers identification, 0 indicating not removing outliers. For Gaussian distribution, use 3, adjust based on data distribution
 #' @param handleInputParams a list of parameters for \code{handle_input}
 #' @param outPrefix a string specifying output file prefix for plots (outPrefix.pdf)
 #' @param regionName a string specifying the name of the center region in the plots
@@ -1140,20 +1139,20 @@ plot_3parts_metagene <- function(queryFiles,
 #'
 #' @examples
 #' txdb <- AnnotationDbi::loadDb(system.file("extdata", "txdb_chr19.sql", package="GenomicPlot"))
-#' queryfiles <- system.file("extdata", "treat_chr19.bam", package="GenomicPlot")
+#' queryfiles <- system.file("extdata", "chip_treat_chr19.bam", package="GenomicPlot")
 #' names(queryfiles) <- "query"
-#' inputfiles <- system.file("extdata", "input_chr19.bam", package="GenomicPlot")
+#' inputfiles <- system.file("extdata", "chip_input_chr19.bam", package="GenomicPlot")
 #' names(inputfiles) <- "input"
 #' centerfiles <- system.file("extdata", "test_chip_peak_chr19.narrowPeak", package="GenomicPlot")
 #' names(centerfiles) <- "narrowPeak"
 #' op <- NULL
-#' handleInputParams <- list(offset=0, fix_width=150, fix_point="start", norm=FALSE,
+#' handleInputParams <- list(offset=0, fix_width=150, fix_point="start", norm=TRUE,
 #' useScore=FALSE, outRle=TRUE, useSizeFactor=TRUE, genome="hg19")
 #'  
 #' plot_region(queryFiles=queryfiles, centerFiles=centerfiles, txdb=NULL, regionName="region", 
 #' inputFiles=inputfiles, nbins=100, handleInputParams=handleInputParams, verbose=TRUE, 
-#' scale=FALSE, heatmap=TRUE, fiveP=-1000, threeP=1000, smooth=TRUE, stranded=TRUE, transform=NA,
-#' outPrefix=NULL, rmOutlier=FALSE, heatRange=NULL, Ylab="Coverage/base/gene", 
+#' scale=FALSE, heatmap=TRUE, fiveP=-1000, threeP=1000, smooth=TRUE, stranded=TRUE, transform="log2",
+#' outPrefix=NULL, rmOutlier=0, heatRange=NULL, Ylab="Coverage/base/gene", 
 #' statsMethod="wilcox.test", nc=2)
 #'
 #' @export plot_region
@@ -1174,7 +1173,7 @@ plot_region <- function(queryFiles,
                         stranded=TRUE, 
                         transform=NA, 
                         outPrefix=NULL, 
-                        rmOutlier=FALSE, 
+                        rmOutlier=0, 
                         heatRange=NULL, 
                         Ylab="Coverage/base/gene", 
                         statsMethod="wilcox.test", 
@@ -1335,7 +1334,7 @@ plot_region <- function(queryFiles,
   names(vx) <- featureNames
   
   if(heatmap)heatmap_list <- list()
-  Ylab <- ifelse(is.na(transform), Ylab, paste0(transform, " (", Ylab, ")"))
+  Ylab <- ifelse(!is.na(transform)&&is.null(inputFiles), paste0(transform, " (", Ylab, ")"), Ylab)
 
   processed_matrix <- list()
   processed_region_matrix <- list()
@@ -1355,7 +1354,11 @@ plot_region <- function(queryFiles,
       }else{
          featureMatrix <- as.matrix(bind_cols(scoreMatrix_list[[queryLabel]][[centerLabel]]))
          rownames(featureMatrix) <- rownames(scoreMatrix_list[[queryLabel]][[centerLabel]][[1]])
-         featureMatrix <- process_scoreMatrix(featureMatrix, scale=scale, rmOutlier=rmOutlier, transform=transform, verbose=verbose)
+         if(is.null(inputFiles)){
+            featureMatrix <- process_scoreMatrix(featureMatrix, scale, rmOutlier, transform=transform, verbose=verbose)
+         }else{
+            featureMatrix <- process_scoreMatrix(featureMatrix, scale=FALSE, rmOutlier=rmOutlier, transform=NA, verbose=verbose)
+         }
          processed_matrix[[queryLabel]][[centerLabel]] <- featureMatrix
          
          colm <- apply(featureMatrix, 2, mean)
@@ -1363,22 +1366,21 @@ plot_region <- function(queryFiles,
          colse <- colsd/sqrt(nrow(featureMatrix))
          querybed <- rep(queryLabel, ncol(featureMatrix))
          centerbed <- rep(centerLabel, ncol(featureMatrix))
-         collabel <- list()
+         collabel_list <- list()
          featuretype <- list()
          for(w in featureNames){
             if(verbose) print(paste("featureName", w))
             if(scaled_bins[w] > 0){
                bin_num <- scaled_bins[w]
-               collabel[[w]] <- seq(vx[w], vx[w]+bin_num-1)
+               collabel_list[[w]] <- seq(vx[w], vx[w]+bin_num-1)
                featuretype[[w]] <- rep(w, bin_num)
             }
          }
-         collabel <- unlist(collabel)
+         collabel <- unlist(collabel_list)
          featuretype <- unlist(featuretype)
          names(collabel) <- featuretype
 
          if(heatmap){
-           
             dataname <- paste(Ylab, queryLabel, centerLabel, sep=":")
             heatmap_list[dataname] <- draw_matrix_heatmap(featureMatrix, dataName=dataname, labels_col=collabel, levels_col=names(scaled_bins[scaled_bins>0]), ranges=heatRange, verbose=verbose)
          }
@@ -1393,8 +1395,7 @@ plot_region <- function(queryFiles,
 
       mplot_df[[paste(queryLabel,centerLabel,sep=":")]] <- plot_df
       
-      regionMatrix <- as.matrix(scoreMatrix_list[[queryLabel]][[centerLabel]][[regionName]])
-      regionMatrix <- process_scoreMatrix(regionMatrix, scale=scale, rmOutlier=rmOutlier, transform=transform, verbose=verbose)
+      regionMatrix <- featureMatrix[, collabel_list[[regionName]]]
       processed_region_matrix[[queryLabel]][[centerLabel]] <- regionMatrix
       
       Intensity <- as.numeric(rowMeans(regionMatrix))
@@ -1447,31 +1448,17 @@ plot_region <- function(queryFiles,
                 outp <- plot_grid(p, marker, ncol = 1, align = 'v', axis="lr", rel_heights = c(10,1))
                 
                 comp <- combn(seq_along(centers),2, simplify=FALSE)
-                
-                ps1 <- draw_boxplot_by_factor(stat_df=astat_df, xc="Reference", yc="Intensity",  comp=comp, stats=statsMethod, Ylab=Ylab)
-                
-                ps1_wo_outlier <- draw_boxplot_wo_outlier(stat_df=astat_df, xc="Reference", yc="Intensity", comp=comp, stats=statsMethod, Ylab=Ylab)
-                ps1_mean_se <- draw_mean_se_barplot(stat_df=astat_df, xc="Reference", yc="Intensity", comp=comp, Ylab=Ylab)
-                prank <- draw_quantile_plot(stat_df=astat_df, xc="Reference", yc="Intensity", Ylab=Ylab)
+                combo <- draw_combo_plot(stat_df=astat_df, xc="Reference", yc="Intensity", comp=comp, stats=statsMethod, Ylab=Ylab)
              }else{
                 p <- draw_region_profile(plot_df=aplot_df, cn="Query", sn="Reference", vx=vx, Ylab=Ylab)
                 outp <- plot_grid(p, marker, ncol = 1, align = 'v', axis="lr", rel_heights = c(10,1))
                 comp <- combn(seq_along(beds),2, simplify=FALSE)
                 
-                ps1 <- draw_boxplot_by_factor(stat_df=astat_df, xc="Query", yc="Intensity", comp=comp, stats=statsMethod, Ylab=Ylab)
-                
-                ps1_wo_outlier <- draw_boxplot_wo_outlier(stat_df=astat_df, xc="Query", yc="Intensity", comp=comp, stats=statsMethod, Ylab=Ylab)
-                ps1_mean_se <- draw_mean_se_barplot(stat_df=astat_df, xc="Query", yc="Intensity", Ylab=Ylab, comp=comp)
-                prank <- draw_quantile_plot(stat_df=astat_df, xc="Query", yc="Intensity", Ylab=Ylab)
+                combo <- draw_combo_plot(stat_df=astat_df, xc="Query", yc="Intensity", comp=comp, stats=statsMethod, Ylab=Ylab)
              }
+            
+            lapply(list(outp, combo), print)
              
-             if(max(i,j)>3){
-                lapply(list(outp, ps1_mean_se, prank, ps1, ps1_wo_outlier), print)
-             }else{
-                comp1 <- plot_grid(outp, ps1_mean_se, ncol = 2, rel_widths = c(1,1))
-                comp2 <- plot_grid(prank, ps1, ps1_wo_outlier, ncol = 3, align='h', axis='b', rel_widths = c(1,1,1))
-                print(plot_grid(comp1, comp2, ncol=1, rel_heights=c(1,1)))
-             }
           }else if(i == 1 && j == 1){
              plot_list[[paste(Ylab, beds,centers,sep=":")]] <- outp
           }else if(i == length(queryLabels) && j == length(centerLabels)){
@@ -1511,11 +1498,8 @@ plot_region <- function(queryFiles,
          im <- inputMatrix_list[[inputLabels[i]]][[centerLabel]]
          commonrow <- intersect(rownames(rm), rownames(im))
          
-         if(is.na(transform)){
-            fullMatrix <- rm[commonrow,]/im[commonrow,]   
-         }else{
-            fullMatrix <- rm[commonrow,] - im[commonrow,]
-         }
+         fullMatrix <- ratio_over_input(rm[commonrow,], im[commonrow,], verbose)
+         fullMatrix <- process_scoreMatrix(fullMatrix, scale, rmOutlier, transform=transform, verbose=verbose)
          
          ratioMatrix_list[[ratiolabels[i]]][[centerLabel]] <- fullMatrix
       }
@@ -1549,42 +1533,34 @@ plot_region <- function(queryFiles,
         
         if(verbose) print(paste("centerlabel", centerLabel))
         plot_df <- NULL
-        dims <- vapply(ratioMatrix_list[[ratiolabel]][[centerLabel]], dim, numeric(2))
-
-        if(any(dims[1,] != dims[1,1])){
-           message(paste(dims[1,], collapse = " "))
-           stop("Number of genes are not equal among features, make sure all feature windows are within chromosome lengths of query regions,
-            as genomation will remvove all feature windows outside chromosome boundaries")
-        }else{
-           featureMatrix <- ratioMatrix_list[[ratiolabel]][[centerLabel]]
-           
-           colm <- apply(featureMatrix, 2, mean)
-           colsd <- apply(featureMatrix, 2, sd)
-           colse <- colsd/sqrt(nrow(featureMatrix))
-           ratiobed <- rep(ratiolabel, ncol(featureMatrix))
-           centerbed <- rep(centerLabel, ncol(featureMatrix))
-           collabel <- list()
-           featuretype <- list()
-           for(w in featureNames){
-              if(verbose) print(w)
-              if(scaled_bins[w] > 0){
-                 bin_num <- scaled_bins[w]
-                 collabel[[w]] <- seq(vx[w], vx[w]+bin_num-1)
-                 featuretype[[w]] <- rep(w, bin_num)
-              }
+        
+        featureMatrix <- ratioMatrix_list[[ratiolabel]][[centerLabel]]
+        
+        colm <- apply(featureMatrix, 2, mean)
+        colsd <- apply(featureMatrix, 2, sd)
+        colse <- colsd/sqrt(nrow(featureMatrix))
+        ratiobed <- rep(ratiolabel, ncol(featureMatrix))
+        centerbed <- rep(centerLabel, ncol(featureMatrix))
+        collabel <- list()
+        featuretype <- list()
+        for(w in featureNames){
+           if(verbose) print(w)
+           if(scaled_bins[w] > 0){
+              bin_num <- scaled_bins[w]
+              collabel[[w]] <- seq(vx[w], vx[w]+bin_num-1)
+              featuretype[[w]] <- rep(w, bin_num)
            }
-           collabel <- unlist(collabel)
-           featuretype <- unlist(featuretype)
-           names(collabel) <- featuretype
-
-           if(heatmap){
-              dataname <- paste(Ylab, ratiolabel, centerLabel, sep=":")
-              heatmap_list[dataname] <- draw_matrix_heatmap(featureMatrix, dataName=dataname, labels_col=collabel, levels_col=names(scaled_bins[scaled_bins>0]), ranges=heatRange, verbose=verbose)
-           }
-           plot_df <- data.frame("Intensity"=colm, "sd"=colsd, "se"=colse, "Position"=collabel, "Query"=ratiobed, "Reference"=centerbed, "Feature"=featuretype)
         }
+        collabel <- unlist(collabel)
+        featuretype <- unlist(featuretype)
+        names(collabel) <- featuretype
 
-
+        if(heatmap){
+           dataname <- paste(Ylab, ratiolabel, centerLabel, sep=":")
+           heatmap_list[dataname] <- draw_matrix_heatmap(featureMatrix, dataName=dataname, labels_col=collabel, levels_col=names(scaled_bins[scaled_bins>0]), ranges=heatRange, verbose=verbose)
+        }
+        plot_df <- data.frame("Intensity"=colm, "sd"=colsd, "se"=colse, "Position"=collabel, "Query"=ratiobed, "Reference"=centerbed, "Feature"=featuretype)
+     
         if(smooth){
           plot_df$Intensity <- as.vector(smooth.spline(plot_df$Intensity, df=as.integer(nbins/5))$y)
           plot_df$se <- as.vector(smooth.spline(plot_df$se, df=as.integer(nbins/5))$y)
@@ -1639,31 +1615,17 @@ plot_region <- function(queryFiles,
                   outp <- plot_grid(p, marker, ncol = 1, align = 'v', axis="lr", rel_heights = c(10,1))
                   
                   comp <- combn(seq_along(centers),2, simplify=FALSE)
-                  
-                  ps1 <- draw_boxplot_by_factor(stat_df=astat_df, xc="Reference", yc="Intensity",  comp=comp, stats=statsMethod, Ylab=Ylab)
-                  
-                  ps1_wo_outlier <- draw_boxplot_wo_outlier(stat_df=astat_df, xc="Reference", yc="Intensity", comp=comp, stats=statsMethod, Ylab=Ylab)
-                  ps1_mean_se <- draw_mean_se_barplot(stat_df=astat_df, xc="Reference", yc="Intensity", comp=comp, Ylab=Ylab)
-                  prank <- draw_quantile_plot(stat_df=astat_df, xc="Reference", yc="Intensity", Ylab=Ylab)
+                  combo <- draw_combo_plot(stat_df=astat_df, xc="Reference", yc="Intensity", comp=comp, stats=statsMethod, Ylab=Ylab)
                }else{
                   p <- draw_region_profile(plot_df=aplot_df, cn="Query", sn="Reference", vx=vx, Ylab=Ylab)
                   outp <- plot_grid(p, marker, ncol = 1, align = 'v', axis="lr", rel_heights = c(10,1))
+                  
                   comp <- combn(seq_along(beds),2, simplify=FALSE)
-                  
-                  ps1 <- draw_boxplot_by_factor(stat_df=astat_df, xc="Query", yc="Intensity", comp=comp, stats=statsMethod, Ylab=Ylab)
-                  
-                  ps1_wo_outlier <- draw_boxplot_wo_outlier(stat_df=astat_df, xc="Query", yc="Intensity", comp=comp, stats=statsMethod, Ylab=Ylab)
-                  ps1_mean_se <- draw_mean_se_barplot(stat_df=astat_df, xc="Query", yc="Intensity", Ylab=Ylab, comp=comp)
-                  prank <- draw_quantile_plot(stat_df=astat_df, xc="Query", yc="Intensity", Ylab=Ylab)
+                  combo <- draw_combo_plot(stat_df=astat_df, xc="Query", yc="Intensity", comp=comp, stats=statsMethod, Ylab=Ylab)
                }
                
-               if(max(i,j)>3){
-                  lapply(list(outp, ps1_mean_se, prank, ps1, ps1_wo_outlier), print)
-               }else{
-                  comp1 <- plot_grid(outp, ps1_mean_se, ncol = 2, rel_widths = c(1,1))
-                  comp2 <- plot_grid(prank, ps1, ps1_wo_outlier, ncol = 3, align='h', axis='b', rel_widths = c(1,1,1))
-                  print(plot_grid(comp1, comp2, ncol=1, rel_heights=c(1,1)))
-               }
+               lapply(list(outp, combo), print)
+               
             }else if(i == 1 && j == 1){
                plot_list[[paste(Ylab, beds,centers,sep=":")]] <- outp
             }else if(i == length(queryLabels) && j == length(centerLabels)){
@@ -1711,7 +1673,7 @@ plot_region <- function(queryFiles,
 #' @param smooth logical, indicating whether the line should smoothed with a spline smoothing algorithm
 #' @param heatmap logical, indicating whether a heatmap of the score matrix should be generated
 #' @param heatRange a numerical vector of two elements, defining range for heatmap color ramp generation
-#' @param rmOutlier logical, indicating whether a row with abnormally high values in the score matrix should be removed
+#' @param rmOutlier a numeric value serving as a multiplier of the MAD in Hampel filter for outliers identification, 0 indicating not removing outliers. For Gaussian distribution, use 3, adjust based on data distribution
 #' @param transform logical, whether to log2 transform the matrix
 #' @param outPrefix a string specifying output file prefix for plots (outPrefix.pdf)
 #' @param verbose logical, indicating whether to output additional information (data used for plotting or statistical test results)
@@ -1734,13 +1696,13 @@ plot_region <- function(queryFiles,
 #' gfeatures <- prepare_5parts_genomic_features(txdb, meta=TRUE, nbins=100, fiveP=-1000, 
 #' threeP=1000, longest=TRUE, verbose=FALSE)
 #' 
-#' handleInputParams <- list(offset=0, fix_width=150, fix_point="start", norm=FALSE,
-#' useScore=FALSE, outRle=TRUE, useSizeFactor=TRUE, genome="hg19")
+#' handleInputParams <- list(offset=0, fix_width=150, fix_point="start", norm=TRUE,
+#' useScore=FALSE, outRle=TRUE, useSizeFactor=FALSE, genome="hg19")
 #'    
 #' df <- plot_5parts_metagene(queryFiles=queryfiles, gFeatures=list("metagene"=gfeatures), 
 #' inputFiles=inputfiles, scale=FALSE, verbose=TRUE, Ylab="Coverage/base/gene", 
 #' handleInputParams=handleInputParams, smooth=TRUE,  stranded=TRUE, outPrefix=NULL, heatmap=TRUE,
-#'  rmOutlier=FALSE, heatRange=NULL, transform=NA, nc=2)
+#' rmOutlier=0, heatRange=NULL, transform="log2", nc=2)
 #'                
 #' @export plot_5parts_metagene
 #'
@@ -1757,7 +1719,7 @@ plot_5parts_metagene <- function(queryFiles,
                                  outPrefix=NULL, 
                                  heatmap=FALSE, 
                                  heatRange=NULL, 
-                                 rmOutlier=FALSE,
+                                 rmOutlier=0,
                                  Ylab="Coverage/base/gene", 
                                  hw=c(8,8),
                                  nc=2){
@@ -1844,7 +1806,7 @@ plot_5parts_metagene <- function(queryFiles,
    
      processed_matrix <- list()
      mplot_df <- NULL
-     Ylab <- ifelse(is.na(transform), Ylab, paste0(transform, " (", Ylab, ")"))
+     Ylab <- ifelse(!is.na(transform)&&is.null(inputFiles), paste0(transform, " (", Ylab, ")"), Ylab)
    
      for(queryLabel in queryLabels){
        plot_df <- NULL
@@ -1856,7 +1818,11 @@ plot_5parts_metagene <- function(queryFiles,
                as genomation will remvove all feature windows outside chromosome boundaries")
        }else{
           featureMatrix <- as.matrix(bind_cols(scoreMatrix_list[[queryLabel]]))
-          featureMatrix <- process_scoreMatrix(featureMatrix, scale=scale, rmOutlier=rmOutlier, transform=transform, verbose=verbose)
+          if(is.null(inputFiles)){
+             featureMatrix <- process_scoreMatrix(featureMatrix, scale, rmOutlier, transform=transform, verbose=verbose)
+          }else{
+             featureMatrix <- process_scoreMatrix(featureMatrix, scale=FALSE, rmOutlier=rmOutlier, transform=NA, verbose=verbose)
+          }
           processed_matrix[[queryLabel]] <- featureMatrix
           
           colm <- apply(featureMatrix, 2, mean)
@@ -1906,11 +1872,9 @@ plot_5parts_metagene <- function(queryFiles,
        ratioMatrix_list <- processed_matrix[ratiolabels]
   
        for(i in seq_along(ratiolabels)){
-            if(is.na(transform)){
-               fullMatrix <- ratioMatrix_list[[ratiolabels[i]]]/inputMatrix_list[[inputLabels[i]]]
-            }else{
-               fullMatrix <- ratioMatrix_list[[ratiolabels[i]]] - inputMatrix_list[[inputLabels[i]]]
-            }
+            
+           fullMatrix <- ratio_over_input(ratioMatrix_list[[ratiolabels[i]]], inputMatrix_list[[inputLabels[i]]], verbose)
+           fullMatrix <- process_scoreMatrix(fullMatrix, scale, rmOutlier, transform=transform, verbose=verbose)
            
            ratioMatrix_list[[ratiolabels[i]]] <- fullMatrix
        }
@@ -1919,51 +1883,42 @@ plot_5parts_metagene <- function(queryFiles,
        
        for(ratiolabel in ratiolabels){
          plot_df <- NULL
-   
-         dims <- vapply(ratioMatrix_list[[ratiolabel]], dim, numeric(2))
-   
-         if(any(dims[1,] != dims[1,1])){
-            message(paste(dims[1,], collapse = " "))
-            stop("Number of genes are not equal among features, make sure all feature windows are within chromosome lengths of query regions,
-               as genomation will remvove all feature windows outside chromosome boundaries")
-         }else{
-            featureMatrix <- as.matrix(ratioMatrix_list[[ratiolabel]])
+         featureMatrix <- as.matrix(ratioMatrix_list[[ratiolabel]])
             
-            colm <- apply(featureMatrix, 2, mean)
-            colsd <- apply(featureMatrix, 2, sd)
-            colse <- colsd/sqrt(nrow(featureMatrix))
-            querybed <- rep(ratiolabel, ncol(featureMatrix))
-            collabel <- list()
-            featuretype <- list()
-            for(w in featureNames){
-               #if(verbose) print(w)
-               if(scaled_bins[w] > 0){
-                  bin_num <- scaled_bins[w]
-                  collabel[[w]] <- seq(vx[w], vx[w]+bin_num-1)
-                  featuretype[[w]] <- rep(w, bin_num)
-               }
+         colm <- apply(featureMatrix, 2, mean)
+         colsd <- apply(featureMatrix, 2, sd)
+         colse <- colsd/sqrt(nrow(featureMatrix))
+         querybed <- rep(ratiolabel, ncol(featureMatrix))
+         collabel <- list()
+         featuretype <- list()
+         for(w in featureNames){
+            #if(verbose) print(w)
+            if(scaled_bins[w] > 0){
+               bin_num <- scaled_bins[w]
+               collabel[[w]] <- seq(vx[w], vx[w]+bin_num-1)
+               featuretype[[w]] <- rep(w, bin_num)
             }
-            collabel <- unlist(collabel)
-            featuretype <- unlist(featuretype)
-            names(collabel) <- featuretype
-   
-            if(heatmap){
-               dataname <- paste(Ylabr, ratiolabel, aFeature, sep=":")
-               heatmap_list_ratio[[dataname]] <- draw_matrix_heatmap(featureMatrix, dataName=dataname, labels_col=collabel, levels_col=featureNames, ranges=heatRange, verbose=verbose)
-            }
-            plot_df <- data.frame("Intensity"=colm, "sd"=colsd, "se"=colse, "Position"=collabel, "Query"=paste(querybed,aFeature,sep=":"), "Feature"=featuretype)
          }
+         collabel <- unlist(collabel)
+         featuretype <- unlist(featuretype)
+         names(collabel) <- featuretype
+
+         if(heatmap){
+            dataname <- paste(Ylabr, ratiolabel, aFeature, sep=":")
+            heatmap_list_ratio[[dataname]] <- draw_matrix_heatmap(featureMatrix, dataName=dataname, labels_col=collabel, levels_col=featureNames, ranges=heatRange, verbose=verbose)
+         }
+         plot_df <- data.frame("Intensity"=colm, "sd"=colsd, "se"=colse, "Position"=collabel, "Query"=paste(querybed,aFeature,sep=":"), "Feature"=featuretype)
+      
          if(smooth){
            plot_df$Intensity <- as.vector(smooth.spline(plot_df$Intensity, df=as.integer(nbins/5))$y)
            plot_df$se <- as.vector(smooth.spline(plot_df$se, df=as.integer(nbins/5))$y)
          }
    
          mplot_df <- rbind(mplot_df, plot_df)
-       }
+      }  
 
        mplot_df <- mutate(mplot_df, lower=Intensity-se, upper=Intensity+se)
        mplot_dfs_ratio <- rbind(mplot_dfs_ratio, mplot_df)
-       
      }
   }
 
@@ -2069,7 +2024,7 @@ plot_5parts_metagene <- function(queryFiles,
 #' @param smooth logical, indicating whether the line should smoothed with a spline smoothing algorithm
 #' @param heatmap logical, indicating whether a heatmap of the score matrix should be generated
 #' @param heatRange a numerical vector of two elements, defining range for heatmap color ramp generation
-#' @param rmOutlier logical, indicating whether a row with abnormally high values in the score matrix should be removed
+#' @param rmOutlier a numeric value serving as a multiplier of the MAD in Hampel filter for outliers identification, 0 indicating not removing outliers. For Gaussian distribution, use 3, adjust based on data distribution.
 #' @param outPrefix a string specifying output file prefix for plots (outPrefix.pdf)
 #' @param refPoint a string in c("start", "center", "end")
 #' @param Xlab a string denotes the label on x-axis
@@ -2104,7 +2059,7 @@ plot_5parts_metagene <- function(queryFiles,
 #' ext=c(-200,200), hl=c(-50, 50), shade=TRUE, smooth=FALSE, handleInputParams=handleInputParams, 
 #' verbose=TRUE, binSize=10, refPoint="center", Xlab="Center", Ylab="Coverage/base/gene", 
 #' inputFiles=inputfiles, stranded=TRUE, heatmap=TRUE, scale=FALSE, outPrefix=NULL, 
-#' rmOutlier=FALSE, transform=NA, statsMethod="wilcox.test", heatRange=NULL, nc=2)
+#' rmOutlier=0, transform="log2", statsMethod="wilcox.test", heatRange=NULL, nc=2)
 #'
 #' @export plot_locus
 
@@ -2127,7 +2082,7 @@ plot_locus <- function(queryFiles,
                        heatmap=TRUE, 
                        scale=FALSE,
                        outPrefix=NULL, 
-                       rmOutlier=FALSE, 
+                       rmOutlier=0, 
                        transform=NA, 
                        statsMethod="wilcox.test", 
                        heatRange=NULL,
@@ -2238,7 +2193,11 @@ plot_locus <- function(queryFiles,
       bin_op <- "mean"
 
       fullMatrix <- parallel_scoreMatrixBin(queryRegions, windowRs, bin_num, bin_op, weight_col, stranded, nc=nc)
-      fullMatrix <- process_scoreMatrix(fullMatrix, scale=scale, rmOutlier=rmOutlier, transform=transform, verbose=verbose)
+      if(is.null(inputFiles)){
+         fullMatrix <- process_scoreMatrix(fullMatrix, scale, rmOutlier, transform=transform, verbose=verbose)
+      }else{
+         fullMatrix <- process_scoreMatrix(fullMatrix, scale=FALSE, rmOutlier=rmOutlier, transform=NA, verbose=verbose)
+      }
       colnames(fullMatrix) <- as.character(colLabel)
       rownames(fullMatrix) <- names(windowRegions)
 
@@ -2258,7 +2217,7 @@ plot_locus <- function(queryFiles,
   plot_df <- list() # per position, averaged over gene
   stat_df <- list() # per gene, averaged over position
   if(heatmap) heatmap_list <- list()
-  Ylab <- ifelse(is.na(transform), Ylab, paste0(transform, " (", Ylab, ")"))
+  Ylab <- ifelse(!is.na(transform)&&is.null(inputFiles), paste0(transform, " (", Ylab, ")"), Ylab)
 
   if(verbose) print("collecting coverage data") ## plot multiple bed files on each center
 
@@ -2352,29 +2311,15 @@ plot_locus <- function(queryFiles,
                  p <- draw_locus_profile(plot_df=aplot_df, cn="Reference", sn="Query", Xlab=Xlab, Ylab=Ylab, shade=shade, hl=hl)
                  comp <- combn(seq_along(centers),2, simplify=FALSE)
 
-                 ps1 <- draw_boxplot_by_factor(stat_df=astat_df, xc="Reference", yc="Intensity",  comp=comp, stats=statsMethod, Ylab=Ylab)
-                 
-                 ps1_wo_outlier <- draw_boxplot_wo_outlier(stat_df=astat_df, xc="Reference", yc="Intensity", comp=comp, stats=statsMethod, Ylab=Ylab)
-                 ps1_mean_se <- draw_mean_se_barplot(stat_df=astat_df, xc="Reference", yc="Intensity", comp=comp, Ylab=Ylab)
-                 prank <- draw_quantile_plot(stat_df=astat_df, xc="Reference", yc="Intensity", Ylab=Ylab)
+                 combo <- draw_combo_plot(stat_df=astat_df, xc="Reference", yc="Intensity", comp=comp, stats=statsMethod, Ylab=Ylab)
                }else{
                  p <- draw_locus_profile(plot_df=aplot_df, cn="Query", sn="Reference", Xlab=Xlab, Ylab=Ylab, shade=shade, hl=hl)
                  comp <- combn(seq_along(beds),2, simplify=FALSE)
 
-                 ps1 <- draw_boxplot_by_factor(stat_df=astat_df, xc="Query", yc="Intensity", comp=comp, stats=statsMethod, Ylab=Ylab)
-                 
-                 ps1_wo_outlier <- draw_boxplot_wo_outlier(stat_df=astat_df, xc="Query", yc="Intensity", comp=comp, stats=statsMethod, Ylab=Ylab)
-                 ps1_mean_se <- draw_mean_se_barplot(stat_df=astat_df, xc="Query", yc="Intensity", Ylab=Ylab, comp=comp)
-                 prank <- draw_quantile_plot(stat_df=astat_df, xc="Query", yc="Intensity", Ylab=Ylab)
+                 combo <- draw_combo_plot(stat_df=astat_df, xc="Query", yc="Intensity", comp=comp, stats=statsMethod, Ylab=Ylab)
                }
 
-               if(max(i,j)>3){
-                  lapply(list(p, ps1_mean_se, prank, ps1, ps1_wo_outlier), print)
-               }else{
-                  comp1 <- plot_grid(p, ps1_mean_se,  ncol = 2, rel_widths = c(1,1))
-                  comp2 <- plot_grid(prank, ps1, ps1_wo_outlier, ncol = 3, align='h', axis='b', rel_widths = c(1,1,1))
-                  print(plot_grid(comp1, comp2, ncol=1, rel_heights=c(1,1)))
-               }
+               lapply(list(p, combo), print)
 
             }else{
                print(p)
@@ -2433,29 +2378,15 @@ plot_locus <- function(queryFiles,
                           p <- draw_locus_profile(plot_df=aplot_df, cn="Reference", sn="Query", Xlab=Xlab, Ylab=Ylab, shade=shade, hl=hl)
                           comp <- combn(seq_along(centers),2, simplify=FALSE)
 
-                          ps1 <- draw_boxplot_by_factor(stat_df=astat_df, xc="Reference", yc="Intensity",  comp=comp, stats=statsMethod, Ylab=Ylab)
-                          
-                          ps1_wo_outlier <- draw_boxplot_wo_outlier(stat_df=astat_df, xc="Reference", yc="Intensity", comp=comp, stats=statsMethod, Ylab=Ylab)
-                          ps1_mean_se <- draw_mean_se_barplot(stat_df=astat_df, xc="Reference", yc="Intensity", comp=comp, Ylab=Ylab)
-                          prank <- draw_quantile_plot(stat_df=astat_df, xc="Reference", yc="Intensity", Ylab=Ylab)
+                          combo <- draw_combo_plot(stat_df=astat_df, xc="Reference", yc="Intensity", comp=comp, stats=statsMethod, Ylab=Ylab)
                        }else{
                           p <- draw_locus_profile(plot_df=aplot_df, cn="Query", sn="Reference", Xlab=Xlab, Ylab=Ylab, shade=shade, hl=hl)
                           comp <- combn(seq_along(beds),2, simplify=FALSE)
 
-                          ps1 <- draw_boxplot_by_factor(stat_df=astat_df, xc="Query", yc="Intensity", comp=comp, stats=statsMethod, Ylab=Ylab)
-                          
-                          ps1_wo_outlier <- draw_boxplot_wo_outlier(stat_df=astat_df, xc="Query", yc="Intensity", comp=comp, stats=statsMethod, Ylab=Ylab)
-                          ps1_mean_se <- draw_mean_se_barplot(stat_df=astat_df, xc="Query", yc="Intensity", comp=comp, Ylab=Ylab)
-                          prank <- draw_quantile_plot(stat_df=astat_df, xc="Query", yc="Intensity", Ylab=Ylab)
+                          combo <- draw_combo_plot(stat_df=astat_df, xc="Query", yc="Intensity", comp=comp, stats=statsMethod, Ylab=Ylab)
                        }
 
-                       if(max(i,j)>3){
-                          lapply(list(p, ps1_mean_se, prank, ps1, ps1_wo_outlier), print)
-                       }else{
-                          comp1 <- plot_grid(p, ps1_mean_se,  ncol = 2, rel_widths = c(1,1))
-                          comp2 <- plot_grid(prank, ps1, ps1_wo_outlier, ncol = 3, align='h', axis='b', rel_widths = c(1,1,1))
-                          print(plot_grid(comp1, comp2, ncol=1, rel_heights=c(1,1)))
-                       }
+                       lapply(list(p, combo), print)
                        
                     }else{
                        print(p)
@@ -2495,12 +2426,10 @@ plot_locus <- function(queryFiles,
     ratioMatrix_list <- scoreMatrix_list[ratiolabels]
     for(centerLabel in centerLabels){
       for(i in seq_along(ratiolabels)){
-         if(is.na(transform)){
-            fullMatrix <- ratioMatrix_list[[ratiolabels[i]]][[centerLabel]]/inputMatrix_list[[inputLabels[i]]][[centerLabel]]
-         }else{
-            fullMatrix <- ratioMatrix_list[[ratiolabels[i]]][[centerLabel]] - inputMatrix_list[[inputLabels[i]]][[centerLabel]]
-         }
         
+        fullMatrix <- ratio_over_input(ratioMatrix_list[[ratiolabels[i]]][[centerLabel]], inputMatrix_list[[inputLabels[i]]][[centerLabel]], verbose)
+        
+        fullMatrix <- process_scoreMatrix(fullMatrix, scale, rmOutlier, transform=transform, verbose=verbose)
         colnames(fullMatrix) <- as.character(colLabel)
 
         ratioMatrix_list[[ratiolabels[i]]][[centerLabel]] <- fullMatrix
@@ -2601,29 +2530,15 @@ plot_locus <- function(queryFiles,
                     p <- draw_locus_profile(plot_df=aplot_df, cn="Reference", sn="Query", Xlab=Xlab, Ylab=Ylab, shade=shade, hl=hl)
                     comp <- combn(seq_along(centers),2, simplify=FALSE)
 
-                    ps1 <- draw_boxplot_by_factor(stat_df=astat_df, xc="Reference", yc="Intensity",  comp=comp, stats=statsMethod, Ylab=Ylab)
-                    
-                    ps1_wo_outlier <- draw_boxplot_wo_outlier(stat_df=astat_df, xc="Reference", yc="Intensity", comp=comp, stats=statsMethod, Ylab=Ylab)
-                    ps1_mean_se <- draw_mean_se_barplot(stat_df=astat_df, xc="Reference", yc="Intensity", comp=comp, Ylab=Ylab)
-                    prank <- draw_quantile_plot(stat_df=astat_df, xc="Reference", yc="Intensity", Ylab=Ylab)
+                    combo <- draw_combo_plot(stat_df=astat_df, xc="Reference", yc="Intensity", comp=comp, stats=statsMethod, Ylab=Ylab)
                  }else{
                     p <- draw_locus_profile(plot_df=aplot_df, cn="Query", sn="Reference", Xlab=Xlab, Ylab=Ylab, shade=shade, hl=hl)
                     comp <- combn(seq_along(beds),2, simplify=FALSE)
 
-                    ps1 <- draw_boxplot_by_factor(stat_df=astat_df, xc="Query", yc="Intensity", comp=comp, stats=statsMethod, Ylab=Ylab)
-                    
-                    ps1_wo_outlier <- draw_boxplot_wo_outlier(stat_df=astat_df, xc="Query", yc="Intensity", comp=comp, stats=statsMethod, Ylab=Ylab)
-                    ps1_mean_se <- draw_mean_se_barplot(stat_df=astat_df, xc="Query", yc="Intensity", comp=comp, Ylab=Ylab)
-                    prank <- draw_quantile_plot(stat_df=astat_df, xc="Query", yc="Intensity", Ylab=Ylab)
+                    combo <- draw_combo_plot(stat_df=astat_df, xc="Query", yc="Intensity", comp=comp, stats=statsMethod, Ylab=Ylab)
                  }
 
-                 if(max(i,j)>3){
-                    lapply(list(p, ps1_mean_se, prank, ps1, ps1_wo_outlier), print)
-                 }else{
-                    comp1 <- plot_grid(p, ps1_mean_se,  ncol = 2, rel_widths = c(1,1))
-                    comp2 <- plot_grid(prank, ps1, ps1_wo_outlier, ncol = 3, align='h', axis='b', rel_widths = c(1,1,1))
-                    print(plot_grid(comp1, comp2, ncol=1, rel_heights=c(1,1)))
-                 }
+                 lapply(list(p, combo), print)
                  
                }else{
                   print(p)
@@ -2677,7 +2592,7 @@ plot_locus <- function(queryFiles,
 #' @param stranded logical, indicating whether the strand of the feature should be considered
 #' @param scale logical, indicating whether the score matrix should be scaled to the range 0:1, so that samples with different baseline can be compared
 #' @param smooth logical, indicating whether the line should smoothed with a spline smoothing algorithm
-#' @param rmOutlier logical, indicating whether a row with abnormally high values in the score matrix should be removed
+#' @param rmOutlier a numeric value serving as a multiplier of the MAD in Hampel filter for outliers identification, 0 indicating not removing outliers. For Gaussian distribution, use 3, adjust based on data distribution
 #' @param outPrefix a string specifying output file prefix for plots (outPrefix.pdf)
 #' @param refPoint a string in c("start", "center", "end")
 #' @param Xlab a string denotes the label on x-axis
@@ -2712,7 +2627,7 @@ plot_locus <- function(queryFiles,
 #' df <- plot_locus_with_random(queryFiles=queryfiles, centerFiles=c(centerfiles), txdb=txdb, 
 #' ext=c(-200,200), hl=c(-20, 20), shade=TRUE, smooth=TRUE, handleInputParams=handleInputParams, 
 #' verbose=TRUE, binSize=10, refPoint="center", Xlab="Center", Ylab="Coverage/base/gene", 
-#' inputFiles=inputfiles, stranded=TRUE, scale=FALSE, outPrefix=NULL, rmOutlier=FALSE, 
+#' inputFiles=inputfiles, stranded=TRUE, scale=FALSE, outPrefix=NULL, rmOutlier=0, 
 #' transform=NA, statsMethod="wilcox.test", nc=2)
 #'
 #' @export plot_locus_with_random
@@ -2735,7 +2650,7 @@ plot_locus_with_random <- function(queryFiles,
                                    stranded=TRUE, 
                                    scale=FALSE, 
                                    outPrefix=NULL, 
-                                   rmOutlier=FALSE, 
+                                   rmOutlier=0, 
                                    n_random=1, 
                                    hw=c(8,8),
                                    statsMethod="wilcox.test", 
@@ -2855,7 +2770,11 @@ plot_locus_with_random <- function(queryFiles,
         windowRs <- as(split(windowRs, f=factor(seq(1:length(windowRs)))), "GRangesList")
 
         fullMatrix <- parallel_scoreMatrixBin(queryRegions, windowRs, bin_num, bin_op, weight_col, stranded, nc=nc)
-        fullMatrix <- process_scoreMatrix(fullMatrix, scale=scale, rmOutlier, transform=transform, verbose=verbose)
+        if(is.null(inputFiles)){
+           fullMatrix <- process_scoreMatrix(fullMatrix, scale, rmOutlier, transform=transform, verbose=verbose)
+        }else{
+           fullMatrix <- process_scoreMatrix(fullMatrix, scale=FALSE, rmOutlier=rmOutlier, transform=NA, verbose=verbose)
+        }
 
         scoreMatrix_list[[queryLabel]][[centerLabel]][[regionName]] <- fullMatrix
 
@@ -2895,7 +2814,7 @@ plot_locus_with_random <- function(queryFiles,
 
   ## plot reference center and random center for each bed
 
-  Ylab <- ifelse(is.na(transform), Ylab, paste0(transform, " (", Ylab, ")"))
+  Ylab <- ifelse(!is.na(transform)&&is.null(inputFiles), paste0(transform, " (", Ylab, ")"), Ylab)
   for(queryLabel in queryLabels){
 
     if(verbose) print(paste("Processing query", queryLabel))
@@ -2964,14 +2883,9 @@ plot_locus_with_random <- function(queryFiles,
               mutate(Reference=factor(Reference, levels=sort(unique(Reference))))
            comp <- list(c(1, 2))
 
-           ps1 <- draw_boxplot_by_factor(stat_df=stat_df, xc="Reference", yc="Intensity",  comp=comp, stats=statsMethod, Ylab=Ylab)
-           ps1_wo_outlier <- draw_boxplot_wo_outlier(stat_df=stat_df, xc="Reference", yc="Intensity", comp=comp, stats=statsMethod, Ylab=Ylab)
-           ps1_mean_se <- draw_mean_se_barplot(stat_df=stat_df, xc="Reference", yc="Intensity", comp=comp, Ylab=Ylab)
-           prank <- draw_quantile_plot(stat_df=stat_df, xc="Reference", yc="Intensity", Ylab=Ylab)
-
-           comp1 <- plot_grid(p, ps1_mean_se,  ncol = 2, rel_widths = c(1,1))
-           comp2 <- plot_grid(ps1, ps1_wo_outlier, ncol = 2, rel_widths = c(1,1))
-           print(plot_grid(comp1, comp2, ncol=1, rel_heights=c(1,1)))
+           combo <- draw_combo_plot(stat_df=stat_df, xc="Reference", yc="Intensity", comp=comp, stats=statsMethod, Ylab=Ylab)
+           print(p)
+           print(combo)
         }else{
            print(p)
         }
@@ -2994,14 +2908,10 @@ plot_locus_with_random <- function(queryFiles,
         for(i in seq_along(ratiolabels)){
           rm <- ratioMatrix_list[[ratiolabels[i]]][[centerLabel]][[regionName]]
           im <- inputMatrix_list[[inputLabels[i]]][[centerLabel]][[regionName]]
-            
-          if(is.na(transform)){
-             fullMatrix <- rm/im
-          }else{
-             fullMatrix <- rm - im
-          }
           
-          #fullMatrix <- process_scoreMatrix(fullMatrix, scale=FALSE, rmOutlier=rmOutlier, transform=transform, verbose=verbose)
+          fullMatrix <- ratio_over_input(rm, im, verbose)
+          
+          fullMatrix <- process_scoreMatrix(fullMatrix, scale, rmOutlier, transform, verbose)
 
           ratioMatrix_list[[ratiolabels[i]]][[centerLabel]][[regionName]] <- fullMatrix
 
@@ -3010,13 +2920,9 @@ plot_locus_with_random <- function(queryFiles,
           imr <- inputMatrix_list_random[[inputLabels[i]]][[centerLabel]][[regionName]]
           minrowr <- min(nrow(rmr), nrow(imr))
 
-          if(is.na(transform)){
-             fullMatrix <- rmr[1:minrowr,]/imr[1:minrowr,]
-          }else{
-             fullMatrix <- rmr[1:minrowr,] - imr[1:minrowr,]
-          }
+          fullMatrix <- ratio_over_input(rmr[1:minrowr,], imr[1:minrowr,])
           
-          #fullMatrix <- process_scoreMatrix(fullMatrix, scale=FALSE, rmOutlier=rmOutlier, transform=transform, verbose=verbose)
+          fullMatrix <- process_scoreMatrix(fullMatrix, scale, rmOutlier, transform, verbose)
 
           ratioMatrix_list_random[[ratiolabels[i]]][[centerLabel]][[regionName]] <- fullMatrix
         }
@@ -3090,14 +2996,10 @@ plot_locus_with_random <- function(queryFiles,
                 mutate(Reference=factor(Reference, levels=sort(unique(Reference))))
              comp <- list(c(1, 2))
 
-             ps1 <- draw_boxplot_by_factor(stat_df=stat_df, xc="Reference", yc="Intensity",  comp=comp, stats=statsMethod, Ylab=Ylab) 
-             ps1_wo_outlier <- draw_boxplot_wo_outlier(stat_df=stat_df, xc="Reference", yc="Intensity", comp=comp, stats=statsMethod, Ylab=Ylab)
-             ps1_mean_se <- draw_mean_se_barplot(stat_df=stat_df, xc="Reference", yc="Intensity", comp=comp, Ylab=Ylab)
-             prank <- draw_quantile_plot(stat_df=stat_df, xc="Reference", yc="Intensity", Ylab=Ylab)
+             combo <- draw_combo_plot(stat_df=stat_df, xc="Reference", yc="Intensity", comp=comp, stats=statsMethod, Ylab=Ylab)
 
-             comp1 <- plot_grid(p, ps1_mean_se,  ncol = 2, rel_widths = c(1,1))
-             comp2 <- plot_grid(ps1, ps1_wo_outlier, ncol = 2, rel_widths = c(1,1))
-             print(plot_grid(comp1, comp2, ncol=1, rel_heights=c(1,1)))
+             print(p)
+             print(combo)
 
           }else{
              print(p)

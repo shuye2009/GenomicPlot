@@ -11,6 +11,7 @@ draw_combo_plot(
   comp = list(c(1, 2)),
   Xlab = xc,
   Ylab = yc,
+  stats = "wilcox.test",
   fc = xc,
   Ylim = NULL,
   nf = 1
@@ -28,6 +29,8 @@ draw_combo_plot(
 \item{Xlab}{a string for x-axis label}
 
 \item{Ylab}{a string for y-axis label}
+
+\item{stats}{the name of pair-wise statistical tests, like t.test or wilcox.test}
 
 \item{fc}{a string denoting column name for sub-grouping based on an additional factor}
 

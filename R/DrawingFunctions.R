@@ -514,7 +514,7 @@ draw_mean_se_barplot <- function(stat_df,
                axis.title.x = element_blank(),
                axis.text = element_text(face="plain", size=12, color="black"),
                legend.position = "none") +
-         labs(y=paste0(Ylab, "(mean±SE)"), x=Xlab) +
+         labs(y=paste0(Ylab, "\n(mean \U00B1 SE)"), x=Xlab) +
          scale_x_discrete(labels = means_se$labelx) +
          ggtitle(label=paste("ANOVA p-value =",format(stats$ANOVA, digits=3)))
       
@@ -602,7 +602,8 @@ draw_mean_se_barplot <- function(stat_df,
 #' stat_df <- data.frame(Feature=rep(c("A", "B"), c(20, 30)), 
 #'                      Intensity=c(rnorm(20, 2, 5), rnorm(30, 3, 5)),
 #'                      Height=c(rnorm(20, 5, 5), rnorm(30, 1, 5)))
-#' stat_df_long <- tidyr::pivot_longer(stat_df, cols=c(Intensity, Height), names_to="type", values_to="value")
+#' stat_df_long <- tidyr::pivot_longer(stat_df, cols=c(Intensity, Height), names_to="type", 
+#' values_to="value")
 #' 
 #' print(draw_quantile_plot(stat_df, xc="Feature", yc="Intensity"))
 #' print(draw_quantile_plot(stat_df, xc="Feature", yc="Height"))
@@ -711,6 +712,7 @@ draw_rank_plot <- function(stat_df,
 #' @param yc a string denoting column name for numeric data to be plotted
 #' @param fc a string denoting column name for sub-grouping based on an additional factor
 #' @param comp a list of vectors denoting pair-wise comparisons to be performed between groups
+#' @param stats the name of pair-wise statistical tests, like t.test or wilcox.test
 #' @param Xlab a string for x-axis label
 #' @param Ylab a string for y-axis label
 #' @param Ylim a numeric vector of two elements, defining custom limits of y-axis
@@ -737,11 +739,12 @@ draw_combo_plot <- function(stat_df,
                             comp=list(c(1,2)), 
                             Xlab=xc, 
                             Ylab=yc, 
+                            stats="wilcox.test", 
                             fc=xc, 
                             Ylim=NULL,
                             nf=1){
-   bbf <- draw_boxplot_by_factor(stat_df, xc=xc, yc=yc, comp=comp, Xlab=Xlab, Ylab=Ylab, fc=fc, nf=nf)
-   bwo <- draw_boxplot_wo_outlier(stat_df, xc=xc, yc=yc, comp=comp, Xlab=Xlab, Ylab=Ylab, fc=fc, nf=nf)
+   bbf <- draw_boxplot_by_factor(stat_df, xc=xc, yc=yc, comp=comp, stats=stats, Xlab=Xlab, Ylab=Ylab, fc=fc, nf=nf)
+   bwo <- draw_boxplot_wo_outlier(stat_df, xc=xc, yc=yc, comp=comp, stats=stats, Xlab=Xlab, Ylab=Ylab, fc=fc, nf=nf)
    msb <- draw_mean_se_barplot(stat_df, xc=xc, yc=yc, comp=comp, Xlab=Xlab, Ylab=Ylab, fc=fc, Ylim=Ylim, nf=nf)
    q <- draw_quantile_plot(stat_df, xc=xc, yc=yc, Ylab=Ylab, fc=fc)
    

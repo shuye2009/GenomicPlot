@@ -17,7 +17,7 @@ plot_5parts_metagene(
   outPrefix = NULL,
   heatmap = FALSE,
   heatRange = NULL,
-  rmOutlier = FALSE,
+  rmOutlier = 0,
   Ylab = "Coverage/base/gene",
   hw = c(8, 8),
   nc = 2
@@ -48,7 +48,7 @@ plot_5parts_metagene(
 
 \item{heatRange}{a numerical vector of two elements, defining range for heatmap color ramp generation}
 
-\item{rmOutlier}{logical, indicating whether a row with abnormally high values in the score matrix should be removed}
+\item{rmOutlier}{a numeric value serving as a multiplier of the MAD in Hampel filter for outliers identification, 0 indicating not removing outliers. For Gaussian distribution, use 3, adjust based on data distribution}
 
 \item{Ylab}{a string for y-axis label}
 
@@ -74,13 +74,13 @@ names(inputfiles) <- "input"
 gfeatures <- prepare_5parts_genomic_features(txdb, meta=TRUE, nbins=100, fiveP=-1000, 
 threeP=1000, longest=TRUE, verbose=FALSE)
 
-handleInputParams <- list(offset=0, fix_width=150, fix_point="start", norm=FALSE,
-useScore=FALSE, outRle=TRUE, useSizeFactor=TRUE, genome="hg19")
+handleInputParams <- list(offset=0, fix_width=150, fix_point="start", norm=TRUE,
+useScore=FALSE, outRle=TRUE, useSizeFactor=FALSE, genome="hg19")
    
 df <- plot_5parts_metagene(queryFiles=queryfiles, gFeatures=list("metagene"=gfeatures), 
 inputFiles=inputfiles, scale=FALSE, verbose=TRUE, Ylab="Coverage/base/gene", 
 handleInputParams=handleInputParams, smooth=TRUE,  stranded=TRUE, outPrefix=NULL, heatmap=TRUE,
- rmOutlier=FALSE, heatRange=NULL, transform=NA, nc=2)
+rmOutlier=0, heatRange=NULL, transform="log2", nc=2)
                
 }
 \author{

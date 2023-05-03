@@ -16,7 +16,7 @@ plot_3parts_metagene(
   stranded = TRUE,
   outPrefix = NULL,
   heatmap = FALSE,
-  rmOutlier = FALSE,
+  rmOutlier = 0,
   heatRange = NULL,
   transform = NA,
   hw = c(8, 8),
@@ -46,7 +46,7 @@ plot_3parts_metagene(
 
 \item{heatmap}{logical, indicating whether a heatmap of the score matrix should be generated}
 
-\item{rmOutlier}{logical, indicating whether a row with abnormally high values in the score matrix should be removed}
+\item{rmOutlier}{a numeric value serving as a multiplier of the MAD in Hampel filter for outliers identification, 0 indicating not removing outliers. For Gaussian distribution, use 3, adjust based on data distribution}
 
 \item{heatRange}{a numerical vector of two elements, defining range for heatmap color ramp generation}
 
@@ -77,15 +77,15 @@ names(inputfiles) <- "input"
 gfeatures <- prepare_3parts_genomic_features(txdb, featureName="transcript", meta=TRUE, 
 nbins=100, fiveP=-1000, threeP=1000, longest=TRUE, protein_coding=TRUE, verbose=FALSE)
 
-handleInputParams <- list(offset=0, fix_width=150, fix_point="start", norm=FALSE,
-useScore=FALSE, outRle=TRUE, useSizeFactor=TRUE, genome="hg19")
+handleInputParams <- list(offset=0, fix_width=150, fix_point="start", norm=TRUE,
+useScore=FALSE, outRle=TRUE, useSizeFactor=FALSE, genome="hg19")
  
 df <- plot_3parts_metagene(queryFiles=queryfiles, gFeatures=gfeatures, inputFiles
                            =inputfiles, scale=FALSE, verbose=TRUE, 
                            Ylab="Coverage/base/gene", handleInputParams
                            =handleInputParams, smooth=TRUE, stranded=TRUE, 
-                           outPrefix=NULL, heatmap=TRUE, rmOutlier=FALSE, heatRange=NULL,
-                           transform=NA, nc=2)
+                           outPrefix=NULL, heatmap=TRUE, rmOutlier=0, heatRange=NULL,
+                           transform="log2", nc=2)
 
 }
 \author{

@@ -51,7 +51,7 @@ plot_5parts_metagene(queryFiles=queryfiles,
                      outPrefix=op, 
                      transform=NA, 
                      heatmap=TRUE,
-                     rmOutlier=TRUE, 
+                     rmOutlier=0, 
                      heatRange=c(0,1),
                      nc=4)
                      
@@ -86,7 +86,7 @@ plot_locus(queryFiles=queryfiles[c(1,3)],
                      transform=NA, 
                      heatmap=TRUE,
                      heatRange=c(0,1),
-                     rmOutlier=TRUE, 
+                     rmOutlier=0, 
                      nc=4)
                      
 ```

@@ -54,7 +54,7 @@ test_that("testing plot_5parts_metagene", {
                         outPrefix=op,
                         transform=NA,
                         heatmap=TRUE,
-                        rmOutlier=TRUE,
+                        rmOutlier=0,
                         heatRange=c(0,1),
                         nc=2)
    pdf_to_png(op)
@@ -71,7 +71,7 @@ test_that("testing plot_5parts_metagene", {
                         outPrefix=op, 
                         handleInputParams=bamHandleInputParams, 
                         heatmap=TRUE, 
-                        rmOutlier=TRUE, 
+                        rmOutlier=0, 
                         nc=2)
    pdf_to_png(op)
 })
@@ -91,7 +91,7 @@ test_that("testing plot_3parts_metagene", {
                         outPrefix=op, 
                         handleInputParams=chipHandleInputParams, 
                         heatmap=TRUE, 
-                        rmOutlier=TRUE, 
+                        rmOutlier=0, 
                         nc=2)
    pdf_to_png(op)
 })
@@ -116,7 +116,7 @@ test_that("testing plot_locus", {
               transform=NA,
               heatmap=TRUE,
               heatRange=c(0,1),
-              rmOutlier=TRUE,
+              rmOutlier=0,
               nc=2)
    pdf_to_png(op)
    
@@ -143,7 +143,7 @@ test_that("testing plot_locus", {
               outPrefix=op, 
               verbose=FALSE, 
               transform=NA, 
-              rmOutlier=FALSE, 
+              rmOutlier=0, 
               statsMethod="wilcox.test", 
               heatmap=TRUE, 
               nc=2)
@@ -202,7 +202,7 @@ test_that("testing plot_region", {
                transform=NA, 
                stranded=TRUE, 
                outPrefix=op, 
-               rmOutlier=FALSE, 
+               rmOutlier=0, 
                nc=2)
    pdf_to_png(op)
 })
@@ -265,7 +265,7 @@ test_that("testing plot_locus_with_random", {
                           outPrefix=op, 
                           verbose=FALSE, 
                           transform=NA, 
-                          rmOutlier=FALSE, 
+                          rmOutlier=0, 
                           n_random=1, 
                           statsMethod="wilcox.test", 
                           nc=2)

@@ -106,7 +106,6 @@ impute_hm <- function(fullmatrix,
 #' @param rmOutlier logical, indicating whether a row with abnormally high values in the score matrix should be removed
 #' @param verbose logical, indicating whether to output additional information (data used for plotting or statistical test results)
 #' @param transform a string in c("log", "log2", "log10"), default = NA indicating no transformation of data matrix
-#' @param pc pseudo-count added to the data matrix before log transformation to avoid taking log of zero
 #'
 #' @return a numeric matrix with the same dimension as the fullmatrix
 #' @author Shuye Pu
@@ -117,9 +116,8 @@ impute_hm <- function(fullmatrix,
 #'
 process_scoreMatrix <- function(fullmatrix, 
                                 scale=FALSE, 
-                                rmOutlier=FALSE, 
+                                rmOutlier=0, 
                                 transform=NA, 
-                                pc=0, 
                                 verbose=FALSE){
 
    #rn <- rownames(fullmatrix)
@@ -129,22 +127,23 @@ process_scoreMatrix <- function(fullmatrix,
    fullmatrix[is.na(fullmatrix)] <- 0
 
    fullmatrix <- impute_hm(fullmatrix, verbose)
+   
+   ## remove outliers from reference regions, using Hampel filter with 1000mad instead of 3mad.
+   ## if outliers are detected, replace the outliers with up bound
+   if(rmOutlier > 0){
+      fullmatrix <- rm_outlier(fullmatrix, verbose=verbose, multiplier=rmOutlier)
+   }
 
    if(!is.na(transform)) {
       if(min(fullmatrix) < 0){
          message("Negative values are found in the matrix, log transformation cannot be applied!")
       }else if(transform == "log"){
-         fullmatrix <- log(fullmatrix + pc)
+         fullmatrix <- log(fullmatrix)
       }else if(transform == "log2"){
-         fullmatrix <- log2(fullmatrix + pc)
+         fullmatrix <- log2(fullmatrix)
       }else if(transform == "log10"){
-         fullmatrix <- log10(fullmatrix + pc)
+         fullmatrix <- log10(fullmatrix)
       }
-   }
-   ## remove outliers from reference regions, using Hampel filter with 1000mad instead of 3mad.
-   ## if outliers are detected, replace the outliers with up bound
-   if(rmOutlier){
-      fullmatrix <- rm_outlier(fullmatrix, verbose=verbose)
    }
 
    if(scale){
@@ -195,11 +194,13 @@ rm_outlier <- function(fullmatrix,
 
    fullmatrix[is.na(fullmatrix)] <- 0
    rowmax <- apply(fullmatrix, 1, max)
-   M <- mad(rowmax)
+   k <- 1.4826 ## k is the scaling constant for estimating rolling standard deviation using median absolute deviation, its value is 1.4826 most of the time
+   M <- mad(rowmax) * k  
+   
    if(M > 0){
       up_bound <- median(rowmax) + multiplier*M
    }else{
-      up_bound <- median(rowmax)
+      up_bound <- max(rowmax)*0.99 # for extremely skewed data, use 99th percentile of the maximum
    }
 
    fullmatrix <- as.matrix(fullmatrix)
@@ -207,11 +208,11 @@ rm_outlier <- function(fullmatrix,
    percentile <- fn(up_bound)
 
    if(length(which(rowmax > up_bound)) > 0){
-      if(verbose) print("Outlier detected:")
       outliers <- fullmatrix[fullmatrix>up_bound]
 
       if(verbose){
-         print(paste("maximum of the matrix", max(rowmax)))
+         print("Outlier detected:")
+         print(paste("maximum of the matrix", max(fullmatrix)))
          print(paste("median of row max", median(rowmax)))
          print(paste("median absolute deviation (mad) of row max", M))
          print(paste("mulitplier of mad", multiplier))
@@ -225,6 +226,16 @@ rm_outlier <- function(fullmatrix,
       }
 
       fullmatrix[fullmatrix>up_bound] <- up_bound
+   }else{
+      if(verbose){
+         print("Outlier not detected:")
+         print(paste("maximum of the matrix", max(rowmax)))
+         print(paste("median of row max", median(rowmax)))
+         print(paste("median absolute deviation (mad) of row max", M))
+         print(paste("mulitplier of mad", multiplier))
+         print(paste("up_bound and replace value", up_bound))
+         print(paste("percentile of up_bound", percentile))
+      }
    }
 
    invisible(fullmatrix)
@@ -322,4 +333,29 @@ gr2df <- function(gr){
    return(df)
 }
 
-
+#' @title compute ratio over input
+#' 
+#' @description compute enrichment of IP samples over Input samples
+#' 
+#' @param IP a numerical matrix 
+#' @param Input another numerical matrix with same dimensions as the IP matrix
+#' @param verbose logical, whether to output additional information 
+#' 
+#' @return a numerical matrix with same dimensions as the IP matrix 
+#' 
+#' @author Shuye Pu 
+#' 
+#' @keywords internal
+#' 
+ratio_over_input <- function(IP, Input, verbose=FALSE){
+   if(!identical(dim(IP), dim(Input))) stop("IP matrix and Input matrix must have same dimensions")
+   if(min(IP) < 0 || min(Input) < 0 ) stop("IP matrix and Input matrix cannot have negative values")
+   
+   # regularize the matrices to avoid unreasonably high ratios, 
+   # if the maximum of IP is greater than 1 and the minimum of Input is smaller than 1
+   reg <- ifelse((max(IP) > 1) && (min(Input) < 1 ), 1, 0)
+   if(verbose) print(paste(max(IP), min(Input), reg))
+   ratio <- (IP + reg)/(Input + reg)
+   
+   return(ratio)
+}
