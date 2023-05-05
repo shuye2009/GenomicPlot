@@ -121,5 +121,5 @@ plot_peak_annotation(peakFile=queryfiles[2],
 ![image1](./tests/test_output/test_plot_peak_annotation1_3.png)
 ![image1](./tests/test_output/test_plot_peak_annotation1_4.png)
 
-For more examples, please check out the package vignette and the tests/test_output directory.
+For more examples, please check out the package vignette using browseVignettes("GenomicPlot").
 

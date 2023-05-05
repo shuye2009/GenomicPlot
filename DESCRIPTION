@@ -24,15 +24,6 @@ Imports: methods, Rsamtools, parallel, grid, ggplot2 (>= 3.3.5), tidyr, rtrackla
    circlize, viridis, ggsignif (>= 0.6.3), ggsci (>= 2.9), genomation (>= 1.26.0), ggpubr
 RoxygenNote: 7.2.1
 VignetteBuilder: knitr
-Suggests: 
-    knitr,
-    rmarkdown,
-    AnnotationHub,
-    AnnotationDbi,
-    R.utils,
-    BSgenome.Hsapiens.UCSC.hg19 (>= 1.4.3),
-    BiocFileCache,
-    TxDb.Hsapiens.UCSC.hg19.knownGene (>= 3.2.2),
-    magick,
-    testthat (>= 3.0.0)
-Config/testthat/edition: 3
+Suggests: knitr, rmarkdown, AnnotationHub, AnnotationDbi, R.utils,  BSgenome.Hsapiens.UCSC.hg19 (>= 1.4.3), 
+   BiocFileCache, TxDb.Hsapiens.UCSC.hg19.knownGene (>= 3.2.2)
+    
