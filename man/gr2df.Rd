@@ -13,7 +13,7 @@ gr2df(gr)
 a dataframe
 }
 \description{
-Convert GRanges object with metacolumns to dataframe
+Convert a GRanges object with meta data columns to a dataframe, with the first 6 columns corresponding those of BED6 format, and the meta data as additional columns
 }
 \examples{
 gr2 <- GenomicRanges::GRanges(c("chr1", "chr1"), IRanges::IRanges(c(7,13), width=3),

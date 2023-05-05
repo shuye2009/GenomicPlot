@@ -3,13 +3,13 @@
 
 #' @title  Plot signals around the start and the end of genomic features and random regions 
 #'
-#' @description   Plot reads or peak Coverage/base/gene of samples in the query files around stat, end and center of genomic features or custom feature given in a .bed file. The upstream and downstream windows can be given separately. If Input files are provided, ratio over Input is computed and displayed as well. A random feature can be generated to serve as a background for contrasting.
+#' @description   Plot reads or peak Coverage/base/gene of samples given in the query files around stat, end and center of genomic features or custom feature given in a .bed file. The upstream and downstream windows can be given separately. If Input files are provided, ratio over Input is computed and displayed as well. A random feature can be generated to serve as a background for contrasting.
 #'
 #' @param queryFiles a vector of sample file names. The file should be in .bam, .bed, .wig or .bw format, mixture of formats is allowed
 #' @param inputFiles a vector of input sample file names. The file should be in .bam, .bed, .wig or .bw format, mixture of formats is allowed
 #' @param centerFile  a bed file that defines the custom feature, or a feature in c("utr3", "utr5", "cds", "intron", "exon", "transcript", "gene"), multiple features are not allowed.
 #' @param txdb a TxDb object defined in the GenomicFeatures package. Default NULL, needed only when genomic features are used in the place of centerFile.
-#' @param handleInputParams a list of parameters for \code{handle_input}
+#' @param importParams a list of parameters for \code{handle_input}
 #' @param binSize an integer defines bin size for intensity calculation
 #' @param ext a vector of four integers defining upstream and downstream boundaries of the plot window, flanking the start and end of features
 #' @param hl a vector of four integers defining upstream and downstream boundaries of the highlight window, flanking the start and end of features
@@ -42,11 +42,11 @@
 #' ext <- c(-500, 200, -200, 500)
 #' hl <- c(-50, 50, -50, 50)
 #'
-#' handleInputParams <- list(offset=-1, fix_width=150, fix_point="start", norm=TRUE, 
+#' importParams <- list(offset=-1, fix_width=150, fix_point="start", norm=TRUE, 
 #' useScore=FALSE, outRle=TRUE, useSizeFactor=TRUE, genome="hg19")
 #' 
 #' plot_start_end_with_random(queryFiles=c(queryFiles), inputFiles=c(inputFiles), txdb=txdb, 
-#' centerFile="intron", binSize=10, handleInputParams=handleInputParams, ext=ext, hl=hl, 
+#' centerFile="intron", binSize=10, importParams=importParams, ext=ext, hl=hl, 
 #' randomize=TRUE, verbose=TRUE, insert=100, stranded=TRUE, scale=FALSE, smooth=TRUE, 
 #' outPrefix=NULL, nc=2)
 #'
@@ -58,7 +58,7 @@ plot_start_end_with_random <- function(queryFiles,
                                        inputFiles=NULL, 
                                        txdb=NULL, 
                                        centerFile, 
-                                       handleInputParams=NULL, 
+                                       importParams=NULL, 
                                        binSize=10,
                                        insert=0, 
                                        verbose=FALSE, 
@@ -81,15 +81,15 @@ plot_start_end_with_random <- function(queryFiles,
 
    if(is.null(inputFiles)){
       inputLabels <- NULL
-      queryInputs <- handle_input(inputFiles=queryFiles, handleInputParams, verbose=verbose, nc=nc)
+      queryInputs <- handle_input(inputFiles=queryFiles, importParams, verbose=verbose, nc=nc)
      
    }else{
       inputLabels <- names(inputFiles)
       queryLabels <- names(queryFiles)
       if(length(queryFiles) == length(inputFiles)){
-         queryInputs <- handle_input(inputFiles=c(queryFiles, inputFiles), handleInputParams, verbose=verbose, nc=nc)
+         queryInputs <- handle_input(inputFiles=c(queryFiles, inputFiles), importParams, verbose=verbose, nc=nc)
       }else if(length(inputFiles) == 1){
-         queryInputs <- handle_input(inputFiles=c(queryFiles, inputFiles), handleInputParams, verbose=verbose, nc=nc)
+         queryInputs <- handle_input(inputFiles=c(queryFiles, inputFiles), importParams, verbose=verbose, nc=nc)
          queryInputs <- queryInputs[c(queryLabels, rep(inputLabels, length(queryLabels)))] # expand the list
          
          inputLabels <- paste0(names(inputFiles), seq_along(queryFiles)) # make each inputLabels unique
@@ -116,8 +116,8 @@ plot_start_end_with_random <- function(queryFiles,
      minimal_width <- ext[2] - ext[3] + insert
      feature <- feature[width(feature)>minimal_width]
   }else if(file.exists(centerFile)){
-     bedparam <- handleInputParams
-     # the input bed is going to be used as center, so the handleInputParams has to be modified accordingly
+     bedparam <- importParams
+     # the input bed is going to be used as center, so the importParams has to be modified accordingly
      bedparam$fix_width <- 0
      bedparam$norm <- FALSE
      bedparam$useScore <- FALSE
@@ -425,7 +425,7 @@ plot_start_end_with_random <- function(queryFiles,
 
 #' @title  Plot signals around the start and the end of genomic features
 #
-#' @description   Plot reads or peak Coverage/base/gene of samples in the query files around start and end of custom features. The upstream and downstream windows
+#' @description   Plot reads or peak Coverage/base/gene of samples given in the query files around start and end of custom features. The upstream and downstream windows
 #' can be given separately, within the window, a smaller window can be defined to highlight region of interest.
 #' A line plot will be displayed for both start and end of feature. If Input files are provided, ratio over Input is
 #' computed and displayed as well.
@@ -434,7 +434,7 @@ plot_start_end_with_random <- function(queryFiles,
 #' @param centerFiles  bed files that define the custom features, or features in c("utr3", "utr5", "cds", "intron", "exon", "transcript", "gene"), multiple features are allowed.
 #' @param txdb a TxDb object defined in the GenomicFeatures package. Default NULL, needed only when genomic features are used in the place of centerFiles.
 #' @param inputFiles a vector of input sample file names. The file should be in .bam, .bed, .wig or .bw format, mixture of formats is allowed
-#' @param handleInputParams a list of parameters for \code{handle_input}
+#' @param importParams a list of parameters for \code{handle_input}
 #' @param binSize an integer defines bin size for intensity calculation
 #' @param ext a vector of four integers defining upstream and downstream boundaries of the plot window, flanking the start and end of features
 #' @param hl a vector of four integers defining upstream and downstream boundaries of the highlight window, flanking the start and end of features
@@ -466,11 +466,11 @@ plot_start_end_with_random <- function(queryFiles,
 #' centerfiles <- system.file("extdata", "test_chip_peak_chr19.narrowPeak", package="GenomicPlot")
 #' names(centerfiles) <- "narrowPeak"
 #' 
-#' handleInputParams <- list(offset=0, fix_width=150, fix_point="start", norm=FALSE, 
+#' importParams <- list(offset=0, fix_width=150, fix_point="start", norm=FALSE, 
 #' useScore=FALSE, outRle=TRUE, useSizeFactor=TRUE, genome="hg19")
 #'  
 #' df <- plot_start_end(queryFiles=queryfiles, inputFiles=inputfiles, 
-#' centerFiles=c("gene", centerfiles), txdb=txdb, handleInputParams=handleInputParams, binSize=10,
+#' centerFiles=c("gene", centerfiles), txdb=txdb, importParams=importParams, binSize=10,
 #' insert=100, verbose=TRUE, ext=c(-500, 100, -100, 500), hl=c(-50, 50, -50, 50), stranded=TRUE,
 #' scale=FALSE, smooth=TRUE, rmOutlier=0, outPrefix=NULL, transform=NA, shade=TRUE, 
 #' Ylab="Coverage/base/gene", nc=2)
@@ -482,7 +482,7 @@ plot_start_end <- function(queryFiles,
                            inputFiles=NULL, 
                            centerFiles, 
                            txdb=NULL, 
-                           handleInputParams=NULL, 
+                           importParams=NULL, 
                            binSize=10, 
                            insert=0, 
                            verbose=FALSE, 
@@ -504,15 +504,15 @@ plot_start_end <- function(queryFiles,
 
    if(is.null(inputFiles)){
       inputLabels <- NULL
-      queryInputs <- handle_input(inputFiles=queryFiles, handleInputParams, verbose=verbose, nc=nc)
+      queryInputs <- handle_input(inputFiles=queryFiles, importParams, verbose=verbose, nc=nc)
       
    }else{
       inputLabels <- names(inputFiles)
       queryLabels <- names(queryFiles)
       if(length(queryFiles) == length(inputFiles)){
-         queryInputs <- handle_input(inputFiles=c(queryFiles, inputFiles), handleInputParams, verbose=verbose, nc=nc)
+         queryInputs <- handle_input(inputFiles=c(queryFiles, inputFiles), importParams, verbose=verbose, nc=nc)
       }else if(length(inputFiles) == 1){
-         queryInputs <- handle_input(inputFiles=c(queryFiles, inputFiles), handleInputParams, verbose=verbose, nc=nc)
+         queryInputs <- handle_input(inputFiles=c(queryFiles, inputFiles), importParams, verbose=verbose, nc=nc)
          queryInputs <- queryInputs[c(queryLabels, rep(inputLabels, length(queryLabels)))] # expand the list
          
          inputLabels <- paste0(names(inputFiles), seq_along(queryFiles)) # make each inputLabels unique
@@ -527,7 +527,7 @@ plot_start_end <- function(queryFiles,
       pdf(paste0(outPrefix, ".pdf"), height=hw[1], width=hw[2])
    }
 
-   bedparam <- handleInputParams
+   bedparam <- importParams
    bedparam$CLIP_reads <- FALSE
    bedparam$fix_width <- 0
    bedparam$fix_point="start"
@@ -785,14 +785,14 @@ plot_start_end <- function(queryFiles,
 
 #' @title Plot promoter, gene body and TTS
 #
-#' @description Plot reads or peak Coverage/base/gene of samples in the query files around genes. The upstream and downstream windows flanking genes
+#' @description Plot reads or peak Coverage/base/gene of samples given in the query files around genes. The upstream and downstream windows flanking genes
 #' can be given separately, the parameter 'meta' controls if gene or metagene plots are generated. If Input files are provided, ratio over Input
 #' is computed and displayed as well.
 #'
 #' @param queryFiles a vector of sample file names. The file should be in .bam, .bed, .wig or .bw format, mixture of formats is allowed
 #' @param gFeatures genomic features as output of the function 'prepare_3parts_genomic_features'
 #' @param inputFiles a vector of input sample file names. The file should be in .bam, .bed, .wig or .bw format, mixture of formats is allowed
-#' @param handleInputParams a list of parameters for \code{handle_input}
+#' @param importParams a list of parameters for \code{handle_input}
 #' @param stranded logical, indicating whether the strand of the feature should be considered
 #' @param scale logical, indicating whether the score matrix should be scaled to the range 0:1, so that samples with different baseline can be compared
 #' @param smooth logical, indicating whether the line should smoothed with a spline smoothing algorithm
@@ -822,13 +822,13 @@ plot_start_end <- function(queryFiles,
 #' gfeatures <- prepare_3parts_genomic_features(txdb, featureName="transcript", meta=TRUE, 
 #' nbins=100, fiveP=-1000, threeP=1000, longest=TRUE, protein_coding=TRUE, verbose=FALSE)
 #' 
-#' handleInputParams <- list(offset=0, fix_width=150, fix_point="start", norm=TRUE,
+#' importParams <- list(offset=0, fix_width=150, fix_point="start", norm=TRUE,
 #' useScore=FALSE, outRle=TRUE, useSizeFactor=FALSE, genome="hg19")
 #'  
 #' df <- plot_3parts_metagene(queryFiles=queryfiles, gFeatures=gfeatures, inputFiles
 #'                            =inputfiles, scale=FALSE, verbose=TRUE, 
-#'                            Ylab="Coverage/base/gene", handleInputParams
-#'                            =handleInputParams, smooth=TRUE, stranded=TRUE, 
+#'                            Ylab="Coverage/base/gene", importParams
+#'                            =importParams, smooth=TRUE, stranded=TRUE, 
 #'                            outPrefix=NULL, heatmap=TRUE, rmOutlier=0, heatRange=NULL,
 #'                            transform="log2", nc=2)
 #'
@@ -841,7 +841,7 @@ plot_3parts_metagene <- function(queryFiles,
                                  scale=FALSE,  
                                  verbose=FALSE, 
                                  Ylab="Coverage/base/gene", 
-                                 handleInputParams=NULL, 
+                                 importParams=NULL, 
                                  smooth=FALSE, 
                                  stranded=TRUE, 
                                  outPrefix=NULL, 
@@ -857,15 +857,15 @@ plot_3parts_metagene <- function(queryFiles,
    
    if(is.null(inputFiles)){
       inputLabels <- NULL
-      queryInputs <- handle_input(inputFiles=queryFiles, handleInputParams, verbose=verbose, nc=nc)
+      queryInputs <- handle_input(inputFiles=queryFiles, importParams, verbose=verbose, nc=nc)
     
    }else{
       inputLabels <- names(inputFiles)
       queryLabels <- names(queryFiles)
       if(length(queryFiles) == length(inputFiles)){
-         queryInputs <- handle_input(inputFiles=c(queryFiles, inputFiles), handleInputParams, verbose=verbose, nc=nc)
+         queryInputs <- handle_input(inputFiles=c(queryFiles, inputFiles), importParams, verbose=verbose, nc=nc)
       }else if(length(inputFiles) == 1){
-         queryInputs <- handle_input(inputFiles=c(queryFiles, inputFiles), handleInputParams, verbose=verbose, nc=nc)
+         queryInputs <- handle_input(inputFiles=c(queryFiles, inputFiles), importParams, verbose=verbose, nc=nc)
          queryInputs <- queryInputs[c(queryLabels, rep(inputLabels, length(queryLabels)))] # expand the list
          
          inputLabels <- paste0(names(inputFiles), seq_along(queryFiles)) # make each inputLabels unique
@@ -1109,7 +1109,7 @@ plot_3parts_metagene <- function(queryFiles,
 
 #' @title Plot signal inside as well as around custom genomic regions
 #'
-#' @description Plot reads or peak Coverage/base/gene of samples in the query files inside regions defined in the centerFiles. The upstream and downstream flanking windows can be given separately. If Input files are provided, ratio over Input is computed and displayed as well.
+#' @description Plot reads or peak Coverage/base/gene of samples given in the query files inside regions defined in the centerFiles. The upstream and downstream flanking windows can be given separately. If Input files are provided, ratio over Input is computed and displayed as well.
 #'
 #' @param queryFiles a named vector of sample file names. The file should be in .bam, .bed, .wig or .bw format, mixture of formats is allowed
 #' @param centerFiles a named vector of reference file names or genomic features in  c("utr3", "utr5", "cds", "intron", "exon", "transcript", "gene"). The file should be in .bed format only
@@ -1124,7 +1124,7 @@ plot_3parts_metagene <- function(queryFiles,
 #' @param heatmap logical, indicating whether a heatmap of the score matrix should be generated
 #' @param heatRange a numerical vector of two elements, defining range for heatmap color ramp generation
 #' @param rmOutlier a numeric value serving as a multiplier of the MAD in Hampel filter for outliers identification, 0 indicating not removing outliers. For Gaussian distribution, use 3, adjust based on data distribution
-#' @param handleInputParams a list of parameters for \code{handle_input}
+#' @param importParams a list of parameters for \code{handle_input}
 #' @param outPrefix a string specifying output file prefix for plots (outPrefix.pdf)
 #' @param regionName a string specifying the name of the center region in the plots
 #' @param Ylab a string for y-axis label
@@ -1146,11 +1146,11 @@ plot_3parts_metagene <- function(queryFiles,
 #' centerfiles <- system.file("extdata", "test_chip_peak_chr19.narrowPeak", package="GenomicPlot")
 #' names(centerfiles) <- "narrowPeak"
 #' op <- NULL
-#' handleInputParams <- list(offset=0, fix_width=150, fix_point="start", norm=TRUE,
+#' importParams <- list(offset=0, fix_width=150, fix_point="start", norm=TRUE,
 #' useScore=FALSE, outRle=TRUE, useSizeFactor=TRUE, genome="hg19")
 #'  
 #' plot_region(queryFiles=queryfiles, centerFiles=centerfiles, txdb=NULL, regionName="region", 
-#' inputFiles=inputfiles, nbins=100, handleInputParams=handleInputParams, verbose=TRUE, 
+#' inputFiles=inputfiles, nbins=100, importParams=importParams, verbose=TRUE, 
 #' scale=FALSE, heatmap=TRUE, fiveP=-1000, threeP=1000, smooth=TRUE, stranded=TRUE, transform="log2",
 #' outPrefix=NULL, rmOutlier=0, heatRange=NULL, Ylab="Coverage/base/gene", 
 #' statsMethod="wilcox.test", nc=2)
@@ -1163,7 +1163,7 @@ plot_region <- function(queryFiles,
                         regionName="region", 
                         inputFiles=NULL, 
                         nbins=100, 
-                        handleInputParams=NULL, 
+                        importParams=NULL, 
                         verbose=FALSE, 
                         scale=FALSE, 
                         heatmap=FALSE, 
@@ -1190,15 +1190,15 @@ plot_region <- function(queryFiles,
 
    if(is.null(inputFiles)){
       inputLabels <- NULL
-      queryInputs <- handle_input(inputFiles=queryFiles, handleInputParams, verbose=verbose, nc=nc)
+      queryInputs <- handle_input(inputFiles=queryFiles, importParams, verbose=verbose, nc=nc)
       
    }else{
       inputLabels <- names(inputFiles)
       queryLabels <- names(queryFiles)
       if(length(queryFiles) == length(inputFiles)){
-         queryInputs <- handle_input(inputFiles=c(queryFiles, inputFiles), handleInputParams, verbose=verbose, nc=nc)
+         queryInputs <- handle_input(inputFiles=c(queryFiles, inputFiles), importParams, verbose=verbose, nc=nc)
       }else if(length(inputFiles) == 1){
-         queryInputs <- handle_input(inputFiles=c(queryFiles, inputFiles), handleInputParams, verbose=verbose, nc=nc)
+         queryInputs <- handle_input(inputFiles=c(queryFiles, inputFiles), importParams, verbose=verbose, nc=nc)
          queryInputs <- queryInputs[c(queryLabels, rep(inputLabels, length(queryLabels)))] # expand the list
          
          inputLabels <- paste0(names(inputFiles), seq_along(queryFiles)) # make each inputLabels unique
@@ -1209,7 +1209,7 @@ plot_region <- function(queryFiles,
    }
    queryLabels <- names(queryInputs)
 
-  bedparam <- handleInputParams
+  bedparam <- importParams
   bedparam$CLIP_reads <- FALSE
   bedparam$fix_width <- 0
   bedparam$useScore <- FALSE
@@ -1270,7 +1270,7 @@ plot_region <- function(queryFiles,
       if(verbose) print(paste("centerLabel", centerLabel))
       centerInput <- centerInputs[[centerLabel]]
       centerGr <- centerInput$query
-      centerGr <- check_constraints(centerGr, handleInputParams$genome, queryRegions)
+      centerGr <- check_constraints(centerGr, importParams$genome, queryRegions)
       
       if(fiveP > 0 && threeP < 0){ # to avoid generating negative width in the narrow function below
          centerGr <- centerGr[width(centerGr) > (abs(fiveP) + abs(threeP))]
@@ -1284,8 +1284,8 @@ plot_region <- function(queryFiles,
 
       upstreamGr <- flank(centerGr, width=fiveL, start=TRUE, both=FALSE, use.names=TRUE, ignore.strand=FALSE)
       downstreamGr <- flank(centerGr, width=threeL, start=FALSE, both=FALSE, use.names=TRUE, ignore.strand=FALSE)
-      upstreamGr <- check_constraints(upstreamGr, handleInputParams$genome, queryRegions)
-      downstreamGr <- check_constraints(downstreamGr, handleInputParams$genome, queryRegions)
+      upstreamGr <- check_constraints(upstreamGr, importParams$genome, queryRegions)
+      downstreamGr <- check_constraints(downstreamGr, importParams$genome, queryRegions)
       
       if(fiveP > 0){
          centerGrPlus <- narrow(centerGrPlus, start=fiveP, end=NA)
@@ -1662,12 +1662,12 @@ plot_region <- function(queryFiles,
 
 #' @title Plot promoter, 5'UTR, CDS, 3'UTR and TTS
 #'
-#' @description Plot reads or peak Coverage/base/gene of samples in the query files around genes. The upstream and downstream windows flanking genes can be given separately, metagene plots are generated with 5'UTR, CDS and 3'UTR segments. The length of each segments are prorated according to the median length of each segments. If Input files are provided, ratio over Input is computed and displayed as well.
+#' @description Plot reads or peak Coverage/base/gene of samples given in the query files around genes. The upstream and downstream windows flanking genes can be given separately, metagene plots are generated with 5'UTR, CDS and 3'UTR segments. The length of each segments are prorated according to the median length of each segments. If Input files are provided, ratio over Input is computed and displayed as well.
 #'
 #' @param queryFiles a vector of sample file names. The file should be in .bam, .bed, .wig or .bw format, mixture of formats is allowed
 #' @param gFeatures_list a list of genomic features as output of the function 'prepare_5parts_genomic_features'
 #' @param inputFiles a vector of input sample file names. The file should be in .bam, .bed, .wig or .bw format, mixture of formats is allowed
-#' @param handleInputParams a list of parameters for \code{handle_input}
+#' @param importParams a list of parameters for \code{handle_input}
 #' @param stranded logical, indicating whether the strand of the feature should be considered
 #' @param scale logical, indicating whether the score matrix should be scaled to the range 0:1, so that samples with different baseline can be compared
 #' @param smooth logical, indicating whether the line should smoothed with a spline smoothing algorithm
@@ -1696,12 +1696,12 @@ plot_region <- function(queryFiles,
 #' gfeatures <- prepare_5parts_genomic_features(txdb, meta=TRUE, nbins=100, fiveP=-1000, 
 #' threeP=1000, longest=TRUE, verbose=FALSE)
 #' 
-#' handleInputParams <- list(offset=0, fix_width=150, fix_point="start", norm=TRUE,
+#' importParams <- list(offset=0, fix_width=150, fix_point="start", norm=TRUE,
 #' useScore=FALSE, outRle=TRUE, useSizeFactor=FALSE, genome="hg19")
 #'    
 #' df <- plot_5parts_metagene(queryFiles=queryfiles, gFeatures=list("metagene"=gfeatures), 
 #' inputFiles=inputfiles, scale=FALSE, verbose=TRUE, Ylab="Coverage/base/gene", 
-#' handleInputParams=handleInputParams, smooth=TRUE,  stranded=TRUE, outPrefix=NULL, heatmap=TRUE,
+#' importParams=importParams, smooth=TRUE,  stranded=TRUE, outPrefix=NULL, heatmap=TRUE,
 #' rmOutlier=0, heatRange=NULL, transform="log2", nc=2)
 #'                
 #' @export plot_5parts_metagene
@@ -1710,7 +1710,7 @@ plot_region <- function(queryFiles,
 plot_5parts_metagene <- function(queryFiles, 
                                  gFeatures_list, 
                                  inputFiles=NULL, 
-                                 handleInputParams=NULL,
+                                 importParams=NULL,
                                  verbose=FALSE, 
                                  transform=NA, 
                                  smooth=FALSE, 
@@ -1729,14 +1729,14 @@ plot_5parts_metagene <- function(queryFiles,
 
   if(is.null(inputFiles)){
      inputLabels <- NULL
-     queryInputs <- handle_input(inputFiles=queryFiles, handleInputParams, verbose=verbose, nc=nc)
+     queryInputs <- handle_input(inputFiles=queryFiles, importParams, verbose=verbose, nc=nc)
   }else{
      inputLabels <- names(inputFiles)
      queryLabels <- names(queryFiles)
      if(length(queryFiles) == length(inputFiles)){
-        queryInputs <- handle_input(inputFiles=c(queryFiles, inputFiles), handleInputParams, verbose=verbose, nc=nc)
+        queryInputs <- handle_input(inputFiles=c(queryFiles, inputFiles), importParams, verbose=verbose, nc=nc)
      }else if(length(inputFiles) == 1){
-        queryInputs <- handle_input(inputFiles=c(queryFiles, inputFiles), handleInputParams, verbose=verbose, nc=nc)
+        queryInputs <- handle_input(inputFiles=c(queryFiles, inputFiles), importParams, verbose=verbose, nc=nc)
         queryInputs <- queryInputs[c(queryLabels, rep(inputLabels, length(queryLabels)))] # expand the list
         
         inputLabels <- paste0(names(inputFiles), seq_along(queryFiles)) # make each inputLabels unique
@@ -2007,7 +2007,7 @@ plot_5parts_metagene <- function(queryFiles,
 
 
 #' @title Plot signal around custom genomic loci
-#' @description  Plot reads or peak Coverage/base/gene of samples in the query files around reference locus (start, end or center of a genomic region)
+#' @description  Plot reads or peak Coverage/base/gene of samples given in the query files around reference locus (start, end or center of a genomic region)
 #' defined in the centerFiles. The upstream and downstream windows flanking loci can be given separately, a smaller window can be defined to allow
 #' statistical comparisons between samples for the same reference, or between references for a given sample. If Input files are provided, ratio over
 #' Input is computed and displayed as well.
@@ -2016,7 +2016,7 @@ plot_5parts_metagene <- function(queryFiles,
 #' @param centerFiles a named vector of reference file names or genomic features in  c("utr3", "utr5", "cds", "intron", "exon", "transcript", "gene"). The file should be in .bed format only
 #' @param txdb a TxDb object defined in the GenomicFeatures package. Default NULL, needed only when genomic features are used in the place of centerFiles.
 #' @param inputFiles a vector of input sample file names. The file should be in .bam, .bed, .wig or .bw format, mixture of formats is allowed
-#' @param handleInputParams a list of parameters for \code{handle_input}
+#' @param importParams a list of parameters for \code{handle_input}
 #' @param ext a vector of two integers defining upstream and downstream boundaries of the plot window, flanking the reference locus
 #' @param hl a vector of two integers defining upstream and downstream boundaries of the highlight window, flanking the reference locus
 #' @param stranded logical, indicating whether the strand of the feature should be considered
@@ -2052,11 +2052,11 @@ plot_5parts_metagene <- function(queryFiles,
 #' centerfiles <- system.file("extdata", "test_clip_peak_chr19.bed", package="GenomicPlot")
 #' names(centerfiles) <- "clipPeak"
 #' 
-#' handleInputParams <- list(offset=-1, fix_width=0, fix_point="start", norm=TRUE, 
+#' importParams <- list(offset=-1, fix_width=0, fix_point="start", norm=TRUE, 
 #' useScore=FALSE, outRle=TRUE, useSizeFactor=FALSE, genome="hg19")
 #'  
 #' df <- plot_locus(queryFiles=queryfiles, centerFiles=c(centerfiles, "exon"), txdb=txdb, 
-#' ext=c(-200,200), hl=c(-50, 50), shade=TRUE, smooth=FALSE, handleInputParams=handleInputParams, 
+#' ext=c(-200,200), hl=c(-50, 50), shade=TRUE, smooth=FALSE, importParams=importParams, 
 #' verbose=TRUE, binSize=10, refPoint="center", Xlab="Center", Ylab="Coverage/base/gene", 
 #' inputFiles=inputfiles, stranded=TRUE, heatmap=TRUE, scale=FALSE, outPrefix=NULL, 
 #' rmOutlier=0, transform="log2", statsMethod="wilcox.test", heatRange=NULL, nc=2)
@@ -2071,7 +2071,7 @@ plot_locus <- function(queryFiles,
                        hl=c(0,0), 
                        shade=TRUE, 
                        smooth=FALSE,
-                       handleInputParams=NULL, 
+                       importParams=NULL, 
                        verbose=FALSE, 
                        binSize=10, 
                        refPoint="center", 
@@ -2095,14 +2095,14 @@ plot_locus <- function(queryFiles,
 
    if(is.null(inputFiles)){
       inputLabels <- NULL
-      queryInputs <- handle_input(inputFiles=queryFiles, handleInputParams, verbose=verbose, nc=nc)
+      queryInputs <- handle_input(inputFiles=queryFiles, importParams, verbose=verbose, nc=nc)
    }else{
       inputLabels <- names(inputFiles)
       queryLabels <- names(queryFiles)
       if(length(queryFiles) == length(inputFiles)){
-         queryInputs <- handle_input(inputFiles=c(queryFiles, inputFiles), handleInputParams, verbose=verbose, nc=nc)
+         queryInputs <- handle_input(inputFiles=c(queryFiles, inputFiles), importParams, verbose=verbose, nc=nc)
       }else if(length(inputFiles) == 1){
-         queryInputs <- handle_input(inputFiles=c(queryFiles, inputFiles), handleInputParams, verbose=verbose, nc=nc)
+         queryInputs <- handle_input(inputFiles=c(queryFiles, inputFiles), importParams, verbose=verbose, nc=nc)
          queryInputs <- queryInputs[c(queryLabels, rep(inputLabels, length(queryLabels)))] # expand the list
          
          inputLabels <- paste0(names(inputFiles), seq_along(queryFiles)) # make each inputLabels unique
@@ -2135,7 +2135,7 @@ plot_locus <- function(queryFiles,
 
   scoreMatrix_list <- list()
 
-  bedparam <- handleInputParams
+  bedparam <- importParams
   bedparam$CLIP_reads <- FALSE
   bedparam$fix_width <- 0
   bedparam$useScore <- FALSE
@@ -2182,7 +2182,7 @@ plot_locus <- function(queryFiles,
       if(refPoint %in% c("center", "start", "end")){
          windowRegions <- resize(centerGr, width = 1, fix = refPoint)
          windowRegions <- promoters(windowRegions, upstream = -ext[1], downstream = ext[2])
-         windowRegions <- check_constraints(windowRegions, handleInputParams$genome, queryRegions)
+         windowRegions <- check_constraints(windowRegions, importParams$genome, queryRegions)
       }else{
         stop("invalid reference point! Must be one of c('center', 'start', 'end')")
       }
@@ -2207,7 +2207,7 @@ plot_locus <- function(queryFiles,
          print("Dimension of fullMatrix")
          print(dim(fullMatrix))
          print("Number of unique window regions")
-         print(length(unique(format_genomic_coordinates(windowRs))))
+         #print(length(unique(format_genomic_coordinates(windowRs))))
          #rownames(fullMatrix) <- format_genomic_coordinates(windowRs)
          #write.table(fullMatrix, paste0(queryLabel, "_", centerLabel, "_scoreMatrix.tab"), col.names=NA, sep="\t", quote=FALSE)
       }
@@ -2580,13 +2580,13 @@ plot_locus <- function(queryFiles,
 
 #' @title Plot signal around custom genomic loci and random loci for comparison
 #
-#' @description Plot reads or peak Coverage/base/gene of samples in the query files around reference locus defined in the centerFiles. The upstream and downstream windows flanking loci can be given separately, a smaller window can be defined to allow statistical comparisons between reference and random loci. The loci are further divided into sub-groups that are overlapping with c("5'UTR", "CDS", "3'UTR"), "unrestricted" means all loci regardless of overlapping.
+#' @description Plot reads or peak Coverage/base/gene of samples given in the query files around reference locus defined in the centerFiles. The upstream and downstream windows flanking loci can be given separately, a smaller window can be defined to allow statistical comparisons between reference and random loci. The loci are further divided into sub-groups that are overlapping with c("5'UTR", "CDS", "3'UTR"), "unrestricted" means all loci regardless of overlapping.
 #'
 #' @param queryFiles a vector of sample file names. The file should be in .bam, .bed, .wig or .bw format, mixture of formats is allowed
 #' @param centerFiles a vector of reference file names. The file should be .bed format only
 #' @param inputFiles a vector of input sample file names. The file should be in .bam, .bed, .wig or .bw format, mixture of formats is allowed
 #' @param txdb a TxDb object defined in the GenomicFeatures package
-#' @param handleInputParams a list of parameters for \code{handle_input}
+#' @param importParams a list of parameters for \code{handle_input}
 #' @param ext a vector of two integers defining upstream and downstream boundaries of the plot window, flanking the reference locus
 #' @param hl a vector of two integers defining upstream and downstream boundaries of the highlight window, flanking the reference locus
 #' @param stranded logical, indicating whether the strand of the feature should be considered
@@ -2621,11 +2621,11 @@ plot_locus <- function(queryFiles,
 #' centerfiles <- system.file("extdata", "test_clip_peak_chr19.bed", package="GenomicPlot")
 #' names(centerfiles) <- "clipPeak"
 #' 
-#' handleInputParams <- list(offset=-1, fix_width=150, fix_point="start", norm=FALSE, 
+#' importParams <- list(offset=-1, fix_width=150, fix_point="start", norm=FALSE, 
 #' useScore=FALSE, outRle=TRUE, useSizeFactor=TRUE, genome="hg19")
 #'  
 #' df <- plot_locus_with_random(queryFiles=queryfiles, centerFiles=c(centerfiles), txdb=txdb, 
-#' ext=c(-200,200), hl=c(-20, 20), shade=TRUE, smooth=TRUE, handleInputParams=handleInputParams, 
+#' ext=c(-200,200), hl=c(-20, 20), shade=TRUE, smooth=TRUE, importParams=importParams, 
 #' verbose=TRUE, binSize=10, refPoint="center", Xlab="Center", Ylab="Coverage/base/gene", 
 #' inputFiles=inputfiles, stranded=TRUE, scale=FALSE, outPrefix=NULL, rmOutlier=0, 
 #' transform=NA, statsMethod="wilcox.test", nc=2)
@@ -2638,7 +2638,7 @@ plot_locus_with_random <- function(queryFiles,
                                    ext=c(-200, 200), 
                                    hl=c(-100, 100), 
                                    shade=FALSE, 
-                                   handleInputParams=NULL, 
+                                   importParams=NULL, 
                                    verbose=FALSE, 
                                    smooth=FALSE, 
                                    transform=NA, 
@@ -2662,14 +2662,14 @@ plot_locus_with_random <- function(queryFiles,
    
    if(is.null(inputFiles)){
       inputLabels <- NULL
-      queryInputs <- handle_input(inputFiles=queryFiles, handleInputParams, verbose=verbose, nc=nc)
+      queryInputs <- handle_input(inputFiles=queryFiles, importParams, verbose=verbose, nc=nc)
    }else{
       inputLabels <- names(inputFiles)
       queryLabels <- names(queryFiles)
       if(length(queryFiles) == length(inputFiles)){
-         queryInputs <- handle_input(inputFiles=c(queryFiles, inputFiles), handleInputParams, verbose=verbose, nc=nc)
+         queryInputs <- handle_input(inputFiles=c(queryFiles, inputFiles), importParams, verbose=verbose, nc=nc)
       }else if(length(inputFiles) == 1){
-         queryInputs <- handle_input(inputFiles=c(queryFiles, inputFiles), handleInputParams, verbose=verbose, nc=nc)
+         queryInputs <- handle_input(inputFiles=c(queryFiles, inputFiles), importParams, verbose=verbose, nc=nc)
          queryInputs <- queryInputs[c(queryLabels, rep(inputLabels, length(queryLabels)))] # expand the list
          
          inputLabels <- paste0(names(inputFiles), seq_along(queryFiles)) # make each inputLabels unique
@@ -2723,7 +2723,7 @@ plot_locus_with_random <- function(queryFiles,
   quantile_list_random <- list()
 
 
-  bedparam <- handleInputParams
+  bedparam <- importParams
   bedparam$CLIP_reads <- FALSE
   bedparam$fix_width <- 0
   bedparam$useScore <- FALSE
@@ -3024,7 +3024,7 @@ plot_locus_with_random <- function(queryFiles,
 #' @param bamfiles a named vector of strings denoting file names
 #' @param binSize an integer denoting the tile width for tiling the genome, default 1000000
 #' @param outPrefix a string denoting output file name in pdf format
-#' @param handleInputParams a list of parameters for \code{handle_input}
+#' @param importParams a list of parameters for \code{handle_input}
 #' @param verbose logical, indicating whether to output additional information
 #' @param hw a vector of two elements specifying the height and width of the output figures
 #' @param nc integer, number of cores for parallel processing
@@ -3040,11 +3040,11 @@ plot_locus_with_random <- function(queryFiles,
 #'                 system.file("extdata", "input_chr19.bam", package="GenomicPlot"))
 #' names(inputFiles) <- c("chip_input", "clip_input")
 #'
-#' handleInputParams <- list(offset=0, fix_width=0, fix_point="start", norm=FALSE, 
+#' importParams <- list(offset=0, fix_width=0, fix_point="start", norm=FALSE, 
 #' useScore=FALSE, outRle=FALSE, useSizeFactor=FALSE, genome="hg19")
 #'                           
 #' plot_bam_correlation(bamfiles=c(queryFiles, inputFiles), binSize=10000, outPrefix=NULL,
-#'    handleInputParams=handleInputParams, nc=2)
+#'    importParams=importParams, nc=2)
 #'
 #'
 #' @export plot_bam_correlation
@@ -3052,17 +3052,21 @@ plot_locus_with_random <- function(queryFiles,
 plot_bam_correlation <- function(bamfiles, 
                                  binSize=1e6, 
                                  outPrefix=NULL, 
-                                 handleInputParams=NULL, 
+                                 importParams=NULL, 
                                  verbose=FALSE, 
                                  hw=c(8,8),
                                  nc=2){
 
-  bamlabels <- names(bamfiles)
-  handleInputParams$outRle <- FALSE # force query to be GRanges
+   functionName <- as.character(match.call()[[1]])
+   params <- plot_named_list(as.list(environment()))
+   print(params)
+   
+   bamlabels <- names(bamfiles)
+  importParams$outRle <- FALSE # force query to be GRanges
   if(verbose) print("Computing bam correlation")
-  outlist <- handle_input(inputFiles=bamfiles, handleInputParams, nc=nc)
+  outlist <- handle_input(inputFiles=bamfiles, importParams, nc=nc)
 
-  seqi <- Seqinfo(genome=handleInputParams$genome)
+  seqi <- Seqinfo(genome=importParams$genome)
 
   tileBins <-  tileGenome(seqi, tilewidth=binSize, cut.last.tile.in.chrom=TRUE)
 
@@ -3154,7 +3158,10 @@ plot_bam_correlation <- function(bamfiles,
   
   if(length(bamfiles)<6) pairs(log2(df+1), lower.panel = panel.smooth, upper.panel=panel.cor, diag.panel = panel.hist, main=paste("log2(CPM/bin), bin size =", binSize))
 
-  if(!is.null(outPrefix)) on.exit(dev.off(), add=TRUE)
+  if(!is.null(outPrefix)) {
+     print(params)
+     on.exit(dev.off(), add=TRUE)
+  }
 
   invisible(df)
 }
@@ -3165,7 +3172,7 @@ plot_bam_correlation <- function(bamfiles,
 #'
 #' @param peakFile a string denoting the peak file name, only .bed format is allowed
 #' @param gtfFile path to a gene annotation gtf file with gene_biotype field
-#' @param handleInputParams a list of parameters for \code{handle_input}
+#' @param importParams a list of parameters for \code{handle_input}
 #' @param fiveP extension out of the 5' boundary of genes for defining promoter: fiveP TSS + dsTSS
 #' @param dsTSS extension downstream of TSS for defining promoter: fiveP TSS + dsTSS
 #' @param threeP extension out of the 3' boundary of genes for defining termination region: -0 TTS + threeP
@@ -3187,14 +3194,14 @@ plot_bam_correlation <- function(bamfiles,
 #' handleBedparams <- list(fix_width=0, fix_point="center", useScore=FALSE, outRle=FALSE, 
 #' offset=0, norm=FALSE, useSizeFactor=FALSE, genome="hg19")
 #'
-#' plot_peak_annotation(peakFile=centerFile, gtfFile=gtfFile, handleInputParams=handleBedparams, 
+#' plot_peak_annotation(peakFile=centerFile, gtfFile=gtfFile, importParams=handleBedparams, 
 #' fiveP=-2000, dsTSS=200, threeP=2000, simple=FALSE)
 #'
 #' @export plot_peak_annotation
 #'
 plot_peak_annotation <- function(peakFile, 
                                  gtfFile, 
-                                 handleInputParams=NULL, 
+                                 importParams=NULL, 
                                  fiveP=-1000, 
                                  dsTSS=300,
                                  threeP=1000, 
@@ -3204,10 +3211,14 @@ plot_peak_annotation <- function(peakFile,
                                  hw=c(8,8),
                                  nc=2){
 
+   functionName <- as.character(match.call()[[1]])
+   params <- plot_named_list(as.list(environment()))
+   print(params)
+   
   peakLabel <- names(peakFile)
-  handleInputParams$useScore=FALSE
-  handleInputParams$outRle=FALSE
-  bedin <- handle_input(inputFiles=peakFile, handleInputParams)
+  importParams$useScore=FALSE
+  importParams$outRle=FALSE
+  bedin <- handle_input(inputFiles=peakFile, importParams)
   peak <- bedin[[peakLabel]]$query
   
   stranded <- TRUE
@@ -3299,7 +3310,10 @@ plot_peak_annotation <- function(peakFile,
              panel.background = element_rect(fill = "white"))
 
     print(plot_grid(ap1, ap2))
-    if(!is.null(outPrefix)) on.exit(dev.off(), add=TRUE)
+    if(!is.null(outPrefix)){
+       print(params)
+       on.exit(dev.off(), add=TRUE)
+    }
     invisible(list(annotation=NULL, stat=df, simplified=NULL))
   }else{
 
@@ -3498,19 +3512,22 @@ plot_peak_annotation <- function(peakFile,
     print(plot_grid(apa1, apb1, nrow=1, labels="Absolute counts", label_y=1))
     print(plot_grid(apa2, apb2, nrow=1, labels="Length-normalized counts", label_y=1))
     
-    if(!is.null(outPrefix)) on.exit(dev.off(), add=TRUE)
+    if(!is.null(outPrefix)){
+       print(params)
+       on.exit(dev.off(), add=TRUE)
+    }
     invisible(list(annotation=dfs, stat=dfa, simplified=dfb))
   }
 }
 
 
 #' @title Plot Venn diagrams depicting overlap of genomic regions
-#' @description This function takes a list of bed file names, and produce a Venn diagram
-#' @param bedList a named list of bed files, with length = 2, 3 or 4
+#' @description This function takes a list of up to 4 bed file names, and produce a Venn diagram
+#' @param bedList a named list of bed files, with list length = 2, 3 or 4
 #' @param outPrefix a string for plot file name
-#' @param handleInputParams a list of parameters for \code{handle_input}
+#' @param importParams a list of parameters for \code{handle_input}
 #' @param stranded logical, indicating whether the feature is stranded. For nonstranded feature, only "*" is accepted as strand
-#' @param pairOnly logical, indicating whether only pair-wise overlap is desired
+#' @param pairOnly logical, indicating whether only pair-wise overlap is desirable
 #' @param verbose logical, indicating whether to output additional information
 #' @param hw a vector of two elements specifying the height and width of the output figures
 #'
@@ -3527,7 +3544,7 @@ plot_peak_annotation <- function(peakFile,
 #' handleBedParams <- list(fix_width=100, fix_point="center", useScore=FALSE, outRle=FALSE,
 #'                         offset=0, norm=FALSE, useSizeFactor=FALSE, genome="hg19")
 #'
-#' plot_overlap_bed(bedList=queryFiles, handleInputParams=handleBedParams, pairOnly=FALSE, 
+#' plot_overlap_bed(bedList=queryFiles, importParams=handleBedParams, pairOnly=FALSE, 
 #' stranded=FALSE)
 #'
 #' @export plot_overlap_bed
@@ -3535,13 +3552,13 @@ plot_peak_annotation <- function(peakFile,
 
 plot_overlap_bed <- function(bedList, 
                              outPrefix=NULL, 
-                             handleInputParams=NULL, 
+                             importParams=NULL, 
                              pairOnly=TRUE, 
                              stranded=TRUE,
                              hw=c(8,8),
                              verbose=FALSE){
 
-  inputList <- handle_input(bedList, handleInputParams)
+  inputList <- handle_input(bedList, importParams)
   names(inputList) <- names(bedList)
   grList <- lapply(inputList, function(x)x$query)
   sizeList <- lapply(inputList, function(x)x$size)
@@ -3612,11 +3629,11 @@ plot_overlap_bed <- function(bedList,
 }
 
 #' @title Plot Venn diagrams depicting overlap of gene lists
-#' @description This function takes a list of (at most 3) tab-delimited file names, and produce a Venn diagram
-#' @param fileList, a named list of tab-dlimited files
+#' @description This function takes a list of (at most 4) tab-delimited file names, and produce a Venn diagram
+#' @param fileList, a named list of tab-delimited files
 #' @param columnList a vector of integers denoting the columns that have gene names in the list of files
 #' @param outPrefix, a string for plot file name
-#' @param pairOnly, logical, indicating whether only pair-wise overlap is desired
+#' @param pairOnly, logical, indicating whether only pair-wise overlap is desirable
 #' @param hw a vector of two elements specifying the height and width of the output figures
 #'
 #' @return a list of vectors of gene names

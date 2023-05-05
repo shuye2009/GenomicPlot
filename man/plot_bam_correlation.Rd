@@ -8,7 +8,7 @@ plot_bam_correlation(
   bamfiles,
   binSize = 1e+06,
   outPrefix = NULL,
-  handleInputParams = NULL,
+  importParams = NULL,
   verbose = FALSE,
   hw = c(8, 8),
   nc = 2
@@ -21,7 +21,7 @@ plot_bam_correlation(
 
 \item{outPrefix}{a string denoting output file name in pdf format}
 
-\item{handleInputParams}{a list of parameters for \code{handle_input}}
+\item{importParams}{a list of parameters for \code{handle_input}}
 
 \item{verbose}{logical, indicating whether to output additional information}
 
@@ -41,11 +41,11 @@ inputFiles <- c(system.file("extdata", "chip_input_chr19.bam", package="GenomicP
                 system.file("extdata", "input_chr19.bam", package="GenomicPlot"))
 names(inputFiles) <- c("chip_input", "clip_input")
 
-handleInputParams <- list(offset=0, fix_width=0, fix_point="start", norm=FALSE, 
+importParams <- list(offset=0, fix_width=0, fix_point="start", norm=FALSE, 
 useScore=FALSE, outRle=FALSE, useSizeFactor=FALSE, genome="hg19")
                           
 plot_bam_correlation(bamfiles=c(queryFiles, inputFiles), binSize=10000, outPrefix=NULL,
-   handleInputParams=handleInputParams, nc=2)
+   importParams=importParams, nc=2)
 
 
 }

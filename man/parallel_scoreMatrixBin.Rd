@@ -15,25 +15,25 @@ parallel_scoreMatrixBin(
 )
 }
 \arguments{
-\item{queryRegions, }{a RleList object or Granges object providing input for the 'target' parameter of the scoreMatrixBin method}
+\item{queryRegions}{a RleList object or Granges object providing input for the 'target' parameter of the scoreMatrixBin method}
 
-\item{windowRs, }{a single GRangesList object.}
+\item{windowRs}{a single GRangesList object.}
 
-\item{bin_num, }{number of bins the windows should be divided into}
+\item{bin_num}{number of bins the windows should be divided into}
 
-\item{bin_op, }{operation on the signals in a bin, a string in c("mean", "max", "min", "median", "sum") is accepted.}
+\item{bin_op}{operation on the signals in a bin, a string in c("mean", "max", "min", "median", "sum") is accepted.}
 
-\item{weight_col, }{if the queryRegions is a GRanges object, a numeric column in meta data part can be used as weights.}
+\item{weight_col}{if the queryRegions is a GRanges object, a numeric column in meta data part can be used as weights.}
 
-\item{stranded, }{logical, indicating if the strand of the windows should be considered to determine upstream and downstream}
+\item{stranded}{logical, indicating if the strand of the windows should be considered to determine upstream and downstream}
 
-\item{nc, }{an integer denoting the number of cores requested, 2 is the default number that is allowed by CRAN but 5 gives best trade-off between speed and space}
+\item{nc}{an integer denoting the number of cores requested, 2 is the default number that is allowed by CRAN but 5 gives best trade-off between speed and space}
 }
 \value{
 a numeric matrix
 }
 \description{
-Function for parallel computation of scoreMatrixBin. The 'windows' parameter of the scoreMatrixBin method is split into 5 chunks, and scoreMatrixBin is called on each chunk simultaneously to speed up the computation.
+Function for parallel computation of scoreMatrixBin. The 'windows' parameter of the scoreMatrixBin method is split into nc chunks, and scoreMatrixBin is called on each chunk simultaneously to speed up the computation.
 }
 \author{
 Shuye Pu

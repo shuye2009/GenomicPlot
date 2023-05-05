@@ -27,7 +27,10 @@ process_scoreMatrix(
 a numeric matrix with the same dimension as the fullmatrix
 }
 \description{
-This is a helper function for manipulate the score matrix produced by ScoreMatrix or ScoreMatrinBin functions defined in the 'genomation' package.
+This is a helper function for manipulate the score matrix produced by ScoreMatrix or ScoreMatrinBin functions defined in the 'genomation' package. To facilitate downstream analysis, imputation of missing values is performed implicitly.
+}
+\details{
+If inputFiles is null, all operations (impute, scale, rmOutlier and transform) can be applied to the score matrix, in the order of impute -> rmOutlier -> transform -> scale. When inputFiles are provided, only impute and rmOutlier can be applied to the score matrix, and transform and scale will affect ratio calculation, especially when log2 of ratio is intended, however, all these operations can be applied to the resulting ratio matrix. In order to avoid introducing distortion into the post-processed data, use caution when applying these operations.
 }
 \author{
 Shuye Pu

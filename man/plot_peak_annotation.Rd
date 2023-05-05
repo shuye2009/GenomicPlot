@@ -7,7 +7,7 @@
 plot_peak_annotation(
   peakFile,
   gtfFile,
-  handleInputParams = NULL,
+  importParams = NULL,
   fiveP = -1000,
   dsTSS = 300,
   threeP = 1000,
@@ -23,7 +23,7 @@ plot_peak_annotation(
 
 \item{gtfFile}{path to a gene annotation gtf file with gene_biotype field}
 
-\item{handleInputParams}{a list of parameters for \code{handle_input}}
+\item{importParams}{a list of parameters for \code{handle_input}}
 
 \item{fiveP}{extension out of the 5' boundary of genes for defining promoter: fiveP TSS + dsTSS}
 
@@ -57,7 +57,7 @@ names(centerFile) <- c("summitPeak")
 handleBedparams <- list(fix_width=0, fix_point="center", useScore=FALSE, outRle=FALSE, 
 offset=0, norm=FALSE, useSizeFactor=FALSE, genome="hg19")
 
-plot_peak_annotation(peakFile=centerFile, gtfFile=gtfFile, handleInputParams=handleBedparams, 
+plot_peak_annotation(peakFile=centerFile, gtfFile=gtfFile, importParams=handleBedparams, 
 fiveP=-2000, dsTSS=200, threeP=2000, simple=FALSE)
 
 }

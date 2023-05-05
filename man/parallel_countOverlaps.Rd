@@ -9,11 +9,11 @@ parallel_countOverlaps(grange_list, tileBins, nc = 2, switch = FALSE)
 \arguments{
 \item{grange_list}{a list of GRanges objects.}
 
-\item{tileBins, }{a GRanges object of tiled genome}
+\item{tileBins}{a GRanges object of tiled genome}
 
 \item{nc}{integer, number of cores for parallel processing}
 
-\item{switch, }{logical, switch the order of query and feature}
+\item{switch}{logical, switch the order of query and feature}
 }
 \value{
 a list of numeric vectors

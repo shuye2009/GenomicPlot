@@ -18,25 +18,25 @@ txdb <- AnnotationDbi::loadDb(system.file("extdata", "txdb_chr19.sql", package="
 bedQueryFiles <- c(system.file("extdata", "test_chip_peak_chr19.narrowPeak", package="GenomicPlot"),
                    system.file("extdata", "test_chip_peak_chr19.bed", package="GenomicPlot"),
                    system.file("extdata", "test_clip_peak_chr19.bed", package="GenomicPlot"))
-names(bedQueryFiles) <- c("Narrow", "Summit", "iCLIP")
+names(bedQueryFiles) <- c("NarrowPeak", "SummitPeak", "iCLIPPeak")
 
-bedHandleInputParams <- list(offset=0, fix_width=100, fix_point="center", norm=FALSE, 
+bedimportParams <- list(offset=0, fix_width=100, fix_point="center", norm=FALSE, 
                              useScore=FALSE, outRle=TRUE, useSizeFactor=FALSE, genome="hg19")
 
 bamQueryFiles <- system.file("extdata", "treat_chr19.bam", package="GenomicPlot")
-names(bamQueryFiles) <- "query"
+names(bamQueryFiles) <- "clip_bam"
 bamInputFiles <- system.file("extdata", "input_chr19.bam", package="GenomicPlot")
-names(bamInputFiles) <- "input"
+names(bamInputFiles) <- "clip_input"
 
-bamHandleInputParams <- list(offset=-1, fix_width=0, fix_point="start", norm=TRUE, 
+bamimportParams <- list(offset=-1, fix_width=0, fix_point="start", norm=TRUE, 
                              useScore=FALSE, outRle=TRUE, useSizeFactor=FALSE, genome="hg19")
 
 chipQureyFiles <- system.file("extdata", "chip_treat_chr19.bam", package="GenomicPlot")
-names(chipQureyFiles) <- "chip_query"
+names(chipQureyFiles) <- "chip_bam"
 chipInputFiles <- system.file("extdata", "chip_input_chr19.bam", package="GenomicPlot")
 names(chipInputFiles) <- "chip_input"
 
-chipHandleInputParams <- list(offset=0, fix_width=150, fix_point="start", norm=TRUE, 
+chipimportParams <- list(offset=0, fix_width=150, fix_point="start", norm=TRUE, 
                               useScore=FALSE, outRle=TRUE, useSizeFactor=TRUE, genome="hg19")
 
 
@@ -46,7 +46,7 @@ test_that("testing plot_5parts_metagene", {
    plot_5parts_metagene(queryFiles=bedQueryFiles,
                         gFeatures_list=list("metagene"=gf),
                         inputFiles=NULL,
-                        handleInputParams=bedHandleInputParams,
+                        importParams=bedimportParams,
                         verbose=FALSE,
                         smooth=TRUE,
                         scale=FALSE,
@@ -55,7 +55,7 @@ test_that("testing plot_5parts_metagene", {
                         transform=NA,
                         heatmap=TRUE,
                         rmOutlier=0,
-                        heatRange=c(0,1),
+                        heatRange=NULL,
                         nc=2)
    pdf_to_png(op)
    
@@ -69,7 +69,7 @@ test_that("testing plot_5parts_metagene", {
                         smooth=TRUE, 
                         stranded=TRUE, 
                         outPrefix=op, 
-                        handleInputParams=bamHandleInputParams, 
+                        importParams=bamimportParams, 
                         heatmap=TRUE, 
                         rmOutlier=0, 
                         nc=2)
@@ -89,7 +89,7 @@ test_that("testing plot_3parts_metagene", {
                         smooth=TRUE, 
                         stranded=TRUE, 
                         outPrefix=op, 
-                        handleInputParams=chipHandleInputParams, 
+                        importParams=chipimportParams, 
                         heatmap=TRUE, 
                         rmOutlier=0, 
                         nc=2)
@@ -103,7 +103,7 @@ test_that("testing plot_locus", {
               ext=c(-1000, 1000),
               hl=c(-100, 100),
               inputFiles=NULL,
-              handleInputParams=bedHandleInputParams,
+              importParams=bedimportParams,
               shade=TRUE,
               binSize=10,
               refPoint="center",
@@ -115,7 +115,7 @@ test_that("testing plot_locus", {
               outPrefix=op,
               transform=NA,
               heatmap=TRUE,
-              heatRange=c(0,1),
+              heatRange=NULL,
               rmOutlier=0,
               nc=2)
    pdf_to_png(op)
@@ -123,7 +123,7 @@ test_that("testing plot_locus", {
    queryfiles <- c(bamQueryFiles, chipQureyFiles)
    inputfiles <- c(bamInputFiles, chipInputFiles)
    
-   handleInputParams <- list(offset=0, fix_width=150, fix_point="start", norm=TRUE, 
+   importParams <- list(offset=0, fix_width=150, fix_point="start", norm=TRUE, 
                              useScore=FALSE, outRle=TRUE, useSizeFactor=TRUE, genome="hg19")
    
    op <- "test_plot_locus2"
@@ -133,7 +133,7 @@ test_that("testing plot_locus", {
               hl=c(-100,100), 
               shade=TRUE, 
               smooth=TRUE, 
-              handleInputParams=handleInputParams, 
+              importParams=importParams, 
               binSize=10, 
               refPoint="center", 
               Xlab="Center", 
@@ -151,12 +151,12 @@ test_that("testing plot_locus", {
 })
 test_that("testing plot_peak_annotation", {
    op <- "test_plot_peak_annotation1"
-   peakHandleInputParams <- list(offset=0, fix_width=100, fix_point="center", norm=FALSE, 
+   peakimportParams <- list(offset=0, fix_width=100, fix_point="center", norm=FALSE, 
                                  useScore=FALSE, outRle=FALSE, useSizeFactor=FALSE, genome="hg19")
    
    plot_peak_annotation(peakFile=bedQueryFiles[2],
                         gtfFile=gtffile,
-                        handleInputParams=peakHandleInputParams,
+                        importParams=peakimportParams,
                         fiveP=-2000,
                         dsTSS=200,
                         threeP=1000,
@@ -165,12 +165,12 @@ test_that("testing plot_peak_annotation", {
    pdf_to_png(op)
    
    op <- "test_plot_peak_annotation2"
-   peakHandleInputParams <- list(offset=0, fix_width=21, fix_point="center", norm=FALSE, 
+   peakimportParams <- list(offset=0, fix_width=21, fix_point="center", norm=FALSE, 
                                  useScore=FALSE, outRle=FALSE, useSizeFactor=FALSE, genome="hg19")
    
    plot_peak_annotation(peakFile=bedQueryFiles[3],
                         gtfFile=gtffile,
-                        handleInputParams=peakHandleInputParams,
+                        importParams=peakimportParams,
                         fiveP=-1000,
                         dsTSS=0,
                         threeP=2000,
@@ -183,7 +183,7 @@ test_that("testing plot_region", {
    queryfiles <- c(bamQueryFiles, chipQureyFiles)
    inputfiles <- c(bamInputFiles, chipInputFiles)
                    
-   handleInputParams <- list(offset=0, fix_width=150, fix_point="start", norm=TRUE, 
+   importParams <- list(offset=0, fix_width=150, fix_point="start", norm=TRUE, 
                              useScore=FALSE, outRle=TRUE, useSizeFactor=FALSE, genome="hg19")
    
    op <- "test_plot_region"
@@ -194,7 +194,7 @@ test_that("testing plot_region", {
                heatmap=TRUE, 
                scale=FALSE,  
                regionName="narrowPeak", 
-               handleInputParams=handleInputParams, 
+               importParams=importParams, 
                verbose=FALSE, 
                fiveP=-500, 
                threeP=500, 
@@ -214,7 +214,7 @@ test_that("testing plot_start_end", {
                   txdb=txdb, 
                   centerFiles="intron", 
                   binSize=10,
-                  handleInputParams=bamHandleInputParams, 
+                  importParams=bamimportParams, 
                   ext=c(-500, 200, -200, 500), 
                   hl=c(-100, 100, -100, 100), 
                   insert=100, 
@@ -233,7 +233,7 @@ test_that("testing plot_start_end_with_random", {
                   txdb=txdb, 
                   centerFile="intron", 
                   binSize=10,
-                  handleInputParams=bamHandleInputParams, 
+                  importParams=bamimportParams, 
                   ext=c(-500, 200, -200, 500), 
                   hl=c(-100, 100, -100, 100), 
                   insert=100, 
@@ -254,7 +254,7 @@ test_that("testing plot_locus_with_random", {
                           ext=c(-500,500), 
                           hl=c(-100,100), 
                           shade=TRUE, 
-                          handleInputParams=bamHandleInputParams, 
+                          importParams=bamimportParams, 
                           binSize=10, 
                           refPoint="center", 
                           Xlab="Center", 

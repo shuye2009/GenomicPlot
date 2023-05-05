@@ -8,7 +8,7 @@ plot_5parts_metagene(
   queryFiles,
   gFeatures_list,
   inputFiles = NULL,
-  handleInputParams = NULL,
+  importParams = NULL,
   verbose = FALSE,
   transform = NA,
   smooth = FALSE,
@@ -30,7 +30,7 @@ plot_5parts_metagene(
 
 \item{inputFiles}{a vector of input sample file names. The file should be in .bam, .bed, .wig or .bw format, mixture of formats is allowed}
 
-\item{handleInputParams}{a list of parameters for \code{handle_input}}
+\item{importParams}{a list of parameters for \code{handle_input}}
 
 \item{verbose}{logical, indicating whether to output additional information (data used for plotting or statistical test results)}
 
@@ -60,7 +60,7 @@ plot_5parts_metagene(
 a dataframe containing the data used for plotting
 }
 \description{
-Plot reads or peak Coverage/base/gene of samples in the query files around genes. The upstream and downstream windows flanking genes can be given separately, metagene plots are generated with 5'UTR, CDS and 3'UTR segments. The length of each segments are prorated according to the median length of each segments. If Input files are provided, ratio over Input is computed and displayed as well.
+Plot reads or peak Coverage/base/gene of samples given in the query files around genes. The upstream and downstream windows flanking genes can be given separately, metagene plots are generated with 5'UTR, CDS and 3'UTR segments. The length of each segments are prorated according to the median length of each segments. If Input files are provided, ratio over Input is computed and displayed as well.
 }
 \examples{
 txdb <- AnnotationDbi::loadDb(system.file("extdata", "txdb_chr19.sql", package="GenomicPlot"))
@@ -74,12 +74,12 @@ names(inputfiles) <- "input"
 gfeatures <- prepare_5parts_genomic_features(txdb, meta=TRUE, nbins=100, fiveP=-1000, 
 threeP=1000, longest=TRUE, verbose=FALSE)
 
-handleInputParams <- list(offset=0, fix_width=150, fix_point="start", norm=TRUE,
+importParams <- list(offset=0, fix_width=150, fix_point="start", norm=TRUE,
 useScore=FALSE, outRle=TRUE, useSizeFactor=FALSE, genome="hg19")
    
 df <- plot_5parts_metagene(queryFiles=queryfiles, gFeatures=list("metagene"=gfeatures), 
 inputFiles=inputfiles, scale=FALSE, verbose=TRUE, Ylab="Coverage/base/gene", 
-handleInputParams=handleInputParams, smooth=TRUE,  stranded=TRUE, outPrefix=NULL, heatmap=TRUE,
+importParams=importParams, smooth=TRUE,  stranded=TRUE, outPrefix=NULL, heatmap=TRUE,
 rmOutlier=0, heatRange=NULL, transform="log2", nc=2)
                
 }

@@ -10,7 +10,7 @@ stop_parallel(cl)
 \item{cl}{a cluster or SOCKcluster object depending on platform}
 }
 \description{
-Method for stopping a virtual cluster needed for parallel processing
+Stopping a virtual cluster after parallel processing is finished
 }
 \examples{
 cl <- start_parallel(2L)

@@ -19,9 +19,9 @@ draw_matrix_heatmap(
 
 \item{dataName}{the nature of the numeric data}
 
-\item{labels_col}{a vector make column annotation}
+\item{labels_col}{a named vector for column annotation}
 
-\item{levels_col}{factor levels for labels_col, specifying the order of labels_col}
+\item{levels_col}{factor levels for names of labels_col, specifying the order of labels_col}
 
 \item{ranking}{method for ranking the rows of the input matrix, options are c("Sum", "Max", "Hierarchical", "None")}
 

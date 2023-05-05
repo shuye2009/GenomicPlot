@@ -16,7 +16,7 @@ get_genomic_feature_coordinates(
 \arguments{
 \item{txdb}{a TxDb object defined in the GenomicFeatures package}
 
-\item{featureName}{one of the gene feature in c("utr3", "utr5", "cds", "intron", "exon", "transcript", "gene")}
+\item{featureName}{one of the genomic feature in c("utr3", "utr5", "cds", "intron", "exon", "transcript", "gene")}
 
 \item{featureSource}{the name of the gtf/gff3 file or the online database from which txdb is derived, used as name of output file}
 

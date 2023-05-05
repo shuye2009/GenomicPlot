@@ -9,7 +9,7 @@ plot_start_end(
   inputFiles = NULL,
   centerFiles,
   txdb = NULL,
-  handleInputParams = NULL,
+  importParams = NULL,
   binSize = 10,
   insert = 0,
   verbose = FALSE,
@@ -36,7 +36,7 @@ plot_start_end(
 
 \item{txdb}{a TxDb object defined in the GenomicFeatures package. Default NULL, needed only when genomic features are used in the place of centerFiles.}
 
-\item{handleInputParams}{a list of parameters for \code{handle_input}}
+\item{importParams}{a list of parameters for \code{handle_input}}
 
 \item{binSize}{an integer defines bin size for intensity calculation}
 
@@ -72,7 +72,7 @@ plot_start_end(
 a list of two objects, the first is a GRanges object, the second is a GRangesList object
 }
 \description{
-Plot reads or peak Coverage/base/gene of samples in the query files around start and end of custom features. The upstream and downstream windows
+Plot reads or peak Coverage/base/gene of samples given in the query files around start and end of custom features. The upstream and downstream windows
 can be given separately, within the window, a smaller window can be defined to highlight region of interest.
 A line plot will be displayed for both start and end of feature. If Input files are provided, ratio over Input is
 computed and displayed as well.
@@ -89,11 +89,11 @@ names(inputfiles) <- "input"
 centerfiles <- system.file("extdata", "test_chip_peak_chr19.narrowPeak", package="GenomicPlot")
 names(centerfiles) <- "narrowPeak"
 
-handleInputParams <- list(offset=0, fix_width=150, fix_point="start", norm=FALSE, 
+importParams <- list(offset=0, fix_width=150, fix_point="start", norm=FALSE, 
 useScore=FALSE, outRle=TRUE, useSizeFactor=TRUE, genome="hg19")
  
 df <- plot_start_end(queryFiles=queryfiles, inputFiles=inputfiles, 
-centerFiles=c("gene", centerfiles), txdb=txdb, handleInputParams=handleInputParams, binSize=10,
+centerFiles=c("gene", centerfiles), txdb=txdb, importParams=importParams, binSize=10,
 insert=100, verbose=TRUE, ext=c(-500, 100, -100, 500), hl=c(-50, 50, -50, 50), stranded=TRUE,
 scale=FALSE, smooth=TRUE, rmOutlier=0, outPrefix=NULL, transform=NA, shade=TRUE, 
 Ylab="Coverage/base/gene", nc=2)

@@ -7,7 +7,7 @@
 plot_overlap_bed(
   bedList,
   outPrefix = NULL,
-  handleInputParams = NULL,
+  importParams = NULL,
   pairOnly = TRUE,
   stranded = TRUE,
   hw = c(8, 8),
@@ -15,13 +15,13 @@ plot_overlap_bed(
 )
 }
 \arguments{
-\item{bedList}{a named list of bed files, with length = 2, 3 or 4}
+\item{bedList}{a named list of bed files, with list length = 2, 3 or 4}
 
 \item{outPrefix}{a string for plot file name}
 
-\item{handleInputParams}{a list of parameters for \code{handle_input}}
+\item{importParams}{a list of parameters for \code{handle_input}}
 
-\item{pairOnly}{logical, indicating whether only pair-wise overlap is desired}
+\item{pairOnly}{logical, indicating whether only pair-wise overlap is desirable}
 
 \item{stranded}{logical, indicating whether the feature is stranded. For nonstranded feature, only "*" is accepted as strand}
 
@@ -30,7 +30,7 @@ plot_overlap_bed(
 \item{verbose}{logical, indicating whether to output additional information}
 }
 \description{
-This function takes a list of bed file names, and produce a Venn diagram
+This function takes a list of up to 4 bed file names, and produce a Venn diagram
 }
 \examples{
 
@@ -42,7 +42,7 @@ names(queryFiles) <- c("narrowPeak", "summitPeak", "clipPeak")
 handleBedParams <- list(fix_width=100, fix_point="center", useScore=FALSE, outRle=FALSE,
                         offset=0, norm=FALSE, useSizeFactor=FALSE, genome="hg19")
 
-plot_overlap_bed(bedList=queryFiles, handleInputParams=handleBedParams, pairOnly=FALSE, 
+plot_overlap_bed(bedList=queryFiles, importParams=handleBedParams, pairOnly=FALSE, 
 stranded=FALSE)
 
 }

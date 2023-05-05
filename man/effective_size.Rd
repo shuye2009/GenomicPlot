@@ -7,10 +7,9 @@
 effective_size(outlist, outRle, genome = "hg19", nc = 2, verbose = FALSE)
 }
 \arguments{
-\item{outlist}{a list object with four elements, 'query' is a list GRanges objects or RleList objects, 'size' is the library size, 'type' is the input file type,
-'weight' is the name of the metadata column}
+\item{outlist}{a list of list objects with four elements, 'query' is either a GRanges object or an RleList object, 'size' is the library size, 'type' is the input file type, 'weight' is the name of the metadata column}
 
-\item{outRle}{logical, indicating whether the output is a list of RleList objects or GRanges objects}
+\item{outRle}{logical, indicating whether the 'query' element of the output should be an RleList object or a GRanges object}
 
 \item{genome}{a string denoting the genome name and version}
 
@@ -19,10 +18,10 @@ effective_size(outlist, outRle, genome = "hg19", nc = 2, verbose = FALSE)
 \item{verbose}{logical, whether to output additional information}
 }
 \value{
-a list object with four elements ('query', 'size', 'type', 'weight'), with the 'size' element modified.
+a list of list objects with four elements ('query', 'size', 'type', 'weight'), with the 'size' element modified.
 }
 \description{
-This is a helper function for handle_input. edgeR::calcNormFactors function is used to estimate normalizing factors, which is used to multiply library sizes. The function only works for human genome only at present.
+This is a helper function for handle_input. edgeR::calcNormFactors function is used to estimate normalizing factors, which is used to multiply library sizes.
 }
 \author{
 Shuye Pu

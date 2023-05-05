@@ -15,7 +15,7 @@ start_parallel(nc = 2, verbose = FALSE)
 an object of class c("SOCKcluster", "cluster"), depending on platform
 }
 \description{
-Method for starting a virtual cluster needed for parallel processing
+Creating a virtual cluster for parallel processing
 }
 \examples{
 cl <- start_parallel(2L)

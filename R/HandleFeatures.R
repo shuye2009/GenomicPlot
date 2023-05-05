@@ -182,7 +182,7 @@ extract_longest_tx <- function(txdb,
 #'      For "gene", both GRanges object and GRangesList object have the same ranges and names. The bed file is in bed6 format.
 #'      
 #' @param txdb a TxDb object defined in the GenomicFeatures package
-#' @param featureName one of the gene feature in c("utr3", "utr5", "cds", "intron", "exon", "transcript", "gene")
+#' @param featureName one of the genomic feature in c("utr3", "utr5", "cds", "intron", "exon", "transcript", "gene")
 #' @param featureSource the name of the gtf/gff3 file or the online database from which txdb is derived, used as name of output file
 #' @param export logical, indicating if the bed file should be produced
 #' @param longest logical, indicating whether the output should be limited to the longest transcript of each gene
@@ -853,39 +853,5 @@ filter_by_nonoverlaps_stranded <- function(query,
    }
    nonoverlaps <- GenomicRanges::setdiff(query, overlaps)
    invisible(nonoverlaps)
-}
-
-
-#' @title Format genomic coordinates in GRanges or GRrangesList as strings used in igv
-#' @description This function takes a GRanges or GRangesList object, and transform each range into a string
-#' @param x a GRanges or GRangesList object
-#' @return a vector of strings in the format of 'chr:start-end(strand)'
-#' @author Shuye Pu
-#'
-#' @examples
-#' gr1 <- GenomicRanges::GRanges("chr2", IRanges::IRanges(3, 6))
-#' gr2 <- GenomicRanges::GRanges(c("chr1", "chr1"), IRanges::IRanges(c(7,13), width=3),
-#'  strand=c("+", "-"))
-#' gr3 <- GenomicRanges::GRanges(c("chr1", "chr2"), IRanges::IRanges(c(1, 4), c(3, 9)),
-#'  strand="-")
-#'
-#' grl <- GenomicRanges::GRangesList(gr1= gr1, gr2=gr2, gr3=gr3)
-#' grl
-#'
-#' out <- format_genomic_coordinates(grl)
-#' cat(out)
-#'
-#' @export format_genomic_coordinates
-#'
-format_genomic_coordinates <- function(x){
-   if(grepl("GRangesList", class(x))) x <- unlist(x) ## convert grl to gr
-   
-   chr <- as.vector(seqnames(x)) %>% as.character
-   start <- start(x) %>% as.numeric
-   end <- end(x) %>% as.numeric
-   strand <- strand(x) %>% as.character
-   
-   out <- paste0(chr, ":", start, "-", end, "(", strand, ")")
-   invisible(out)
 }
 

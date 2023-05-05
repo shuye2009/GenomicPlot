@@ -4,12 +4,12 @@
 \alias{handle_bed}
 \title{Handle files in bed|narrowPeak|broadPeak format}
 \usage{
-handle_bed(inputFile, handleInputParams = NULL, verbose = FALSE)
+handle_bed(inputFile, importParams = NULL, verbose = FALSE)
 }
 \arguments{
 \item{inputFile}{a string denoting path to the input file}
 
-\item{handleInputParams}{a list of parameters for \code{handle_input}}
+\item{importParams}{a list of parameters, refer to \code{handle_input} for details}
 
 \item{verbose}{logical, whether to output additional information}
 }
