@@ -1,0 +1,7 @@
+pandoc: 2.19.2
+pkgdown: 2.0.6
+pkgdown_sha: ~
+articles:
+  GenomicPlot_vignettes: GenomicPlot_vignettes.html
+last_built: 2023-05-05T18:17Z
+
