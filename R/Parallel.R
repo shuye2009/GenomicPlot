@@ -1,7 +1,7 @@
 
 #' @title Prepare for parallel processing
 #'
-#' @description Method for starting a virtual cluster needed for parallel processing
+#' @description Creating a virtual cluster for parallel processing
 #'
 #' @param nc a positive integer greater than 1, denoting number of cores requested
 #' @param verbose logical, whether to output additional information
@@ -32,7 +32,7 @@ start_parallel <- function(nc=2,
 
 #' @title Stop parallel processing
 #
-#' @description Method for stopping a virtual cluster needed for parallel processing
+#' @description Stopping a virtual cluster after parallel processing is finished
 #'
 #' @param cl a cluster or SOCKcluster object depending on platform
 #' @return NULL
@@ -85,15 +85,15 @@ parallel_feature_coordinates <- function(txdb,
 
 #' @title Parallel execution of scoreMatrixBin on a huge target windows object split into chunks
 #'
-#' @description Function for parallel computation of scoreMatrixBin. The 'windows' parameter of the scoreMatrixBin method is split into 5 chunks, and scoreMatrixBin is called on each chunk simultaneously to speed up the computation.
+#' @description Function for parallel computation of scoreMatrixBin. The 'windows' parameter of the scoreMatrixBin method is split into nc chunks, and scoreMatrixBin is called on each chunk simultaneously to speed up the computation.
 #'
-#' @param windowRs, a single GRangesList object.
-#' @param queryRegions, a RleList object or Granges object providing input for the 'target' parameter of the scoreMatrixBin method
-#' @param bin_num, number of bins the windows should be divided into
-#' @param bin_op, operation on the signals in a bin, a string in c("mean", "max", "min", "median", "sum") is accepted.
-#' @param weight_col, if the queryRegions is a GRanges object, a numeric column in meta data part can be used as weights.
-#' @param stranded, logical, indicating if the strand of the windows should be considered to determine upstream and downstream
-#' @param nc, an integer denoting the number of cores requested, 2 is the default number that is allowed by CRAN but 5 gives best trade-off between speed and space
+#' @param windowRs a single GRangesList object.
+#' @param queryRegions a RleList object or Granges object providing input for the 'target' parameter of the scoreMatrixBin method
+#' @param bin_num number of bins the windows should be divided into
+#' @param bin_op operation on the signals in a bin, a string in c("mean", "max", "min", "median", "sum") is accepted.
+#' @param weight_col if the queryRegions is a GRanges object, a numeric column in meta data part can be used as weights.
+#' @param stranded logical, indicating if the strand of the windows should be considered to determine upstream and downstream
+#' @param nc an integer denoting the number of cores requested, 2 is the default number that is allowed by CRAN but 5 gives best trade-off between speed and space
 #'
 #' @return a numeric matrix
 #' @author Shuye Pu
@@ -138,7 +138,7 @@ parallel_scoreMatrixBin <- function(queryRegions,
 #' @description Function for parallel computation of binnedAverage function in the GenomicRanges package
 #'
 #' @param Rle_list a list of RleList objects.
-#' @param tileBins, a GRanges object of tiled genome
+#' @param tileBins a GRanges object of tiled genome
 #' @param nc integer, number of cores for parallel processing
 #'
 #' @return a list of numeric vectors
@@ -172,8 +172,8 @@ parallel_binnedAverage <- function(Rle_list,
 #' @description Function for parallel computation of countOverlaps function in the GenomicRanges package
 #'
 #' @param grange_list a list of GRanges objects.
-#' @param tileBins, a GRanges object of tiled genome
-#' @param switch, logical, switch the order of query and feature
+#' @param tileBins a GRanges object of tiled genome
+#' @param switch logical, switch the order of query and feature
 #' @param nc integer, number of cores for parallel processing
 #'
 #' @return a list of numeric vectors

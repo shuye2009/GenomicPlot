@@ -4,12 +4,12 @@
 \alias{handle_bw}
 \title{Handle files in bw|bigwig|bigWig|BigWig|BW|BIGWIG format}
 \usage{
-handle_bw(inputFile, handleInputParams, verbose = FALSE)
+handle_bw(inputFile, importParams, verbose = FALSE)
 }
 \arguments{
 \item{inputFile}{a string denoting path to the input file}
 
-\item{handleInputParams}{a list of parameters for \code{handle_input}}
+\item{importParams}{a list of parameters, refer to \code{handle_input} for details}
 
 \item{verbose}{logical, whether to output additional information}
 }

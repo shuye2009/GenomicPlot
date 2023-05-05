@@ -4,8 +4,8 @@
 #'
 #' @param fullMatrix a numeric matrix
 #' @param dataName the nature of the numeric data
-#' @param labels_col a vector make column annotation
-#' @param levels_col factor levels for labels_col, specifying the order of labels_col
+#' @param labels_col a named vector for column annotation
+#' @param levels_col factor levels for names of labels_col, specifying the order of labels_col
 #' @param ranking method for ranking the rows of the input matrix, options are c("Sum", "Max", "Hierarchical", "None")
 #' @param ranges a numeric vector with two elements, defining custom range for color ramp, default=NULL, i.e. the range is defined automatically based on the range of fullMatrix
 #' @param verbose logical, whether to output the input matrix for inspection
@@ -155,7 +155,7 @@ draw_region_landmark <- function(featureNames,
 #'
 #' @param featureNames a string vector giving names of sub-regions
 #' @param scaled_bins a vector on integers denoting the length of each sub-region
-#' @param xmax an integer denoting the left most boundary
+#' @param xmax an integer denoting the right most boundary
 #' @return a ggplot object
 #' @note used by \code{plot_3parts_metagene}, \code{plot_5parts_metagene}, \code{plot_region}
 #'
@@ -249,9 +249,9 @@ draw_region_profile <- function(plot_df,
 #' @param sn a string denoting column name for the subject of sample grouping, if 'cn' is 'Query', then 'sn' will be 'Reference'
 #' @param Xlab a string for x-axis label
 #' @param Ylab a string for y-axis label
-#' @param shade logical indicating whether to place a shaded rectangle around the loci
 #' @param hl a vector of two integers defining upstream and downstream boundaries of the rectangle
-#'
+#' @param shade logical indicating whether to place a shaded rectangle around the loci bounded by hl
+#' 
 #' @return a ggplot object
 #' @note used by \code{plot_locus}, \code{plot_locus_with_random}
 #' @author Shuye Pu
@@ -285,7 +285,7 @@ draw_locus_profile <- function(plot_df,
 }
 
 #' @title Plot boxplot with two factors
-#' @description Plot boxplot for data with one or two factors, with p-value significance levels displayed
+#' @description Plot violin plot with boxplot components for data with one or two factors, p-value significance levels are displayed, "***"=0.001, "**"=0.01, "*"=0.05.
 #'
 #' @param stat_df a dataframe with column names c(xc, yc)
 #' @param xc a string denoting column name for grouping
@@ -367,7 +367,7 @@ draw_boxplot_by_factor <- function(stat_df,
 }
 
 #' @title Plot boxplot without outliers
-#' @description Plot boxplot without outliers, with p-value significance levels displayed
+#' @description Plot boxplot without outliers, useful when outliers have a wide range and the median is squeezed at the bottom of the plot. The p-value significance level is the same as those in \code{draw_boxplot_by_factor}, but not displayed.
 #'
 #' @param stat_df a dataframe with column names c(xc, yc)
 #' @param xc a string denoting column name for grouping
@@ -507,14 +507,14 @@ draw_mean_se_barplot <- function(stat_df,
 
       p <- ggplot(means_se, aes(x=.data[[xc]], y=mean_Intensity, fill=.data[[xc]])) +
          scale_fill_npg() + scale_color_npg() +
-         geom_col(stat="identity") +
+         geom_col(position="identity") +
          geom_errorbar(aes(ymin=lower_limit, ymax=upper_limit), position=position_dodge(width = 0.2), width=0.2) +
          theme_classic() +
          theme(axis.title = element_text(face="bold", size=14, color="black", vjust=0.25),
                axis.title.x = element_blank(),
                axis.text = element_text(face="plain", size=12, color="black"),
                legend.position = "none") +
-         labs(y=paste0(Ylab, "\n(mean \U00B1 SE)"), x=Xlab) +
+         labs(y=paste0(Ylab, "\n(mean \u00b1 SE)"), x=Xlab) +
          scale_x_discrete(labels = means_se$labelx) +
          ggtitle(label=paste("ANOVA p-value =",format(stats$ANOVA, digits=3)))
       
@@ -561,7 +561,7 @@ draw_mean_se_barplot <- function(stat_df,
                axis.title.x = element_blank(),
                axis.text = element_text(face="plain", size=12, color="black"),
                legend.position = "none") +
-         labs(y=paste0(Ylab, "(mean±SE)"), x=Xlab) +
+         labs(y=paste0(Ylab, "(mean \u00b1 SE)"), x=Xlab) +
          scale_x_discrete(labels = means_se$labelx) +
          ggtitle(label=paste("ANOVA p-value =",format(stats$ANOVA, digits=3)))
       

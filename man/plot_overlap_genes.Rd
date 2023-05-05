@@ -13,11 +13,11 @@ plot_overlap_genes(
 )
 }
 \arguments{
-\item{fileList, }{a named list of tab-dlimited files}
+\item{fileList, }{a named list of tab-delimited files}
 
 \item{columnList}{a vector of integers denoting the columns that have gene names in the list of files}
 
-\item{pairOnly, }{logical, indicating whether only pair-wise overlap is desired}
+\item{pairOnly, }{logical, indicating whether only pair-wise overlap is desirable}
 
 \item{hw}{a vector of two elements specifying the height and width of the output figures}
 
@@ -27,7 +27,7 @@ plot_overlap_genes(
 a list of vectors of gene names
 }
 \description{
-This function takes a list of (at most 3) tab-delimited file names, and produce a Venn diagram
+This function takes a list of (at most 4) tab-delimited file names, and produce a Venn diagram
 }
 \author{
 Shuye Pu

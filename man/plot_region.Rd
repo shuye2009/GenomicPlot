@@ -11,7 +11,7 @@ plot_region(
   regionName = "region",
   inputFiles = NULL,
   nbins = 100,
-  handleInputParams = NULL,
+  importParams = NULL,
   verbose = FALSE,
   scale = FALSE,
   heatmap = FALSE,
@@ -42,7 +42,7 @@ plot_region(
 
 \item{nbins}{an integer defines the total number of bins}
 
-\item{handleInputParams}{a list of parameters for \code{handle_input}}
+\item{importParams}{a list of parameters for \code{handle_input}}
 
 \item{verbose}{logical, indicating whether to output additional information (data used for plotting or statistical test results)}
 
@@ -78,7 +78,7 @@ plot_region(
 a dataframe containing the data used for plotting
 }
 \description{
-Plot reads or peak Coverage/base/gene of samples in the query files inside regions defined in the centerFiles. The upstream and downstream flanking windows can be given separately. If Input files are provided, ratio over Input is computed and displayed as well.
+Plot reads or peak Coverage/base/gene of samples given in the query files inside regions defined in the centerFiles. The upstream and downstream flanking windows can be given separately. If Input files are provided, ratio over Input is computed and displayed as well.
 }
 \examples{
 txdb <- AnnotationDbi::loadDb(system.file("extdata", "txdb_chr19.sql", package="GenomicPlot"))
@@ -89,11 +89,11 @@ names(inputfiles) <- "input"
 centerfiles <- system.file("extdata", "test_chip_peak_chr19.narrowPeak", package="GenomicPlot")
 names(centerfiles) <- "narrowPeak"
 op <- NULL
-handleInputParams <- list(offset=0, fix_width=150, fix_point="start", norm=TRUE,
+importParams <- list(offset=0, fix_width=150, fix_point="start", norm=TRUE,
 useScore=FALSE, outRle=TRUE, useSizeFactor=TRUE, genome="hg19")
  
 plot_region(queryFiles=queryfiles, centerFiles=centerfiles, txdb=NULL, regionName="region", 
-inputFiles=inputfiles, nbins=100, handleInputParams=handleInputParams, verbose=TRUE, 
+inputFiles=inputfiles, nbins=100, importParams=importParams, verbose=TRUE, 
 scale=FALSE, heatmap=TRUE, fiveP=-1000, threeP=1000, smooth=TRUE, stranded=TRUE, transform="log2",
 outPrefix=NULL, rmOutlier=0, heatRange=NULL, Ylab="Coverage/base/gene", 
 statsMethod="wilcox.test", nc=2)

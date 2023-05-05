@@ -39,7 +39,7 @@ draw_boxplot_by_factor(
 a ggplot object
 }
 \description{
-Plot boxplot for data with one or two factors, with p-value significance levels displayed
+Plot violin plot with boxplot components for data with one or two factors, p-value significance levels are displayed, "***"=0.001, "**"=0.01, "*"=0.05.
 }
 \note{
 used by \code{plot_locus}, \code{plot_locus_with_random}, \code{plot_region}

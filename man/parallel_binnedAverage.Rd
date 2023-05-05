@@ -9,7 +9,7 @@ parallel_binnedAverage(Rle_list, tileBins, nc = 2)
 \arguments{
 \item{Rle_list}{a list of RleList objects.}
 
-\item{tileBins, }{a GRanges object of tiled genome}
+\item{tileBins}{a GRanges object of tiled genome}
 
 \item{nc}{integer, number of cores for parallel processing}
 }

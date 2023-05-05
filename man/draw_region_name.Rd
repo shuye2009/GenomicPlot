@@ -11,7 +11,7 @@ draw_region_name(featureNames, scaled_bins, xmax)
 
 \item{scaled_bins}{a vector on integers denoting the length of each sub-region}
 
-\item{xmax}{an integer denoting the left most boundary}
+\item{xmax}{an integer denoting the right most boundary}
 }
 \value{
 a ggplot object

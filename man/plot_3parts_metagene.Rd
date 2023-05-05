@@ -11,7 +11,7 @@ plot_3parts_metagene(
   scale = FALSE,
   verbose = FALSE,
   Ylab = "Coverage/base/gene",
-  handleInputParams = NULL,
+  importParams = NULL,
   smooth = FALSE,
   stranded = TRUE,
   outPrefix = NULL,
@@ -36,7 +36,7 @@ plot_3parts_metagene(
 
 \item{Ylab}{a string for y-axis label}
 
-\item{handleInputParams}{a list of parameters for \code{handle_input}}
+\item{importParams}{a list of parameters for \code{handle_input}}
 
 \item{smooth}{logical, indicating whether the line should smoothed with a spline smoothing algorithm}
 
@@ -60,7 +60,7 @@ plot_3parts_metagene(
 a dataframe containing the data used for plotting
 }
 \description{
-Plot reads or peak Coverage/base/gene of samples in the query files around genes. The upstream and downstream windows flanking genes
+Plot reads or peak Coverage/base/gene of samples given in the query files around genes. The upstream and downstream windows flanking genes
 can be given separately, the parameter 'meta' controls if gene or metagene plots are generated. If Input files are provided, ratio over Input
 is computed and displayed as well.
 }
@@ -77,13 +77,13 @@ names(inputfiles) <- "input"
 gfeatures <- prepare_3parts_genomic_features(txdb, featureName="transcript", meta=TRUE, 
 nbins=100, fiveP=-1000, threeP=1000, longest=TRUE, protein_coding=TRUE, verbose=FALSE)
 
-handleInputParams <- list(offset=0, fix_width=150, fix_point="start", norm=TRUE,
+importParams <- list(offset=0, fix_width=150, fix_point="start", norm=TRUE,
 useScore=FALSE, outRle=TRUE, useSizeFactor=FALSE, genome="hg19")
  
 df <- plot_3parts_metagene(queryFiles=queryfiles, gFeatures=gfeatures, inputFiles
                            =inputfiles, scale=FALSE, verbose=TRUE, 
-                           Ylab="Coverage/base/gene", handleInputParams
-                           =handleInputParams, smooth=TRUE, stranded=TRUE, 
+                           Ylab="Coverage/base/gene", importParams
+                           =importParams, smooth=TRUE, stranded=TRUE, 
                            outPrefix=NULL, heatmap=TRUE, rmOutlier=0, heatRange=NULL,
                            transform="log2", nc=2)
 

@@ -9,7 +9,7 @@ plot_start_end_with_random(
   inputFiles = NULL,
   txdb = NULL,
   centerFile,
-  handleInputParams = NULL,
+  importParams = NULL,
   binSize = 10,
   insert = 0,
   verbose = FALSE,
@@ -37,7 +37,7 @@ plot_start_end_with_random(
 
 \item{centerFile}{a bed file that defines the custom feature, or a feature in c("utr3", "utr5", "cds", "intron", "exon", "transcript", "gene"), multiple features are not allowed.}
 
-\item{handleInputParams}{a list of parameters for \code{handle_input}}
+\item{importParams}{a list of parameters for \code{handle_input}}
 
 \item{binSize}{an integer defines bin size for intensity calculation}
 
@@ -75,7 +75,7 @@ plot_start_end_with_random(
 a list of two objects, the first is a GRanges object, the second is a GRangesList object
 }
 \description{
-Plot reads or peak Coverage/base/gene of samples in the query files around stat, end and center of genomic features or custom feature given in a .bed file. The upstream and downstream windows can be given separately. If Input files are provided, ratio over Input is computed and displayed as well. A random feature can be generated to serve as a background for contrasting.
+Plot reads or peak Coverage/base/gene of samples given in the query files around stat, end and center of genomic features or custom feature given in a .bed file. The upstream and downstream windows can be given separately. If Input files are provided, ratio over Input is computed and displayed as well. A random feature can be generated to serve as a background for contrasting.
 }
 \examples{
 txdb <- AnnotationDbi::loadDb(system.file("extdata", "txdb_chr19.sql", package="GenomicPlot"))
@@ -89,11 +89,11 @@ names(inputFiles) <- "input"
 ext <- c(-500, 200, -200, 500)
 hl <- c(-50, 50, -50, 50)
 
-handleInputParams <- list(offset=-1, fix_width=150, fix_point="start", norm=TRUE, 
+importParams <- list(offset=-1, fix_width=150, fix_point="start", norm=TRUE, 
 useScore=FALSE, outRle=TRUE, useSizeFactor=TRUE, genome="hg19")
 
 plot_start_end_with_random(queryFiles=c(queryFiles), inputFiles=c(inputFiles), txdb=txdb, 
-centerFile="intron", binSize=10, handleInputParams=handleInputParams, ext=ext, hl=hl, 
+centerFile="intron", binSize=10, importParams=importParams, ext=ext, hl=hl, 
 randomize=TRUE, verbose=TRUE, insert=100, stranded=TRUE, scale=FALSE, smooth=TRUE, 
 outPrefix=NULL, nc=2)
 

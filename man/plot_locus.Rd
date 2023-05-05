@@ -12,7 +12,7 @@ plot_locus(
   hl = c(0, 0),
   shade = TRUE,
   smooth = FALSE,
-  handleInputParams = NULL,
+  importParams = NULL,
   verbose = FALSE,
   binSize = 10,
   refPoint = "center",
@@ -46,7 +46,7 @@ plot_locus(
 
 \item{smooth}{logical, indicating whether the line should smoothed with a spline smoothing algorithm}
 
-\item{handleInputParams}{a list of parameters for \code{handle_input}}
+\item{importParams}{a list of parameters for \code{handle_input}}
 
 \item{verbose}{logical, indicating whether to output additional information (data used for plotting or statistical test results)}
 
@@ -84,7 +84,7 @@ plot_locus(
 a list of two dataframes containing the data used for plotting and for statistical testing
 }
 \description{
-Plot reads or peak Coverage/base/gene of samples in the query files around reference locus (start, end or center of a genomic region)
+Plot reads or peak Coverage/base/gene of samples given in the query files around reference locus (start, end or center of a genomic region)
 defined in the centerFiles. The upstream and downstream windows flanking loci can be given separately, a smaller window can be defined to allow
 statistical comparisons between samples for the same reference, or between references for a given sample. If Input files are provided, ratio over
 Input is computed and displayed as well.
@@ -101,11 +101,11 @@ names(inputfiles) <- "input"
 centerfiles <- system.file("extdata", "test_clip_peak_chr19.bed", package="GenomicPlot")
 names(centerfiles) <- "clipPeak"
 
-handleInputParams <- list(offset=-1, fix_width=0, fix_point="start", norm=TRUE, 
+importParams <- list(offset=-1, fix_width=0, fix_point="start", norm=TRUE, 
 useScore=FALSE, outRle=TRUE, useSizeFactor=FALSE, genome="hg19")
  
 df <- plot_locus(queryFiles=queryfiles, centerFiles=c(centerfiles, "exon"), txdb=txdb, 
-ext=c(-200,200), hl=c(-50, 50), shade=TRUE, smooth=FALSE, handleInputParams=handleInputParams, 
+ext=c(-200,200), hl=c(-50, 50), shade=TRUE, smooth=FALSE, importParams=importParams, 
 verbose=TRUE, binSize=10, refPoint="center", Xlab="Center", Ylab="Coverage/base/gene", 
 inputFiles=inputfiles, stranded=TRUE, heatmap=TRUE, scale=FALSE, outPrefix=NULL, 
 rmOutlier=0, transform="log2", statsMethod="wilcox.test", heatRange=NULL, nc=2)

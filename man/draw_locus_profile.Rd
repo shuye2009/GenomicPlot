@@ -31,7 +31,7 @@ draw_locus_profile(
 
 \item{Ylab}{a string for y-axis label}
 
-\item{shade}{logical indicating whether to place a shaded rectangle around the loci}
+\item{shade}{logical indicating whether to place a shaded rectangle around the loci bounded by hl}
 
 \item{hl}{a vector of two integers defining upstream and downstream boundaries of the rectangle}
 }

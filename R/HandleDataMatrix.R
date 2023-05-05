@@ -99,13 +99,15 @@ impute_hm <- function(fullmatrix,
 
 #' @title Preprocess scoreMatrix before plotting
 #'
-#' @description  This is a helper function for manipulate the score matrix produced by ScoreMatrix or ScoreMatrinBin functions defined in the 'genomation' package.
+#' @description  This is a helper function for manipulate the score matrix produced by ScoreMatrix or ScoreMatrinBin functions defined in the 'genomation' package. To facilitate downstream analysis, imputation of missing values is performed implicitly.
 #'
 #' @param fullmatrix a numeric matrix, with bins in columns and genomic windows in rows
 #' @param scale logical, indicating whether the score matrix should be scaled to the range 0:1, so that samples with different baseline can be compared
 #' @param rmOutlier logical, indicating whether a row with abnormally high values in the score matrix should be removed
 #' @param verbose logical, indicating whether to output additional information (data used for plotting or statistical test results)
 #' @param transform a string in c("log", "log2", "log10"), default = NA indicating no transformation of data matrix
+#' 
+#' @details If inputFiles is null, all operations (impute, scale, rmOutlier and transform) can be applied to the score matrix, in the order of impute -> rmOutlier -> transform -> scale. When inputFiles are provided, only impute and rmOutlier can be applied to the score matrix, and transform and scale will affect ratio calculation, especially when log2 of ratio is intended, however, all these operations can be applied to the resulting ratio matrix. In order to avoid introducing distortion into the post-processed data, use caution when applying these operations.
 #'
 #' @return a numeric matrix with the same dimension as the fullmatrix
 #' @author Shuye Pu
@@ -284,7 +286,7 @@ aov_TukeyHSD <- function(df,
 }
 
 #' @title Convert GRanges to dataframe
-#' @description Convert GRanges object with metacolumns to dataframe
+#' @description Convert a GRanges object with meta data columns to a dataframe, with the first 6 columns corresponding those of BED6 format, and the meta data as additional columns
 #'
 #' @param gr a GRanges object
 #'
