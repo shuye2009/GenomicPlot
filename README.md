@@ -12,13 +12,18 @@ The following packages are prerequisites:
 
 GenomicRanges (>= 1.46.1), GenomicFeatures, Rsamtools, ggplot2 (>= 3.3.5), tidyr, rtracklayer (>= 1.54.0), plyranges (>= 1.14.0), dplyr (>= 1.0.8), cowplot (>= 1.1.1), VennDiagram, ggplotify, GenomeInfoDb, IRanges, ComplexHeatmap, RCAS (>= 1.20.0), scales (>= 1.2.0), GenomicAlignments (>= 1.30.0), edgeR, forcats, circlize, viridis, ggsignif (>= 0.6.3), ggsci (>= 2.9), genomation (>= 1.26.0), ggpubr
 
-You can install the development version of GenomicPlot from [GitHub](https://github.com/) with:
+You can install the development version of GenomicPlot from [GitHub](https://github.com/shuye2009/GenomicPlot) with:
 
 ``` r
 # install.packages("devtools")
 devtools::install_github("shuye2009/GenomicPlot", build_manual=TRUE, build_vignettes=TRUE)
 ```
+Or download the source package from the latest release on [GitHub](https://github.com/shuye2009/GenomicPlot) and run in R:
 
+``` r
+install.packages("path-to-source-package/GenomicPlot_x.x.x.tar.gz", repos=NULL)
+```
+where "path-to-source-package" is the absolute path to the file "GenomicPlot_x.x.x.tar.gz", substitute 'x' with the version number of your downloaded package
 ## Examples
 
 The following is a basic example which shows you how to visualize ChIP-seq peaks and iCLIP-seq peaks in different parts of genes.
