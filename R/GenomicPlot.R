@@ -1457,7 +1457,8 @@ plot_region <- function(queryFiles,
                 combo <- draw_combo_plot(stat_df=astat_df, xc="Query", yc="Intensity", comp=comp, stats=statsMethod, Ylab=Ylab)
              }
             
-            lapply(list(outp, combo), print)
+            print(outp)
+            print(combo)
              
           }else if(i == 1 && j == 1){
              plot_list[[paste(Ylab, beds,centers,sep=":")]] <- outp
@@ -1624,7 +1625,8 @@ plot_region <- function(queryFiles,
                   combo <- draw_combo_plot(stat_df=astat_df, xc="Query", yc="Intensity", comp=comp, stats=statsMethod, Ylab=Ylab)
                }
                
-               lapply(list(outp, combo), print)
+               print(outp)
+               print(combo)
                
             }else if(i == 1 && j == 1){
                plot_list[[paste(Ylab, beds,centers,sep=":")]] <- outp
