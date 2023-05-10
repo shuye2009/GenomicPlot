@@ -5,13 +5,13 @@
 #' @import Rsamtools
 #' @import GenomicFeatures
 #' @import GenomicRanges
-#' @import dplyr 
-#' @import GenomeInfoDb 
-#' @import stats 
-#' @import BiocGenerics 
-#' @import parallel 
+#' @import dplyr
+#' @import GenomeInfoDb
+#' @import stats
+#' @import BiocGenerics
+#' @import parallel
 #' @import grid
-#' @import graphics 
+#' @import graphics
 #' @import utils
 #' @importFrom parallel detectCores clusterExport parLapply makeCluster stopCluster clusterApply
 #' @importFrom dplyr bind_cols bind_rows mutate filter arrange %>% group_by select count full_join left_join desc inner_join
