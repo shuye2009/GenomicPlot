@@ -360,10 +360,10 @@ prepare_3parts_genomic_features <- function(txdb,
 
    five <- fiveP/1000
    five <- paste0(five, "K")
-   if(fiveP==0) five=""
+   if(fiveP==0) five <- ""
    three <- threeP/1000
    three <- paste0(three, "K")
-   if(threeP==0) three=""
+   if(threeP==0) three <- ""
 
    featureNames <-  c(five, featureName, three)
 
@@ -438,10 +438,10 @@ prepare_5parts_genomic_features <- function(txdb,
    if(verbose) print("Preparing genomic features ... ")
    five <- fiveP/1000
    five <- paste0(five, "K")
-   if(fiveP==0) five=""
+   if(fiveP==0) five <- ""
    three <- threeP/1000
    three <- paste0(three, "K")
-   if(threeP==0) three=""
+   if(threeP==0) three <- ""
    featureNames <-  c(five, "5'UTR", "CDS", "3'UTR", three)
 
    if(!meta) longest <- TRUE # always use the longest transcript to represent the gene

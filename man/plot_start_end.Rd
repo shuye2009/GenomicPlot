@@ -80,10 +80,10 @@ computed and displayed as well.
 \examples{
 txdb <- AnnotationDbi::loadDb(system.file("extdata", "txdb_chr19.sql", package="GenomicPlot"))
 
-queryfiles <- system.file("extdata", "treat_chr19.bam", package="GenomicPlot")
+queryfiles <- system.file("extdata", "chip_treat_chr19.bam", package="GenomicPlot")
 names(queryfiles) <- "query"
 
-inputfiles <- system.file("extdata", "input_chr19.bam", package="GenomicPlot")
+inputfiles <- system.file("extdata", "chip_input_chr19.bam", package="GenomicPlot")
 names(inputfiles) <- "input"
 
 centerfiles <- system.file("extdata", "test_chip_peak_chr19.narrowPeak", package="GenomicPlot")
