@@ -66,13 +66,13 @@ plot_5parts_metagene(queryFiles=queryfiles,
 
 ```
 ```{r metagene1, echo=FALSE, fig.cap="Individual sample profile and heatmap", out.width = '75%'}
-knitr::include_graphics("../tests/test_output/test_plot_5parts_metagene2_1.png")
+knitr::include_graphics("../inst/tests/test_output/test_plot_5parts_metagene2_1.png")
 ```
 ```{r metagene2, echo=FALSE, fig.cap="Profile overlay", out.width = '75%'}
-knitr::include_graphics("../tests/test_output/test_plot_5parts_metagene2_2.png")
+knitr::include_graphics("../inst/tests/test_output/test_plot_5parts_metagene2_2.png")
 ```
 ```{r metagene3, echo=FALSE, fig.cap="Ratio-over-input profile and heatmap", out.width = '75%'}
-knitr::include_graphics("../tests/test_output/test_plot_5parts_metagene2_3.png")
+knitr::include_graphics("../inst/tests/test_output/test_plot_5parts_metagene2_3.png")
 ```
 
 
@@ -109,13 +109,13 @@ plot_3parts_metagene(queryFiles=queryfiles,
 
 ```
 ```{r gene1, echo=FALSE, fig.cap="Individual sample profile and heatmap", out.width = '75%'}
-knitr::include_graphics("../tests/test_output/test_plot_3parts_metagene_1.png")
+knitr::include_graphics("../inst/tests/test_output/test_plot_3parts_metagene_1.png")
 ```
 ```{r gene2, echo=FALSE, fig.cap="Profile overlay", out.width = '75%'}
-knitr::include_graphics("../tests/test_output/test_plot_3parts_metagene_2.png")
+knitr::include_graphics("../inst/tests/test_output/test_plot_3parts_metagene_2.png")
 ```
 ```{r gene3, echo=FALSE, fig.cap="Ratio-over-input profile and heatmap", out.width = '75%'}
-knitr::include_graphics("../tests/test_output/test_plot_3parts_metagene_3.png")
+knitr::include_graphics("../inst/tests/test_output/test_plot_3parts_metagene_3.png")
 ```
 
 ## Plot along the ranges of genomic features
@@ -154,25 +154,25 @@ centerfiles <- system.file("extdata", "test_chip_peak_chr19.narrowPeak", package
              nc=5)
 ```
 ```{r region1, echo=FALSE, fig.cap="Individual sample profile", out.width = '75%'}
-knitr::include_graphics("../tests/test_output/test_plot_region_21.png")
+knitr::include_graphics("../inst/tests/test_output/test_plot_region_21.png")
 ```
 ```{r region2, echo=FALSE, fig.cap="Individual sample coverage stats in narrowPeak", out.width = '100%'}
-knitr::include_graphics("../tests/test_output/test_plot_region_22.png")
+knitr::include_graphics("../inst/tests/test_output/test_plot_region_22.png")
 ```
 ```{r region3, echo=FALSE, fig.cap="Individual sample coverage profiles and heatmaps in narrowPeak", out.width = '100%'}
-knitr::include_graphics("../tests/test_output/test_plot_region_23.png")
+knitr::include_graphics("../inst/tests/test_output/test_plot_region_23.png")
 ```
 ```{r region4, echo=FALSE, fig.cap="Ratio-over-input profile", out.width = '75%'}
-knitr::include_graphics("../tests/test_output/test_plot_region_24.png")
+knitr::include_graphics("../inst/tests/test_output/test_plot_region_24.png")
 ```
 ```{r region5, echo=FALSE, fig.cap="Ratio-over-input stats", out.width = '75%'}
-knitr::include_graphics("../tests/test_output/test_plot_region_25.png")
+knitr::include_graphics("../inst/tests/test_output/test_plot_region_25.png")
 ```
 ```{r region6, echo=FALSE, fig.cap="Ratio-over-input profiles and heatmaps", out.width = '75%'}
-knitr::include_graphics("../tests/test_output/test_plot_region_26.png")
+knitr::include_graphics("../inst/tests/test_output/test_plot_region_26.png")
 ```
 ```{r region7, echo=FALSE, fig.cap="Program names and arguments", out.width = '75%'}
-knitr::include_graphics("../tests/test_output/test_plot_region_27.png")
+knitr::include_graphics("../inst/tests/test_output/test_plot_region_27.png")
 ```
 
 ## Plot start, end and center of a genomic feature 
@@ -206,10 +206,10 @@ plot_start_end(queryFiles=queryfiles,
                nc=5)
 ```
 ```{r intron1, echo=FALSE, fig.cap="Query and input sample profiles in start, center and end of intron", out.width = '75%'}
-knitr::include_graphics("../tests/test_output/test_plot_stat_end_3.png")
+knitr::include_graphics("../inst/tests/test_output/test_plot_stat_end_3.png")
 ```
 ```{r intron2, echo=FALSE, fig.cap="Ratio-over profile in start, center and end of intron", out.width = '75%'}
-knitr::include_graphics("../tests/test_output/test_plot_stat_end_4.png")
+knitr::include_graphics("../inst/tests/test_output/test_plot_stat_end_4.png")
 ```
 
 ## Plot genomic loci (start, end or center of a feature)
@@ -251,34 +251,34 @@ Difference in signal intensity within specific regions around the reference loci
             nc=5)
 ```
 ```{r locus11, echo=FALSE, fig.cap="Ratio-over-input for clip signal around clip and chip peaks", out.width = '75%'}
-knitr::include_graphics("../tests/test_output/test_plot_locus2_21.png")
+knitr::include_graphics("../inst/tests/test_output/test_plot_locus2_21.png")
 ```
 ```{r locus12, echo=FALSE, fig.cap="Ratio-over-input for clip signal around clip and chip peaks", out.width = '75%'}
-knitr::include_graphics("../tests/test_output/test_plot_locus2_22.png")
+knitr::include_graphics("../inst/tests/test_output/test_plot_locus2_22.png")
 ```
 ```{r locus21, echo=FALSE, fig.cap="Ratio-over-input for chip signal around clip and chip peaks", out.width = '75%'}
-knitr::include_graphics("../tests/test_output/test_plot_locus2_23.png")
+knitr::include_graphics("../inst/tests/test_output/test_plot_locus2_23.png")
 ```
 ```{r locus22, echo=FALSE, fig.cap="Ratio-over-input for chip signal around clip and chip peaks", out.width = '75%'}
-knitr::include_graphics("../tests/test_output/test_plot_locus2_24.png")
+knitr::include_graphics("../inst/tests/test_output/test_plot_locus2_24.png")
 ```
 ```{r locus31, echo=FALSE, fig.cap="Ratio-over-input for chip and clip signal around clip peaks", out.width = '75%'}
-knitr::include_graphics("../tests/test_output/test_plot_locus2_25.png")
+knitr::include_graphics("../inst/tests/test_output/test_plot_locus2_25.png")
 ```
 ```{r locus32, echo=FALSE, fig.cap="Ratio-over-input for chip and clip signal around clip peaks", out.width = '75%'}
-knitr::include_graphics("../tests/test_output/test_plot_locus2_26.png")
+knitr::include_graphics("../inst/tests/test_output/test_plot_locus2_26.png")
 ```
 ```{r locus41, echo=FALSE, fig.cap="Ratio-over-input for chip and clip signal around chip peaks", out.width = '75%'}
-knitr::include_graphics("../tests/test_output/test_plot_locus2_27.png")
+knitr::include_graphics("../inst/tests/test_output/test_plot_locus2_27.png")
 ```
 ```{r locus42, echo=FALSE, fig.cap="Ratio-over-input for chip and clip signal around chip peaks", out.width = '75%'}
-knitr::include_graphics("../tests/test_output/test_plot_locus2_28.png")
+knitr::include_graphics("../inst/tests/test_output/test_plot_locus2_28.png")
 ```
 ```{r locus5, echo=FALSE, fig.cap="Ratio-over-input profiles for chip and clip signal around clip and chip peaks", out.width = '75%'}
-knitr::include_graphics("../tests/test_output/test_plot_locus2_29.png")
+knitr::include_graphics("../inst/tests/test_output/test_plot_locus2_29.png")
 ```
 ```{r locus6, echo=FALSE, fig.cap="Ratio-over-input profiles and heatmap for chip and clip signal", out.width = '100%'}
-knitr::include_graphics("../tests/test_output/test_plot_locus2_30.png")
+knitr::include_graphics("../inst/tests/test_output/test_plot_locus2_30.png")
 ```
 
 ## Plot genomic loci with random sites as contrast
@@ -320,16 +320,16 @@ plot_locus_with_random(queryFiles=queryfiles,
                        nc=5)
 ```
 ```{r locusr11, echo=FALSE, fig.cap="Ratio-over-input for clip signal around clip peaks in 5'UTR", out.width = '75%'}
-knitr::include_graphics("../tests/test_output/test_plot_locus_with_random_27.png")
+knitr::include_graphics("../inst/tests/test_output/test_plot_locus_with_random_27.png")
 ```
 ```{r locusr12, echo=FALSE, fig.cap="Ratio-over-input for clip signal around clip peaks in 5'UTR", out.width = '75%'}
-knitr::include_graphics("../tests/test_output/test_plot_locus_with_random_28.png")
+knitr::include_graphics("../inst/tests/test_output/test_plot_locus_with_random_28.png")
 ```
 ```{r locusr21, echo=FALSE, fig.cap="Ratio-over-input for clip signal around clip peaks", out.width = '75%'}
-knitr::include_graphics("../tests/test_output/test_plot_locus_with_random_35.png")
+knitr::include_graphics("../inst/tests/test_output/test_plot_locus_with_random_35.png")
 ```
 ```{r locusr22, echo=FALSE, fig.cap="Ratio-over-input for clip signal around clip peaks", out.width = '75%'}
-knitr::include_graphics("../tests/test_output/test_plot_locus_with_random_36.png")
+knitr::include_graphics("../inst/tests/test_output/test_plot_locus_with_random_36.png")
 ```
 
 
@@ -358,12 +358,15 @@ pa <- plot_peak_annotation(peakFile=centerfile,
                            outPrefix=NULL)
 ```
 ```{r annotation1, echo=FALSE, fig.cap="Distribution of chip peak in various types of gene", out.width = '75%'}
-knitr::include_graphics("../tests/test_output/test_plot_peak_annotation1_1.png")
+knitr::include_graphics("../inst/tests/test_output/test_plot_peak_annotation1_1.png")
 ```
 ```{r annotation2, echo=FALSE, fig.cap="Distribution of chip peak in various parts of gene", out.width = '75%'}
-knitr::include_graphics("../tests/test_output/test_plot_peak_annotation1_2.png")
+knitr::include_graphics("../inst/tests/test_output/test_plot_peak_annotation1_2.png")
 ```
 ```{r annotation3, echo=FALSE, fig.cap="Density of chip peak in various parts of gene", out.width = '75%'}
-knitr::include_graphics("../tests/test_output/test_plot_peak_annotation1_3.png")
+knitr::include_graphics("../inst/tests/test_output/test_plot_peak_annotation1_3.png")
+```
+```{r last}
+sessionInfo()
 ```
 
