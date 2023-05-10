@@ -43,7 +43,7 @@ handle_input <- function(inputFiles,
                          nc=2){
 
    if(any(is.null(names(inputFiles)))) stop("Each file must have a name attribute!")
-   if(is.null(importParams)) importParams=list(offset=0, fix_width=0, fix_point="center", useScore=FALSE, outRle=TRUE, norm=TRUE, useSizeFactor=FALSE, genome="hg19")
+   if(is.null(importParams)) importParams <- list(offset=0, fix_width=0, fix_point="center", useScore=FALSE, outRle=TRUE, norm=TRUE, useSizeFactor=FALSE, genome="hg19")
 
    original_outRle <- importParams$outRle
    if(importParams$useSizeFactor && length(inputFiles)>1){
@@ -201,9 +201,9 @@ handle_bed <- function(inputFile,
 
    nco <- ncol(beddata)
    if(nco > 6 && verbose){
-      message(paste("The input file", inputFile, "have more than 6 columns, only the first 6 columns will be used!"))
+      message("The input filehave more than 6 columns, only the first 6 columns will be used!")
    }else if(nco < 6 && verbose){
-      message(paste("The input file", inputFile, "have only", nco, "columns!"))
+      message("The input file have less than 6 columns!")
    }
 
    beddata <- type.convert(beddata[, 1:min(6,nco)], as.is=TRUE)  ## ignore extra columns, which cause problem in import.bed()
@@ -229,10 +229,10 @@ handle_bed <- function(inputFile,
    
    if(c("chr1") %in% as.vector(seqnames(queryRegions)) && seqnames(seqInfo)[1] == "1"){
       seqnames(seqInfo) <- paste0("chr", seqnames(seqInfo))
-      seqnames(seqInfo)[25] = "chrM"
+      seqnames(seqInfo)[25] <- "chrM"
    }else if(c("1") %in% as.vector(seqnames(queryRegions)) && seqnames(seqInfo)[1] == "chr1"){
       seqnames(seqInfo) <- gsub("chr", "", seqnames(seqInfo))
-      seqnames(seqInfo)[25] = "MT"
+      seqnames(seqInfo)[25] <- "MT"
    }  
    queryRegions <- queryRegions[as.vector(seqnames(queryRegions)) %in% seqnames(seqInfo)]
    seqlevels(queryRegions) <- seqlevels(seqInfo)
@@ -279,7 +279,7 @@ handle_bam <- function(inputFile,
    }else{
       param <- ScanBamParam(mapqFilter=10)
    }
-   if(verbose) message(paste("\nbam file", inputFile, "is loaded\n"))
+   if(verbose) print(paste("\nbam file", inputFile, "is loaded\n"))
    
    ga <- readGAlignments(inputFile, use.names=TRUE, param=param)
    libsize <- sum(idxstatsBam(inputFile)$mapped)

@@ -61,9 +61,9 @@ plot_5parts_metagene(queryFiles=queryfiles,
                      nc=4)
                      
 ```
-![image1](./tests/test_output/test_plot_5parts_metagene1_1.png)
-![image1](./tests/test_output/test_plot_5parts_metagene1_2.png)
-![image1](./tests/test_output/test_plot_5parts_metagene1_3.png)
+![image1](./inst/tests/test_output/test_plot_5parts_metagene1_1.png)
+![image1](./inst/tests/test_output/test_plot_5parts_metagene1_2.png)
+![image1](./inst/tests/test_output/test_plot_5parts_metagene1_3.png)
 
 The following example shows you how to visualize distance between iCLIP_peaks/ChIP-seq narrowPeaks and ChIP-seq summit Peaks.
 
@@ -96,10 +96,10 @@ plot_locus(queryFiles=queryfiles[c(1,3)],
                      nc=4)
                      
 ```
-![image1](./tests/test_output/test_plot_locus1_1.png)
-![image1](./tests/test_output/test_plot_locus1_2.png)
-![image1](./tests/test_output/test_plot_locus1_3.png)
-![image1](./tests/test_output/test_plot_locus1_4.png)
+![image1](./inst/tests/test_output/test_plot_locus1_1.png)
+![image1](./inst/tests/test_output/test_plot_locus1_2.png)
+![image1](./inst/tests/test_output/test_plot_locus1_3.png)
+![image1](./inst/tests/test_output/test_plot_locus1_4.png)
 
 The following example shows you how to annotate ChIP-seq peaks. The annotation statistics is shown in "test_plot_peak_annotation.pdf". The detailed annotation is in the table "summitPeak_targeted_annotated_gene.tab".
 
@@ -121,10 +121,10 @@ plot_peak_annotation(peakFile=queryfiles[2],
                      verbose=TRUE)
 
 ```
-![image1](./tests/test_output/test_plot_peak_annotation1_1.png)
-![image1](./tests/test_output/test_plot_peak_annotation1_2.png)
-![image1](./tests/test_output/test_plot_peak_annotation1_3.png)
-![image1](./tests/test_output/test_plot_peak_annotation1_4.png)
+![image1](./inst/tests/test_output/test_plot_peak_annotation1_1.png)
+![image1](./inst/tests/test_output/test_plot_peak_annotation1_2.png)
+![image1](./inst/tests/test_output/test_plot_peak_annotation1_3.png)
+![image1](./inst/tests/test_output/test_plot_peak_annotation1_4.png)
 
 For more examples, please check out the package vignette using browseVignettes("GenomicPlot").
 
