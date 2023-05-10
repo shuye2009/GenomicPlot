@@ -125,7 +125,7 @@ plot_start_end_with_random <- function(queryFiles,
      feature <- handle_input(inputFiles=centerFile, bedparam, verbose=verbose, nc=nc)[[1]]$query
      featureName <- names(centerFile)
   }else{
-     stop(paste(centerFile, "does not exit or the feature name is not supported!"))
+     stop("centerfile does not exit or the feature name is not supported!")
   }
 
   if(verbose) print(paste("number of features: ", featureName, length(feature)))
@@ -457,10 +457,10 @@ plot_start_end_with_random <- function(queryFiles,
 #' @examples
 #' txdb <- AnnotationDbi::loadDb(system.file("extdata", "txdb_chr19.sql", package="GenomicPlot"))
 #' 
-#' queryfiles <- system.file("extdata", "treat_chr19.bam", package="GenomicPlot")
+#' queryfiles <- system.file("extdata", "chip_treat_chr19.bam", package="GenomicPlot")
 #' names(queryfiles) <- "query"
 #' 
-#' inputfiles <- system.file("extdata", "input_chr19.bam", package="GenomicPlot")
+#' inputfiles <- system.file("extdata", "chip_input_chr19.bam", package="GenomicPlot")
 #' names(inputfiles) <- "input"
 #' 
 #' centerfiles <- system.file("extdata", "test_chip_peak_chr19.narrowPeak", package="GenomicPlot")
@@ -530,7 +530,7 @@ plot_start_end <- function(queryFiles,
    bedparam <- importParams
    bedparam$CLIP_reads <- FALSE
    bedparam$fix_width <- 0
-   bedparam$fix_point="start"
+   bedparam$fix_point <- "start"
    bedparam$useScore <- FALSE
    bedparam$outRle <- FALSE
    bedparam$norm <- FALSE
@@ -553,7 +553,7 @@ plot_start_end <- function(queryFiles,
          feature[[1]]$query <- featureGR
          features[[names(feature)[1]]] <- feature[[1]]
       }else{
-         stop(paste(featureName, "is not supported!"))
+         stop("featureName is not supported!")
       }
    }
 
@@ -1228,7 +1228,7 @@ plot_region <- function(queryFiles,
         feature <- handle_input(featureName, bedparam, verbose=verbose, nc=nc)
         centerInputs[[names(feature)[1]]] <- feature[[1]]
      }else{
-        stop(paste(featureName, "is not supported!"))
+        stop("featureName is not supported!")
      }
    }
   centerLabels <- names(centerInputs)
@@ -2117,10 +2117,10 @@ plot_locus <- function(queryFiles,
 
   five <- ext[1]/1000
   five <- paste0(five, "K")
-  if(ext[1]==0) five=""
+  if(ext[1]==0) five <- ""
   three <- ext[2]/1000
   three <- paste0(three, "K")
-  if(ext[2]==0) three=""
+  if(ext[2]==0) three <- ""
   featureNames <- c(five, Xlab, three)
 
   ext[2] <- ext[2] - (ext[2]-ext[1])%%binSize ## to avoid binSize inconsistency, as the final binSize is dictated by bin_num
@@ -2156,7 +2156,7 @@ plot_locus <- function(queryFiles,
         feature <- handle_input(featureName, bedparam, verbose=verbose, nc=nc)
         centerInputs[[names(feature)[1]]] <- feature[[1]]
      }else{
-        stop(paste(featureName, "is not supported or the file does not exist, please check your file name and path!"))
+        stop("featureName is not supported or the file does not exist, please check your file name and path!")
      }
    }
   centerLabels <- names(centerInputs)
@@ -2258,7 +2258,7 @@ plot_locus <- function(queryFiles,
 
          xmin <- which(colLabel == hl[1])
          xmax <- which(colLabel == hl[2])
-         if(length(xmax)==0) xmax=length(colLabel)
+         if(length(xmax)==0) xmax <- length(colLabel)
          submatrix <- (fullMatrix[, xmin:xmax])
          submatrix[is.na(submatrix)] <- 0
          Intensity <- as.numeric(rowMeans(submatrix))
@@ -2479,7 +2479,7 @@ plot_locus <- function(queryFiles,
         if(hl[2] > hl[1]){
            xmin <- which(colLabel == hl[1])
            xmax <- which(colLabel == hl[2])
-           if(length(xmax)==0) xmax=length(colLabel)
+           if(length(xmax)==0) xmax <- length(colLabel)
            submatrix <- (fullMatrix[, xmin:xmax])
            submatrix[is.na(submatrix)] <- 0
            Intensity <- as.numeric(rowMeans(submatrix))
@@ -2859,7 +2859,7 @@ plot_locus_with_random <- function(queryFiles,
           if(hl[2] > hl[1]){
              xmin <- which(colLabel == hl[1])
              xmax <- which(colLabel == hl[2])
-             if(length(xmax)==0) xmax=length(colLabel)
+             if(length(xmax)==0) xmax <-length(colLabel)
              submatrix <- (fullMatrix[, xmin:xmax])
              submatrix[is.na(submatrix)] <- 0
              Intensity <- as.numeric(rowMeans(submatrix))
@@ -2973,7 +2973,7 @@ plot_locus_with_random <- function(queryFiles,
             if(hl[2] > hl[1]){
                xmin <- which(colLabel == hl[1])
                xmax <- which(colLabel == hl[2])
-               if(length(xmax)==0) xmax=length(colLabel)
+               if(length(xmax)==0) xmax <- length(colLabel)
                submatrix <- (fullMatrix[, xmin:xmax])
                submatrix[is.na(submatrix)] <- 0
                Intensity <- as.numeric(rowMeans(submatrix))
@@ -3118,7 +3118,7 @@ plot_bam_correlation <- function(bamfiles,
   panel.cor <- function(x, y, digits = 2, prefix = "", cex.cor, ...)
   {
     #usr <- par("usr"); on.exit(par(usr))
-    old=par(usr = c(0, 1, 0, 1))
+    old <- par(usr = c(0, 1, 0, 1))
     r <- abs(cor(x, y))
     txt <- format(c(r, 0.123456789), digits = digits)[1]
     txt <- paste0(prefix, txt)
@@ -3131,7 +3131,7 @@ plot_bam_correlation <- function(bamfiles,
   panel.hist <- function(x, ...)
   {
     usr <- par("usr")
-    old=par(usr = c(usr[1:2], 0, 1.5) )
+    old <- par(usr = c(usr[1:2], 0, 1.5) )
     h <- hist(x, plot = FALSE)
     breaks <- h$breaks; nB <- length(breaks)
     y <- h$counts; y <- y/max(y)
@@ -3218,8 +3218,8 @@ plot_peak_annotation <- function(peakFile,
    print(params)
    
   peakLabel <- names(peakFile)
-  importParams$useScore=FALSE
-  importParams$outRle=FALSE
+  importParams$useScore <- FALSE
+  importParams$outRle <- FALSE
   bedin <- handle_input(inputFiles=peakFile, importParams)
   peak <- bedin[[peakLabel]]$query
   

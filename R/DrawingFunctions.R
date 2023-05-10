@@ -9,6 +9,7 @@
 #' @param ranking method for ranking the rows of the input matrix, options are c("Sum", "Max", "Hierarchical", "None")
 #' @param ranges a numeric vector with two elements, defining custom range for color ramp, default=NULL, i.e. the range is defined automatically based on the range of fullMatrix
 #' @param verbose logical, whether to output the input matrix for inspection
+#' 
 #' @return NULL
 #'
 #' @author Shuye Pu
@@ -114,14 +115,14 @@ draw_region_landmark <- function(featureNames,
    if(nfeatures == 5){
       values <- data.frame(id=featureNames, value=c(1.75, 1.5, 1.25, 1.5, 1.75))
       positions <- data.frame(
-         id = rep(featureNames, each = 4),
+         fid = rep(featureNames, each = 4),
          x = c(vx[2], vx[1], vx[1], vx[2], vx[3], vx[2], vx[2], vx[3], vx[4], vx[3], vx[3], vx[4], vx[5], vx[4], vx[4], vx[5], xmax, vx[5], vx[5], xmax),
          y = c(3, 3, 4, 4, 2.5, 2.5, 4.5, 4.5, 2, 2, 5, 5, 2.5, 2.5, 4.5, 4.5, 3, 3, 4, 4) - 2
       )
    }else if(nfeatures == 3){
       values <- data.frame(id=featureNames, value=c(1.25, 1.75, 1.25))
       positions <- data.frame(
-         id = rep(featureNames, each = 4),
+         fid = rep(featureNames, each = 4),
          x = c(vx[2], vx[1], vx[1], vx[2], vx[3], vx[2], vx[2], vx[3], xmax, vx[3], vx[3], xmax),
          y = c(3, 3, 4, 4, 2.5, 2.5, 4.5, 4.5, 3, 3, 4, 4) - 2
       )
@@ -129,7 +130,7 @@ draw_region_landmark <- function(featureNames,
       stop("Number of feautre names must be 3 or 5! other numbers are not supported at this point.")
    }
 
-   datapoly <- merge(values, positions, by = c("id"))
+   datapoly <- merge(values, positions, by = c("fid"))
 
    pp <- ggplot(datapoly, aes(x = x, y = y)) +
       geom_polygon(aes(fill = value, group = id)) +
@@ -322,7 +323,7 @@ draw_boxplot_by_factor <- function(stat_df,
    
    xlabs <- paste(levels(as.factor(stat_df[[xc]])), "\n(", table(stat_df[[xc]])/nf,")", sep="")
    ypos <- rep(max(stat_df[[yc]]), length(comp))*seq(1, 1+(length(comp)-1)*0.1, 0.1)
-   outlier.shape = 19
+   outlier.shape <- 19
    
    if(fc == xc){
       p <- ggplot(stat_df, aes(x=.data[[xc]], y=.data[[yc]], fill=.data[[fc]])) +
