@@ -1,4 +1,3 @@
-
 #' @title Rank rows of a matrix based on user input
 #' @description The rows of a input numeric matrix is ordered based row sum, row maximum, or hierarchical clustering of the rows with euclidean distance and centroid linkage. This a helper function for drawing matrix heatmaps.
 #'
@@ -10,21 +9,21 @@
 #'
 #' @export rank_rows
 
-rank_rows <- function(fullmatrix, 
-                      ranking="Hierarchical"){
-   fullmatrix <- data.matrix(fullmatrix)
-   if(ranking == "None"){
-      invisible(fullmatrix)
-   }else if(ranking == "Sum"){
-      fullmatrix <- arrange(as.data.frame(fullmatrix), desc(rowSums(fullmatrix)))
-      invisible(data.matrix(fullmatrix))
-   }else if(ranking == "Max"){
-      fullmatrix <- arrange(as.data.frame(fullmatrix), desc(rowMax(fullmatrix)))
-      invisible(data.matrix(fullmatrix))
-   }else{
-      clust <- hclust(dist(fullmatrix, method="euclidean"), method="centroid")
-      invisible(data.matrix(fullmatrix[clust$order,]))
-   }
+rank_rows <- function(fullmatrix,
+                      ranking = "Hierarchical") {
+  fullmatrix <- data.matrix(fullmatrix)
+  if (ranking == "None") {
+    invisible(fullmatrix)
+  } else if (ranking == "Sum") {
+    fullmatrix <- arrange(as.data.frame(fullmatrix), desc(rowSums(fullmatrix)))
+    invisible(data.matrix(fullmatrix))
+  } else if (ranking == "Max") {
+    fullmatrix <- arrange(as.data.frame(fullmatrix), desc(rowMax(fullmatrix)))
+    invisible(data.matrix(fullmatrix))
+  } else {
+    clust <- hclust(dist(fullmatrix, method = "euclidean"), method = "centroid")
+    invisible(data.matrix(fullmatrix[clust$order, ]))
+  }
 }
 
 
@@ -36,65 +35,63 @@ rank_rows <- function(fullmatrix,
 #' @return NULL
 #' @keywords internal
 
-inspect_matrix <- function(fullmatrix, 
-                           verbose=FALSE){
+inspect_matrix <- function(fullmatrix,
+                           verbose = FALSE) {
+  if (verbose) print("Inspecting matrix")
+  size <- nrow(fullmatrix) * ncol(fullmatrix)
+  n_infinite <- sum(is.infinite(fullmatrix))
+  n_NA <- sum(is.na(fullmatrix))
+  n_NaN <- sum(is.nan(fullmatrix))
+  n_zero <- sum(fullmatrix == 0.0, na.rm = TRUE)
 
-   if(verbose) print("Inspecting matrix")
-   size <- nrow(fullmatrix)*ncol(fullmatrix)
-   n_infinite <- sum(is.infinite(fullmatrix))
-   n_NA <- sum(is.na(fullmatrix))
-   n_NaN <- sum(is.nan(fullmatrix))
-   n_zero <- sum(fullmatrix == 0.0, na.rm=TRUE)
+  n_invalid <- c(n_infinite, n_NA, n_NaN, n_zero)
+  fraction_invalid <- n_invalid / size
 
-   n_invalid <- c(n_infinite, n_NA, n_NaN, n_zero)
-   fraction_invalid <- n_invalid/size
+  stat_df <- data.frame(n_invalid, fraction_invalid)
+  rownames(stat_df) <- c("infinite", "NA", "NaN", "zero")
 
-   stat_df <- data.frame(n_invalid, fraction_invalid)
-   rownames(stat_df) <- c("infinite", "NA", "NaN", "zero")
+  if (verbose) print(stat_df)
 
-   if(verbose) print(stat_df)
-
-   return(NULL)
-
+  return(NULL)
 }
 
 #' @title Impute missing values
 #' @description Replace 0 and missing values in a sparse non-negative matrix with half of minimum of non-zero values, to avoid use of arbitrary pseudo numbers, and to allow computing ratios and log transformation of matrices. When a matrix is sparse (assuming it has many all-zero rows and few all-zero columns), the half of minimum of non-zero values is a number that is small enough so that is will not distort the data too much (comparing to pseudo count=1), but large enough to avoid huge ratios when used as a denominator.
-#' 
+#'
 #' @param fullmatrix a numeric matrix
 #' @param verbose logical, whether to output additional information
-#' 
+#'
 #' @return a numeric matrix
-#' 
-#' @author Shuye Pu 
-#' 
+#'
+#' @author Shuye Pu
+#'
 #' @keywords internal
 #'
 
-impute_hm <- function(fullmatrix, 
-                      verbose=FALSE){
-   if(min(fullmatrix) < 0){
-      message("cannot impute because the matrix has negative values")
-      return(fullmatrix)
-   }
-   if(verbose){
-      message("Imputing missing values. Matrix quartiles:")
-      print(quantile(fullmatrix))
-   }
+impute_hm <- function(fullmatrix,
+                      verbose = FALSE) {
+  if (min(fullmatrix) < 0) {
+    message("cannot impute because the matrix has negative values")
+    return(fullmatrix)
+  }
+  if (verbose) {
+    message("Imputing missing values. Matrix quartiles:")
+    print(quantile(fullmatrix))
+  }
 
-   #fullmatrix[fullmatrix == 0] <- NA
-   minv <- min(fullmatrix[fullmatrix != 0])
-   #minv <- min(apply(fullmatrix, 2, mean))
-   halfmin <- minv/2
-   fullmatrix[fullmatrix < halfmin] <- halfmin ##  to avoid take log of zero and use of pseudo numbers
+  # fullmatrix[fullmatrix == 0] <- NA
+  minv <- min(fullmatrix[fullmatrix != 0])
+  # minv <- min(apply(fullmatrix, 2, mean))
+  halfmin <- minv / 2
+  fullmatrix[fullmatrix < halfmin] <- halfmin ##  to avoid take log of zero and use of pseudo numbers
 
-   if(verbose){
-      message("Matrix quantiles after imputing:")
-      print(quantile(fullmatrix))
-      print(paste("The imputed value is:", halfmin))
-   }
+  if (verbose) {
+    message("Matrix quantiles after imputing:")
+    print(quantile(fullmatrix))
+    print(paste("The imputed value is:", halfmin))
+  }
 
-   return(fullmatrix)
+  return(fullmatrix)
 }
 
 #' @title Preprocess scoreMatrix before plotting
@@ -106,7 +103,7 @@ impute_hm <- function(fullmatrix,
 #' @param rmOutlier logical, indicating whether a row with abnormally high values in the score matrix should be removed
 #' @param verbose logical, indicating whether to output additional information (data used for plotting or statistical test results)
 #' @param transform a string in c("log", "log2", "log10"), default = NA indicating no transformation of data matrix
-#' 
+#'
 #' @details If inputFiles is null, all operations (impute, scale, rmOutlier and transform) can be applied to the score matrix, in the order of impute -> rmOutlier -> transform -> scale. When inputFiles are provided, only impute and rmOutlier can be applied to the score matrix, and transform and scale will affect ratio calculation, especially when log2 of ratio is intended, however, all these operations can be applied to the resulting ratio matrix. In order to avoid introducing distortion into the post-processed data, use caution when applying these operations.
 #'
 #' @return a numeric matrix with the same dimension as the fullmatrix
@@ -116,56 +113,55 @@ impute_hm <- function(fullmatrix,
 #' @export process_scoreMatrix
 #'
 #'
-process_scoreMatrix <- function(fullmatrix, 
-                                scale=FALSE, 
-                                rmOutlier=0, 
-                                transform=NA, 
-                                verbose=FALSE){
+process_scoreMatrix <- function(fullmatrix,
+                                scale = FALSE,
+                                rmOutlier = 0,
+                                transform = NA,
+                                verbose = FALSE) {
+  # rn <- rownames(fullmatrix)
+  inspect_matrix(fullmatrix, verbose = verbose)
 
-   #rn <- rownames(fullmatrix)
-   inspect_matrix(fullmatrix, verbose=verbose)
+  fullmatrix[is.infinite(fullmatrix)] <- 0
+  fullmatrix[is.na(fullmatrix)] <- 0
 
-   fullmatrix[is.infinite(fullmatrix)] <- 0
-   fullmatrix[is.na(fullmatrix)] <- 0
+  fullmatrix <- impute_hm(fullmatrix, verbose)
 
-   fullmatrix <- impute_hm(fullmatrix, verbose)
-   
-   ## remove outliers from reference regions, using Hampel filter with 1000mad instead of 3mad.
-   ## if outliers are detected, replace the outliers with up bound
-   if(rmOutlier > 0){
-      fullmatrix <- rm_outlier(fullmatrix, verbose=verbose, multiplier=rmOutlier)
-   }
+  ## remove outliers from reference regions, using Hampel filter with 1000mad instead of 3mad.
+  ## if outliers are detected, replace the outliers with up bound
+  if (rmOutlier > 0) {
+    fullmatrix <- rm_outlier(fullmatrix, verbose = verbose, multiplier = rmOutlier)
+  }
 
-   if(!is.na(transform)) {
-      if(min(fullmatrix) < 0){
-         message("Negative values are found in the matrix, log transformation cannot be applied!")
-      }else if(transform == "log"){
-         fullmatrix <- log(fullmatrix)
-      }else if(transform == "log2"){
-         fullmatrix <- log2(fullmatrix)
-      }else if(transform == "log10"){
-         fullmatrix <- log10(fullmatrix)
-      }
-   }
+  if (!is.na(transform)) {
+    if (min(fullmatrix) < 0) {
+      message("Negative values are found in the matrix, log transformation cannot be applied!")
+    } else if (transform == "log") {
+      fullmatrix <- log(fullmatrix)
+    } else if (transform == "log2") {
+      fullmatrix <- log2(fullmatrix)
+    } else if (transform == "log10") {
+      fullmatrix <- log10(fullmatrix)
+    }
+  }
 
-   if(scale){
-      smc <- t(apply(fullmatrix, 1, scales::rescale)) ## rescale to 0:1 range
-      #smc <- t(base::scale(t(fullmatrix))) ## rescale to zscore by row
-      fullmatrix <- as.matrix(smc)
-      
-      fullmatrix[is.na(fullmatrix)] <- 0
-      allSame <- apply(fullmatrix, 1, function(x)all(x == mean(x)))
-      fullmatrix[allSame,] <- 0 # rescale will set the entire row to 0.5 if all values are 0,
-      # this will distort the downstream analysis
-      count_allSame_rows <- sum(allSame)
-      if(count_allSame_rows > 0 && verbose){
-         message(count_allSame_rows, " rows have only one distinct value in the entire row after rescale!")
-      }
-   }
-   fullmatrix[is.na(fullmatrix)] <- 0
+  if (scale) {
+    smc <- t(apply(fullmatrix, 1, scales::rescale)) ## rescale to 0:1 range
+    # smc <- t(base::scale(t(fullmatrix))) ## rescale to zscore by row
+    fullmatrix <- as.matrix(smc)
 
-   #rownames(fullmatrix) <- rn
-   invisible(fullmatrix)
+    fullmatrix[is.na(fullmatrix)] <- 0
+    allSame <- apply(fullmatrix, 1, function(x) all(x == mean(x)))
+    fullmatrix[allSame, ] <- 0 # rescale will set the entire row to 0.5 if all values are 0,
+    # this will distort the downstream analysis
+    count_allSame_rows <- sum(allSame)
+    if (count_allSame_rows > 0 && verbose) {
+      message(count_allSame_rows, " rows have only one distinct value in the entire row after rescale!")
+    }
+  }
+  fullmatrix[is.na(fullmatrix)] <- 0
+
+  # rownames(fullmatrix) <- rn
+  invisible(fullmatrix)
 }
 
 #' @title Remove outliers from scoreMatrix
@@ -180,67 +176,66 @@ process_scoreMatrix <- function(fullmatrix,
 #' @author Shuye Pu
 #'
 #' @examples
-#' fullmatrix <- matrix(rnorm(100), ncol=10)
+#' fullmatrix <- matrix(rnorm(100), ncol = 10)
 #' maxm <- max(fullmatrix)
-#' fullmatrix[3,9] <- maxm + 1000
-#' fullmatrix[8,1] <- maxm + 500
-#' rm_outlier(fullmatrix, verbose=TRUE, multiplier=100)
-#' rm_outlier(fullmatrix, verbose=TRUE, multiplier=1000)
+#' fullmatrix[3, 9] <- maxm + 1000
+#' fullmatrix[8, 1] <- maxm + 500
+#' rm_outlier(fullmatrix, verbose = TRUE, multiplier = 100)
+#' rm_outlier(fullmatrix, verbose = TRUE, multiplier = 1000)
 #'
 #' @export rm_outlier
 #'
 
-rm_outlier <- function(fullmatrix, 
-                       verbose=FALSE, 
-                       multiplier=1000){
+rm_outlier <- function(fullmatrix,
+                       verbose = FALSE,
+                       multiplier = 1000) {
+  fullmatrix[is.na(fullmatrix)] <- 0
+  rowmax <- apply(fullmatrix, 1, max)
+  k <- 1.4826 ## k is the scaling constant for estimating rolling standard deviation using median absolute deviation, its value is 1.4826 most of the time
+  M <- mad(rowmax) * k
 
-   fullmatrix[is.na(fullmatrix)] <- 0
-   rowmax <- apply(fullmatrix, 1, max)
-   k <- 1.4826 ## k is the scaling constant for estimating rolling standard deviation using median absolute deviation, its value is 1.4826 most of the time
-   M <- mad(rowmax) * k  
-   
-   if(M > 0){
-      up_bound <- median(rowmax) + multiplier*M
-   }else{
-      up_bound <- max(rowmax)*0.99 # for extremely skewed data, use 99th percentile of the maximum
-   }
+  if (M > 0) {
+    up_bound <- median(rowmax) + multiplier * M
+  } else {
+    up_bound <- max(rowmax) * 0.99 # for extremely skewed data, use 99th percentile of the maximum
+  }
 
-   fullmatrix <- as.matrix(fullmatrix)
-   fn <- ecdf(fullmatrix)
-   percentile <- fn(up_bound)
+  fullmatrix <- as.matrix(fullmatrix)
+  fn <- ecdf(fullmatrix)
+  percentile <- fn(up_bound)
 
-   if(length(which(rowmax > up_bound)) > 0){
-      outliers <- fullmatrix[fullmatrix>up_bound]
+  if (length(which(rowmax > up_bound)) > 0) {
+    outliers <- fullmatrix[fullmatrix > up_bound]
 
-      if(verbose){
-         print("Outlier detected:")
-         print(paste("maximum of the matrix", max(fullmatrix)))
-         print(paste("median of row max", median(rowmax)))
-         print(paste("median absolute deviation (mad) of row max", M))
-         print(paste("mulitplier of mad", multiplier))
-         print(paste("up_bound and replace value", up_bound))
-         print(paste("percentile of up_bound", percentile))
-         print(paste("number of outlier rows", length(which(rowmax > up_bound))))
-         print(paste("number of outliers", length(outliers)))
-         print(paste("fraction of outliers", length(outliers)/(nrow(fullmatrix)*ncol(fullmatrix))))
-         print("values of outliers")
-         print(outliers)
-      }
+    if (verbose) {
+      print("Outlier detected:")
+      print(paste("maximum of the matrix", max(fullmatrix)))
+      print(paste("median of row max", median(rowmax)))
+      print(paste("median absolute deviation (mad) of row max", M))
+      print(paste("mulitplier of mad", multiplier))
+      print(paste("up_bound and replace value", up_bound))
+      print(paste("percentile of up_bound", percentile))
+      print(paste("number of outlier rows", length(which(rowmax > up_bound))))
+      print(paste("number of outliers", length(outliers)))
+      print(paste("fraction of outliers", length(outliers) / (nrow(fullmatrix) * ncol(fullmatrix))))
+      print("values of outliers")
+      print(outliers)
+    }
 
-      fullmatrix[fullmatrix>up_bound] <- up_bound
-   }else{
-      if(verbose){
-         print("Outlier not detected:")
-         print(paste("maximum of the matrix", max(rowmax)))
-         print(paste("median of row max", median(rowmax)))
-         print(paste("median absolute deviation (mad) of row max", M))
-         print(paste("mulitplier of mad", multiplier))
-         print(paste("up_bound and replace value", up_bound))
-         print(paste("percentile of up_bound", percentile))
-      }
-   }
+    fullmatrix[fullmatrix > up_bound] <- up_bound
+  } else {
+    if (verbose) {
+      print("Outlier not detected:")
+      print(paste("maximum of the matrix", max(rowmax)))
+      print(paste("median of row max", median(rowmax)))
+      print(paste("median absolute deviation (mad) of row max", M))
+      print(paste("mulitplier of mad", multiplier))
+      print(paste("up_bound and replace value", up_bound))
+      print(paste("percentile of up_bound", percentile))
+    }
+  }
 
-   invisible(fullmatrix)
+  invisible(fullmatrix)
 }
 
 #' @title Perform one-way ANOVA and post hoc TukeyHSD tests
@@ -260,29 +255,29 @@ rm_outlier <- function(fullmatrix,
 #' @export aov_TukeyHSD
 #'
 
-aov_TukeyHSD <- function(df, 
-                         xc="Group", 
-                         yc="Intensity", 
-                         op=NULL, 
-                         verbose=FALSE){
-   if(verbose){
-      sink(file=paste0(op,"_TukeyHSD.txt"), append=TRUE, split=TRUE)
-      cat(paste("Performing one-way ANOVA analysis for", op, "\n"))
-   }
-   formu <- as.formula(paste(yc, "~", xc))
-   res.aov <- aov(formu, data = df)
-   s <- summary(res.aov)
-   p <-  s[[1]][1, "Pr(>F)"]
-   if(verbose){
-      print(s) ## anova summary
-      cat("\nPost hoc Tukey Honest Significant Differences test\n")
-   } 
-   v <- TukeyHSD(res.aov, which = xc)
-   if(verbose){
-      print(v)
-      sink()
-   }
-   invisible(list("ANOVA"=p, "HSD"=v[[xc]]))
+aov_TukeyHSD <- function(df,
+                         xc = "Group",
+                         yc = "Intensity",
+                         op = NULL,
+                         verbose = FALSE) {
+  if (verbose) {
+    sink(file = paste0(op, "_TukeyHSD.txt"), append = TRUE, split = TRUE)
+    cat(paste("Performing one-way ANOVA analysis for", op, "\n"))
+  }
+  formu <- as.formula(paste(yc, "~", xc))
+  res.aov <- aov(formu, data = df)
+  s <- summary(res.aov)
+  p <- s[[1]][1, "Pr(>F)"]
+  if (verbose) {
+    print(s) ## anova summary
+    cat("\nPost hoc Tukey Honest Significant Differences test\n")
+  }
+  v <- TukeyHSD(res.aov, which = xc)
+  if (verbose) {
+    print(v)
+    sink()
+  }
+  invisible(list("ANOVA" = p, "HSD" = v[[xc]]))
 }
 
 #' @title Convert GRanges to dataframe
@@ -295,69 +290,69 @@ aov_TukeyHSD <- function(df,
 #' @author Shuye Pu
 #'
 #' @examples
-#' gr2 <- GenomicRanges::GRanges(c("chr1", "chr1"), IRanges::IRanges(c(7,13), width=3),
-#'  strand=c("+", "-"))
-#' GenomicRanges::mcols(gr2) <- data.frame(score=c(0.3, 0.9), cat=c(TRUE, FALSE))
+#' gr2 <- GenomicRanges::GRanges(c("chr1", "chr1"), IRanges::IRanges(c(7, 13), width = 3),
+#'   strand = c("+", "-")
+#' )
+#' GenomicRanges::mcols(gr2) <- data.frame(score = c(0.3, 0.9), cat = c(TRUE, FALSE))
 #' df2 <- gr2df(gr2)
 #'
 #' @export gr2df
 
-gr2df <- function(gr){
+gr2df <- function(gr) {
+  chr <- as.vector(seqnames(gr))
+  start <- start(gr) - 1 # convert to 0-based for bed
+  end <- end(gr)
+  width <- width(gr)
+  strand <- as.vector(strand(gr))
+  meta <- mcols(gr, us.names = TRUE)
 
-   chr <- as.vector(seqnames(gr))
-   start <- start(gr)-1 # convert to 0-based for bed
-   end <- end(gr)
-   width <- width(gr)
-   strand <- as.vector(strand(gr))
-   meta <- mcols(gr, us.names=TRUE)
-   
-   if("name" %in% colnames(meta)){
-      name <- gr$name
-      meta <- meta[, !colnames(meta) %in% c("name"), drop=FALSE]
-   }else if("id" %in% colnames(meta)){
-         name <- gr$id
-         meta <- meta[, !colnames(meta) %in% c("id"), drop=FALSE]
-   }else if(!is.null(names(gr))){
-      name <- names(gr)
-   }else{
-      name <- seq_along(gr)
-   }
-   
-   if("score" %in% colnames(meta)){
-      score <- gr$score
-      meta <- meta[, !colnames(meta) %in% c("score"), drop=FALSE]
-   }else{
-      score <- width
-   }
+  if ("name" %in% colnames(meta)) {
+    name <- gr$name
+    meta <- meta[, !colnames(meta) %in% c("name"), drop = FALSE]
+  } else if ("id" %in% colnames(meta)) {
+    name <- gr$id
+    meta <- meta[, !colnames(meta) %in% c("id"), drop = FALSE]
+  } else if (!is.null(names(gr))) {
+    name <- names(gr)
+  } else {
+    name <- seq_along(gr)
+  }
 
-   df <- as.data.frame(cbind(chr, start, end, name, score, strand, meta))
-   
-   return(df)
+  if ("score" %in% colnames(meta)) {
+    score <- gr$score
+    meta <- meta[, !colnames(meta) %in% c("score"), drop = FALSE]
+  } else {
+    score <- width
+  }
+
+  df <- as.data.frame(cbind(chr, start, end, name, score, strand, meta))
+
+  return(df)
 }
 
 #' @title compute ratio over input
-#' 
+#'
 #' @description compute enrichment of IP samples over Input samples
-#' 
-#' @param IP a numerical matrix 
+#'
+#' @param IP a numerical matrix
 #' @param Input another numerical matrix with same dimensions as the IP matrix
-#' @param verbose logical, whether to output additional information 
-#' 
-#' @return a numerical matrix with same dimensions as the IP matrix 
-#' 
-#' @author Shuye Pu 
-#' 
+#' @param verbose logical, whether to output additional information
+#'
+#' @return a numerical matrix with same dimensions as the IP matrix
+#'
+#' @author Shuye Pu
+#'
 #' @keywords internal
-#' 
-ratio_over_input <- function(IP, Input, verbose=FALSE){
-   if(!identical(dim(IP), dim(Input))) stop("IP matrix and Input matrix must have same dimensions")
-   if(min(IP) < 0 || min(Input) < 0 ) stop("IP matrix and Input matrix cannot have negative values")
-   
-   # regularize the matrices to avoid unreasonably high ratios, 
-   # if the maximum of IP is greater than 1 and the minimum of Input is smaller than 1
-   reg <- ifelse((max(IP) > 1) && (min(Input) < 1 ), 1, 0)
-   if(verbose) print(paste(max(IP), min(Input), reg))
-   ratio <- (IP + reg)/(Input + reg)
-   
-   return(ratio)
+#'
+ratio_over_input <- function(IP, Input, verbose = FALSE) {
+  if (!identical(dim(IP), dim(Input))) stop("IP matrix and Input matrix must have same dimensions")
+  if (min(IP) < 0 || min(Input) < 0) stop("IP matrix and Input matrix cannot have negative values")
+
+  # regularize the matrices to avoid unreasonably high ratios,
+  # if the maximum of IP is greater than 1 and the minimum of Input is smaller than 1
+  reg <- ifelse((max(IP) > 1) && (min(Input) < 1), 1, 0)
+  if (verbose) print(paste(max(IP), min(Input), reg))
+  ratio <- (IP + reg) / (Input + reg)
+
+  return(ratio)
 }
