@@ -29,21 +29,32 @@ plot_overlap_bed(
 
 \item{verbose}{logical, indicating whether to output additional information}
 }
+\value{
+a ggplot object
+}
 \description{
 This function takes a list of up to 4 bed file names, and produce a Venn diagram
 }
 \examples{
 
-queryFiles <- c(system.file("extdata", "test_chip_peak_chr19.narrowPeak", package="GenomicPlot"),
-system.file("extdata", "test_chip_peak_chr19.bed", package="GenomicPlot"),
-system.file("extdata", "test_clip_peak_chr19.bed", package="GenomicPlot"))
+queryFiles <- c(
+  system.file("extdata", "test_chip_peak_chr19.narrowPeak", package = "GenomicPlot"),
+  system.file("extdata", "test_chip_peak_chr19.bed", package = "GenomicPlot"),
+  system.file("extdata", "test_clip_peak_chr19.bed", package = "GenomicPlot")
+)
 names(queryFiles) <- c("narrowPeak", "summitPeak", "clipPeak")
 
-handleBedParams <- list(fix_width=100, fix_point="center", useScore=FALSE, outRle=FALSE,
-                        offset=0, norm=FALSE, useSizeFactor=FALSE, genome="hg19")
+handleBedParams <- list(
+  fix_width = 100, fix_point = "center", useScore = FALSE, outRle = FALSE,
+  offset = 0, norm = FALSE, useSizeFactor = FALSE, genome = "hg19"
+)
 
-plot_overlap_bed(bedList=queryFiles, importParams=handleBedParams, pairOnly=FALSE, 
-stranded=FALSE)
+p <- plot_overlap_bed(
+  bedList = queryFiles, importParams = handleBedParams, pairOnly = FALSE,
+  stranded = FALSE
+)
+
+p
 
 }
 \author{

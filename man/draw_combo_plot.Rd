@@ -45,14 +45,20 @@ a ggplot object
 Place violin plot, boxplot without outliers, mean+se barplot and quantile plot on the same page
 }
 \examples{
-stat_df <- data.frame(Feature=rep(c("A", "B"), c(200, 300)), 
-                     Intensity=c(rnorm(200, 2, 5), rnorm(300, 3, 5)),
-                     Height=c(rnorm(200, 5, 5), rnorm(300, 1, 5)))
-stat_df_long <- tidyr::pivot_longer(stat_df, cols=c(Intensity, Height), 
-names_to="type", values_to="value")
+stat_df <- data.frame(
+  Feature = rep(c("A", "B"), c(200, 300)),
+  Intensity = c(rnorm(200, 2, 5), rnorm(300, 3, 5)),
+  Height = c(rnorm(200, 5, 5), rnorm(300, 1, 5))
+)
+stat_df_long <- tidyr::pivot_longer(stat_df,
+  cols = c(Intensity, Height),
+  names_to = "type", values_to = "value"
+)
 
-print(draw_combo_plot(stat_df_long, xc="Feature", yc="value", fc="type", 
-Ylab="value", comp=list(c(1,2), c(3,4), c(1,3), c(2,4)), nf=2))
+print(draw_combo_plot(stat_df_long,
+  xc = "Feature", yc = "value", fc = "type",
+  Ylab = "value", comp = list(c(1, 2), c(3, 4), c(1, 3), c(2, 4)), nf = 2
+))
 }
 \author{
 Shuye Pu

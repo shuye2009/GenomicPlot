@@ -9,16 +9,16 @@
 #' @param ranges a numeric vector with two elements, defining custom range for color ramp, default=NULL, i.e. the range is defined automatically based on the range of fullMatrix
 #' @param verbose logical, whether to output the input matrix for inspection
 #'
-#' @return NULL
+#' @return a grob object
 #'
 #' @author Shuye Pu
 #'
 #' @examples
 #' fullMatrix <- matrix(rnorm(10000), ncol = 100)
-#' for (i in 1:80) {
+#' for (i in seq_len(80)) {
 #'   fullMatrix[i, 16:75] <- runif(60) + i
 #' }
-#' labels_col <- as.character(seq(1:100))
+#' labels_col <- as.character(seq_len(100))
 #' levels_col <- c("start", "center", "end")
 #' names(labels_col) <- rep(levels_col, c(15, 60, 25))
 #'
@@ -50,7 +50,7 @@ draw_matrix_heatmap <- function(fullMatrix,
   fullMatrix <- rank_rows(fullMatrix, ranking)
 
   if (verbose) {
-    print("drawing heatmap")
+    message("drawing heatmap\n")
     vdataName <- gsub(":|/|,|\\.|\\s", "_", dataName, fixed = FALSE) ## replace characters not allowed in file names
     write.table(fullMatrix, paste(vdataName, "_matrix.tab", sep = ""), row.names = TRUE, col.names = TRUE, sep = "\t", quote = FALSE)
   }
@@ -61,17 +61,18 @@ draw_matrix_heatmap <- function(fullMatrix,
   mycols <- cols[features]
   names(mycols) <- features
 
-  ha <- HeatmapAnnotation(df = data.frame(feature = features), col = list(feature = mycols), which = "column", show_legend = FALSE, annotation_label = "")
+  ha <- HeatmapAnnotation(df = data.frame(feature = features), col = list(feature = mycols), 
+    which = "column", show_legend = FALSE, annotation_label = ""
+  )
   # y <- matrix(as.vector(fullMatrix), ncol=1)
   if (verbose) {
-    print("quantile(fullMatrix, c(seq(0.9, 1, 0.005)), na.rm=TRUE)")
-    print(quantile(fullMatrix, c(seq(0.9, 1, 0.005)), na.rm = TRUE))
+    message("quantile(fullMatrix, c(seq(0.9, 1, 0.005)), na.rm=TRUE)\n")
+    message(paste(quantile(fullMatrix, c(seq(0.9, 1, 0.005)), na.rm = TRUE), collapse = " "), "\n")
   }
   if (is.null(ranges)) {
     ranges <- quantile(fullMatrix, c(0.025, 0.975), na.rm = TRUE)
     if (ranges[1] == ranges[2]) {
-      message("97.5% of values are not unique, heatmap may not show signals effectively")
-
+      message("97.5% of values are not unique, heatmap may not show signals effectively\n")
       ranges <- quantile(fullMatrix, c(0, 1), na.rm = TRUE) ## Need to have a better way for determine the upper bound
     }
   }
@@ -107,6 +108,13 @@ draw_matrix_heatmap <- function(fullMatrix,
 #' @note used by \code{plot_3parts_metagene}, \code{plot_5parts_metagene}, \code{plot_region}
 #'
 #' @author Shuye Pu
+#' 
+#' @examples 
+#' fn <- c("5'UTR", "CDS", "3'UTR")
+#' mark <- c(1, 5, 20)
+#' xmax <- 25
+#' 
+#' p <- draw_region_landmark(featureNames = fn, vx = mark, xmax = xmax)
 #'
 #' @export draw_region_landmark
 
@@ -116,14 +124,14 @@ draw_region_landmark <- function(featureNames,
                                  xmax) {
   nfeatures <- length(featureNames)
   if (nfeatures == 5) {
-    values <- data.frame(id = featureNames, value = c(1.75, 1.5, 1.25, 1.5, 1.75))
+    values <- data.frame(fid = featureNames, value = c(1.75, 1.5, 1.25, 1.5, 1.75))
     positions <- data.frame(
       fid = rep(featureNames, each = 4),
       x = c(vx[2], vx[1], vx[1], vx[2], vx[3], vx[2], vx[2], vx[3], vx[4], vx[3], vx[3], vx[4], vx[5], vx[4], vx[4], vx[5], xmax, vx[5], vx[5], xmax),
       y = c(3, 3, 4, 4, 2.5, 2.5, 4.5, 4.5, 2, 2, 5, 5, 2.5, 2.5, 4.5, 4.5, 3, 3, 4, 4) - 2
     )
   } else if (nfeatures == 3) {
-    values <- data.frame(id = featureNames, value = c(1.25, 1.75, 1.25))
+    values <- data.frame(fid = featureNames, value = c(1.25, 1.75, 1.25))
     positions <- data.frame(
       fid = rep(featureNames, each = 4),
       x = c(vx[2], vx[1], vx[1], vx[2], vx[3], vx[2], vx[2], vx[3], xmax, vx[3], vx[3], xmax),
@@ -136,7 +144,7 @@ draw_region_landmark <- function(featureNames,
   datapoly <- merge(values, positions, by = c("fid"))
 
   pp <- ggplot(datapoly, aes(x = x, y = y)) +
-    geom_polygon(aes(fill = value, group = id)) +
+    geom_polygon(aes(fill = value, group = fid)) +
     theme(
       axis.line = element_blank(),
       axis.text.x = element_blank(),
@@ -165,7 +173,13 @@ draw_region_landmark <- function(featureNames,
 #' @return a ggplot object
 #' @note used by \code{plot_3parts_metagene}, \code{plot_5parts_metagene}, \code{plot_region}
 #'
-#' @author Shuye Pu
+#' @author Shuye Pu 
+#' @examples 
+#' fn <- c("5'UTR", "CDS", "3'UTR")
+#' bins <- c(5, 15, 5)
+#' xmax <- 25
+#' 
+#' p <- draw_region_name(featureNames = fn, scaled_bins = bins, xmax = xmax)
 #'
 #' @export draw_region_name
 
@@ -174,7 +188,7 @@ draw_region_name <- function(featureNames,
                              xmax) {
   annotx <- scaled_bins / 2
   for (i in 2:length(scaled_bins)) {
-    annotx[i] <- annotx[i] + sum(scaled_bins[1:(i - 1)])
+    annotx[i] <- annotx[i] + sum(scaled_bins[seq_len(i - 1)])
   }
 
   annot <- data.frame(
@@ -217,7 +231,22 @@ draw_region_name <- function(featureNames,
 #' @return a ggplot object
 #' @note used by \code{plot_3parts_metagene}, \code{plot_5parts_metagene}, \code{plot_region}
 #'
-#' @author Shuye Pu
+#' @author Shuye Pu 
+#' 
+#' @examples 
+#' library(dplyr)
+#' Reference <- rep(rep(c("Ref1", "Ref2"), each = 100), 2)
+#' Query <- rep(c("Query1", "Query2"), each = 200)
+#' Position <- rep(seq_len(100), 4)
+#' Intensity <- rlnorm(400)
+#' se <- runif(400)
+#' df <- data.frame(Intensity, se, Position, Query, Reference) %>%
+#'   mutate(lower = Intensity - se, upper = Intensity + se) %>%
+#'   mutate(Group = paste(Query, Reference, sep = ":"))
+#' vx <- c(1, 23, 70)
+#' 
+#' p <- draw_region_profile(df, cn = "Group", vx = vx)
+#' p
 #'
 #' @export draw_region_profile
 #'
@@ -240,12 +269,12 @@ draw_region_profile <- function(plot_df,
     ylab(Ylab) +
     theme(
       legend.position = "top",
+      legend.title = element_blank(),
       axis.title.x = element_blank(),
       axis.ticks.x = element_blank(),
       axis.text.x = element_blank(),
       plot.margin = unit(c(1, 1, 0, 1), "lines")
-    ) +
-    ggtitle(unique(plot_df[[sn]]))
+    ) 
 
   return(p)
 }
@@ -266,6 +295,21 @@ draw_region_profile <- function(plot_df,
 #' @return a ggplot object
 #' @note used by \code{plot_locus}, \code{plot_locus_with_random}
 #' @author Shuye Pu
+#' 
+#' @examples 
+#' library(dplyr)
+#' Reference <- rep(rep(c("Ref1", "Ref2"), each = 100), 2)
+#' Query <- rep(c("Query1", "Query2"), each = 200)
+#' Position <- rep(seq(-50, 49), 4)
+#' Intensity <- rlnorm(400)
+#' se <- runif(400)
+#' df <- data.frame(Intensity, se, Position, Query, Reference) %>%
+#'   mutate(lower = Intensity - se, upper = Intensity + se) %>%
+#'   mutate(Group = paste(Query, Reference, sep = ":"))
+#' 
+#' p <- draw_locus_profile(df, cn = "Group", shade = TRUE, hl = c(-10, 20))
+#' p 
+#' 
 #' @export draw_locus_profile
 #'
 
@@ -288,12 +332,11 @@ draw_locus_profile <- function(plot_df,
     xlab(Xlab) +
     ylab(Ylab) +
     theme(
-      legend.position = "top", legend.title = element_blank(),
+      legend.position = "top", 
+      legend.title = element_blank(),
       axis.text = element_text(face = "plain", size = 14),
       axis.title = element_text(face = "bold", size = 16)
-    ) +
-    ggtitle(unique(plot_df[[sn]]))
-
+    ) 
   if (shade) p <- p + annotate("rect", xmin = hl[1], xmax = hl[2], ymin = -Inf, ymax = Inf, fill = "grey", color = "grey", alpha = 0.3)
 
   return(p)
@@ -361,7 +404,7 @@ draw_boxplot_by_factor <- function(stat_df,
   } else {
     mid <- function(v) {
       m <- rep(0, (length(v) / 2))
-      for (i in 1:length(m)) {
+      for (i in seq_along(m)) {
         m[i] <- (v[i * 2 - 1] + v[i * 2]) / 2
       }
       return(m)
@@ -428,12 +471,6 @@ draw_boxplot_wo_outlier <- function(stat_df,
   bp <- boxplot(fomu, stat_df, plot = FALSE)
   # lim <- c(min(bp$stats) - abs(min(bp$stats))*0.25, max(bp$stats) + abs(max(bp$stats))*0.25)
   lim <- c(min(bp$stats), max(bp$stats))
-  # ypos <- rep(lim[2], length(comp))*seq(1, 1+(length(comp)-1)*0.1, 0.1)
-  # lim[2] <- max(ypos)*1.25
-  # tipl <- 0.03
-  # print(lim)
-  # print(ypos)
-  # print(tipl)
 
   if (fc == xc) {
     p <- ggplot(stat_df, aes(x = .data[[xc]], y = .data[[yc]], fill = .data[[fc]])) +
@@ -454,7 +491,7 @@ draw_boxplot_wo_outlier <- function(stat_df,
   } else {
     mid <- function(v) {
       m <- rep(0, (length(v) / 2))
-      for (i in 1:length(m)) {
+      for (i in seq_along(m)) {
         m[i] <- (v[i * 2 - 1] + v[i * 2]) / 2
       }
       return(m)
@@ -555,12 +592,12 @@ draw_mean_se_barplot <- function(stat_df,
       p <- p + coord_cartesian(ylim = Ylim)
     }
 
-    stats$HSD[, 1:3] <- round(stats$HSD[, 1:3], digits = 3)
+    stats$HSD[, seq_len(3)] <- round(stats$HSD[, seq_len(3)], digits = 3)
     stats$HSD[, 4] <- format(stats$HSD[, 4], digits = 3)
 
-    comp_row <- sapply(comp, function(x) {
+    comp_row <- vapply(comp, function(x) {
       arow <- paste0(levels(stat_df[[xc]])[x[2]], "-", levels(stat_df[[xc]])[x[1]])
-    })
+    }, character(1))
     stats_selected <- as.data.frame(stats$HSD) %>%
       filter(row.names(stats$HSD) %in% comp_row)
     ptable <- tab_add_title(ggtexttable(stats_selected, theme = ttheme(base_size = 9)), text = "post hoc TukeyHSD test", padding = unit(1.0, "line"), just = "left")
@@ -606,12 +643,12 @@ draw_mean_se_barplot <- function(stat_df,
       p <- p + coord_cartesian(ylim = Ylim)
     }
 
-    stats$HSD[, 1:3] <- round(stats$HSD[, 1:3], digits = 3)
+    stats$HSD[, seq_len(3)] <- round(stats$HSD[, seq_len(3)], digits = 3)
     stats$HSD[, 4] <- format(stats$HSD[, 4], digits = 3)
 
-    comp_row <- sapply(comp, function(x) {
+    comp_row <- vapply(comp, function(x) {
       arow <- paste0(levels(stat_df[["x2"]])[x[2]], "-", levels(stat_df[["x2"]])[x[1]])
-    })
+    }, character(1))
     stats_selected <- as.data.frame(stats$HSD) %>%
       filter(row.names(stats$HSD) %in% comp_row)
     ptable <- tab_add_title(ggtexttable(stats_selected, theme = ttheme(base_size = 9)), text = "post hoc TukeyHSD test", padding = unit(1.0, "line"), just = "left")
@@ -824,7 +861,8 @@ draw_combo_plot <- function(stat_df,
 #'
 #' @return a ggplot object
 #' @note used by \code{plot_start_end}, \code{plot_start_end_with_random}
-#' @author Shuye Pu
+#' @author Shuye Pu 
+#' 
 #' @export draw_stacked_profile
 #'
 
@@ -995,13 +1033,44 @@ draw_stacked_profile <- function(plot_df,
 
 #' @title Plot two-sets Venn diagram
 #'
-#' @description This is a helper function for Venn diagram plot. A Venn diagram is plotted as output.
+#' @description This is a helper function for Venn diagram plot. A Venn diagram is plotted as output. For GRanges, as A overlap B may not be the same as B overlap A, the order of GRanges in a list matters, certain order may produce error.
 #' @param apair a list of two vectors
-#' @param overlap_fun the name of the function that defines overlap, depending on the type of object in the vectors.
+#' @param overlap_fun the name of the function that defines overlap, depending on the type of object in the vectors. For GRanges, use filter_by_overlaps_stranded or filter_by_overlaps_nonstranded, for gene names, use intersect.
 #'
-#' @return NULL
-#' @author Shuye Pu
+#' @return a VennDiagram object
+#' @author Shuye Pu 
+#' 
+#' @examples 
+#' test_list <- list(A = c(1, 2, 3, 4, 5), B = c(4, 5, 7))
+#' overlap_pair(test_list, intersect)
+#' 
+#' ## GRanges overlap
+#' query <- GRanges("chr19", 
+#'   IRanges(rep(c(10, 15), 2), width=c(1, 20, 40, 50)), 
+#'   strand=c("+", "+", "-", "-")
+#' )
+#' 
+#' subject <- GRanges("chr19", 
+#'   IRanges(rep(c(13, 150), 2), width=c(10, 14, 20, 28)), 
+#'   strand=c("+", "-", "-", "+")
+#' )
 #'
+#'overlap_pair(list(query = query, subject = subject), filter_by_overlaps_stranded)
+#'
+#' ## the following will generate an error
+#' \donttest{
+#' short <- GRanges("chr19", 
+#'   IRanges(rep(c(10, 15), 1), width=c(10, 20)), 
+#'   strand=c("+", "+")
+#' )
+#' 
+#' long <- GRanges("chr19", 
+#'   IRanges(rep(c(11, 15, 10), 1), width=c(10, 20, 10)), 
+#'   strand=c("+", "+", "+")
+#' )
+#' 
+#' overlap_pair(list(query = long, subject = short), filter_by_overlaps_stranded)
+#' }
 #'
 #' @export overlap_pair
 
@@ -1020,18 +1089,41 @@ overlap_pair <- function(apair,
   grid.text(paste("Jaccard:", jaccard), unit(0.2, "npc"), unit(0.9, "npc"), draw = TRUE)
   grid.newpage()
 
-  return(NULL)
+  return(venn.plot)
 }
 
 #' @title Plot three-sets Venn diagram
 #'
-#' @description This is a helper function for Venn diagram plot. A Venn diagram is plotted as output.
+#' @description This is a helper function for Venn diagram plot. A Venn diagram is plotted as output. For GRanges, as A overlap B may not be the same as B overlap A, the order of GRanges in a list matters, certain order may produce error.
 #' @param atriple a list of three vectors
 #' @param overlap_fun the name of the function that defines overlap
 #'
-#' @return NULL
+#' @return a VennDiagram object
 #' @author Shuye Pu
+#' 
+#' @examples 
+#' test_list <- list(A = c(1, 2, 3, 4, 5), B = c(4, 5, 7), C = c(1, 3))
+#' overlap_triple(test_list, intersect)
+#' 
+#' ## GRanges overlap
+#' query <- GRanges("chr19", 
+#'   IRanges(rep(c(10, 15), 2), width=c(1, 20, 40, 50)), 
+#'   strand=c("+", "+", "-", "-")
+#' )
+#' 
+#' subject1 <- GRanges("chr19", 
+#'   IRanges(rep(c(13, 150), 2), width=c(10, 14, 20, 28)), 
+#'   strand=c("+", "-", "-", "+")
+#' )
+#' 
+#' subject2 <- GRanges("chr19", 
+#'   IRanges(rep(c(13, 50), 2), width=c(10, 14, 20, 21)), 
+#'   strand=c("+", "-", "-", "+")
+#' )
 #'
+#' overlap_triple(list(subject1 = subject1, subject2 = subject2, query = query),
+#'   filter_by_overlaps_stranded
+#' )
 #'
 #' @export overlap_triple
 
@@ -1055,19 +1147,46 @@ overlap_triple <- function(atriple,
   grid.draw(venn.plot)
   grid.newpage()
 
-  return(NULL)
+  return(venn.plot)
 }
 
 #' @title Plot four-sets Venn diagram
 #'
-#' @description This is a helper function for Venn diagram plot. A Venn diagram is plotted as output.
+#' @description This is a helper function for Venn diagram plot. A Venn diagram is plotted as output. For GRanges, as A overlap B may not be the same as B overlap A, the order of GRanges in a list matters, certain order may produce error.
 #' @param aquad a list of four vectors
 #' @param overlap_fun the name of the function that defines overlap
 #'
-#' @return NULL
+#' @return a VennDiagram object
 #' @author Shuye Pu
 #'
+#' @examples 
+#' test_list <- list(A = c(1, 2, 3, 4, 5), B = c(4, 5, 7), C = c(1, 3), D = 6)
+#' overlap_quad(test_list, intersect)
+#' 
+#' ## GRanges overlap
+#' query1 <- GRanges("chr19", 
+#'   IRanges(rep(c(10, 15), 2), width=c(1, 20, 40, 50)), 
+#'   strand=c("+", "+", "-", "-")
+#' )
+#' 
+#' query2 <- GRanges("chr19", 
+#'   IRanges(rep(c(1, 15), 2), width=c(1, 20, 40, 50)), 
+#'   strand=c("+", "+", "-", "-")
+#' )
+#' 
+#' subject1 <- GRanges("chr19", 
+#'   IRanges(rep(c(13, 150), 2), width=c(10, 14, 20, 28)), 
+#'   strand=c("+", "-", "-", "+")
+#' )
+#' 
+#' subject2 <- GRanges("chr19", 
+#'   IRanges(rep(c(13, 50), 2), width=c(10, 14, 20, 21)), 
+#'   strand=c("+", "-", "-", "+")
+#' )
 #'
+#' overlap_quad(list(subject1 = subject1, subject2 = subject2, query1 = query1,
+#'   query2 = query2), filter_by_overlaps_stranded
+#' )
 #' @export overlap_quad
 #'
 overlap_quad <- function(aquad,
@@ -1097,5 +1216,5 @@ overlap_quad <- function(aquad,
 
   grid.draw(venn.plot)
   grid.newpage()
-  return(NULL)
+  return(venn.plot)
 }

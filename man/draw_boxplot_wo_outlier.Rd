@@ -42,10 +42,14 @@ a ggplot object
 Plot boxplot without outliers, useful when outliers have a wide range and the median is squeezed at the bottom of the plot. The p-value significance level is the same as those in \code{draw_boxplot_by_factor}, but not displayed.
 }
 \examples{
-stat_df <- data.frame(Feature=rep(c("A", "B"), c(20, 30)), Intensity=c(rnorm(20, 2), 
-rnorm(30, 3)))
-p <- draw_boxplot_wo_outlier(stat_df, xc="Feature", yc="Intensity", 
-Ylab="Signal Intensity")
+stat_df <- data.frame(Feature = rep(c("A", "B"), c(20, 30)), Intensity = c(
+  rnorm(20, 2),
+  rnorm(30, 3)
+))
+p <- draw_boxplot_wo_outlier(stat_df,
+  xc = "Feature", yc = "Intensity",
+  Ylab = "Signal Intensity"
+)
 p
 
 }

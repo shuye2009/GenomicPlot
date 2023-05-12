@@ -6,6 +6,16 @@
 #'
 #' @return a numeric matrix
 #' @author Shuye Pu
+#' 
+#' @examples 
+#' 
+#' fullMatrix <- matrix(rnorm(100), ncol = 10)
+#' for (i in 5:8) {
+#'   fullMatrix[i, 4:7] <- runif(4) + i
+#' }
+#' apply(fullMatrix, 1, sum)
+#' ranked <- rank_rows(fullMatrix, ranking = "Sum")
+#' apply(ranked, 1, sum)
 #'
 #' @export rank_rows
 
@@ -32,12 +42,25 @@ rank_rows <- function(fullmatrix,
 #'
 #' @param fullmatrix a numeric matrix
 #' @param verbose logical, indicating whether to print out the stats in the console
-#' @return NULL
+#' @return a numerical matrix summarizing the unusual values
+#' 
+#' @examples 
+#' fullMatrix <- matrix(rnorm(100), ncol = 10)
+#' for (i in 5:6) {
+#'   fullMatrix[i, 4:7] <- NaN
+#'   fullMatrix[i+1, 4:7] <- NA
+#'   fullMatrix[i+2, 4:7] <- -Inf
+#'   fullMatrix[i-1, 4:7] <- 0
+#'   fullMatrix[i-2, 1:3] <- Inf
+#' }
+#' 
+#' GenomicPlot:::inspect_matrix(fullMatrix, verbose = TRUE)
+#' 
 #' @keywords internal
 
 inspect_matrix <- function(fullmatrix,
                            verbose = FALSE) {
-  if (verbose) print("Inspecting matrix")
+  if (verbose) message("Inspecting matrix\n")
   size <- nrow(fullmatrix) * ncol(fullmatrix)
   n_infinite <- sum(is.infinite(fullmatrix))
   n_NA <- sum(is.na(fullmatrix))
@@ -52,11 +75,11 @@ inspect_matrix <- function(fullmatrix,
 
   if (verbose) print(stat_df)
 
-  return(NULL)
+  invisible(stat_df)
 }
 
 #' @title Impute missing values
-#' @description Replace 0 and missing values in a sparse non-negative matrix with half of minimum of non-zero values, to avoid use of arbitrary pseudo numbers, and to allow computing ratios and log transformation of matrices. When a matrix is sparse (assuming it has many all-zero rows and few all-zero columns), the half of minimum of non-zero values is a number that is small enough so that is will not distort the data too much (comparing to pseudo count=1), but large enough to avoid huge ratios when used as a denominator.
+#' @description Replace 0 and missing values in a sparse non-negative matrix with half of minimum of non-zero values, to avoid use of arbitrary pseudo numbers, and to allow computing ratios and log transformation of matrices. When a matrix is sparse (assuming it has many all-zero rows and few all-zero columns), the half of minimum of non-zero values is a number that is small enough so that is will not distort the data too much (comparing to a pseudo count = 1), but large enough to avoid huge ratios when used as a denominator.
 #'
 #' @param fullmatrix a numeric matrix
 #' @param verbose logical, whether to output additional information
@@ -64,6 +87,19 @@ inspect_matrix <- function(fullmatrix,
 #' @return a numeric matrix
 #'
 #' @author Shuye Pu
+#' 
+#' @examples 
+#' fullMatrix <- matrix(rlnorm(100), ncol = 10)
+#' for (i in 5:6) {
+#'   fullMatrix[i, 4:7] <- NaN
+#'   fullMatrix[i+1, 4:7] <- NA
+#'   fullMatrix[i+2, 4:7] <- -Inf
+#'   fullMatrix[i-1, 4:7] <- 0
+#'   fullMatrix[i-2, 1:3] <- Inf
+#' }
+#' 
+#' imp <- GenomicPlot:::impute_hm(fullMatrix, verbose = TRUE)
+#' 
 #'
 #' @keywords internal
 #'
@@ -71,12 +107,12 @@ inspect_matrix <- function(fullmatrix,
 impute_hm <- function(fullmatrix,
                       verbose = FALSE) {
   if (min(fullmatrix) < 0) {
-    message("cannot impute because the matrix has negative values")
+    message("cannot impute because the matrix has negative values!\n")
     return(fullmatrix)
   }
   if (verbose) {
-    message("Imputing missing values. Matrix quartiles:")
-    print(quantile(fullmatrix))
+    message("Imputing missing values. Matrix quartiles:\n")
+    message(paste(quantile(fullmatrix), collapse = " "), "\n")
   }
 
   # fullmatrix[fullmatrix == 0] <- NA
@@ -86,9 +122,9 @@ impute_hm <- function(fullmatrix,
   fullmatrix[fullmatrix < halfmin] <- halfmin ##  to avoid take log of zero and use of pseudo numbers
 
   if (verbose) {
-    message("Matrix quantiles after imputing:")
-    print(quantile(fullmatrix))
-    print(paste("The imputed value is:", halfmin))
+    message("\nMatrix quantiles after imputing:\n")
+    message(paste(quantile(fullmatrix), collapse = " "), "\n")
+    message("The imputed value is: ", halfmin, "\n")
   }
 
   return(fullmatrix)
@@ -104,12 +140,28 @@ impute_hm <- function(fullmatrix,
 #' @param verbose logical, indicating whether to output additional information (data used for plotting or statistical test results)
 #' @param transform a string in c("log", "log2", "log10"), default = NA indicating no transformation of data matrix
 #'
-#' @details If inputFiles is null, all operations (impute, scale, rmOutlier and transform) can be applied to the score matrix, in the order of impute -> rmOutlier -> transform -> scale. When inputFiles are provided, only impute and rmOutlier can be applied to the score matrix, and transform and scale will affect ratio calculation, especially when log2 of ratio is intended, however, all these operations can be applied to the resulting ratio matrix. In order to avoid introducing distortion into the post-processed data, use caution when applying these operations.
+#' @details If inputFiles for the plotting function is null, all operations (impute, scale, rmOutlier and transform) can be applied to the score matrix, in the order of impute -> rmOutlier -> transform -> scale. When inputFiles are provided, only impute and rmOutlier can be applied to the score matrix, as transform and scale will affect ratio calculation, especially when log2 transformation of the ratio is intended. However, all these operations can be applied to the resulting ratio matrix. In order to avoid introducing distortion into the post-processed data, use caution when applying these operations.
 #'
 #' @return a numeric matrix with the same dimension as the fullmatrix
 #' @author Shuye Pu
+#' 
+#' @examples 
+#' fullMatrix <- matrix(rlnorm(100), ncol = 10)
+#' for (i in 5:6) {
+#'   fullMatrix[i, 4:7] <- NaN
+#'   fullMatrix[i+1, 4:7] <- NA
+#'   fullMatrix[i+2, 4:7] <- -Inf
+#'   fullMatrix[i-1, 4:7] <- 0
+#'   fullMatrix[i-2, 1:3] <- Inf
+#' }
+#' fullMatrix[9, 4:7] <- runif(4) + 90
 #'
-#'
+#' wo <- process_scoreMatrix(fullMatrix, rmOutlier = 3, verbose = TRUE)
+#' tf <- process_scoreMatrix(fullMatrix, 
+#'   rmOutlier = 0, transform = "log2", verbose = TRUE
+#' )
+#' scaled <- process_scoreMatrix(fullMatrix, scale = TRUE, verbose = TRUE)
+#'   
 #' @export process_scoreMatrix
 #'
 #'
@@ -134,7 +186,7 @@ process_scoreMatrix <- function(fullmatrix,
 
   if (!is.na(transform)) {
     if (min(fullmatrix) < 0) {
-      message("Negative values are found in the matrix, log transformation cannot be applied!")
+      message("Negative values are found in the matrix, log transformation cannot be applied!\n")
     } else if (transform == "log") {
       fullmatrix <- log(fullmatrix)
     } else if (transform == "log2") {
@@ -155,7 +207,7 @@ process_scoreMatrix <- function(fullmatrix,
     # this will distort the downstream analysis
     count_allSame_rows <- sum(allSame)
     if (count_allSame_rows > 0 && verbose) {
-      message(count_allSame_rows, " rows have only one distinct value in the entire row after rescale!")
+      message(count_allSame_rows, " rows have only one distinct value in the entire row after rescale!\n")
     }
   }
   fullmatrix[is.na(fullmatrix)] <- 0
@@ -208,30 +260,30 @@ rm_outlier <- function(fullmatrix,
     outliers <- fullmatrix[fullmatrix > up_bound]
 
     if (verbose) {
-      print("Outlier detected:")
-      print(paste("maximum of the matrix", max(fullmatrix)))
-      print(paste("median of row max", median(rowmax)))
-      print(paste("median absolute deviation (mad) of row max", M))
-      print(paste("mulitplier of mad", multiplier))
-      print(paste("up_bound and replace value", up_bound))
-      print(paste("percentile of up_bound", percentile))
-      print(paste("number of outlier rows", length(which(rowmax > up_bound))))
-      print(paste("number of outliers", length(outliers)))
-      print(paste("fraction of outliers", length(outliers) / (nrow(fullmatrix) * ncol(fullmatrix))))
-      print("values of outliers")
-      print(outliers)
+      message("Outlier detected:\n")
+      message("maximum of the matrix ", max(fullmatrix))
+      message("\nmedian of row max ", median(rowmax))
+      message("\nmedian absolute deviation (mad) of row max ", M)
+      message("\nmulitplier of mad ", multiplier)
+      message("\nup_bound and replace value ", up_bound)
+      message("\npercentile of up_bound", percentile)
+      message("\nnumber of outlier rows", length(which(rowmax > up_bound)))
+      message("\nnumber of outliers", length(outliers))
+      message("\nfraction of outliers ", length(outliers) / (nrow(fullmatrix) * ncol(fullmatrix)))
+      message("\nvalues of outliers:\n")
+      message(paste(outliers, collapse = " "), "\n")
     }
 
     fullmatrix[fullmatrix > up_bound] <- up_bound
   } else {
     if (verbose) {
-      print("Outlier not detected:")
-      print(paste("maximum of the matrix", max(rowmax)))
-      print(paste("median of row max", median(rowmax)))
-      print(paste("median absolute deviation (mad) of row max", M))
-      print(paste("mulitplier of mad", multiplier))
-      print(paste("up_bound and replace value", up_bound))
-      print(paste("percentile of up_bound", percentile))
+      message("Outlier not detected:\n")
+      message("maximum of the matrix ", max(rowmax))
+      message("\nmedian of row max ", median(rowmax))
+      message("\nmedian absolute deviation (mad) of row max ", M)
+      message("\nmulitplier of mad ", multiplier)
+      message("\nup_bound and replace value ", up_bound)
+      message("\npercentile of up_bound ", percentile, "\n")
     }
   }
 
@@ -252,6 +304,16 @@ rm_outlier <- function(fullmatrix,
 #' @author Shuye Pu
 #'
 #' @note used in \code{plot_locus}
+#' 
+#' @examples 
+#' stat_df <- data.frame(
+#'   Feature = rep(c("A", "B"), c(20, 30)),
+#'   Intensity = c(rnorm(20, 2), rnorm(30, 3))
+#' )
+#' 
+#' out <- aov_TukeyHSD(stat_df, xc="Feature")
+#' out
+#' 
 #' @export aov_TukeyHSD
 #'
 
@@ -342,16 +404,43 @@ gr2df <- function(gr) {
 #'
 #' @author Shuye Pu
 #'
+#' @examples 
+#' 
+#' IP <- matrix(rlnorm(100), ncol = 10)
+#' Input <- matrix(runif(100), ncol = 10)
+#' 
+#' ratio <- GenomicPlot:::ratio_over_input(IP, Input, verbose = TRUE)
+#' 
 #' @keywords internal
 #'
 ratio_over_input <- function(IP, Input, verbose = FALSE) {
   if (!identical(dim(IP), dim(Input))) stop("IP matrix and Input matrix must have same dimensions")
   if (min(IP) < 0 || min(Input) < 0) stop("IP matrix and Input matrix cannot have negative values")
 
-  # regularize the matrices to avoid unreasonably high ratios,
-  # if the maximum of IP is greater than 1 and the minimum of Input is smaller than 1
-  reg <- ifelse((max(IP) > 1) && (min(Input) < 1), 1, 0)
-  if (verbose) print(paste(max(IP), min(Input), reg))
+  # regularize the matrices to avoid unreasonably high ratios.
+  # The maximum of IP determines the size of the regularizing term which is a pseudo number.
+  # As a pseudo number is essentially a noise, if it is too large, it will mask signals.
+  
+  reg <- 0
+  numerator <- max(IP)
+  if (numerator > 10) {
+     reg <- 1
+  } else if (numerator > 1) {
+     reg <- 0.1
+  } else if (numerator > 0.1) {
+     reg <- 0.01
+  } else if (numerator > 0.01) {
+     reg <- 0.001
+  } else if (numerator > 0.001) {
+     reg <- 0.0001
+  }
+  
+  if (verbose) {
+     out <- c(max(IP), min(Input), reg)
+     names(out) <- c("Max(IP)", "min(Input)", "pseudo")
+     print(out)
+  }
+  
   ratio <- (IP + reg) / (Input + reg)
 
   return(ratio)

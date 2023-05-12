@@ -15,6 +15,34 @@ a ggplot object
 \description{
 This is a helper function for displaying function arguments for a plotting function. If the runtime value of the argument is a small object, its values is displayed, otherwise, only the name of the value of the argument is displayed.
 }
+\examples{
+txdb <- AnnotationDbi::loadDb(system.file("extdata", "txdb_chr19.sql", package = "GenomicPlot"))
+
+queryfiles <- system.file("extdata", "treat_chr19.bam", package = "GenomicPlot")
+names(queryfiles) <- "query"
+
+inputfiles <- system.file("extdata", "input_chr19.bam", package = "GenomicPlot")
+names(inputfiles) <- "input"
+
+gfeatures <- prepare_5parts_genomic_features(txdb,
+  meta = TRUE, nbins = 100, fiveP = -1000,
+  threeP = 1000, longest = TRUE, verbose = FALSE
+)
+
+importParams <- list(
+  offset = 0, fix_width = 150, fix_point = "start", norm = TRUE,
+  useScore = FALSE, outRle = TRUE, useSizeFactor = FALSE, genome = "hg19"
+)
+
+alist <- list(
+  "txdb" = txdb, "treat" = queryfiles, "control" = inputfiles, 
+  "feature" = gfeatures, "param" = importParams
+)
+
+GenomicPlot:::plot_named_list(alist)
+
+
+}
 \author{
 Shuye Pu
 }

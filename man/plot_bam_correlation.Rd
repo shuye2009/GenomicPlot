@@ -29,23 +29,33 @@ plot_bam_correlation(
 
 \item{nc}{integer, number of cores for parallel processing}
 }
+\value{
+a dataframe of read counts per bin perl sample
+}
 \description{
 plot correlation in reads coverage distributions along the genome for bam files
 }
 \examples{
-queryFiles <- c(system.file("extdata", "chip_treat_chr19.bam", package="GenomicPlot"),
-               system.file("extdata", "treat_chr19.bam", package="GenomicPlot"))
+queryFiles <- c(
+  system.file("extdata", "chip_treat_chr19.bam", package = "GenomicPlot"),
+  system.file("extdata", "treat_chr19.bam", package = "GenomicPlot")
+)
 names(queryFiles) <- c("chip_query", "clip_query")
 
-inputFiles <- c(system.file("extdata", "chip_input_chr19.bam", package="GenomicPlot"),
-                system.file("extdata", "input_chr19.bam", package="GenomicPlot"))
+inputFiles <- c(
+  system.file("extdata", "chip_input_chr19.bam", package = "GenomicPlot"),
+  system.file("extdata", "input_chr19.bam", package = "GenomicPlot")
+)
 names(inputFiles) <- c("chip_input", "clip_input")
 
-importParams <- list(offset=0, fix_width=0, fix_point="start", norm=FALSE, 
-useScore=FALSE, outRle=FALSE, useSizeFactor=FALSE, genome="hg19")
-                          
-plot_bam_correlation(bamfiles=c(queryFiles, inputFiles), binSize=10000, outPrefix=NULL,
-   importParams=importParams, nc=2)
+importParams <- list(
+  offset = 0, fix_width = 0, fix_point = "start", norm = FALSE,
+  useScore = FALSE, outRle = FALSE, useSizeFactor = FALSE, genome = "hg19"
+)
 
+plot_bam_correlation(
+  bamfiles = c(queryFiles, inputFiles), binSize = 10000, outPrefix = NULL,
+  importParams = importParams, nc = 2
+)
 
 }

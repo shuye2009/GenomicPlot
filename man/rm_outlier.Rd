@@ -20,12 +20,12 @@ a numeric matrix
 This is a helper function for dealing with excessively high values using Hampel filter. If outliers are detected, replace the outliers with the up bound = median(rowmax) + multiplier*mad(rowmax). This function is experimental. For data with normal distribution, the multiplier is usually set at 3. As the read counts data distribution is highly skewed, it is difficult to define a boundary for outliers, try the multiplier values between 10 to 1000.
 }
 \examples{
-fullmatrix <- matrix(rnorm(100), ncol=10)
+fullmatrix <- matrix(rnorm(100), ncol = 10)
 maxm <- max(fullmatrix)
-fullmatrix[3,9] <- maxm + 1000
-fullmatrix[8,1] <- maxm + 500
-rm_outlier(fullmatrix, verbose=TRUE, multiplier=100)
-rm_outlier(fullmatrix, verbose=TRUE, multiplier=1000)
+fullmatrix[3, 9] <- maxm + 1000
+fullmatrix[8, 1] <- maxm + 500
+rm_outlier(fullmatrix, verbose = TRUE, multiplier = 100)
+rm_outlier(fullmatrix, verbose = TRUE, multiplier = 1000)
 
 }
 \author{

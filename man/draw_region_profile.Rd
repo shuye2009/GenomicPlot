@@ -38,6 +38,22 @@ Plot lines with standard error as the error band
 \note{
 used by \code{plot_3parts_metagene}, \code{plot_5parts_metagene}, \code{plot_region}
 }
+\examples{
+library(dplyr)
+Reference <- rep(rep(c("Ref1", "Ref2"), each = 100), 2)
+Query <- rep(c("Query1", "Query2"), each = 200)
+Position <- rep(seq_len(100), 4)
+Intensity <- rlnorm(400)
+se <- runif(400)
+df <- data.frame(Intensity, se, Position, Query, Reference) \%>\%
+  mutate(lower = Intensity - se, upper = Intensity + se) \%>\%
+  mutate(Group = paste(Query, Reference, sep = ":"))
+vx <- c(1, 23, 70)
+
+p <- draw_region_profile(df, cn = "Group", vx = vx)
+p
+
+}
 \author{
 Shuye Pu
 }

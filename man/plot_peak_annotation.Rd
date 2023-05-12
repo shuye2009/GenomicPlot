@@ -49,16 +49,20 @@ Produce a table of transcripts targeted by peaks, and generate plots for target 
 }
 \examples{
 
-gtfFile <- system.file("extdata", "gencode.v19.annotation_chr19.gtf", package="GenomicPlot")
+gtfFile <- system.file("extdata", "gencode.v19.annotation_chr19.gtf", package = "GenomicPlot")
 
-centerFile <- system.file("extdata", "test_chip_peak_chr19.bed", package="GenomicPlot")
+centerFile <- system.file("extdata", "test_chip_peak_chr19.bed", package = "GenomicPlot")
 names(centerFile) <- c("summitPeak")
 
-handleBedparams <- list(fix_width=0, fix_point="center", useScore=FALSE, outRle=FALSE, 
-offset=0, norm=FALSE, useSizeFactor=FALSE, genome="hg19")
+handleBedparams <- list(
+  fix_width = 0, fix_point = "center", useScore = FALSE, outRle = FALSE,
+  offset = 0, norm = FALSE, useSizeFactor = FALSE, genome = "hg19"
+)
 
-plot_peak_annotation(peakFile=centerFile, gtfFile=gtfFile, importParams=handleBedparams, 
-fiveP=-2000, dsTSS=200, threeP=2000, simple=FALSE)
+plot_peak_annotation(
+  peakFile = centerFile, gtfFile = gtfFile, importParams = handleBedparams,
+  fiveP = -2000, dsTSS = 200, threeP = 2000, simple = FALSE
+)
 
 }
 \author{

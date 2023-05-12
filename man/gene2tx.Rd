@@ -19,6 +19,14 @@ a vector of transcript ids (eg. ENST00000577222.1)
 \description{
 Given a list of gene names in a file or in a character vector, turn them into a vector of transcript ids.
 }
+\examples{
+
+gtfFile <- system.file("extdata", "gencode.v19.annotation_chr19.gtf", package = "GenomicPlot") 
+genes <- c("RPRD1A", "RPAP2", "RPRD1B", "RPRD2", "ZNF281", "ZNF121", "YTHDF2")
+
+tx <- gene2tx(gtfFile = gtfFile, geneList = genes)
+
+}
 \author{
 Shuye Pu
 }

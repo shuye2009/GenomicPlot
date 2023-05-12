@@ -22,6 +22,14 @@ Plot sub-region labels under the landmark
 \note{
 used by \code{plot_3parts_metagene}, \code{plot_5parts_metagene}, \code{plot_region}
 }
+\examples{
+fn <- c("5'UTR", "CDS", "3'UTR")
+bins <- c(5, 15, 5)
+xmax <- 25
+
+p <- draw_region_name(featureNames = fn, scaled_bins = bins, xmax = xmax)
+
+}
 \author{
 Shuye Pu
 }

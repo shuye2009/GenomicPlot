@@ -63,25 +63,31 @@ a dataframe containing the data used for plotting
 Plot reads or peak Coverage/base/gene of samples given in the query files around genes. The upstream and downstream windows flanking genes can be given separately, metagene plots are generated with 5'UTR, CDS and 3'UTR segments. The length of each segments are prorated according to the median length of each segments. If Input files are provided, ratio over Input is computed and displayed as well.
 }
 \examples{
-txdb <- AnnotationDbi::loadDb(system.file("extdata", "txdb_chr19.sql", package="GenomicPlot"))
+txdb <- AnnotationDbi::loadDb(system.file("extdata", "txdb_chr19.sql", package = "GenomicPlot"))
 
-queryfiles <- system.file("extdata", "treat_chr19.bam", package="GenomicPlot")
+queryfiles <- system.file("extdata", "treat_chr19.bam", package = "GenomicPlot")
 names(queryfiles) <- "query"
 
-inputfiles <- system.file("extdata", "input_chr19.bam", package="GenomicPlot")
+inputfiles <- system.file("extdata", "input_chr19.bam", package = "GenomicPlot")
 names(inputfiles) <- "input"
 
-gfeatures <- prepare_5parts_genomic_features(txdb, meta=TRUE, nbins=100, fiveP=-1000, 
-threeP=1000, longest=TRUE, verbose=FALSE)
+gfeatures <- prepare_5parts_genomic_features(txdb,
+  meta = TRUE, nbins = 100, fiveP = -1000,
+  threeP = 1000, longest = TRUE, verbose = FALSE
+)
 
-importParams <- list(offset=0, fix_width=150, fix_point="start", norm=TRUE,
-useScore=FALSE, outRle=TRUE, useSizeFactor=FALSE, genome="hg19")
-   
-df <- plot_5parts_metagene(queryFiles=queryfiles, gFeatures=list("metagene"=gfeatures), 
-inputFiles=inputfiles, scale=FALSE, verbose=TRUE, Ylab="Coverage/base/gene", 
-importParams=importParams, smooth=TRUE,  stranded=TRUE, outPrefix=NULL, heatmap=TRUE,
-rmOutlier=0, heatRange=NULL, transform="log2", nc=2)
-               
+importParams <- list(
+  offset = 0, fix_width = 150, fix_point = "start", norm = TRUE,
+  useScore = FALSE, outRle = TRUE, useSizeFactor = FALSE, genome = "hg19"
+)
+
+df <- plot_5parts_metagene(
+  queryFiles = queryfiles, gFeatures = list("metagene" = gfeatures),
+  inputFiles = inputfiles, scale = FALSE, verbose = TRUE, Ylab = "Coverage/base/gene",
+  importParams = importParams, smooth = TRUE, stranded = TRUE, outPrefix = NULL, heatmap = TRUE,
+  rmOutlier = 0, heatRange = NULL, transform = "log2", nc = 2
+)
+
 }
 \author{
 Shuye Pu

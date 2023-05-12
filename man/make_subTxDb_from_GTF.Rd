@@ -19,6 +19,14 @@ a TxDb object
 \description{
 Make a partial TxDb object given a GTF file and a list of gene names in a file or in a character vector.
 }
+\examples{
+
+gtfFile <- system.file("extdata", "gencode.v19.annotation_chr19.gtf", package = "GenomicPlot") 
+genes <- c("RPRD1A", "RPAP2", "RPRD1B", "RPRD2", "ZNF281", "ZNF121", "YTHDF2")
+
+txdb <- make_subTxDb_from_GTF(gtfFile = gtfFile, geneList = genes)
+
+}
 \author{
 Shuye Pu
 }

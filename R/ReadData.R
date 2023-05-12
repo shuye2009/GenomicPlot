@@ -60,16 +60,16 @@ handle_input <- function(inputFiles,
       temp <- readRDS(file.path(dirName, paste0(fileName, ".rds")))
       if (identical(temp$param, importParams)) {
         out <- temp$Rle
-        if (verbose) message("cached .rds file is used")
+        if (verbose) message("cached .rds file is used\n")
       } else {
         out <- funName(inputFile = inputFile, importParams, verbose)
         saveRDS(list(param = importParams, Rle = out), file.path(dirName, paste0(fileName, ".rds")))
-        if (verbose) message("cached .rds file is modified using new input parameters")
+        if (verbose) message("cached .rds file is modified using new input parameters\n")
       }
     } else {
       out <- funName(inputFile = inputFile, importParams, verbose)
       saveRDS(list(param = importParams, Rle = out), file.path(dirName, paste0(fileName, ".rds")))
-      if (verbose) message("input data is cached as .rds file for fast reloading")
+      if (verbose) message("input data is cached as .rds file for fast reloading\n")
     }
     return(out)
   }
@@ -78,19 +78,19 @@ handle_input <- function(inputFiles,
     if (!file.exists(inputFile)) stop("file does not exist, please check your file name and path!")
     if (grepl("\\.bed|BED|Bed|narrowPeak|broadPeak$", inputFile)) {
       fileType <- "bed"
-      if (verbose) print(paste("Reading", fileType, "file:", inputFile))
+      if (verbose) message("Reading ", fileType, "file: ", inputFile, "\n")
       out <- inputFUN(handle_bed, inputFile = inputFile, importParams, verbose)
     } else if (grepl("\\.bam|BAM|Bam$", inputFile)) {
       fileType <- "bam"
-      if (verbose) print(paste("Reading", fileType, "file:", inputFile))
+      if (verbose) message("Reading ", fileType, "file: ", inputFile, "\n")
       out <- inputFUN(handle_bam, inputFile = inputFile, importParams, verbose)
     } else if (grepl("\\.wig|WIG|Wig$", inputFile)) {
       fileType <- "wig"
-      if (verbose) print(paste("Reading", fileType, "file:", inputFile))
+      if (verbose) message("Reading ", fileType, "file: ", inputFile, "\n")
       out <- inputFUN(handle_wig, inputFile = inputFile, importParams, verbose)
     } else if (grepl("\\.bw|bigwig|bigWig|BigWig|BW|BIGWIG$", inputFile)) {
       fileType <- "bw"
-      if (verbose) print(paste("Reading", fileType, "file:", inputFile))
+      if (verbose) message("Reading ", fileType, "file: ", inputFile, "\n")
       out <- inputFUN(handle_bw, inputFile = inputFile, importParams, verbose)
     } else {
       stop("The format of file is not supported, please convert it to one of the following format: bed, bam, wig, bigwig")
@@ -135,6 +135,25 @@ handle_input <- function(inputFiles,
 #' @return a list of list objects with four elements ('query', 'size', 'type', 'weight'), with the 'size' element modified.
 #'
 #' @author Shuye Pu
+#' 
+#' @examples
+#' queryFiles <- system.file("extdata", "chip_treat_chr19.bam", package = "GenomicPlot")
+#' names(queryFiles) <- "query"
+#'
+#' inputFiles <- system.file("extdata", "chip_input_chr19.bam", package = "GenomicPlot")
+#' names(inputFiles) <- "input"
+#'
+#' importParams <- list(
+#'   offset = 0, fix_width = 140, fix_point = "start", norm = FALSE,
+#'   useScore = FALSE, outRle = FALSE, useSizeFactor = FALSE, genome = "hg19"
+#' )
+#'
+#' out_list <- handle_input(
+#'   inputFiles = c(queryFiles, inputFiles),
+#'   importParams = importParams, verbose = TRUE, nc = 2
+#' )
+#'
+#' res <- effective_size(out_list, outRle = TRUE, genome = "hg19", nc = 2, verbose = TRUE)
 #'
 #' @export effective_size
 #'
@@ -143,7 +162,7 @@ effective_size <- function(outlist,
                            genome = "hg19",
                            nc = 2,
                            verbose = FALSE) {
-  if (verbose) print("Estimating size factor")
+  if (verbose) message("Estimating size factor\n")
 
   seqi <- Seqinfo(genome = genome)
 
@@ -168,7 +187,9 @@ effective_size <- function(outlist,
     x$size <- as.integer(x$size * y)
     x
   }, SIMPLIFY = FALSE, USE.NAMES = TRUE)
-
+   
+  lib.size.adj <- vapply(normlist, function(x) x$size, numeric(1))
+  
   if (outRle) {
     normlist <- lapply(normlist, function(x) {
       x$query <- coverage(x$query, weight = x$weight)
@@ -177,8 +198,14 @@ effective_size <- function(outlist,
   }
 
   names(normFactor) <- NULL
-  if (verbose) print("Library size normalizing factors:")
-  if (verbose) print(normFactor)
+  
+  if (verbose){
+     message("Library size before adjusting: ", lib.size, "\n")
+     message("Library size after adjusting: ", lib.size.adj, "\n")
+     message("Library size normalizing factors: ", normFactor, "\n")
+     
+  }
+  
   invisible(normlist)
 }
 
@@ -192,7 +219,19 @@ effective_size <- function(outlist,
 #'
 #' @return a list object with four elements, 'query' is a list GRanges objects or RleList objects, 'size' is the library size, 'type' is the input file type, 'weight' is the name of the metadata column to be used as weight for coverage calculation
 #'
-#' @author Shuye Pu
+#' @author Shuye Pu 
+#' 
+#' @examples 
+#' queryFiles <- system.file("extdata", "test_chip_peak_chr19.narrowPeak", package = "GenomicPlot")
+#' names(queryFiles) <- "narrowPeak"
+#'
+#' importParams <- list(
+#'   offset = 0, fix_width = 0, fix_point = "start", norm = FALSE,
+#'   useScore = TRUE, outRle = TRUE, useSizeFactor = FALSE, genome = "hg19"
+#' )
+#'
+#' out <- handle_bed(queryFiles, importParams, verbose = TRUE)
+#' lapply(out$query, sum)
 #'
 #' @export handle_bed
 
@@ -203,13 +242,13 @@ handle_bed <- function(inputFile,
 
   nco <- ncol(beddata)
   if (nco > 6 && verbose) {
-    message("The input filehave more than 6 columns, only the first 6 columns will be used!")
+    message("The input file ", inputFile, " have more than 6 columns, only the first 6 columns will be used!\n")
   } else if (nco < 6 && verbose) {
-    message("The input file have less than 6 columns!")
+    message("The input file ", inputFile, " have less than 6 columns!\n")
   }
 
-  beddata <- type.convert(beddata[, 1:min(6, nco)], as.is = TRUE) ## ignore extra columns, which cause problem in import.bed()
-  colnames(beddata) <- c("chr", "start", "end", "name", "score", "strand")[1:min(6, ncol(beddata))]
+  beddata <- type.convert(beddata[, seq_len(min(6, nco))], as.is = TRUE) ## ignore extra columns, which cause problem in import.bed()
+  colnames(beddata) <- c("chr", "start", "end", "name", "score", "strand")[seq_len(min(6, ncol(beddata)))]
   queryRegions <- makeGRangesFromDataFrame(beddata, keep.extra.columns = TRUE, starts.in.df.are.0based = TRUE)
   names(queryRegions) <- beddata$name
   if (sum(duplicated(names(queryRegions))) > 0) { ## if the names are not unique, force them to be unique
@@ -269,7 +308,19 @@ handle_bed <- function(inputFile,
 #' @return a list object with four elements, 'query' is a list GRanges objects or RleList objects, 'size' is the library size, 'type' is the input file type, weight' is the name of the metadata column to be used as weight for coverage calculation
 #'
 #' @author Shuye Pu
+#' 
+#' @examples 
+#' queryFiles <- system.file("extdata", "chip_treat_chr19.bam", package = "GenomicPlot")
+#' names(queryFiles) <- "query"
 #'
+#' importParams <- list(
+#'   offset = 0, fix_width = 140, fix_point = "start", norm = FALSE,
+#'   useScore = FALSE, outRle = TRUE, useSizeFactor = FALSE, genome = "hg19"
+#' )
+#'
+#' out <- handle_bam(queryFiles, importParams, verbose = TRUE)
+#' lapply(out$query, sum)
+#' 
 #' @export handle_bam
 #'
 handle_bam <- function(inputFile,
@@ -279,11 +330,11 @@ handle_bam <- function(inputFile,
   if (paired.end) {
     flag <- scanBamFlag(isPaired = TRUE, isProperPair = TRUE, isUnmappedQuery = FALSE, hasUnmappedMate = FALSE, isSecondMateRead = TRUE) ## assume the second read in a pair is the sense read for strand-specific RNAseq
     param <- ScanBamParam(mapqFilter = 10, flag = flag)
-    if (verbose) message("Paired end bam file detected!")
+    if (verbose) message("Paired end bam file detected!\n")
   } else {
     param <- ScanBamParam(mapqFilter = 10)
   }
-  if (verbose) print(paste("\nbam file", inputFile, "is loaded\n"))
+  if (verbose) message("\nbam file ", inputFile, " is loaded\n")
 
   ga <- readGAlignments(inputFile, use.names = TRUE, param = param)
   libsize <- sum(idxstatsBam(inputFile)$mapped)
@@ -330,7 +381,18 @@ handle_bam <- function(inputFile,
 #'
 #' @return a list object with four elements, 'query' is a list GRanges objects or RleList objects, 'size' is the estimated library size, 'type' is the input file type, weight' is the name of the metadata column to be used as weight for coverage calculation
 #'
-#' @author Shuye Pu
+#' @author Shuye Pu 
+#' @examples 
+#' queryFiles <- system.file("extdata", "test_wig_chr19_+.bw", package = "GenomicPlot")
+#' names(queryFiles) <- "test_bw"
+#'
+#' importParams <- list(
+#'   offset = 0, fix_width = 0, fix_point = "start", norm = FALSE,
+#'   useScore = FALSE, outRle = TRUE, useSizeFactor = FALSE, genome = "hg19"
+#' )
+#'
+#' out <- handle_bw(queryFiles, importParams, verbose = TRUE)
+#' lapply(out$query, sum)
 #'
 #' @export handle_bw
 #'
@@ -388,7 +450,19 @@ handle_bw <- function(inputFile,
 #'
 #' @return a list object with four elements, 'query' is a list GRanges objects or RleList objects, 'size' is the library size, 'type' is the input file type, 'weight' is the name of the metadata column to be used as weight for coverage calculation
 #'
-#' @author Shuye Pu
+#' @author Shuye Pu 
+#' 
+#' @examples 
+#' queryFiles <- system.file("extdata", "test_wig_chr19_+.wig", package = "GenomicPlot")
+#' names(queryFiles) <- "test_wig"
+#'
+#' importParams <- list(
+#'   offset = 0, fix_width = 0, fix_point = "start", norm = FALSE,
+#'   useScore = FALSE, outRle = TRUE, useSizeFactor = FALSE, genome = "hg19"
+#' )
+#'
+#' out <- handle_wig(queryFiles, importParams, verbose = TRUE)
+#' lapply(out$query, sum)
 #'
 #' @export handle_wig
 #'
@@ -398,7 +472,7 @@ handle_wig <- function(inputFile,
   neg_file <- find_mate(inputFile, verbose)
   stranded <- ifelse(!is.null(neg_file), TRUE, FALSE)
 
-  seqinfo <- Seqinfo(genome = handleInputParam$genome)
+  seqinfo <- Seqinfo(genome = importParams$genome)
   wigToBigWig(inputFile, seqinfo)
 
   if (stranded) {
@@ -438,8 +512,8 @@ find_mate <- function(inputFile,
     if (length(fch_v) == length(och_v) && sum(fch_v != och_v) == 1) {
       mate <- file.path(dirName, afile)
       diff <- base::setdiff(och_v, fch_v)
-      if (verbose) print(diff)
-    }
+      if (verbose) message("mate found:\n", inputFile, "\n", mate, "\n", diff, "\n")
+    } 
   }
   invisible(mate)
 }

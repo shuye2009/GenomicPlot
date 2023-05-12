@@ -9,6 +9,9 @@ stop_parallel(cl)
 \arguments{
 \item{cl}{a cluster or SOCKcluster object depending on platform}
 }
+\value{
+0 if the cluster is stopped successfully, 1 otherwise.
+}
 \description{
 Stopping a virtual cluster after parallel processing is finished
 }

@@ -29,19 +29,26 @@ draw_matrix_heatmap(
 
 \item{verbose}{logical, whether to output the input matrix for inspection}
 }
+\value{
+a grob object
+}
 \description{
 Make a complex heatmap with column annotations
 }
 \examples{
-fullMatrix <- matrix(rnorm(10000), ncol=100)
-for(i in 1:80){fullMatrix[i,16:75] <- runif(60) + i}
-labels_col <- as.character(seq(1:100))
+fullMatrix <- matrix(rnorm(10000), ncol = 100)
+for (i in seq_len(80)) {
+  fullMatrix[i, 16:75] <- runif(60) + i
+}
+labels_col <- as.character(seq_len(100))
 levels_col <- c("start", "center", "end")
 names(labels_col) <- rep(levels_col, c(15, 60, 25))
 
-draw_matrix_heatmap(fullMatrix, dataName="test", labels_col, levels_col)
-draw_matrix_heatmap(fullMatrix, dataName="test", labels_col, levels_col, 
-ranking="Hierarchical")
+draw_matrix_heatmap(fullMatrix, dataName = "test", labels_col, levels_col)
+draw_matrix_heatmap(fullMatrix,
+  dataName = "test", labels_col, levels_col,
+  ranking = "Hierarchical"
+)
 
 }
 \author{
