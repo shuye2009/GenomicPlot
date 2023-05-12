@@ -22,6 +22,14 @@ Plot a gene centered polygon for demarcating gene and its upstream and downstrea
 \note{
 used by \code{plot_3parts_metagene}, \code{plot_5parts_metagene}, \code{plot_region}
 }
+\examples{
+fn <- c("5'UTR", "CDS", "3'UTR")
+mark <- c(1, 5, 20)
+xmax <- 25
+
+p <- draw_region_landmark(featureNames = fn, vx = mark, xmax = xmax)
+
+}
 \author{
 Shuye Pu
 }

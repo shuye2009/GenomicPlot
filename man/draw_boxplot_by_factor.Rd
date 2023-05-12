@@ -45,10 +45,14 @@ Plot violin plot with boxplot components for data with one or two factors, p-val
 used by \code{plot_locus}, \code{plot_locus_with_random}, \code{plot_region}
 }
 \examples{
-stat_df <- data.frame(Feature=rep(c("A", "B"), c(20, 30)), 
-Intensity=c(rnorm(20, 2, 0.5), rnorm(30, 3, 0.6)))
-p <- draw_boxplot_by_factor(stat_df, xc="Feature", yc="Intensity", 
-Ylab="Signal Intensity")
+stat_df <- data.frame(
+  Feature = rep(c("A", "B"), c(20, 30)),
+  Intensity = c(rnorm(20, 2, 0.5), rnorm(30, 3, 0.6))
+)
+p <- draw_boxplot_by_factor(stat_df,
+  xc = "Feature", yc = "Intensity",
+  Ylab = "Signal Intensity"
+)
 p
 }
 \author{

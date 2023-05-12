@@ -90,25 +90,29 @@ statistical comparisons between samples for the same reference, or between refer
 Input is computed and displayed as well.
 }
 \examples{
-txdb <- AnnotationDbi::loadDb(system.file("extdata", "txdb_chr19.sql", package="GenomicPlot"))
+txdb <- AnnotationDbi::loadDb(system.file("extdata", "txdb_chr19.sql", package = "GenomicPlot"))
 
-queryfiles <- system.file("extdata", "treat_chr19.bam", package="GenomicPlot")
+queryfiles <- system.file("extdata", "treat_chr19.bam", package = "GenomicPlot")
 names(queryfiles) <- "query"
 
-inputfiles <- system.file("extdata", "input_chr19.bam", package="GenomicPlot")
+inputfiles <- system.file("extdata", "input_chr19.bam", package = "GenomicPlot")
 names(inputfiles) <- "input"
 
-centerfiles <- system.file("extdata", "test_clip_peak_chr19.bed", package="GenomicPlot")
+centerfiles <- system.file("extdata", "test_clip_peak_chr19.bed", package = "GenomicPlot")
 names(centerfiles) <- "clipPeak"
 
-importParams <- list(offset=-1, fix_width=0, fix_point="start", norm=TRUE, 
-useScore=FALSE, outRle=TRUE, useSizeFactor=FALSE, genome="hg19")
- 
-df <- plot_locus(queryFiles=queryfiles, centerFiles=c(centerfiles, "exon"), txdb=txdb, 
-ext=c(-200,200), hl=c(-50, 50), shade=TRUE, smooth=FALSE, importParams=importParams, 
-verbose=TRUE, binSize=10, refPoint="center", Xlab="Center", Ylab="Coverage/base/gene", 
-inputFiles=inputfiles, stranded=TRUE, heatmap=TRUE, scale=FALSE, outPrefix=NULL, 
-rmOutlier=0, transform="log2", statsMethod="wilcox.test", heatRange=NULL, nc=2)
+importParams <- list(
+  offset = -1, fix_width = 0, fix_point = "start", norm = TRUE,
+  useScore = FALSE, outRle = TRUE, useSizeFactor = FALSE, genome = "hg19"
+)
+
+df <- plot_locus(
+  queryFiles = queryfiles, centerFiles = c(centerfiles, "exon"), txdb = txdb,
+  ext = c(-200, 200), hl = c(-50, 50), shade = TRUE, smooth = FALSE, importParams = importParams,
+  verbose = TRUE, binSize = 10, refPoint = "center", Xlab = "Center", Ylab = "Coverage/base/gene",
+  inputFiles = inputfiles, stranded = TRUE, heatmap = TRUE, scale = FALSE, outPrefix = NULL,
+  rmOutlier = 0, transform = "log2", statsMethod = "wilcox.test", heatRange = NULL, nc = 2
+)
 
 }
 \author{

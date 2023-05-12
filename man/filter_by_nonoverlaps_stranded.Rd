@@ -17,6 +17,22 @@ a GRanges object
 \description{
 This function reports all query GRanges that do not overlaps GRanges in subject. Strand information is used to define overlap.
 }
+\examples{
+
+query <- GRanges("chr19", 
+  IRanges(rep(c(10, 15), 2), width=c(1, 20, 40, 50)), 
+  strand=c("+", "+", "-", "-")
+)
+
+subject <- GRanges("chr19", 
+  IRanges(rep(c(13, 150), 2), width=c(10, 14, 20, 28)), 
+  strand=c("+", "-", "-", "+")
+)
+
+res <- filter_by_nonoverlaps_stranded(query, subject)
+res
+
+}
 \author{
 Shuye Pu
 }

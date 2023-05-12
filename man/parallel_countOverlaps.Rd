@@ -21,6 +21,34 @@ a list of numeric vectors
 \description{
 Function for parallel computation of countOverlaps function in the GenomicRanges package
 }
+\examples{
+queryFiles <- system.file("extdata", "treat_chr19.bam", package = "GenomicPlot")
+names(queryFiles) <- "query"
+
+inputFiles <- system.file("extdata", "input_chr19.bam", package = "GenomicPlot")
+names(inputFiles) <- "input"
+
+importParams <- list(
+  offset = -1, fix_width = 0, fix_point = "start", norm = FALSE,
+  useScore = FALSE, outRle = FALSE, useSizeFactor = FALSE, genome = "hg19"
+)
+
+out_list <- handle_input(
+  inputFiles = c(queryFiles, inputFiles),
+  importParams = importParams, verbose = TRUE, nc = 2
+)
+
+seqi <- GenomeInfoDb::Seqinfo(genome = "hg19") 
+grange_list <- lapply(out_list, function(x) x$query) 
+tilewidth <- 100000 
+tileBins <- tileGenome(seqi, tilewidth = tilewidth, cut.last.tile.in.chrom = TRUE)
+ 
+score_list1 <- parallel_countOverlaps(grange_list, tileBins, nc = 2)
+dplyr::glimpse(score_list1)
+score_list2 <- parallel_countOverlaps(grange_list, tileBins, nc = 2, switch = TRUE)
+dplyr::glimpse(score_list2)
+
+}
 \author{
 Shuye Pu
 }

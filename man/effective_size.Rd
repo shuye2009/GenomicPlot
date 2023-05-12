@@ -23,6 +23,26 @@ a list of list objects with four elements ('query', 'size', 'type', 'weight'), w
 \description{
 This is a helper function for handle_input. edgeR::calcNormFactors function is used to estimate normalizing factors, which is used to multiply library sizes.
 }
+\examples{
+queryFiles <- system.file("extdata", "chip_treat_chr19.bam", package = "GenomicPlot")
+names(queryFiles) <- "query"
+
+inputFiles <- system.file("extdata", "chip_input_chr19.bam", package = "GenomicPlot")
+names(inputFiles) <- "input"
+
+importParams <- list(
+  offset = 0, fix_width = 140, fix_point = "start", norm = FALSE,
+  useScore = FALSE, outRle = FALSE, useSizeFactor = FALSE, genome = "hg19"
+)
+
+out_list <- handle_input(
+  inputFiles = c(queryFiles, inputFiles),
+  importParams = importParams, verbose = TRUE, nc = 2
+)
+
+res <- effective_size(out_list, outRle = TRUE, genome = "hg19", nc = 2, verbose = TRUE)
+
+}
 \author{
 Shuye Pu
 }

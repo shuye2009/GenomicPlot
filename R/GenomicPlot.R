@@ -128,7 +128,7 @@ plot_start_end_with_random <- function(queryFiles,
     stop("centerfile does not exit or the feature name is not supported!")
   }
 
-  if (verbose) print(paste("number of features: ", featureName, length(feature)))
+  if (verbose) message("number of features: ", featureName, " ", length(feature), "\n")
 
   fs <- trim(promoters(resize(feature, width = 1, fix = "start"), upstream = -ext[1], downstream = ext[2]))
   fe <- trim(promoters(resize(feature, width = 1, fix = "end"), upstream = -ext[3], downstream = ext[4]))
@@ -164,7 +164,7 @@ plot_start_end_with_random <- function(queryFiles,
     if (bin_num <= 0) next
 
     for (queryLabel in queryLabels) {
-      if (verbose) print(queryLabel)
+      if (verbose) message("Query label: ", queryLabel, "\n")
       queryRegions <- queryInputs[[queryLabel]]$query
       libsize <- queryInputs[[queryLabel]]$size
 
@@ -204,7 +204,7 @@ plot_start_end_with_random <- function(queryFiles,
 
     if (bin_num <= 0) next
     for (queryLabel in queryLabels) {
-      if (verbose) print(queryLabel)
+      if (verbose) message("Query label: ", queryLabel, "\n")
 
       fullMatrix <- scoreMatrix_list[[queryLabel]][[locus]]
 
@@ -301,7 +301,7 @@ plot_start_end_with_random <- function(queryFiles,
         im <- inputMatrix_list[[inputLabels[i]]][[locus]]
         minrow <- min(nrow(rm), nrow(im))
 
-        fullMatrix <- ratio_over_input(rm[1:minrow, ], im[1:minrow, ], verbose)
+        fullMatrix <- ratio_over_input(rm[seq_len(minrow), ], im[seq_len(minrow), ], verbose)
 
         fullMatrix <- process_scoreMatrix(fullMatrix, scale, rmOutlier, transform = transform, verbose = verbose)
 
@@ -313,7 +313,7 @@ plot_start_end_with_random <- function(queryFiles,
           imr <- inputMatrix_list_random[[inputLabels[i]]][[locus]]
           minrowr <- min(nrow(rmr), nrow(imr))
 
-          fullMatrix <- ratio_over_input(rmr[1:minrowr, ], imr[1:minrowr, ], verbose)
+          fullMatrix <- ratio_over_input(rmr[seq_len(minrowr), ], imr[seq_len(minrowr), ], verbose)
 
           fullMatrix <- process_scoreMatrix(fullMatrix, scale, rmOutlier, transform = transform, verbose = verbose)
 
@@ -333,7 +333,7 @@ plot_start_end_with_random <- function(queryFiles,
 
       if (bin_num <= 0) next
       for (ratiolabel in ratiolabels) {
-        if (verbose) print(ratiolabel)
+        if (verbose) message("Ratio label: ", ratiolabel, "\n")
 
         fullMatrix <- ratioMatrix_list[[ratiolabel]][[locus]]
         fullMatrix <- process_scoreMatrix(fullMatrix, scale = FALSE, rmOutlier, transform = transform, verbose = verbose)
@@ -561,14 +561,14 @@ plot_start_end <- function(queryFiles,
   bin_num_e <- round((ext[4] - ext[3]) / binSize)
   bin_num_c <- round(insert / binSize)
 
-  if (verbose) print(paste("Bin numbers", paste(bin_num_s, bin_num_c, bin_num_e)))
+  if (verbose) message("Bin numbers: ", bin_num_s, " ", bin_num_c, " ", bin_num_e, "\n")
   scoreMatrix_lists <- list()
   mat_lists <- list()
   plot_df <- NULL
   for (featureName in featureNames) {
     feature <- features[[featureName]]$query
     nf <- length(feature)
-    if (verbose) print(paste("number of features: ", featureName, nf))
+    if (verbose) message("number of features: ", featureName, " ", nf, "\n")
 
     fs <- promoters(resize(feature, width = 1, fix = "start"), upstream = -ext[1], downstream = ext[2])
     fe <- promoters(resize(feature, width = 1, fix = "end"), upstream = -ext[3], downstream = ext[4])
@@ -586,11 +586,11 @@ plot_start_end <- function(queryFiles,
     for (locus in names(mat_list)) {
       windowR <- mat_list[[locus]]$window
       bin_num <- mat_list[[locus]]$bin_num
-      if (verbose) print(paste(locus, bin_num, length(windowR)))
+      if (verbose) message("locus: ", locus, " ", bin_num, " ", length(windowR), "\n")
       if (bin_num <= 0) next
 
       for (queryLabel in queryLabels) {
-        if (verbose) print(queryLabel)
+        if (verbose) message("Query label: ", queryLabel, "\n")
         queryRegions <- queryInputs[[queryLabel]]$query
         libsize <- queryInputs[[queryLabel]]$size
 
@@ -619,7 +619,7 @@ plot_start_end <- function(queryFiles,
 
       if (bin_num <= 0) next
       for (queryLabel in queryLabels) {
-        if (verbose) print(queryLabel)
+        if (verbose) message("Query label: ", queryLabel, "\n")
 
         fullMatrix <- scoreMatrix_list[[queryLabel]][[locus]]
 
@@ -694,7 +694,7 @@ plot_start_end <- function(queryFiles,
           im <- inputMatrix_list[[inputLabels[i]]][[locus]]
           minrow <- min(nrow(rm), nrow(im))
 
-          fullMatrix <- ratio_over_input(rm[1:minrow, ], im[1:minrow, ], verbose)
+          fullMatrix <- ratio_over_input(rm[seq_len(minrow), ], im[seq_len(minrow), ], verbose)
           fullMatrix <- process_scoreMatrix(fullMatrix, scale, rmOutlier, transform, verbose = verbose)
 
           ratioMatrix_list[[ratiolabels[i]]][[locus]] <- fullMatrix
@@ -710,7 +710,7 @@ plot_start_end <- function(queryFiles,
 
         if (bin_num <= 0) next
         for (ratiolabel in ratiolabels) {
-          if (verbose) print(ratiolabel)
+          if (verbose) message("Ratio label: ", ratiolabel, "\n")
 
           fullMatrix <- ratioMatrix_list[[ratiolabel]][[locus]]
 
@@ -873,8 +873,10 @@ plot_3parts_metagene <- function(queryFiles,
 
   windowRs <- gFeatures$windowRs
   featureNames <- names(windowRs)
-  if (verbose) print(featureNames)
-  if (verbose) print(vapply(windowRs, length, numeric(1)))
+  if (verbose) {
+     message("Feature name: ", paste(featureNames, collapse = " "), "\n")
+     message("Window sizes: ", paste(vapply(windowRs, length, numeric(1)), collapse = " "), "\n")
+  }
 
   nbins <- gFeatures$nbins
   scaled_bins <- gFeatures$scaled_bins
@@ -884,7 +886,7 @@ plot_3parts_metagene <- function(queryFiles,
 
   ## start overlapping
 
-  if (verbose) print("computing coverage for queryFiles")
+  if (verbose) message("computing coverage for queryFiles\n")
   scoreMatrix_list <- list()
 
   for (queryLabel in queryLabels) {
@@ -895,7 +897,7 @@ plot_3parts_metagene <- function(queryFiles,
     weight_col <- myInput$weight
 
     for (w in featureNames) {
-      if (verbose) print(w)
+      if (verbose) message("Feature name: ", w, "\n")
       windowR <- as(windowRs[[w]], "GRangesList")
       bin_num <- scaled_bins[w]
 
@@ -906,9 +908,9 @@ plot_3parts_metagene <- function(queryFiles,
     }
   }
 
-  if (verbose) print("plotting coverage for queryFiles")
+  if (verbose) message("plotting coverage for queryFiles\n")
   mplot_df <- NULL
-  vx <- c(1, cumsum(scaled_bins[1:(length(scaled_bins) - 1)]) + 1) ## x axis points for vlines that demarcate the genomic features
+  vx <- c(1, cumsum(scaled_bins[seq_len(length(scaled_bins) - 1)]) + 1) ## x axis points for vlines that demarcate the genomic features
   names(vx) <- featureNames
 
   Ylab <- ifelse(!is.na(transform) && is.null(inputFiles), paste0(transform, " (", Ylab, ")"), Ylab)
@@ -922,7 +924,7 @@ plot_3parts_metagene <- function(queryFiles,
     dims <- vapply(scoreMatrix_list[[queryLabel]], dim, numeric(2))
 
     if (any(dims[1, ] != dims[1, 1])) {
-      message(paste(dims[1, ], collapse = " "))
+      message(paste(dims[1, ], collapse = " "), "\n")
       stop("Number of genes are not equal among features, make sure all feature windows are within chromosome lengths of query regions,
             as genomation will remvove all feature windows outside chromosome boundaries")
     } else {
@@ -941,7 +943,7 @@ plot_3parts_metagene <- function(queryFiles,
       collabel <- list()
       featuretype <- list()
       for (w in featureNames) {
-        if (verbose) print(w)
+        if (verbose) message("Feature name: ", w, "\n")
         if (scaled_bins[w] > 0) {
           bin_num <- scaled_bins[w]
           collabel[[w]] <- seq(vx[w], vx[w] + bin_num - 1)
@@ -1002,7 +1004,7 @@ plot_3parts_metagene <- function(queryFiles,
   print(outp)
 
   if (!is.null(inputFiles)) {
-    if (verbose) print("computing coverage for ratio over input")
+    if (verbose) message("computing coverage for ratio over input\n")
     Ylabr <- ifelse(is.na(transform), "Ratio-over-Input", paste0(transform, " (Ratio-over-Input)"))
     if (heatmap) heatmap_list_ratio <- list()
 
@@ -1018,7 +1020,7 @@ plot_3parts_metagene <- function(queryFiles,
     }
 
 
-    if (verbose) print("plotting coverage for ratio over input")
+    if (verbose) message("plotting coverage for ratio over input\n")
     mplot_df_ratio <- NULL
     for (ratiolabel in ratiolabels) {
       plot_df <- NULL
@@ -1032,7 +1034,7 @@ plot_3parts_metagene <- function(queryFiles,
       collabel <- list()
       featuretype <- list()
       for (w in featureNames) {
-        if (verbose) print(w)
+        if (verbose) message("Feature name: ", w, "\n")
         if (scaled_bins[w] > 0) {
           bin_num <- scaled_bins[w]
           collabel[[w]] <- seq(vx[w], vx[w] + bin_num - 1)
@@ -1246,11 +1248,11 @@ plot_region <- function(queryFiles,
   # scaled_bins <- scaled_bins[scaled_bins > 0]
   names(scaled_bins) <- featureNames
 
-  if (verbose) print("computing coverage for Sample")
+  if (verbose) message("computing coverage for Sample\n")
   scoreMatrix_list <- list()
 
   for (queryLabel in queryLabels) {
-    if (verbose) print(paste("queryLabel", queryLabel))
+    if (verbose) message("queryLabel ", queryLabel, "\n")
 
     myInput <- queryInputs[[queryLabel]]
     libsize <- myInput$size
@@ -1259,7 +1261,7 @@ plot_region <- function(queryFiles,
     weight_col <- myInput$weight
 
     for (centerLabel in centerLabels) {
-      if (verbose) print(paste("centerLabel", centerLabel))
+      if (verbose) message("centerLabel ", centerLabel, "\n")
       centerInput <- centerInputs[[centerLabel]]
       centerGr <- centerInput$query
       centerGr <- check_constraints(centerGr, importParams$genome, queryRegions)
@@ -1307,7 +1309,7 @@ plot_region <- function(queryFiles,
 
       for (w in featureNames) {
         # w <- "utr5"
-        if (verbose) print(paste("featureName", w))
+        if (verbose) message("featureName ", w, "\n")
         if (scaled_bins[w] > 0) {
           windowR <- as(windowRs[[w]], "GRangesList")
           bin_num <- scaled_bins[w]
@@ -1322,7 +1324,7 @@ plot_region <- function(queryFiles,
 
   mplot_df <- list()
   stat_df <- list()
-  vx <- c(1, cumsum(scaled_bins[1:(length(scaled_bins) - 1)]) + 1) ## x-axis points for vlines that demarcate the genomic features
+  vx <- c(1, cumsum(scaled_bins[seq_len(length(scaled_bins) - 1)]) + 1) ## x-axis points for vlines that demarcate the genomic features
   names(vx) <- featureNames
 
   if (heatmap) heatmap_list <- list()
@@ -1330,17 +1332,17 @@ plot_region <- function(queryFiles,
 
   processed_matrix <- list()
   processed_region_matrix <- list()
-  if (verbose) print("plotting coverage profiles")
+  if (verbose) message("plotting coverage profiles\n")
   for (queryLabel in queryLabels) {
-    if (verbose) print(paste("queryLabel", queryLabel))
+    if (verbose) message("queryLabel ", queryLabel, "\n")
     for (centerLabel in centerLabels) {
-      if (verbose) print(paste("centerLabel", centerLabel))
+      if (verbose) message("centerLabel ", centerLabel, "\n")
       plot_df <- NULL
 
       dims <- vapply(scoreMatrix_list[[queryLabel]][[centerLabel]], dim, numeric(2))
 
       if (any(dims[1, ] != dims[1, 1])) {
-        message(paste(dims[1, ], collapse = " "))
+        message(paste(dims[1, ], collapse = " "), "\n")
         stop("Number of genes are not equal among features, make sure all feature windows are within chromosome lengths of query regions,
             as genomation will remvove all feature windows outside chromosome boundaries")
       } else {
@@ -1361,7 +1363,7 @@ plot_region <- function(queryFiles,
         collabel_list <- list()
         featuretype <- list()
         for (w in featureNames) {
-          if (verbose) print(paste("featureName", w))
+          if (verbose) message("featureName ", w, "\n")
           if (scaled_bins[w] > 0) {
             bin_num <- scaled_bins[w]
             collabel_list[[w]] <- seq(vx[w], vx[w] + bin_num - 1)
@@ -1415,8 +1417,10 @@ plot_region <- function(queryFiles,
     for (beds in combn(queryLabels, i, simplify = FALSE)) {
       for (j in seq_along(centerLabels)) {
         for (centers in combn(centerLabels, j, simplify = FALSE)) {
-          if (verbose) print(paste("beds", beds))
-          if (verbose) print(paste("centers", centers))
+          if (verbose) {
+             message("beds: ", beds, "\n")
+             message("centers: ", centers, "\n")
+          }
 
           aplot_df <- mplot_df %>%
             filter(Query %in% beds & Reference %in% centers) %>%
@@ -1517,11 +1521,11 @@ plot_region <- function(queryFiles,
     mplot_df <- list()
     stat_df <- list()
     if (heatmap) heatmap_list <- list()
-    if (verbose) print("plotting coverage profiles")
+    if (verbose) message("plotting coverage profiles\n")
     for (ratiolabel in ratiolabels) {
-      if (verbose) print(paste("ratiolabel", ratiolabel))
+      if (verbose) message("ratiolabel ", ratiolabel, "\n")
       for (centerLabel in centerLabels) {
-        if (verbose) print(paste("centerlabel", centerLabel))
+        if (verbose) message("centerlabel ", centerLabel, "\n")
         plot_df <- NULL
 
         featureMatrix <- ratioMatrix_list[[ratiolabel]][[centerLabel]]
@@ -1534,7 +1538,7 @@ plot_region <- function(queryFiles,
         collabel <- list()
         featuretype <- list()
         for (w in featureNames) {
-          if (verbose) print(w)
+          if (verbose) message("Feature name: ", w, "\n")
           if (scaled_bins[w] > 0) {
             bin_num <- scaled_bins[w]
             collabel[[w]] <- seq(vx[w], vx[w] + bin_num - 1)
@@ -1580,8 +1584,10 @@ plot_region <- function(queryFiles,
       for (beds in combn(ratiolabels, i, simplify = FALSE)) {
         for (j in seq_along(centerLabels)) {
           for (centers in combn(centerLabels, j, simplify = FALSE)) {
-            if (verbose) print(beds)
-            if (verbose) print(centers)
+            if (verbose) {
+               message(paste(beds, collapse = " "), "\n")
+               message(paste(centers, collapse = " "), "\n")
+            }
 
             aplot_df <- mplot_df %>%
               filter(Query %in% beds & Reference %in% centers) %>%
@@ -1749,13 +1755,15 @@ plot_5parts_metagene <- function(queryFiles,
   heatmap_list <- list()
   heatmap_list_ratio <- list()
   for (aFeature in names(gFeatures_list)) {
-    if (verbose) print(paste0("computing coverage for query files in ", aFeature))
+    if (verbose) message("computing coverage for query files in ", aFeature, "\n")
     gFeatures <- gFeatures_list[[aFeature]]
 
     windowRs <- gFeatures$windowRs
     featureNames <- names(windowRs)
-    if (verbose) print("Number of features:")
-    if (verbose) print(vapply(windowRs, length, numeric(1)))
+    if (verbose) {
+       message("Number of features:\n")
+       message(paste(vapply(windowRs, length, numeric(1)), collapse = " "), "\n")
+    }
 
     nbins <- gFeatures$nbins
     scaled_bins <- gFeatures$scaled_bins
@@ -1763,8 +1771,10 @@ plot_5parts_metagene <- function(queryFiles,
     fiveP <- gFeatures$fiveP
     threeP <- gFeatures$threeP
 
-    if (verbose) print("Number of scaled bins")
-    if (verbose) print(scaled_bins)
+    if (verbose) {
+       message("Number of scaled bins:\n")
+       message(paste(scaled_bins, collapse = " "), "\n")
+    }
 
     scoreMatrix_list <- list()
 
@@ -1777,7 +1787,7 @@ plot_5parts_metagene <- function(queryFiles,
       weight_col <- Input$weight
 
       for (w in featureNames) {
-        if (verbose) print(w)
+        if (verbose) message("Feature name: ", w, "\n")
         windowR <- windowRs[[w]]
         bin_num <- scaled_bins[w]
 
@@ -1792,9 +1802,9 @@ plot_5parts_metagene <- function(queryFiles,
       }
     }
 
-    if (verbose) print("Preparing data for individual plotting")
+    if (verbose) message("Preparing data for individual plotting\n")
 
-    vx <- c(1, cumsum(scaled_bins[1:(length(scaled_bins) - 1)]) + 1) ## x axis points for vlines that demarcate the genomic features
+    vx <- c(1, cumsum(scaled_bins[seq_len((length(scaled_bins) - 1))]) + 1) ## x axis points for vlines that demarcate the genomic features
     names(vx) <- featureNames
 
     processed_matrix <- list()
@@ -1806,7 +1816,7 @@ plot_5parts_metagene <- function(queryFiles,
       dims <- vapply(scoreMatrix_list[[queryLabel]], dim, numeric(2))
 
       if (any(dims[1, ] != dims[1, 1])) {
-        message(paste(dims[1, ], collapse = " "))
+        message(paste(dims[1, ], collapse = " "), "\n")
         stop("Number of genes are not equal among features, make sure all feature windows are within chromosome lengths of query regions,
                as genomation will remvove all feature windows outside chromosome boundaries")
       } else {
@@ -1857,7 +1867,7 @@ plot_5parts_metagene <- function(queryFiles,
     ## if inputFiles are provided, plot ratio over input
 
     if (!is.null(inputFiles)) {
-      if (verbose) print("Preparing data for ratio plotting")
+      if (verbose) message("Preparing data for ratio plotting\n")
       Ylabr <- ifelse(is.na(transform), "Ratio-over-Input", paste0(transform, " (Ratio-over-Input)"))
 
       ratiolabels <- queryLabels[!queryLabels %in% inputLabels]
@@ -1914,7 +1924,7 @@ plot_5parts_metagene <- function(queryFiles,
     }
   }
 
-  if (verbose) print("Start plotting")
+  if (verbose) message("Start plotting...\n")
 
   xmax <- max(mplot_dfs$Position)
   pp <- draw_region_landmark(featureNames, vx, xmax)
@@ -1992,7 +2002,7 @@ plot_5parts_metagene <- function(queryFiles,
     on.exit(dev.off(), add = TRUE)
   }
 
-  if (verbose) print("plot_5parts_metagene runs successfully!")
+  if (verbose) message("plot_5parts_metagene runs successfully!\n")
   invisible(mplot_dfs)
 }
 
@@ -2153,7 +2163,7 @@ plot_locus <- function(queryFiles,
   }
   centerLabels <- names(centerInputs)
 
-  if (verbose) print("computing coverage for Sample")
+  if (verbose) message("computing coverage for Sample\n")
   for (queryLabel in queryLabels) {
     myInput <- queryInputs[[queryLabel]]
     libsize <- myInput$size
@@ -2161,16 +2171,16 @@ plot_locus <- function(queryFiles,
     fileType <- myInput$type
     weight_col <- myInput$weight
     if (verbose) {
-      print(paste("size of query regions", libsize))
-      print(queryLabel)
+      message("size of query regions ", libsize, "\n")
+      message("Query label: ", queryLabel, "\n")
     }
 
     for (centerLabel in centerLabels) {
       centerInput <- centerInputs[[centerLabel]]
       centerGr <- centerInput$query
       if (verbose) {
-        print("preparing window regions")
-        print(centerLabel)
+        message("preparing window regions...\n")
+        message("Center label: ", centerLabel, "\n")
       }
 
       if (refPoint %in% c("center", "start", "end")) {
@@ -2182,7 +2192,7 @@ plot_locus <- function(queryFiles,
       }
       windowRs <- as(split(windowRegions, f = factor(names(windowRegions))), "GRangesList")
 
-      if (verbose) print(paste("number of window regions", length(windowRs)))
+      if (verbose) message("number of window regions ", length(windowRs), "\n")
 
       bin_op <- "mean"
 
@@ -2198,9 +2208,9 @@ plot_locus <- function(queryFiles,
       scoreMatrix_list[[queryLabel]][[centerLabel]] <- fullMatrix
 
       if (verbose) {
-        print("Dimension of fullMatrix")
-        print(dim(fullMatrix))
-        print("Number of unique window regions")
+        message("Dimension of fullMatrix\n")
+        message(paste(dim(fullMatrix), collapse = " "), "\n")
+        #print("Number of unique window regions")
         # print(length(unique(format_genomic_coordinates(windowRs))))
         # rownames(fullMatrix) <- format_genomic_coordinates(windowRs)
         # write.table(fullMatrix, paste0(queryLabel, "_", centerLabel, "_scoreMatrix.tab"), col.names=NA, sep="\t", quote=FALSE)
@@ -2213,12 +2223,12 @@ plot_locus <- function(queryFiles,
   if (heatmap) heatmap_list <- list()
   Ylab <- ifelse(!is.na(transform) && is.null(inputFiles), paste0(transform, " (", Ylab, ")"), Ylab)
 
-  if (verbose) print("collecting coverage data") ## plot multiple bed files on each center
+  if (verbose) message("collecting coverage data\n") ## plot multiple bed files on each center
 
   for (queryLabel in queryLabels) {
-    if (verbose) print(queryLabel)
+    if (verbose) message("Query label: ", queryLabel, "\n")
     for (centerLabel in centerLabels) {
-      if (verbose) print(centerLabel)
+      if (verbose) message("Center label: ", centerLabel, "\n")
 
       fullMatrix <- scoreMatrix_list[[queryLabel]][[centerLabel]]
 
@@ -2274,7 +2284,7 @@ plot_locus <- function(queryFiles,
       mutate(Group = as.factor(paste0(Query, ":", Reference)), .keep = "all")
   }
 
-  if (verbose) print("Plotting profile and boxplot")
+  if (verbose) message("Plotting profile and boxplot\n")
 
   plot_list <- list()
   queryLabels <- queryLabels[!queryLabels %in% inputLabels]
@@ -2282,8 +2292,10 @@ plot_locus <- function(queryFiles,
     for (beds in combn(queryLabels, i, simplify = FALSE)) {
       for (j in seq_along(centerLabels)) {
         for (centers in combn(centerLabels, j, simplify = FALSE)) {
-          if (verbose) print(beds)
-          if (verbose) print(centers)
+           if (verbose) {
+              message("beds: ", beds, "\n")
+              message("centers: ", centers, "\n")
+           }
 
           aplot_df <- mplot_dt %>%
             filter(Query %in% beds & Reference %in% centers)
@@ -2348,8 +2360,10 @@ plot_locus <- function(queryFiles,
       for (beds in combn(inputLabels, i, simplify = FALSE)) {
         for (j in seq_along(centerLabels)) {
           for (centers in combn(centerLabels, j, simplify = FALSE)) {
-            if (verbose) print(beds)
-            if (verbose) print(centers)
+             if (verbose) {
+                message("beds: ", beds, "\n")
+                message("centers: ", centers, "\n")
+             }
 
             aplot_df <- mplot_dt %>%
               filter(Query %in% beds & Reference %in% centers)
@@ -2408,7 +2422,7 @@ plot_locus <- function(queryFiles,
     }
 
 
-    if (verbose) print("Computing Ratio over input")
+    if (verbose) message("Computing Ratio over input\n")
     Ylab <- ifelse(is.na(transform), "Ratio-over-Input", paste0(transform, " (Ratio-over-Input)"))
 
     inputMatrix_list <- scoreMatrix_list[inputLabels]
@@ -2430,12 +2444,12 @@ plot_locus <- function(queryFiles,
     stat_df <- list()
     if (heatmap) heatmap_list <- list()
 
-    if (verbose) print("collecting ratio data") ## plot multiple bed files on each center
+    if (verbose) message("collecting ratio data\n") ## plot multiple bed files on each center
 
     for (ratiolabel in ratiolabels) {
-      if (verbose) print(ratiolabel)
+      if (verbose) message("Ratio label: ", ratiolabel, "\n")
       for (centerLabel in centerLabels) {
-        if (verbose) print(centerLabel)
+        if (verbose) message("Center label: ", centerLabel, "\n")
 
         fullMatrix <- ratioMatrix_list[[ratiolabel]][[centerLabel]]
         # fullMatrix <- process_scoreMatrix(fullMatrix, scale=FALSE, rmOutlier=rmOutlier, transform=transform, verbose=verbose)
@@ -2490,14 +2504,16 @@ plot_locus <- function(queryFiles,
         mutate(Group = as.factor(paste0(Query, ":", Reference)), .keep = "all")
     }
 
-    if (verbose) print("Plotting ratio profile and boxplot")
+    if (verbose) message("Plotting ratio profile and boxplot\n")
     plot_list <- list()
     for (i in seq_along(ratiolabels)) {
       for (beds in combn(ratiolabels, i, simplify = FALSE)) {
         for (j in seq_along(centerLabels)) {
           for (centers in combn(centerLabels, j, simplify = FALSE)) {
-            if (verbose) print(beds)
-            if (verbose) print(centers)
+             if (verbose) {
+                message("beds: ", beds, "\n")
+                message("centers: ", centers, "\n")
+             }
 
             aplot_df <- mplot_dt %>%
               filter(Query %in% beds & Reference %in% centers)
@@ -2690,7 +2706,7 @@ plot_locus_with_random <- function(queryFiles,
 
   ## get protein-coding genes features
 
-  if (verbose) print("Collecting protein_coding gene features")
+  if (verbose) message("Collecting protein_coding gene features\n")
   exons <- get_genomic_feature_coordinates(txdb, "exon", longest = TRUE)
   utr5 <- get_genomic_feature_coordinates(txdb, "utr5", longest = TRUE)
   utr3 <- get_genomic_feature_coordinates(txdb, "utr3", longest = TRUE)
@@ -2707,9 +2723,10 @@ plot_locus_with_random <- function(queryFiles,
     "unrestricted" = NULL
   )
 
-  if (verbose) print(lapply(region_list, length))
-
-  if (verbose) print("computing coverage for Sample")
+  if (verbose) {
+     message("Region length ", paste(lapply(region_list, length), collapse = " "), "\n")
+     message("computing coverage for Sample\n")
+  }
   scoreMatrix_list <- list()
   quantile_list <- list()
   scoreMatrix_list_random <- list()
@@ -2733,17 +2750,19 @@ plot_locus_with_random <- function(queryFiles,
     fileType <- myInput$type
     weight_col <- myInput$weight
 
-    if (verbose) print(queryLabel)
-    if (verbose) print(libsize)
+    if (verbose) {
+       message("Query label: ", queryLabel, "\n")
+       message("Library size ", libsize, "\n")
+    }
 
     for (centerLabel in centerLabels) {
-      if (verbose) print(centerLabel)
+      if (verbose) message("Center label: ", centerLabel, "\n")
       centerInput <- centerInputs[[centerLabel]]
 
       windowRegionsALL <- centerInput$query
 
       for (regionName in names(region_list)) {
-        if (verbose) print(paste("Processing genomic region", regionName))
+        if (verbose) message("Processing genomic region ", regionName, "\n")
 
         if (regionName == "unrestricted") {
           windowRegions <- windowRegionsALL
@@ -2751,16 +2770,16 @@ plot_locus_with_random <- function(queryFiles,
           region <- region_list[[regionName]]
           if (any(unique(as.vector(strand(windowRegionsALL))) %in% c("*", ".", ""))) {
             windowRegions <- plyranges::filter_by_overlaps(windowRegionsALL, region)
-            if (verbose) print("the center file is Unstranded")
+            if (verbose) message("the center file is Unstranded\n")
           } else {
             windowRegions <- filter_by_overlaps_stranded(windowRegionsALL, region)
-            if (verbose) print("the center file is stranded")
+            if (verbose) message("the center file is stranded\n")
           }
         }
 
         windowRs <- resize(windowRegions, width = 1, fix = refPoint)
         windowRs <- promoters(windowRs, upstream = -ext[1], downstream = ext[2])
-        windowRs <- as(split(windowRs, f = factor(seq(1:length(windowRs)))), "GRangesList")
+        windowRs <- as(split(windowRs, f = factor(seq_along(windowRs))), "GRangesList")
 
         fullMatrix <- parallel_scoreMatrixBin(queryRegions, windowRs, bin_num, bin_op, weight_col, stranded, nc = nc)
         if (is.null(inputFiles)) {
@@ -2780,7 +2799,7 @@ plot_locus_with_random <- function(queryFiles,
 
           windowR <- resize(rwindowRegions, width = 1, fix = refPoint)
           windowR <- promoters(windowR, upstream = -ext[1], downstream = ext[2])
-          windowR <- as(split(windowR, f = factor(seq(1:length(windowR)))), "GRangesList")
+          windowR <- as(split(windowR, f = factor(seq_along(windowR))), "GRangesList")
           invisible(windowR)
         })
 
@@ -2791,10 +2810,10 @@ plot_locus_with_random <- function(queryFiles,
         ## unify the dimensions of random_matrices
         dims <- vapply(random_matricies, dim, numeric(2))
         minrows <- min(dims[1, ])
-        random_matricies <- lapply(random_matricies, function(x) x[1:minrows, ])
+        random_matricies <- lapply(random_matricies, function(x) x[seq_len(minrows), ])
 
         a3d <- array(unlist(random_matricies), c(dim(random_matricies[[1]]), length(random_matricies))) ## turn the list of matrices into a 3-d array
-        fullMatrix <- apply(a3d, 1:2, mean) # take average of all matrices
+        fullMatrix <- apply(a3d, seq_len(2), mean) # take average of all matrices
 
         fullMatrix <- process_scoreMatrix(fullMatrix, scale = scale, rmOutlier = rmOutlier, transform = transform, verbose = verbose)
 
@@ -2808,13 +2827,13 @@ plot_locus_with_random <- function(queryFiles,
 
   Ylab <- ifelse(!is.na(transform) && is.null(inputFiles), paste0(transform, " (", Ylab, ")"), Ylab)
   for (queryLabel in queryLabels) {
-    if (verbose) print(paste("Processing query", queryLabel))
+    if (verbose) message("Processing query ", queryLabel, "\n")
 
     for (centerLabel in centerLabels) {
-      if (verbose) print(paste("Processing reference", centerLabel))
+      if (verbose) message("Processing reference ", centerLabel, "\n")
 
       for (regionName in names(region_list)) {
-        if (verbose) print(paste("Processing genomic region", regionName))
+        if (verbose) message("Processing genomic region ", regionName, "\n")
         plot_df <- NULL
         stat_df <- NULL
         countOverlap_df <- NULL
@@ -2913,7 +2932,7 @@ plot_locus_with_random <- function(queryFiles,
           imr <- inputMatrix_list_random[[inputLabels[i]]][[centerLabel]][[regionName]]
           minrowr <- min(nrow(rmr), nrow(imr))
 
-          fullMatrix <- ratio_over_input(rmr[1:minrowr, ], imr[1:minrowr, ])
+          fullMatrix <- ratio_over_input(rmr[seq_len(minrowr), ], imr[seq_len(minrowr), ])
 
           fullMatrix <- process_scoreMatrix(fullMatrix, scale, rmOutlier, transform, verbose)
 
@@ -2923,11 +2942,11 @@ plot_locus_with_random <- function(queryFiles,
     }
 
     for (ratiolabel in ratiolabels) {
-      if (verbose) print(paste("Processing ratio for query", ratiolabel))
+      if (verbose) message("Processing ratio for query ", ratiolabel, "\n")
       for (centerLabel in centerLabels) {
-        if (verbose) print(paste("Processing ratio for reference", centerLabel))
+        if (verbose) message("Processing ratio for reference ", centerLabel, "\n")
         for (regionName in names(region_list)) {
-          if (verbose) print(paste("Processing ratio for genomic region", regionName))
+          if (verbose) message("Processing ratio for genomic region ", regionName, "\n")
           plot_df <- NULL
           stat_df <- NULL
           countOverlap_df <- NULL
@@ -3022,7 +3041,7 @@ plot_locus_with_random <- function(queryFiles,
 #' @param hw a vector of two elements specifying the height and width of the output figures
 #' @param nc integer, number of cores for parallel processing
 #'
-#' @return NULL
+#' @return a dataframe of read counts per bin perl sample
 #'
 #' @examples
 #' queryFiles <- c(
@@ -3062,7 +3081,7 @@ plot_bam_correlation <- function(bamfiles,
 
   bamlabels <- names(bamfiles)
   importParams$outRle <- FALSE # force query to be GRanges
-  if (verbose) print("Computing bam correlation")
+  if (verbose) message("Computing bam correlation...\n")
   outlist <- handle_input(inputFiles = bamfiles, importParams, nc = nc)
 
   seqi <- Seqinfo(genome = importParams$genome)
@@ -3126,7 +3145,7 @@ plot_bam_correlation <- function(bamfiles,
   ## put histograms on the diagonal
   panel.hist <- function(x, ...) {
     usr <- par("usr")
-    old <- par(usr = c(usr[1:2], 0, 1.5))
+    old <- par(usr = c(usr[seq_len(2)], 0, 1.5))
     h <- hist(x, plot = FALSE)
     breaks <- h$breaks
     nB <- length(breaks)
@@ -3139,7 +3158,7 @@ plot_bam_correlation <- function(bamfiles,
   ## END code from pairs example
 
   mat <- cor(log2(df + 1))
-  mat_long <- pivot_longer(as.data.frame(mat), cols = 1:ncol(mat), names_to = "X", values_to = "correlation") %>%
+  mat_long <- pivot_longer(as.data.frame(mat), cols = seq_len(ncol(mat)), names_to = "X", values_to = "correlation") %>%
     mutate(Y = rep(rownames(mat), each = ncol(mat)))
   g <- ggplot(mat_long, aes(X, Y)) +
     geom_tile(aes(fill = correlation)) +
@@ -3231,7 +3250,7 @@ plot_peak_annotation <- function(peakFile,
   }
 
   if (!is.null(outPrefix)) pdf(paste0(outPrefix, ".pdf"), height = hw[1], width = hw[2])
-  suppressWarnings(suppressMessages(txdb <- makeTxDbFromGFF(gtfFile)))
+  txdb <- makeTxDbFromGFF(gtfFile)
 
   if (simple) {
     ## the 5'UTR and 3'UTR are not annotted
@@ -3264,7 +3283,7 @@ plot_peak_annotation <- function(peakFile,
       compress = FALSE
     )
 
-    suppressWarnings(annot <- annotateWithFeatures(peak, features, strand.aware = TRUE, intersect.chr = FALSE))
+    annot <- annotateWithFeatures(peak, features, strand.aware = TRUE, intersect.chr = FALSE)
     if (verbose) print(annot)
     precedence_count <- annot@num.precedence
     lengths <- vapply(features, FUN = function(x) sum(width(x)), FUN.VALUE = numeric(1))
@@ -3328,12 +3347,11 @@ plot_peak_annotation <- function(peakFile,
     }
     invisible(list(annotation = NULL, stat = df, simplified = NULL))
   } else {
-    if (verbose) print("Collecting gene info")
+    if (verbose) message("Collecting gene info...\n")
 
-    suppressWarnings(suppressMessages({
-      gff <- RCAS::importGtf(saveObjectAsRds = TRUE, filePath = gtfFile)
-      overlaps <- gr2df(RCAS::queryGff(queryRegions = peak, gffData = gff))
-    }))
+    gff <- RCAS::importGtf(saveObjectAsRds = TRUE, filePath = gtfFile)
+    overlaps <- gr2df(RCAS::queryGff(queryRegions = peak, gffData = gff))
+   
     geneType <- NULL
     if ("gene_type" %in% colnames(overlaps)) {
       geneType <- "gene_type"
@@ -3348,7 +3366,7 @@ plot_peak_annotation <- function(peakFile,
       select(chr, start, end, name, strand, transcript_id, gene_id, gene_name, all_of(geneType))
 
     # To find out the distribution of the query regions across gene types:
-    if (verbose) print("Computing barchart of gene types")
+    if (verbose) message("Computing barchart of gene types...\n")
 
     df <- overlaps %>%
       filter(type == "gene") %>%
@@ -3424,7 +3442,7 @@ plot_peak_annotation <- function(peakFile,
     # Plotting overlap counts between query regions and transcript features
     # here utr5, utr3 and cds do not contain introns
 
-    if (verbose) print("Annotation stats:")
+    if (verbose) message("Computing annotation stats...\n")
     lengths <- vapply(features, FUN = function(x) sum(width(x)), FUN.VALUE = numeric(1))
     feature_counts <- dt$feature_count
     feature_counts <- feature_counts[!names(feature_counts) %in% c("Exon", "Transcript")]
@@ -3433,7 +3451,7 @@ plot_peak_annotation <- function(peakFile,
 
     lengths <- lengths[names(precedence_c)]
 
-    if (verbose) print("plot piechart")
+    if (verbose) message("Plotting piechart...\n")
 
     dfa <- data.frame(count = precedence_c, len = lengths) %>%
       mutate(feature = rownames(.)) %>%
@@ -3469,6 +3487,7 @@ plot_peak_annotation <- function(peakFile,
         axis.title = element_blank(),
         axis.text = element_text(size = 10),
         legend.position = "top",
+        legend.title = element_blank(),
         panel.background = element_rect(fill = "white")
       )
     apa2 <- ggplot(dfa, aes(x = "", y = norm_percent, fill = feature)) +
@@ -3482,6 +3501,7 @@ plot_peak_annotation <- function(peakFile,
         axis.title = element_blank(),
         axis.text = element_text(size = 10),
         legend.position = "top",
+        legend.title = element_blank(),
         panel.background = element_rect(fill = "white")
       )
 
@@ -3560,7 +3580,7 @@ plot_peak_annotation <- function(peakFile,
 #' @param verbose logical, indicating whether to output additional information
 #' @param hw a vector of two elements specifying the height and width of the output figures
 #'
-#' @return NULL
+#' @return a ggplot object
 #' @author Shuye Pu
 #'
 #' @examples
@@ -3577,10 +3597,12 @@ plot_peak_annotation <- function(peakFile,
 #'   offset = 0, norm = FALSE, useSizeFactor = FALSE, genome = "hg19"
 #' )
 #'
-#' plot_overlap_bed(
+#' p <- plot_overlap_bed(
 #'   bedList = queryFiles, importParams = handleBedParams, pairOnly = FALSE,
 #'   stranded = FALSE
 #' )
+#' 
+#' p
 #'
 #' @export plot_overlap_bed
 
@@ -3596,7 +3618,7 @@ plot_overlap_bed <- function(bedList,
   names(inputList) <- names(bedList)
   grList <- lapply(inputList, function(x) x$query)
   sizeList <- lapply(inputList, function(x) x$size)
-  if (verbose) print(sizeList)
+  if (verbose) message("sizes: ", paste(sizeList, collapse = " "), "\n")
 
   # get all pair-wise overlap counts into a matrix, display as a heatmap
 
@@ -3611,7 +3633,7 @@ plot_overlap_bed <- function(bedList,
     }
   }
   rownames(counts) <- colnames(counts) <- names(bedList)
-  counts_long <- pivot_longer(as.data.frame(counts), cols = 1:ncol(counts), names_to = "X", values_to = "count") %>%
+  counts_long <- pivot_longer(as.data.frame(counts), cols = seq_len(ncol(counts)), names_to = "X", values_to = "count") %>%
     mutate(Y = rep(rownames(counts), each = ncol(counts)))
 
   pairs <- combn(grList, 2, simplify = FALSE)
@@ -3660,7 +3682,7 @@ plot_overlap_bed <- function(bedList,
   }
   if (!is.null(outPrefix)) on.exit(dev.off(), add = TRUE)
 
-  return(NULL)
+  return(g)
 }
 
 #' @title Plot Venn diagrams depicting overlap of gene lists
@@ -3718,7 +3740,34 @@ plot_overlap_genes <- function(fileList,
 #' @return a ggplot object
 #'
 #' @author Shuye Pu
+#' 
+#' @examples
+#' txdb <- AnnotationDbi::loadDb(system.file("extdata", "txdb_chr19.sql", package = "GenomicPlot"))
 #'
+#' queryfiles <- system.file("extdata", "treat_chr19.bam", package = "GenomicPlot")
+#' names(queryfiles) <- "query"
+#'
+#' inputfiles <- system.file("extdata", "input_chr19.bam", package = "GenomicPlot")
+#' names(inputfiles) <- "input"
+#'
+#' gfeatures <- prepare_5parts_genomic_features(txdb,
+#'   meta = TRUE, nbins = 100, fiveP = -1000,
+#'   threeP = 1000, longest = TRUE, verbose = FALSE
+#' )
+#'
+#' importParams <- list(
+#'   offset = 0, fix_width = 150, fix_point = "start", norm = TRUE,
+#'   useScore = FALSE, outRle = TRUE, useSizeFactor = FALSE, genome = "hg19"
+#' )
+#'
+#' alist <- list(
+#'   "txdb" = txdb, "treat" = queryfiles, "control" = inputfiles, 
+#'   "feature" = gfeatures, "param" = importParams
+#' )
+#' 
+#' GenomicPlot:::plot_named_list(alist)
+#' 
+#' 
 #' @keywords  internal
 
 plot_named_list <- function(params) {

@@ -39,11 +39,14 @@ a named list with the elements c("windowRs", "nbins", "scaled_bins", "fiveP", "t
 This is a helper function for 'plot_5parts_metagene', used to speed up plotting of multiple data sets with the same configuration.
 }
 \examples{
-txdb <- AnnotationDbi::loadDb(system.file("extdata", "txdb_chr19.sql", 
-package="GenomicPlot"))
+txdb <- AnnotationDbi::loadDb(system.file("extdata", "txdb_chr19.sql",
+  package = "GenomicPlot"
+))
 
-gf <- prepare_5parts_genomic_features(txdb, meta=TRUE, nbins=100, fiveP=-1000, threeP=1000,
-longest=TRUE)
+gf <- prepare_5parts_genomic_features(txdb,
+  meta = TRUE, nbins = 100, fiveP = -1000, threeP = 1000,
+  longest = TRUE
+)
 
 }
 \author{

@@ -44,6 +44,21 @@ Plot lines with standard error as the error band
 \note{
 used by \code{plot_locus}, \code{plot_locus_with_random}
 }
+\examples{
+library(dplyr)
+Reference <- rep(rep(c("Ref1", "Ref2"), each = 100), 2)
+Query <- rep(c("Query1", "Query2"), each = 200)
+Position <- rep(seq(-50, 49), 4)
+Intensity <- rlnorm(400)
+se <- runif(400)
+df <- data.frame(Intensity, se, Position, Query, Reference) \%>\%
+  mutate(lower = Intensity - se, upper = Intensity + se) \%>\%
+  mutate(Group = paste(Query, Reference, sep = ":"))
+
+p <- draw_locus_profile(df, cn = "Group", shade = TRUE, hl = c(-10, 20))
+p 
+
+}
 \author{
 Shuye Pu
 }

@@ -35,6 +35,45 @@ a numeric matrix
 \description{
 Function for parallel computation of scoreMatrixBin. The 'windows' parameter of the scoreMatrixBin method is split into nc chunks, and scoreMatrixBin is called on each chunk simultaneously to speed up the computation.
 }
+\examples{
+queryFiles <- system.file("extdata", "chip_treat_chr19.bam", package = "GenomicPlot")
+names(queryFiles) <- "query"
+
+importParams <- list(
+  offset = 0, fix_width = 140, fix_point = "start", norm = FALSE,
+  useScore = FALSE, outRle = TRUE, useSizeFactor = FALSE, genome = "hg19"
+)
+
+queryRegion <- handle_bam(queryFiles, importParams, verbose = TRUE)$query
+
+windowFiles <- system.file("extdata", "test_chip_peak_chr19.narrowPeak", 
+  package = "GenomicPlot"
+)
+names(windowFiles) <- "narrowPeak"
+
+importParams <- list(
+  offset = 0, fix_width = 0, fix_point = "start", norm = FALSE,
+  useScore = FALSE, outRle = FALSE, useSizeFactor = FALSE, genome = "hg19"
+)
+
+windowRegion <- handle_bed(windowFiles, importParams, verbose = TRUE)$query
+
+out <- parallel_scoreMatrixBin(
+  queryRegions = queryRegion,
+  windowRs = windowRegion, 
+  bin_num = 50, 
+  bin_op = "mean",
+  weight_col = "score",
+  stranded = TRUE,
+  nc = 2
+)
+
+\donttest{
+draw_matrix_heatmap(out, dataName = "chipData", labels_col = NULL, 
+  levels_col = NULL, ranking = "Sum", ranges = NULL, verbose = FALSE)
+} 
+ 
+}
 \author{
 Shuye Pu
 }

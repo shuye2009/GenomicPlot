@@ -26,6 +26,16 @@ This is a helper function for performing one-way ANOVA analysis and post hoc Tuk
 \note{
 used in \code{plot_locus}
 }
+\examples{
+stat_df <- data.frame(
+  Feature = rep(c("A", "B"), c(20, 30)),
+  Intensity = c(rnorm(20, 2), rnorm(30, 3))
+)
+
+out <- aov_TukeyHSD(stat_df, xc="Feature")
+out
+
+}
 \author{
 Shuye Pu
 }

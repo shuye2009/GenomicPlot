@@ -18,7 +18,9 @@ an object of class c("SOCKcluster", "cluster"), depending on platform
 Creating a virtual cluster for parallel processing
 }
 \examples{
+
 cl <- start_parallel(2L)
+stop_parallel(cl)
 
 }
 \author{

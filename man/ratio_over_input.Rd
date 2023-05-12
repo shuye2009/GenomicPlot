@@ -19,6 +19,14 @@ a numerical matrix with same dimensions as the IP matrix
 \description{
 compute enrichment of IP samples over Input samples
 }
+\examples{
+
+IP <- matrix(rlnorm(100), ncol = 10)
+Input <- matrix(runif(100), ncol = 10)
+
+ratio <- GenomicPlot:::ratio_over_input(IP, Input, verbose = TRUE)
+
+}
 \author{
 Shuye Pu
 }

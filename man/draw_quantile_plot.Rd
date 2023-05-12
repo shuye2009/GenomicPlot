@@ -33,17 +33,19 @@ Plot quantiles as y-axis, and values as x-axis. Same as geom_ecdf, but allows su
 used by \code{plot_reference_locus}, \code{plot_reference_locus_with_random}
 }
 \examples{
-stat_df <- data.frame(Feature=rep(c("A", "B"), c(20, 30)), 
-                     Intensity=c(rnorm(20, 2, 5), rnorm(30, 3, 5)),
-                     Height=c(rnorm(20, 5, 5), rnorm(30, 1, 5)))
-stat_df_long <- tidyr::pivot_longer(stat_df, cols=c(Intensity, Height), names_to="type", 
-values_to="value")
+stat_df <- data.frame(
+  Feature = rep(c("A", "B"), c(20, 30)),
+  Intensity = c(rnorm(20, 2, 5), rnorm(30, 3, 5)),
+  Height = c(rnorm(20, 5, 5), rnorm(30, 1, 5))
+)
+stat_df_long <- tidyr::pivot_longer(stat_df,
+  cols = c(Intensity, Height), names_to = "type",
+  values_to = "value"
+)
 
-print(draw_quantile_plot(stat_df, xc="Feature", yc="Intensity"))
-print(draw_quantile_plot(stat_df, xc="Feature", yc="Height"))
-print(draw_quantile_plot(stat_df_long, xc="Feature", yc="value", fc="type", Ylab="value"))
-
-
+print(draw_quantile_plot(stat_df, xc = "Feature", yc = "Intensity"))
+print(draw_quantile_plot(stat_df, xc = "Feature", yc = "Height"))
+print(draw_quantile_plot(stat_df_long, xc = "Feature", yc = "value", fc = "type", Ylab = "value"))
 
 }
 \author{

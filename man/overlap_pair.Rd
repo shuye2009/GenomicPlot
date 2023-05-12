@@ -9,10 +9,46 @@ overlap_pair(apair, overlap_fun)
 \arguments{
 \item{apair}{a list of two vectors}
 
-\item{overlap_fun}{the name of the function that defines overlap, depending on the type of object in the vectors.}
+\item{overlap_fun}{the name of the function that defines overlap, depending on the type of object in the vectors. For GRanges, use filter_by_overlaps_stranded or filter_by_overlaps_nonstranded, for gene names, use intersect.}
+}
+\value{
+a VennDiagram object
 }
 \description{
-This is a helper function for Venn diagram plot. A Venn diagram is plotted as output.
+This is a helper function for Venn diagram plot. A Venn diagram is plotted as output. For GRanges, as A overlap B may not be the same as B overlap A, the order of GRanges in a list matters, certain order may produce error.
+}
+\examples{
+test_list <- list(A = c(1, 2, 3, 4, 5), B = c(4, 5, 7))
+overlap_pair(test_list, intersect)
+
+## GRanges overlap
+query <- GRanges("chr19", 
+  IRanges(rep(c(10, 15), 2), width=c(1, 20, 40, 50)), 
+  strand=c("+", "+", "-", "-")
+)
+
+subject <- GRanges("chr19", 
+  IRanges(rep(c(13, 150), 2), width=c(10, 14, 20, 28)), 
+  strand=c("+", "-", "-", "+")
+)
+
+overlap_pair(list(query = query, subject = subject), filter_by_overlaps_stranded)
+
+## the following will generate an error
+\donttest{
+short <- GRanges("chr19", 
+  IRanges(rep(c(10, 15), 1), width=c(10, 20)), 
+  strand=c("+", "+")
+)
+
+long <- GRanges("chr19", 
+  IRanges(rep(c(11, 15, 10), 1), width=c(10, 20, 10)), 
+  strand=c("+", "+", "+")
+)
+
+overlap_pair(list(query = long, subject = short), filter_by_overlaps_stranded)
+}
+
 }
 \author{
 Shuye Pu

@@ -85,7 +85,6 @@ extract_longest_tx <- function(txdb,
         ) +
         xlab(paste(featureName, "length"))
 
-      # print(p1)
       plot_list[[featureName]] <- p1
     }
     outp <- plot_grid(plot_list[[1]], plot_list[[2]], ncol = 2)
@@ -361,7 +360,7 @@ prepare_3parts_genomic_features <- function(txdb,
                                             verbose = FALSE) {
   ## prepare transcripts
 
-  if (verbose) print("Preparing features ...")
+  if (verbose) message("Preparing features ...\n")
 
   ## prepare transcripts that are suitable for overlap
   if (featureName %in% c("utr5", "cds", "utr3")) {
@@ -404,14 +403,17 @@ prepare_3parts_genomic_features <- function(txdb,
   names(windowRs) <- featureNames
   names(scaled_bins) <- featureNames
 
-  if (verbose) print("median sizes for features")
-  if (verbose) print(means)
-  if (verbose) print("bin sizes for features")
-  if (verbose) print(scaled_bins)
-  if (verbose) print("number of transcripts")
-  if (verbose) print(vapply(windowRs, length, numeric(1)))
+  if (verbose) {
+     message("median sizes for features ", paste(means, collase = " "), "\n")
+     message("bin sizes for features ", paste(scaled_bins, collapse = " "), "\n")
+     message("number of transcripts ", 
+       paste(vapply(windowRs, length, numeric(1)), collapse = " "), "\n"
+     )
+  }
 
-  invisible(list("windowRs" = windowRs, "nbins" = nbins, "scaled_bins" = scaled_bins, "fiveP" = fiveP, "threeP" = threeP, "meta" = meta, "longest" = longest))
+  invisible(list("windowRs" = windowRs, "nbins" = nbins, "scaled_bins" = scaled_bins, 
+    "fiveP" = fiveP, "threeP" = threeP, "meta" = meta, "longest" = longest
+  ))
 }
 
 #' @title Demarcate genes into promoter, 5'UTR, CDS, 3'UTR and TTS features
@@ -452,7 +454,7 @@ prepare_5parts_genomic_features <- function(txdb,
                                             subsetTx = NULL) {
   ## prepare transcripts
 
-  if (verbose) print("Preparing genomic features ... ")
+  if (verbose) message("Preparing genomic features ...\n")
   five <- fiveP / 1000
   five <- paste0(five, "K")
   if (fiveP == 0) five <- ""
@@ -513,13 +515,14 @@ prepare_5parts_genomic_features <- function(txdb,
 
   names(windowRs) <- featureNames
 
-  if (verbose) print("median sizes for features")
-  if (verbose) print(means)
-  if (verbose) print("bin sizes for features")
-  if (verbose) print(scaled_bins)
-  if (verbose) print("number of transcripts")
-  if (verbose) print(vapply(windowRs, length, numeric(1)))
-
+  if (verbose) {
+     message("median sizes for features ", paste(means, collase = " "), "\n")
+     message("bin sizes for features ", paste(scaled_bins, collapse = " "), "\n")
+     message("number of transcripts ", 
+       paste(vapply(windowRs, length, numeric(1)), collapse = " "), "\n"
+     )
+  }
+  
   invisible(list("windowRs" = windowRs, "nbins" = nbins, "scaled_bins" = scaled_bins, "fiveP" = fiveP, "threeP" = threeP, "meta" = meta, "longest" = longest))
 }
 
@@ -721,7 +724,7 @@ get_targeted_genes <- function(peak,
   rownames(annot_df) <- annot_df$tx_name
 
   system.time(
-    for (i in 1:nrow(annot_count)) {
+    for (i in seq_len(nrow(annot_count))) {
       txi <- annot_count[i, 1]
       fn <- annot_count[i, 2]
       count <- annot_count[i, 3]
@@ -747,15 +750,22 @@ get_targeted_genes <- function(peak,
 #' @param geneCol the position of the column that containing gene names in the case that geneList is a file
 #'
 #' @return a TxDb object
-#' @author Shuye Pu
-#'
+#' @author Shuye Pu 
+#' 
+#' @examples
+#' 
+#' gtfFile <- system.file("extdata", "gencode.v19.annotation_chr19.gtf", package = "GenomicPlot") 
+#' genes <- c("RPRD1A", "RPAP2", "RPRD1B", "RPRD2", "ZNF281", "ZNF121", "YTHDF2")
+#' 
+#' txdb <- make_subTxDb_from_GTF(gtfFile = gtfFile, geneList = genes)
+#' 
 #' @export make_subTxDb_from_GTF
 
 make_subTxDb_from_GTF <- function(gtfFile,
                                   geneList,
                                   geneCol = 1) {
   gff <- RCAS::importGtf(saveObjectAsRds = TRUE, filePath = gtfFile)
-  if (length(geneList) == 1) {
+  if (file.exists(geneList)) {
     aList <- read.delim2(geneList, comment.char = "#")
     geneList <- as.character(aList[, geneCol])
   }
@@ -775,14 +785,20 @@ make_subTxDb_from_GTF <- function(gtfFile,
 #'
 #' @return a vector of transcript ids (eg. ENST00000577222.1)
 #' @author Shuye Pu
-#'
+#' @examples
+#' 
+#' gtfFile <- system.file("extdata", "gencode.v19.annotation_chr19.gtf", package = "GenomicPlot") 
+#' genes <- c("RPRD1A", "RPAP2", "RPRD1B", "RPRD2", "ZNF281", "ZNF121", "YTHDF2")
+#' 
+#' tx <- gene2tx(gtfFile = gtfFile, geneList = genes)
+#' 
 #' @export gene2tx
 
 gene2tx <- function(gtfFile,
                     geneList,
                     geneCol = 1) {
   gff <- RCAS::importGtf(saveObjectAsRds = TRUE, filePath = gtfFile)
-  if (length(geneList) == 1) {
+  if (file.exists(geneList)) {
     aList <- read.delim2(geneList, comment.char = "#")
     geneList <- as.character(aList[, geneCol])
   }
@@ -802,7 +818,16 @@ gene2tx <- function(gtfFile,
 #'
 #' @return a GRanges object
 #' @author Shuye Pu
+#' 
+#' @examples 
+#' subject <- GRanges("chr19", 
+#'   IRanges(rep(c(10, 15), 2), width=c(1, 20, 400, 2e+8)), 
+#'   strand=c("+", "+", "-", "-")
+#' )
 #'
+#' g <- check_constraints(gr = subject, genome = "hg19")
+#' identical(g, subject)
+#' 
 #' @export check_constraints
 #'
 check_constraints <- function(gr,
@@ -831,7 +856,21 @@ check_constraints <- function(gr,
 #' @return a GRanges object
 #' @author Shuye Pu
 #'
-#'
+#' @examples 
+#' 
+#' query <- GRanges("chr19", 
+#'   IRanges(rep(c(10, 15), 2), width=c(1, 20, 40, 50)), 
+#'   strand=c("+", "+", "-", "-")
+#' )
+#' 
+#' subject <- GRanges("chr19", 
+#'   IRanges(rep(c(13, 150), 2), width=c(10, 14, 20, 28)), 
+#'   strand=c("+", "-", "-", "+")
+#' )
+#' 
+#' res <- filter_by_overlaps_stranded(query, subject)
+#' res
+#' 
 #' @export filter_by_overlaps_stranded
 
 filter_by_overlaps_stranded <- function(query,
@@ -849,7 +888,7 @@ filter_by_overlaps_stranded <- function(query,
   overlaps <- c(overlap_plus, overlap_minus)
 
   if (length(overlaps) > min(length(query), length(subject))) {
-    message("Size of overlap is greater than min(sizeOfQuery, sizeOfSubject)!")
+    message("Size of overlap is greater than min(sizeOfQuery, sizeOfSubject)!\n")
   }
   invisible(overlaps)
 }
@@ -861,7 +900,20 @@ filter_by_overlaps_stranded <- function(query,
 #'
 #' @return a GRanges object
 #' @author Shuye Pu
-#'
+#' @examples 
+#' 
+#' query <- GRanges("chr19", 
+#'   IRanges(rep(c(10, 15), 2), width=c(1, 20, 40, 50)), 
+#'   strand=c("+", "+", "-", "-")
+#' )
+#' 
+#' subject <- GRanges("chr19", 
+#'   IRanges(rep(c(13, 150), 2), width=c(10, 14, 20, 28)), 
+#'   strand=c("+", "-", "-", "+")
+#' )
+#' 
+#' res <- filter_by_nonoverlaps_stranded(query, subject)
+#' res
 #'
 #' @export filter_by_nonoverlaps_stranded
 #'
@@ -869,7 +921,7 @@ filter_by_nonoverlaps_stranded <- function(query,
                                            subject) {
   overlaps <- filter_by_overlaps_stranded(query, subject, maxgap = -1L)
   if (length(overlaps) > min(length(query), length(subject))) {
-    message("Size of overlap is greater than min(sizeOfQuery, sizeOfSubject!")
+    message("Size of overlap is greater than min(sizeOfQuery, sizeOfSubject!\n")
   }
   nonoverlaps <- GenomicRanges::setdiff(query, overlaps)
   invisible(nonoverlaps)
