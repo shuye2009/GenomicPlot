@@ -765,10 +765,15 @@ make_subTxDb_from_GTF <- function(gtfFile,
                                   geneList,
                                   geneCol = 1) {
   gff <- RCAS::importGtf(saveObjectAsRds = TRUE, filePath = gtfFile)
-  if (file.exists(geneList)) {
-    aList <- read.delim2(geneList, comment.char = "#")
-    geneList <- as.character(aList[, geneCol])
+  if (length(geneList == 1)) {
+     if (file.exists(geneList)) {
+        aList <- read.delim2(geneList, comment.char = "#")
+        geneList <- as.character(aList[, geneCol])
+     } else {
+        stop("Gene list file does not exist!")
+     }
   }
+  
   subgff <- gff[gff$gene_name %in% geneList]
   TxDb <- makeTxDbFromGRanges(subgff)
 
@@ -798,9 +803,14 @@ gene2tx <- function(gtfFile,
                     geneList,
                     geneCol = 1) {
   gff <- RCAS::importGtf(saveObjectAsRds = TRUE, filePath = gtfFile)
-  if (file.exists(geneList)) {
-    aList <- read.delim2(geneList, comment.char = "#")
-    geneList <- as.character(aList[, geneCol])
+  
+  if (length(geneList) == 1) {
+     if (file.exists(geneList)) {
+       aList <- read.delim2(geneList, comment.char = "#")
+       geneList <- as.character(aList[, geneCol])
+     } else {
+        stop("Gene list file does not exist!")
+     }
   }
   subgff <- gff[gff$gene_name %in% geneList]
 

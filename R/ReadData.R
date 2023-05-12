@@ -424,15 +424,15 @@ handle_bw <- function(inputFile,
   seqInfo <- Seqinfo(genome = importParams$genome)
   seqInfo <- keepStandardChromosomes(seqInfo)
   queryRegions <- queryRegions[as.vector(seqnames(queryRegions)) %in% seqnames(seqInfo)]
-  seqlevels(queryRegions) <- seqlevels(seqInfo)
-  seqinfo(queryRegions) <- seqInfo
+  GenomeInfoDb::seqlevels(queryRegions) <- GenomeInfoDb::seqlevels(seqInfo)
+  GenomeInfoDb::seqinfo(queryRegions) <- seqInfo
 
   fragmentLength <- 100 ## this is an assumption
   libsize <- as.integer(sum(score(queryRegions) * width(queryRegions)) / fragmentLength)
 
   if (importParams$outRle) {
     queryRegions <- coverage(queryRegions, weight = weight_col)
-    seqinfo(queryRegions) <- seqInfo
+    GenomeInfoDb::seqinfo(queryRegions) <- seqInfo
   }
 
   invisible(list("query" = queryRegions, "size" = libsize, "type" = "bw", "weight" = weight_col))
