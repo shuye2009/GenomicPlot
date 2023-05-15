@@ -20,11 +20,7 @@ Replace 0 and missing values in a sparse non-negative matrix with half of minimu
 \examples{
 fullMatrix <- matrix(rlnorm(100), ncol = 10)
 for (i in 5:6) {
-  fullMatrix[i, 4:7] <- NaN
-  fullMatrix[i+1, 4:7] <- NA
-  fullMatrix[i+2, 4:7] <- -Inf
   fullMatrix[i-1, 4:7] <- 0
-  fullMatrix[i-2, 1:3] <- Inf
 }
 
 imp <- GenomicPlot:::impute_hm(fullMatrix, verbose = TRUE)

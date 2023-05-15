@@ -50,7 +50,7 @@ draw_matrix_heatmap <- function(fullMatrix,
   fullMatrix <- rank_rows(fullMatrix, ranking)
 
   if (verbose) {
-    message("drawing heatmap\n")
+    message("Drawing heatmap\n")
     vdataName <- gsub(":|/|,|\\.|\\s", "_", dataName, fixed = FALSE) ## replace characters not allowed in file names
     write.table(fullMatrix, paste(vdataName, "_matrix.tab", sep = ""), row.names = TRUE, col.names = TRUE, sep = "\t", quote = FALSE)
   }
@@ -274,7 +274,8 @@ draw_region_profile <- function(plot_df,
       axis.ticks.x = element_blank(),
       axis.text.x = element_blank(),
       plot.margin = unit(c(1, 1, 0, 1), "lines")
-    ) 
+    ) +
+    ggtitle(paste(unique(plot_df[[sn]]), collapse = ", "))
 
   return(p)
 }
@@ -336,7 +337,9 @@ draw_locus_profile <- function(plot_df,
       legend.title = element_blank(),
       axis.text = element_text(face = "plain", size = 14),
       axis.title = element_text(face = "bold", size = 16)
-    ) 
+    ) +
+    ggtitle(paste(unique(plot_df[[sn]]), collapse = ", "))
+  
   if (shade) p <- p + annotate("rect", xmin = hl[1], xmax = hl[2], ymin = -Inf, ymax = Inf, fill = "grey", color = "grey", alpha = 0.3)
 
   return(p)
@@ -1069,7 +1072,7 @@ draw_stacked_profile <- function(plot_df,
 #'   strand=c("+", "+", "+")
 #' )
 #' 
-#' overlap_pair(list(query = long, subject = short), filter_by_overlaps_stranded)
+#' #overlap_pair(list(query = long, subject = short), filter_by_overlaps_stranded)
 #' }
 #'
 #' @export overlap_pair

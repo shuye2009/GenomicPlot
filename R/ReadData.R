@@ -60,16 +60,16 @@ handle_input <- function(inputFiles,
       temp <- readRDS(file.path(dirName, paste0(fileName, ".rds")))
       if (identical(temp$param, importParams)) {
         out <- temp$Rle
-        if (verbose) message("cached .rds file is used\n")
+        if (verbose) message("Cached .rds file is used\n")
       } else {
         out <- funName(inputFile = inputFile, importParams, verbose)
         saveRDS(list(param = importParams, Rle = out), file.path(dirName, paste0(fileName, ".rds")))
-        if (verbose) message("cached .rds file is modified using new input parameters\n")
+        if (verbose) message("Cached .rds file is modified using new input parameters\n")
       }
     } else {
       out <- funName(inputFile = inputFile, importParams, verbose)
       saveRDS(list(param = importParams, Rle = out), file.path(dirName, paste0(fileName, ".rds")))
-      if (verbose) message("input data is cached as .rds file for fast reloading\n")
+      if (verbose) message("Input data is cached as .rds file for fast reloading\n")
     }
     return(out)
   }
@@ -334,7 +334,7 @@ handle_bam <- function(inputFile,
   } else {
     param <- ScanBamParam(mapqFilter = 10)
   }
-  if (verbose) message("\nbam file ", inputFile, " is loaded\n")
+  if (verbose) message("\nBam file ", inputFile, " is loaded\n")
 
   ga <- readGAlignments(inputFile, use.names = TRUE, param = param)
   libsize <- sum(idxstatsBam(inputFile)$mapped)
@@ -512,7 +512,7 @@ find_mate <- function(inputFile,
     if (length(fch_v) == length(och_v) && sum(fch_v != och_v) == 1) {
       mate <- file.path(dirName, afile)
       diff <- base::setdiff(och_v, fch_v)
-      if (verbose) message("mate found:\n", inputFile, "\n", mate, "\n", diff, "\n")
+      if (verbose) message("Mate found:\n", inputFile, "\n", mate, "\n", diff, "\n")
     } 
   }
   invisible(mate)

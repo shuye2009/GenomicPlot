@@ -180,10 +180,10 @@ knitr::include_graphics("../inst/tests/test_output/test_plot_region_27.png")
 #  )
 
 ## ----intron1, echo = FALSE, fig.cap = "Query and input sample profiles in start, center and end of intron", out.width = '75%'----
-knitr::include_graphics("../inst/tests/test_output/test_plot_stat_end_3.png")
+knitr::include_graphics("../inst/tests/test_output/test_plot_start_end_3.png")
 
 ## ----intron2, echo = FALSE, fig.cap = "Ratio-over profile in start, center and end of intron", out.width = '75%'----
-knitr::include_graphics("../inst/tests/test_output/test_plot_stat_end_5.png")
+knitr::include_graphics("../inst/tests/test_output/test_plot_start_end_4.png")
 
 ## ---- eval = FALSE, fig.show = 'hold', fig.keep = 'all', fig.align = 'center', fig.dim = c(7,7)----
 #  centerfiles <- c(

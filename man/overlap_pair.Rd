@@ -46,7 +46,7 @@ long <- GRanges("chr19",
   strand=c("+", "+", "+")
 )
 
-overlap_pair(list(query = long, subject = short), filter_by_overlaps_stranded)
+#overlap_pair(list(query = long, subject = short), filter_by_overlaps_stranded)
 }
 
 }

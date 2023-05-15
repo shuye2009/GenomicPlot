@@ -91,11 +91,7 @@ inspect_matrix <- function(fullmatrix,
 #' @examples 
 #' fullMatrix <- matrix(rlnorm(100), ncol = 10)
 #' for (i in 5:6) {
-#'   fullMatrix[i, 4:7] <- NaN
-#'   fullMatrix[i+1, 4:7] <- NA
-#'   fullMatrix[i+2, 4:7] <- -Inf
 #'   fullMatrix[i-1, 4:7] <- 0
-#'   fullMatrix[i-2, 1:3] <- Inf
 #' }
 #' 
 #' imp <- GenomicPlot:::impute_hm(fullMatrix, verbose = TRUE)
@@ -107,11 +103,11 @@ inspect_matrix <- function(fullmatrix,
 impute_hm <- function(fullmatrix,
                       verbose = FALSE) {
   if (min(fullmatrix) < 0) {
-    message("cannot impute because the matrix has negative values!\n")
+    message("Cannot impute because the matrix has negative values!\n")
     return(fullmatrix)
   }
   if (verbose) {
-    message("Imputing missing values. Matrix quartiles:\n")
+    message("Imputing missing values...\nMatrix quartiles:\n")
     message(paste(quantile(fullmatrix), collapse = " "), "\n")
   }
 
@@ -261,16 +257,16 @@ rm_outlier <- function(fullmatrix,
 
     if (verbose) {
       message("Outlier detected:\n")
-      message("maximum of the matrix ", max(fullmatrix))
-      message("\nmedian of row max ", median(rowmax))
-      message("\nmedian absolute deviation (mad) of row max ", M)
-      message("\nmulitplier of mad ", multiplier)
-      message("\nup_bound and replace value ", up_bound)
+      message("Maximum of the matrix ", max(fullmatrix))
+      message("\nMedian of row max ", median(rowmax))
+      message("\nMedian absolute deviation (mad) of row max ", M)
+      message("\nMulitplier of mad ", multiplier)
+      message("\nUp_bound and replace value ", up_bound)
       message("\npercentile of up_bound", percentile)
-      message("\nnumber of outlier rows", length(which(rowmax > up_bound)))
-      message("\nnumber of outliers", length(outliers))
-      message("\nfraction of outliers ", length(outliers) / (nrow(fullmatrix) * ncol(fullmatrix)))
-      message("\nvalues of outliers:\n")
+      message("\nPumber of outlier rows", length(which(rowmax > up_bound)))
+      message("\nNumber of outliers", length(outliers))
+      message("\nFraction of outliers ", length(outliers) / (nrow(fullmatrix) * ncol(fullmatrix)))
+      message("\nValues of outliers:\n")
       message(paste(outliers, collapse = " "), "\n")
     }
 
@@ -278,12 +274,12 @@ rm_outlier <- function(fullmatrix,
   } else {
     if (verbose) {
       message("Outlier not detected:\n")
-      message("maximum of the matrix ", max(rowmax))
-      message("\nmedian of row max ", median(rowmax))
-      message("\nmedian absolute deviation (mad) of row max ", M)
-      message("\nmulitplier of mad ", multiplier)
-      message("\nup_bound and replace value ", up_bound)
-      message("\npercentile of up_bound ", percentile, "\n")
+      message("Maximum of the matrix ", max(rowmax))
+      message("\nMedian of row max ", median(rowmax))
+      message("\nMedian absolute deviation (mad) of row max ", M)
+      message("\nMulitplier of mad ", multiplier)
+      message("\nUp_bound and replace value ", up_bound)
+      message("\nPercentile of up_bound ", percentile, "\n")
     }
   }
 
