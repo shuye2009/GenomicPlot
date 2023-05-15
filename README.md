@@ -101,7 +101,7 @@ plot_locus(queryFiles = queryfiles[c(1,3)],
 ![image1](./inst/tests/test_output/test_plot_locus1_3.png)
 ![image1](./inst/tests/test_output/test_plot_locus1_4.png)
 
-The following example shows you how to annotate ChIP-seq peaks. The annotation statistics is shown in "test_plot_peak_annotation.pdf". The detailed annotation is in the table "summitPeak_targeted_annotated_gene.tab".
+The following example shows you how to annotate ChIP-seq peaks. The annotation statistics is shown in "test_plot_peak_annotation.png". The detailed annotation is in the table "summitPeak_targeted_annotated_gene.tab".
 
 ``` r
 

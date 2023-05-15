@@ -404,9 +404,9 @@ prepare_3parts_genomic_features <- function(txdb,
   names(scaled_bins) <- featureNames
 
   if (verbose) {
-     message("median sizes for features ", paste(means, collase = " "), "\n")
-     message("bin sizes for features ", paste(scaled_bins, collapse = " "), "\n")
-     message("number of transcripts ", 
+     message("Median sizes for features: ", paste(means, collase = " "), "\n")
+     message("Bin sizes for features: ", paste(scaled_bins, collapse = " "), "\n")
+     message("Number of transcripts: ", 
        paste(vapply(windowRs, length, numeric(1)), collapse = " "), "\n"
      )
   }
@@ -516,9 +516,9 @@ prepare_5parts_genomic_features <- function(txdb,
   names(windowRs) <- featureNames
 
   if (verbose) {
-     message("median sizes for features ", paste(means, collase = " "), "\n")
-     message("bin sizes for features ", paste(scaled_bins, collapse = " "), "\n")
-     message("number of transcripts ", 
+     message("Median sizes for features: ", paste(means, collase = " "), "\n")
+     message("Bin sizes for features: ", paste(scaled_bins, collapse = " "), "\n")
+     message("Number of transcripts: ", 
        paste(vapply(windowRs, length, numeric(1)), collapse = " "), "\n"
      )
   }
@@ -765,7 +765,7 @@ make_subTxDb_from_GTF <- function(gtfFile,
                                   geneList,
                                   geneCol = 1) {
   gff <- RCAS::importGtf(saveObjectAsRds = TRUE, filePath = gtfFile)
-  if (length(geneList == 1)) {
+  if (length(geneList) == 1) {
      if (file.exists(geneList)) {
         aList <- read.delim2(geneList, comment.char = "#")
         geneList <- as.character(aList[, geneCol])
