@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">GenomicPlot</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.1.4</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.1.5</span>
       </span>
     </div>
 
@@ -35,7 +35,13 @@
       <a href="../articles/GenomicPlot_vignettes.html">GenomicPlot: an R package for efficient and flexible visualization of NGS coverage profiles</a>
     </li>
   </ul></li>
-      </ul><ul class="nav navbar-nav navbar-right"></ul></div><!--/.nav-collapse -->
+      </ul><ul class="nav navbar-nav navbar-right"><li>
+  <a href="https://github.com/shuye2009/GenomicPlot/" class="external-link">
+    <span class="fab fa-github fa-lg"></span>
+     
+  </a>
+</li>
+      </ul></div><!--/.nav-collapse -->
   </div><!--/.container -->
 </div><!--/.navbar -->
 
@@ -45,7 +51,7 @@
   <div class="col-md-9 contents">
     <div class="page-header">
     <h1>Plot signal inside as well as around custom genomic regions</h1>
-    
+    <small class="dont-index">Source: <a href="https://github.com/shuye2009/GenomicPlot/blob/HEAD/R/GenomicPlot.R" class="external-link"><code>R/GenomicPlot.R</code></a></small>
     <div class="hidden name"><code>plot_region.Rd</code></div>
     </div>
 
@@ -183,160 +189,146 @@
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">txdb</span> <span class="op">&lt;-</span> <span class="fu">AnnotationDbi</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/AnnotationDbi/man/AnnotationDb-class.html" class="external-link">loadDb</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"txdb_chr19.sql"</span>, package<span class="op">=</span><span class="st">"GenomicPlot"</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">queryfiles</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"chip_treat_chr19.bam"</span>, package<span class="op">=</span><span class="st">"GenomicPlot"</span><span class="op">)</span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">txdb</span> <span class="op">&lt;-</span> <span class="fu">AnnotationDbi</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/AnnotationDbi/man/AnnotationDb-class.html" class="external-link">loadDb</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"txdb_chr19.sql"</span>, package <span class="op">=</span> <span class="st">"GenomicPlot"</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">queryfiles</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"chip_treat_chr19.bam"</span>, package <span class="op">=</span> <span class="st">"GenomicPlot"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">queryfiles</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="st">"query"</span></span></span>
-<span class="r-in"><span><span class="va">inputfiles</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"chip_input_chr19.bam"</span>, package<span class="op">=</span><span class="st">"GenomicPlot"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">inputfiles</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"chip_input_chr19.bam"</span>, package <span class="op">=</span> <span class="st">"GenomicPlot"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">inputfiles</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="st">"input"</span></span></span>
-<span class="r-in"><span><span class="va">centerfiles</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"test_chip_peak_chr19.narrowPeak"</span>, package<span class="op">=</span><span class="st">"GenomicPlot"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">centerfiles</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"test_chip_peak_chr19.narrowPeak"</span>, package <span class="op">=</span> <span class="st">"GenomicPlot"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">centerfiles</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="st">"narrowPeak"</span></span></span>
 <span class="r-in"><span><span class="va">op</span> <span class="op">&lt;-</span> <span class="cn">NULL</span></span></span>
-<span class="r-in"><span><span class="va">importParams</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>offset<span class="op">=</span><span class="fl">0</span>, fix_width<span class="op">=</span><span class="fl">150</span>, fix_point<span class="op">=</span><span class="st">"start"</span>, norm<span class="op">=</span><span class="cn">TRUE</span>,</span></span>
-<span class="r-in"><span>useScore<span class="op">=</span><span class="cn">FALSE</span>, outRle<span class="op">=</span><span class="cn">TRUE</span>, useSizeFactor<span class="op">=</span><span class="cn">TRUE</span>, genome<span class="op">=</span><span class="st">"hg19"</span><span class="op">)</span></span></span>
-<span class="r-in"><span> </span></span>
-<span class="r-in"><span><span class="fu">plot_region</span><span class="op">(</span>queryFiles<span class="op">=</span><span class="va">queryfiles</span>, centerFiles<span class="op">=</span><span class="va">centerfiles</span>, txdb<span class="op">=</span><span class="cn">NULL</span>, regionName<span class="op">=</span><span class="st">"region"</span>, </span></span>
-<span class="r-in"><span>inputFiles<span class="op">=</span><span class="va">inputfiles</span>, nbins<span class="op">=</span><span class="fl">100</span>, importParams<span class="op">=</span><span class="va">importParams</span>, verbose<span class="op">=</span><span class="cn">TRUE</span>, </span></span>
-<span class="r-in"><span>scale<span class="op">=</span><span class="cn">FALSE</span>, heatmap<span class="op">=</span><span class="cn">TRUE</span>, fiveP<span class="op">=</span><span class="op">-</span><span class="fl">1000</span>, threeP<span class="op">=</span><span class="fl">1000</span>, smooth<span class="op">=</span><span class="cn">TRUE</span>, stranded<span class="op">=</span><span class="cn">TRUE</span>, transform<span class="op">=</span><span class="st">"log2"</span>,</span></span>
-<span class="r-in"><span>outPrefix<span class="op">=</span><span class="cn">NULL</span>, rmOutlier<span class="op">=</span><span class="fl">0</span>, heatRange<span class="op">=</span><span class="cn">NULL</span>, Ylab<span class="op">=</span><span class="st">"Coverage/base/gene"</span>, </span></span>
-<span class="r-in"><span>statsMethod<span class="op">=</span><span class="st">"wilcox.test"</span>, nc<span class="op">=</span><span class="fl">2</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "Reading bam file: C:/Users/greenblatt/AppData/Local/Temp/RtmpuKLw25/temp_libpath57068a86f55/GenomicPlot/extdata/chip_treat_chr19.bam"</span>
+<span class="r-in"><span><span class="va">importParams</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>  offset <span class="op">=</span> <span class="fl">0</span>, fix_width <span class="op">=</span> <span class="fl">150</span>, fix_point <span class="op">=</span> <span class="st">"start"</span>, norm <span class="op">=</span> <span class="cn">TRUE</span>,</span></span>
+<span class="r-in"><span>  useScore <span class="op">=</span> <span class="cn">FALSE</span>, outRle <span class="op">=</span> <span class="cn">TRUE</span>, useSizeFactor <span class="op">=</span> <span class="cn">TRUE</span>, genome <span class="op">=</span> <span class="st">"hg19"</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="fu">plot_region</span><span class="op">(</span></span></span>
+<span class="r-in"><span>  queryFiles <span class="op">=</span> <span class="va">queryfiles</span>, centerFiles <span class="op">=</span> <span class="va">centerfiles</span>, txdb <span class="op">=</span> <span class="cn">NULL</span>, regionName <span class="op">=</span> <span class="st">"region"</span>,</span></span>
+<span class="r-in"><span>  inputFiles <span class="op">=</span> <span class="va">inputfiles</span>, nbins <span class="op">=</span> <span class="fl">100</span>, importParams <span class="op">=</span> <span class="va">importParams</span>, verbose <span class="op">=</span> <span class="cn">TRUE</span>,</span></span>
+<span class="r-in"><span>  scale <span class="op">=</span> <span class="cn">FALSE</span>, heatmap <span class="op">=</span> <span class="cn">TRUE</span>, fiveP <span class="op">=</span> <span class="op">-</span><span class="fl">1000</span>, threeP <span class="op">=</span> <span class="fl">1000</span>, smooth <span class="op">=</span> <span class="cn">TRUE</span>, stranded <span class="op">=</span> <span class="cn">TRUE</span>, transform <span class="op">=</span> <span class="st">"log2"</span>,</span></span>
+<span class="r-in"><span>  outPrefix <span class="op">=</span> <span class="cn">NULL</span>, rmOutlier <span class="op">=</span> <span class="fl">0</span>, heatRange <span class="op">=</span> <span class="cn">NULL</span>, Ylab <span class="op">=</span> <span class="st">"Coverage/base/gene"</span>,</span></span>
+<span class="r-in"><span>  statsMethod <span class="op">=</span> <span class="st">"wilcox.test"</span>, nc <span class="op">=</span> <span class="fl">2</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Reading bamfile: C:/Users/greenblatt/AppData/Local/Temp/RtmpiQE4hr/temp_libpath167c637a5c73/GenomicPlot/extdata/chip_treat_chr19.bam</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Paired end bam file detected!</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> bam file C:/Users/greenblatt/AppData/Local/Temp/RtmpuKLw25/temp_libpath57068a86f55/GenomicPlot/extdata/chip_treat_chr19.bam is loaded</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> cached .rds file is modified using new input parameters</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "Reading bam file: C:/Users/greenblatt/AppData/Local/Temp/RtmpuKLw25/temp_libpath57068a86f55/GenomicPlot/extdata/chip_input_chr19.bam"</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Bam file C:/Users/greenblatt/AppData/Local/Temp/RtmpiQE4hr/temp_libpath167c637a5c73/GenomicPlot/extdata/chip_treat_chr19.bam is loaded</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Cached .rds file is modified using new input parameters</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Reading bamfile: C:/Users/greenblatt/AppData/Local/Temp/RtmpiQE4hr/temp_libpath167c637a5c73/GenomicPlot/extdata/chip_input_chr19.bam</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Paired end bam file detected!</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> bam file C:/Users/greenblatt/AppData/Local/Temp/RtmpuKLw25/temp_libpath57068a86f55/GenomicPlot/extdata/chip_input_chr19.bam is loaded</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> cached .rds file is modified using new input parameters</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "Reading bed file: C:/Users/greenblatt/AppData/Local/Temp/RtmpuKLw25/temp_libpath57068a86f55/GenomicPlot/extdata/test_chip_peak_chr19.narrowPeak"</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> The input file C:/Users/greenblatt/AppData/Local/Temp/RtmpuKLw25/temp_libpath57068a86f55/GenomicPlot/extdata/test_chip_peak_chr19.narrowPeak have more than 6 columns, only the first 6 columns will be used!</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> cached .rds file is modified using new input parameters</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "computing coverage for Sample"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "queryLabel query"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "centerLabel narrowPeak"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "featureName -1K"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "featureName region"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "featureName 1K"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "queryLabel input"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "centerLabel narrowPeak"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "featureName -1K"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "featureName region"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "featureName 1K"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "plotting coverage profiles"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "queryLabel query"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "centerLabel narrowPeak"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "Inspecting matrix"</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Bam file C:/Users/greenblatt/AppData/Local/Temp/RtmpiQE4hr/temp_libpath167c637a5c73/GenomicPlot/extdata/chip_input_chr19.bam is loaded</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Cached .rds file is modified using new input parameters</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Reading bedfile: C:/Users/greenblatt/AppData/Local/Temp/RtmpiQE4hr/temp_libpath167c637a5c73/GenomicPlot/extdata/test_chip_peak_chr19.narrowPeak</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> The input file C:/Users/greenblatt/AppData/Local/Temp/RtmpiQE4hr/temp_libpath167c637a5c73/GenomicPlot/extdata/test_chip_peak_chr19.narrowPeak have more than 6 columns, only the first 6 columns will be used!</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Cached .rds file is modified using new input parameters</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Computing coverage for sample...</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Query label: query</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Center label: narrowPeak</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Feature name: -1K</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Feature name: region</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Feature name: 1K</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Query label: input</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Center label: narrowPeak</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Feature name: -1K</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Feature name: region</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Feature name: 1K</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Plotting coverage profiles...</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Query label: query</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Center label: narrowPeak</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Inspecting matrix</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>          n_invalid fraction_invalid</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> infinite         0        0.0000000</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> NA               0        0.0000000</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> NaN              0        0.0000000</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> zero        559199        0.7038376</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Imputing missing values. Matrix quartiles:</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>          0%         25%         50%         75%        100% </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    0.000000    0.000000    0.000000    7.028187 2030.694099 </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Imputing missing values...</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Matrix quartiles:</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> 0 0 0 7.0281865421272 2030.69409868277</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Matrix quantiles after imputing:</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>           0%          25%          50%          75%         100% </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2.772748e-02 2.772748e-02 2.772748e-02 7.028187e+00 2.030694e+03 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "The imputed value is: 0.0277274801288241"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "featureName -1K"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "featureName region"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "featureName 1K"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "drawing heatmap"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "quantile(fullMatrix, c(seq(0.9, 1, 0.005)), na.rm=TRUE)"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>         90%       90.5%         91%       91.5%         92%       92.5% </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    9.919783   11.445904   12.972024   14.400892   15.774803   17.326886 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>         93%       93.5%         94%       94.5%         95%       95.5% </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   18.909169   19.076506   19.076506   19.076506   19.076506   19.076506 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>         96%       96.5%         97%       97.5%         98%       98.5% </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   22.011353   25.245136   28.614759   28.614759   34.729024   39.620436 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>         99%       99.5%        100% </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   48.922008   71.894583 2030.694099 </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> 0.0277274801288241 0.0277274801288241 0.0277274801288241 7.0281865421272 2030.69409868277</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> The imputed value is: 0.0277274801288241</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Feature name: -1K</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Feature name: region</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Feature name: 1K</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Drawing heatmap</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> quantile(fullMatrix, c(seq(0.9, 1, 0.005)), na.rm=TRUE)</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> 9.91978329088811 11.4459037971786 12.9720243034691 14.4008920323979 15.7748033102141 17.3268859257092 18.9091685538184 19.076506328631 19.076506328631 19.076506328631 19.076506328631 19.076506328631 22.0113534561127 25.24513550115 28.6147594929465 28.6147594929465 34.7290243418666 39.6204362210028 48.9220081653601 71.894583226028 2030.69409868277</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> `use_raster` is automatically set to TRUE for a matrix with more than</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> 2000 rows. You can control `use_raster` argument by explicitly setting</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> TRUE/FALSE to it.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Set `ht_opt$message = FALSE` to turn off this message.</span>
 <span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>implicit list embedding of S4 objects is deprecated</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "queryLabel input"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "centerLabel narrowPeak"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "Inspecting matrix"</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Query label: input</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Center label: narrowPeak</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Inspecting matrix</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>          n_invalid fraction_invalid</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> infinite         0        0.0000000</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> NA               0        0.0000000</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> NaN              0        0.0000000</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> zero        617165        0.7767967</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Imputing missing values. Matrix quartiles:</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>       0%      25%      50%      75%     100% </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    0.000    0.000    0.000    0.000 2381.269 </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Imputing missing values...</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Matrix quartiles:</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> 0 0 0 0 2381.26891525185</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Matrix quantiles after imputing:</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>           0%          25%          50%          75%         100% </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    0.0210222    0.0210222    0.0210222    0.0210222 2381.2689153 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "The imputed value is: 0.0210222020521201"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "featureName -1K"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "featureName region"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "featureName 1K"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "drawing heatmap"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "quantile(fullMatrix, c(seq(0.9, 1, 0.005)), na.rm=TRUE)"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>         90%       90.5%         91%       91.5%         92%       92.5% </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    7.820259    7.820259    7.820259    7.820259    7.820259    7.820259 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>         93%       93.5%         94%       94.5%         95%       95.5% </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    7.820259    7.820259    7.820259    7.820259    7.820259    7.820259 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>         96%       96.5%         97%       97.5%         98%       98.5% </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    7.820259    8.780642   11.028571   13.450846   15.640518   15.640518 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>         99%       99.5%        100% </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   15.640518   18.076007 2381.268915 </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> 0.0210222020521201 0.0210222020521201 0.0210222020521201 0.0210222020521201 2381.26891525185</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> The imputed value is: 0.0210222020521201</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Feature name: -1K</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Feature name: region</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Feature name: 1K</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Drawing heatmap</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> quantile(fullMatrix, c(seq(0.9, 1, 0.005)), na.rm=TRUE)</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> 7.82025916338868 7.82025916338868 7.82025916338868 7.82025916338868 7.82025916338868 7.82025916338868 7.82025916338868 7.82025916338868 7.82025916338868 7.82025916338868 7.82025916338868 7.82025916338868 7.82025916338868 8.78064186766448 11.0285706150353 13.4508457610285 15.6405183267774 15.6405183267774 15.6405183267774 18.0760065819617 2381.26891525185</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> `use_raster` is automatically set to TRUE for a matrix with more than</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> 2000 rows. You can control `use_raster` argument by explicitly setting</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> TRUE/FALSE to it.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Set `ht_opt$message = FALSE` to turn off this message.</span>
 <span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>implicit list embedding of S4 objects is deprecated</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Beds: query</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Centers: narrowPeak</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Beds: input</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Centers: narrowPeak</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Beds: query input</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Centers: narrowPeak</span>
 <span class="r-plt img"><img src="plot_region-1.png" alt="" width="700" height="433"></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "beds query"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "centers narrowPeak"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "beds input"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "centers narrowPeak"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "beds query" "beds input"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "centers narrowPeak"</span>
 <span class="r-plt img"><img src="plot_region-2.png" alt="" width="700" height="433"></span>
 <span class="r-plt img"><img src="plot_region-3.png" alt="" width="700" height="433"></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "2030.69409868277 0.0210222020521201 1"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "Inspecting matrix"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>      Max(IP)   min(Input)       pseudo </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2030.6940987    0.0210222    1.0000000 </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Inspecting matrix</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>          n_invalid fraction_invalid</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> infinite         0                0</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> NA               0                0</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> NaN              0                0</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> zero             0                0</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Imputing missing values. Matrix quartiles:</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>           0%          25%          50%          75%         100% </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   0.02562829   1.00656722   1.00656722   1.31911487 458.12161981 </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Imputing missing values...</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Matrix quartiles:</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> 0.025628286048916 1.00656722063754 1.00656722063754 1.31911487027852 458.121619806466</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Matrix quantiles after imputing:</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>           0%          25%          50%          75%         100% </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   0.02562829   1.00656722   1.00656722   1.31911487 458.12161981 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "The imputed value is: 0.012814143024458"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "plotting coverage profiles"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "ratiolabel query"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "centerlabel narrowPeak"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "-1K"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "region"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "1K"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "drawing heatmap"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "quantile(fullMatrix, c(seq(0.9, 1, 0.005)), na.rm=TRUE)"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>      90%    90.5%      91%    91.5%      92%    92.5%      93%    93.5% </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3.367550 3.367550 3.367550 3.367550 3.367550 3.367550 3.367550 3.367550 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>      94%    94.5%      95%    95.5%      96%    96.5%      97%    97.5% </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3.607585 3.825773 4.022369 4.203010 4.297422 4.297422 4.297422 4.323546 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>      98%    98.5%      99%    99.5%     100% </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4.636980 4.858230 5.136948 5.575577 8.839587 </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> 0.025628286048916 1.00656722063754 1.00656722063754 1.31911487027852 458.121619806466</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> The imputed value is: 0.012814143024458</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Plotting coverage profiles...</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Ratio label: query</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Center label: narrowPeak</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Feature name: -1K</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Feature name: region</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Feature name: 1K</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Drawing heatmap</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> quantile(fullMatrix, c(seq(0.9, 1, 0.005)), na.rm=TRUE)</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> 3.36754960066551 3.36754960066551 3.36754960066551 3.36754960066551 3.36754960066551 3.36754960066551 3.36754960066551 3.36754960066551 3.60758485684757 3.82577283303868 4.02236889314674 4.20301015811094 4.29742209340991 4.29742209340991 4.29742209340991 4.323546345804 4.63697971277802 4.85823022681547 5.13694783145658 5.57557686371549 8.83958683831407</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> `use_raster` is automatically set to TRUE for a matrix with more than</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> 2000 rows. You can control `use_raster` argument by explicitly setting</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> TRUE/FALSE to it.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Set `ht_opt$message = FALSE` to turn off this message.</span>
 <span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>implicit list embedding of S4 objects is deprecated</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "query"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "narrowPeak"</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Beds: query</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Centers: narrowPeak</span>
 <span class="r-plt img"><img src="plot_region-4.png" alt="" width="700" height="433"></span>
 <span class="r-plt img"><img src="plot_region-5.png" alt="" width="700" height="433"></span>
 <span class="r-in"><span></span></span>

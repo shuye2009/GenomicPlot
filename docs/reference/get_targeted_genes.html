@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">GenomicPlot</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.1.4</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.1.5</span>
       </span>
     </div>
 
@@ -35,7 +35,13 @@
       <a href="../articles/GenomicPlot_vignettes.html">GenomicPlot: an R package for efficient and flexible visualization of NGS coverage profiles</a>
     </li>
   </ul></li>
-      </ul><ul class="nav navbar-nav navbar-right"></ul></div><!--/.nav-collapse -->
+      </ul><ul class="nav navbar-nav navbar-right"><li>
+  <a href="https://github.com/shuye2009/GenomicPlot/" class="external-link">
+    <span class="fab fa-github fa-lg"></span>
+     
+  </a>
+</li>
+      </ul></div><!--/.nav-collapse -->
   </div><!--/.container -->
 </div><!--/.navbar -->
 
@@ -45,7 +51,7 @@
   <div class="col-md-9 contents">
     <div class="page-header">
     <h1>Get the number of peaks overlapping each feature of all protein-coding genes</h1>
-    
+    <small class="dont-index">Source: <a href="https://github.com/shuye2009/GenomicPlot/blob/HEAD/R/HandleFeatures.R" class="external-link"><code>R/HandleFeatures.R</code></a></small>
     <div class="hidden name"><code>get_targeted_genes.Rd</code></div>
     </div>
 
@@ -88,18 +94,18 @@
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">txdb</span> <span class="op">&lt;-</span> <span class="fu">AnnotationDbi</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/AnnotationDbi/man/AnnotationDb-class.html" class="external-link">loadDb</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"txdb_chr19.sql"</span>, package<span class="op">=</span><span class="st">"GenomicPlot"</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">f</span> <span class="op">&lt;-</span> <span class="fu"><a href="get_txdb_features.html">get_txdb_features</a></span><span class="op">(</span><span class="va">txdb</span>, dsTSS<span class="op">=</span><span class="fl">100</span>, fiveP<span class="op">=</span><span class="fl">0</span>, threeP<span class="op">=</span><span class="fl">1000</span><span class="op">)</span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">txdb</span> <span class="op">&lt;-</span> <span class="fu">AnnotationDbi</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/AnnotationDbi/man/AnnotationDb-class.html" class="external-link">loadDb</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"txdb_chr19.sql"</span>, package <span class="op">=</span> <span class="st">"GenomicPlot"</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">f</span> <span class="op">&lt;-</span> <span class="fu"><a href="get_txdb_features.html">get_txdb_features</a></span><span class="op">(</span><span class="va">txdb</span>, dsTSS <span class="op">=</span> <span class="fl">100</span>, fiveP <span class="op">=</span> <span class="fl">0</span>, threeP <span class="op">=</span> <span class="fl">1000</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="va">p</span> <span class="op">&lt;-</span> <span class="fu">RCAS</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/RCAS/man/importBed.html" class="external-link">importBed</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"test_chip_peak_chr19.bed"</span>, package<span class="op">=</span><span class="st">"GenomicPlot"</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Processing C:/Users/greenblatt/AppData/Local/Temp/RtmpuKLw25/temp_libpath57068a86f55/GenomicPlot/extdata/test_chip_peak_chr19.bed</span>
+<span class="r-in"><span><span class="va">p</span> <span class="op">&lt;-</span> <span class="fu">RCAS</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/RCAS/man/importBed.html" class="external-link">importBed</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"test_chip_peak_chr19.bed"</span>, package <span class="op">=</span> <span class="st">"GenomicPlot"</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Processing C:/Users/greenblatt/AppData/Local/Temp/RtmpiQE4hr/temp_libpath167c637a5c73/GenomicPlot/extdata/test_chip_peak_chr19.bed</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Keeping standard chromosomes only</span>
-<span class="r-in"><span><span class="va">ann</span> <span class="op">&lt;-</span> <span class="fu">get_targeted_genes</span><span class="op">(</span>peak<span class="op">=</span><span class="va">p</span>, features<span class="op">=</span><span class="va">f</span>, stranded<span class="op">=</span><span class="cn">FALSE</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">ann</span> <span class="op">&lt;-</span> <span class="fu">get_targeted_genes</span><span class="op">(</span>peak <span class="op">=</span> <span class="va">p</span>, features <span class="op">=</span> <span class="va">f</span>, stranded <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="va">pp</span> <span class="op">&lt;-</span> <span class="fu">RCAS</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/RCAS/man/importBed.html" class="external-link">importBed</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"test_clip_peak_chr19.bed"</span>, package<span class="op">=</span><span class="st">"GenomicPlot"</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Processing C:/Users/greenblatt/AppData/Local/Temp/RtmpuKLw25/temp_libpath57068a86f55/GenomicPlot/extdata/test_clip_peak_chr19.bed</span>
+<span class="r-in"><span><span class="va">pp</span> <span class="op">&lt;-</span> <span class="fu">RCAS</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/RCAS/man/importBed.html" class="external-link">importBed</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"test_clip_peak_chr19.bed"</span>, package <span class="op">=</span> <span class="st">"GenomicPlot"</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Processing C:/Users/greenblatt/AppData/Local/Temp/RtmpiQE4hr/temp_libpath167c637a5c73/GenomicPlot/extdata/test_clip_peak_chr19.bed</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Keeping standard chromosomes only</span>
-<span class="r-in"><span><span class="va">ann</span> <span class="op">&lt;-</span> <span class="fu">get_targeted_genes</span><span class="op">(</span>peak<span class="op">=</span><span class="va">pp</span>, features<span class="op">=</span><span class="va">f</span>, stranded<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">ann</span> <span class="op">&lt;-</span> <span class="fu">get_targeted_genes</span><span class="op">(</span>peak <span class="op">=</span> <span class="va">pp</span>, features <span class="op">=</span> <span class="va">f</span>, stranded <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>

@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">GenomicPlot</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.1.4</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.1.5</span>
       </span>
     </div>
 
@@ -35,7 +35,13 @@
       <a href="../articles/GenomicPlot_vignettes.html">GenomicPlot: an R package for efficient and flexible visualization of NGS coverage profiles</a>
     </li>
   </ul></li>
-      </ul><ul class="nav navbar-nav navbar-right"></ul></div><!--/.nav-collapse -->
+      </ul><ul class="nav navbar-nav navbar-right"><li>
+  <a href="https://github.com/shuye2009/GenomicPlot/" class="external-link">
+    <span class="fab fa-github fa-lg"></span>
+     
+  </a>
+</li>
+      </ul></div><!--/.nav-collapse -->
   </div><!--/.container -->
 </div><!--/.navbar -->
 
@@ -45,7 +51,7 @@
   <div class="col-md-9 contents">
     <div class="page-header">
     <h1>Inspect a numeric matrix</h1>
-    
+    <small class="dont-index">Source: <a href="https://github.com/shuye2009/GenomicPlot/blob/HEAD/R/HandleDataMatrix.R" class="external-link"><code>R/HandleDataMatrix.R</code></a></small>
     <div class="hidden name"><code>inspect_matrix.Rd</code></div>
     </div>
 
@@ -67,7 +73,34 @@
 <dd><p>logical, indicating whether to print out the stats in the console</p></dd>
 
 </dl></div>
+    <div id="value">
+    <h2>Value</h2>
+    
 
+<p>a numerical matrix summarizing the unusual values</p>
+    </div>
+
+    <div id="ref-examples">
+    <h2>Examples</h2>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">fullMatrix</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">100</span><span class="op">)</span>, ncol <span class="op">=</span> <span class="fl">10</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="kw">for</span> <span class="op">(</span><span class="va">i</span> <span class="kw">in</span> <span class="fl">5</span><span class="op">:</span><span class="fl">6</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span>  <span class="va">fullMatrix</span><span class="op">[</span><span class="va">i</span>, <span class="fl">4</span><span class="op">:</span><span class="fl">7</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="cn">NaN</span></span></span>
+<span class="r-in"><span>  <span class="va">fullMatrix</span><span class="op">[</span><span class="va">i</span><span class="op">+</span><span class="fl">1</span>, <span class="fl">4</span><span class="op">:</span><span class="fl">7</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="cn">NA</span></span></span>
+<span class="r-in"><span>  <span class="va">fullMatrix</span><span class="op">[</span><span class="va">i</span><span class="op">+</span><span class="fl">2</span>, <span class="fl">4</span><span class="op">:</span><span class="fl">7</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="op">-</span><span class="cn">Inf</span></span></span>
+<span class="r-in"><span>  <span class="va">fullMatrix</span><span class="op">[</span><span class="va">i</span><span class="op">-</span><span class="fl">1</span>, <span class="fl">4</span><span class="op">:</span><span class="fl">7</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fl">0</span></span></span>
+<span class="r-in"><span>  <span class="va">fullMatrix</span><span class="op">[</span><span class="va">i</span><span class="op">-</span><span class="fl">2</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">3</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="cn">Inf</span></span></span>
+<span class="r-in"><span><span class="op">}</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="fu">GenomicPlot</span><span class="fu">:::</span><span class="fu">inspect_matrix</span><span class="op">(</span><span class="va">fullMatrix</span>, verbose <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Inspecting matrix</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          n_invalid fraction_invalid</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> infinite        10             0.10</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> NA               8             0.08</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> NaN              4             0.04</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> zero             8             0.08</span>
+<span class="r-in"><span></span></span>
+</code></pre></div>
+    </div>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top"><h2 data-toc-skip>Contents</h2>

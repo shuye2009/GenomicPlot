@@ -20,7 +20,7 @@ computed and displayed as well."><!-- mathjax --><script src="https://cdnjs.clou
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">GenomicPlot</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.1.4</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.1.5</span>
       </span>
     </div>
 
@@ -38,7 +38,13 @@ computed and displayed as well."><!-- mathjax --><script src="https://cdnjs.clou
       <a href="../articles/GenomicPlot_vignettes.html">GenomicPlot: an R package for efficient and flexible visualization of NGS coverage profiles</a>
     </li>
   </ul></li>
-      </ul><ul class="nav navbar-nav navbar-right"></ul></div><!--/.nav-collapse -->
+      </ul><ul class="nav navbar-nav navbar-right"><li>
+  <a href="https://github.com/shuye2009/GenomicPlot/" class="external-link">
+    <span class="fab fa-github fa-lg"></span>
+     
+  </a>
+</li>
+      </ul></div><!--/.nav-collapse -->
   </div><!--/.container -->
 </div><!--/.navbar -->
 
@@ -48,7 +54,7 @@ computed and displayed as well."><!-- mathjax --><script src="https://cdnjs.clou
   <div class="col-md-9 contents">
     <div class="page-header">
     <h1>Plot signals around the start and the end of genomic features</h1>
-    
+    <small class="dont-index">Source: <a href="https://github.com/shuye2009/GenomicPlot/blob/HEAD/R/GenomicPlot.R" class="external-link"><code>R/GenomicPlot.R</code></a></small>
     <div class="hidden name"><code>plot_start_end.Rd</code></div>
     </div>
 
@@ -179,326 +185,336 @@ computed and displayed as well.</p>
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">txdb</span> <span class="op">&lt;-</span> <span class="fu">AnnotationDbi</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/AnnotationDbi/man/AnnotationDb-class.html" class="external-link">loadDb</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"txdb_chr19.sql"</span>, package<span class="op">=</span><span class="st">"GenomicPlot"</span><span class="op">)</span><span class="op">)</span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">txdb</span> <span class="op">&lt;-</span> <span class="fu">AnnotationDbi</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/AnnotationDbi/man/AnnotationDb-class.html" class="external-link">loadDb</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"txdb_chr19.sql"</span>, package <span class="op">=</span> <span class="st">"GenomicPlot"</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="va">queryfiles</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"treat_chr19.bam"</span>, package<span class="op">=</span><span class="st">"GenomicPlot"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">queryfiles</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"chip_treat_chr19.bam"</span>, package <span class="op">=</span> <span class="st">"GenomicPlot"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">queryfiles</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="st">"query"</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="va">inputfiles</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"input_chr19.bam"</span>, package<span class="op">=</span><span class="st">"GenomicPlot"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">inputfiles</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"chip_input_chr19.bam"</span>, package <span class="op">=</span> <span class="st">"GenomicPlot"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">inputfiles</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="st">"input"</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="va">centerfiles</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"test_chip_peak_chr19.narrowPeak"</span>, package<span class="op">=</span><span class="st">"GenomicPlot"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">centerfiles</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"test_chip_peak_chr19.narrowPeak"</span>, package <span class="op">=</span> <span class="st">"GenomicPlot"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">centerfiles</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="st">"narrowPeak"</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="va">importParams</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>offset<span class="op">=</span><span class="fl">0</span>, fix_width<span class="op">=</span><span class="fl">150</span>, fix_point<span class="op">=</span><span class="st">"start"</span>, norm<span class="op">=</span><span class="cn">FALSE</span>, </span></span>
-<span class="r-in"><span>useScore<span class="op">=</span><span class="cn">FALSE</span>, outRle<span class="op">=</span><span class="cn">TRUE</span>, useSizeFactor<span class="op">=</span><span class="cn">TRUE</span>, genome<span class="op">=</span><span class="st">"hg19"</span><span class="op">)</span></span></span>
-<span class="r-in"><span> </span></span>
-<span class="r-in"><span><span class="va">df</span> <span class="op">&lt;-</span> <span class="fu">plot_start_end</span><span class="op">(</span>queryFiles<span class="op">=</span><span class="va">queryfiles</span>, inputFiles<span class="op">=</span><span class="va">inputfiles</span>, </span></span>
-<span class="r-in"><span>centerFiles<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"gene"</span>, <span class="va">centerfiles</span><span class="op">)</span>, txdb<span class="op">=</span><span class="va">txdb</span>, importParams<span class="op">=</span><span class="va">importParams</span>, binSize<span class="op">=</span><span class="fl">10</span>,</span></span>
-<span class="r-in"><span>insert<span class="op">=</span><span class="fl">100</span>, verbose<span class="op">=</span><span class="cn">TRUE</span>, ext<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">500</span>, <span class="fl">100</span>, <span class="op">-</span><span class="fl">100</span>, <span class="fl">500</span><span class="op">)</span>, hl<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">50</span>, <span class="fl">50</span>, <span class="op">-</span><span class="fl">50</span>, <span class="fl">50</span><span class="op">)</span>, stranded<span class="op">=</span><span class="cn">TRUE</span>,</span></span>
-<span class="r-in"><span>scale<span class="op">=</span><span class="cn">FALSE</span>, smooth<span class="op">=</span><span class="cn">TRUE</span>, rmOutlier<span class="op">=</span><span class="fl">0</span>, outPrefix<span class="op">=</span><span class="cn">NULL</span>, transform<span class="op">=</span><span class="cn">NA</span>, shade<span class="op">=</span><span class="cn">TRUE</span>, </span></span>
-<span class="r-in"><span>Ylab<span class="op">=</span><span class="st">"Coverage/base/gene"</span>, nc<span class="op">=</span><span class="fl">2</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "Reading bam file: C:/Users/greenblatt/AppData/Local/Temp/RtmpuKLw25/temp_libpath57068a86f55/GenomicPlot/extdata/treat_chr19.bam"</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> 144852 </span>
+<span class="r-in"><span><span class="va">importParams</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>  offset <span class="op">=</span> <span class="fl">0</span>, fix_width <span class="op">=</span> <span class="fl">150</span>, fix_point <span class="op">=</span> <span class="st">"start"</span>, norm <span class="op">=</span> <span class="cn">FALSE</span>,</span></span>
+<span class="r-in"><span>  useScore <span class="op">=</span> <span class="cn">FALSE</span>, outRle <span class="op">=</span> <span class="cn">TRUE</span>, useSizeFactor <span class="op">=</span> <span class="cn">TRUE</span>, genome <span class="op">=</span> <span class="st">"hg19"</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="va">df</span> <span class="op">&lt;-</span> <span class="fu">plot_start_end</span><span class="op">(</span></span></span>
+<span class="r-in"><span>  queryFiles <span class="op">=</span> <span class="va">queryfiles</span>, inputFiles <span class="op">=</span> <span class="va">inputfiles</span>,</span></span>
+<span class="r-in"><span>  centerFiles <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"gene"</span>, <span class="va">centerfiles</span><span class="op">)</span>, txdb <span class="op">=</span> <span class="va">txdb</span>, importParams <span class="op">=</span> <span class="va">importParams</span>, binSize <span class="op">=</span> <span class="fl">10</span>,</span></span>
+<span class="r-in"><span>  insert <span class="op">=</span> <span class="fl">100</span>, verbose <span class="op">=</span> <span class="cn">TRUE</span>, ext <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">500</span>, <span class="fl">100</span>, <span class="op">-</span><span class="fl">100</span>, <span class="fl">500</span><span class="op">)</span>, hl <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">50</span>, <span class="fl">50</span>, <span class="op">-</span><span class="fl">50</span>, <span class="fl">50</span><span class="op">)</span>, stranded <span class="op">=</span> <span class="cn">TRUE</span>,</span></span>
+<span class="r-in"><span>  scale <span class="op">=</span> <span class="cn">FALSE</span>, smooth <span class="op">=</span> <span class="cn">TRUE</span>, rmOutlier <span class="op">=</span> <span class="fl">0</span>, outPrefix <span class="op">=</span> <span class="cn">NULL</span>, transform <span class="op">=</span> <span class="cn">NA</span>, shade <span class="op">=</span> <span class="cn">TRUE</span>,</span></span>
+<span class="r-in"><span>  Ylab <span class="op">=</span> <span class="st">"Coverage/base/gene"</span>, nc <span class="op">=</span> <span class="fl">2</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Reading bamfile: C:/Users/greenblatt/AppData/Local/Temp/RtmpiQE4hr/temp_libpath167c637a5c73/GenomicPlot/extdata/chip_treat_chr19.bam</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Paired end bam file detected!</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> bam file C:/Users/greenblatt/AppData/Local/Temp/RtmpuKLw25/temp_libpath57068a86f55/GenomicPlot/extdata/treat_chr19.bam is loaded</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> cached .rds file is modified using new input parameters</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "Reading bam file: C:/Users/greenblatt/AppData/Local/Temp/RtmpuKLw25/temp_libpath57068a86f55/GenomicPlot/extdata/input_chr19.bam"</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> 240639 </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Bam file C:/Users/greenblatt/AppData/Local/Temp/RtmpiQE4hr/temp_libpath167c637a5c73/GenomicPlot/extdata/chip_treat_chr19.bam is loaded</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Cached .rds file is modified using new input parameters</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Reading bamfile: C:/Users/greenblatt/AppData/Local/Temp/RtmpiQE4hr/temp_libpath167c637a5c73/GenomicPlot/extdata/chip_input_chr19.bam</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Paired end bam file detected!</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> bam file C:/Users/greenblatt/AppData/Local/Temp/RtmpuKLw25/temp_libpath57068a86f55/GenomicPlot/extdata/input_chr19.bam is loaded</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> cached .rds file is modified using new input parameters</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "Reading bed file: C:/Users/greenblatt/AppData/Local/Temp/RtmpuKLw25/temp_libpath57068a86f55/GenomicPlot/extdata/test_chip_peak_chr19.narrowPeak"</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> The input file C:/Users/greenblatt/AppData/Local/Temp/RtmpuKLw25/temp_libpath57068a86f55/GenomicPlot/extdata/test_chip_peak_chr19.narrowPeak have more than 6 columns, only the first 6 columns will be used!</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> cached .rds file is modified using new input parameters</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "Bin numbers 60 10 60"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "number of features:  gene 1483"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "Start 60 1483"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "query"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "Inspecting matrix"</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Bam file C:/Users/greenblatt/AppData/Local/Temp/RtmpiQE4hr/temp_libpath167c637a5c73/GenomicPlot/extdata/chip_input_chr19.bam is loaded</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Cached .rds file is modified using new input parameters</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Reading bedfile: C:/Users/greenblatt/AppData/Local/Temp/RtmpiQE4hr/temp_libpath167c637a5c73/GenomicPlot/extdata/test_chip_peak_chr19.narrowPeak</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> The input file C:/Users/greenblatt/AppData/Local/Temp/RtmpiQE4hr/temp_libpath167c637a5c73/GenomicPlot/extdata/test_chip_peak_chr19.narrowPeak have more than 6 columns, only the first 6 columns will be used!</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Cached .rds file is modified using new input parameters</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Bin numbers: 60 10 60</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Number of features: gene 1483</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Locus: Start 60 1483</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Query label: query</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Inspecting matrix</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>          n_invalid fraction_invalid</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> infinite         0        0.0000000</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> NA               0        0.0000000</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> NaN              0        0.0000000</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> zero         77964        0.8761969</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Imputing missing values. Matrix quartiles:</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   0%  25%  50%  75% 100% </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    0    0    0    0   67 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> zero         60198        0.6765341</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Imputing missing values...</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Matrix quartiles:</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> 0 0 0 1 68.1</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Matrix quantiles after imputing:</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    0%   25%   50%   75%  100% </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  0.05  0.05  0.05  0.05 67.00 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "The imputed value is: 0.05"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "input"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "Inspecting matrix"</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> 0.05 0.05 0.05 1 68.1</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> The imputed value is: 0.05</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Query label: input</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Inspecting matrix</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>          n_invalid fraction_invalid</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> infinite         0        0.0000000</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> NA               0        0.0000000</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> NaN              0        0.0000000</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> zero         79304        0.8912565</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Imputing missing values. Matrix quartiles:</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   0%  25%  50%  75% 100% </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    0    0    0    0  290 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> zero         64862        0.7289503</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Imputing missing values...</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Matrix quartiles:</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> 0 0 0 0.9 5</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Matrix quantiles after imputing:</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     0%    25%    50%    75%   100% </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   0.05   0.05   0.05   0.05 290.00 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "The imputed value is: 0.05"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "Center 10 1483"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "query"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "Inspecting matrix"</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> 0.05 0.05 0.05 0.9 5</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> The imputed value is: 0.05</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Locus: Center 10 1483</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Query label: query</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Inspecting matrix</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>          n_invalid fraction_invalid</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> infinite         0        0.0000000</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> NA               0        0.0000000</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> NaN              0        0.0000000</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> zero         12597        0.8494268</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Imputing missing values. Matrix quartiles:</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   0%  25%  50%  75% 100% </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    0    0    0    0   29 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> zero         12950        0.8732299</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Imputing missing values...</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Matrix quartiles:</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> 0 0 0 0 21.5</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Matrix quantiles after imputing:</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    0%   25%   50%   75%  100% </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  0.05  0.05  0.05  0.05 29.00 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "The imputed value is: 0.05"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "input"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "Inspecting matrix"</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> 0.05 0.05 0.05 0.05 21.5</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> The imputed value is: 0.05</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Query label: input</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Inspecting matrix</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>          n_invalid fraction_invalid</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> infinite         0        0.0000000</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> NA               0        0.0000000</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> NaN              0        0.0000000</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> zero         12495        0.8425489</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Imputing missing values. Matrix quartiles:</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    0%   25%   50%   75%  100% </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   0.0   0.0   0.0   0.0 137.1 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> zero         12814        0.8640593</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Imputing missing values...</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Matrix quartiles:</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> 0 0 0 0 3.8</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Matrix quantiles after imputing:</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     0%    25%    50%    75%   100% </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   0.05   0.05   0.05   0.05 137.10 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "The imputed value is: 0.05"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "End 60 1483"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "query"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "Inspecting matrix"</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> 0.05 0.05 0.05 0.05 3.8</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> The imputed value is: 0.05</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Locus: End 60 1483</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Query label: query</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Inspecting matrix</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>          n_invalid fraction_invalid</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> infinite         0        0.0000000</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> NA               0        0.0000000</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> NaN              0        0.0000000</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> zero         65063        0.7312093</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Imputing missing values. Matrix quartiles:</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   0%  25%  50%  75% 100% </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    0    0    0    1  151 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> zero         76184        0.8561924</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Imputing missing values...</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Matrix quartiles:</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> 0 0 0 0 20.3</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Matrix quantiles after imputing:</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     0%    25%    50%    75%   100% </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   0.05   0.05   0.05   1.00 151.00 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "The imputed value is: 0.05"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "input"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "Inspecting matrix"</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> 0.05 0.05 0.05 0.05 20.3</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> The imputed value is: 0.05</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Query label: input</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Inspecting matrix</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>          n_invalid fraction_invalid</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> infinite         0        0.0000000</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> NA               0        0.0000000</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> NaN              0        0.0000000</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> zero         70537        0.7927287</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Imputing missing values. Matrix quartiles:</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    0%   25%   50%   75%  100% </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   0.0   0.0   0.0   0.0 367.4 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> zero         76766        0.8627332</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Imputing missing values...</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Matrix quartiles:</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> 0 0 0 0 5</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Matrix quantiles after imputing:</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     0%    25%    50%    75%   100% </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   0.05   0.05   0.05   0.05 367.40 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "The imputed value is: 0.05"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "query"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "input"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "query"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "input"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "query"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "input"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "number of features:  narrowPeak 5825"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "Start 60 5825"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "query"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "Inspecting matrix"</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> 0.05 0.05 0.05 0.05 5</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> The imputed value is: 0.05</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Query label: query</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Query label: input</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Query label: query</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Query label: input</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Query label: query</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Query label: input</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Number of features: narrowPeak 5825</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Locus: Start 60 5825</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Query label: query</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Inspecting matrix</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>          n_invalid fraction_invalid</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> infinite         0        0.0000000</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> NA               0        0.0000000</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> NaN              0        0.0000000</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> zero        277776        0.7947811</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Imputing missing values. Matrix quartiles:</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   0%  25%  50%  75% 100% </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    0    0    0    0  226 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> zero        258818        0.7405379</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Imputing missing values...</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Matrix quartiles:</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> 0 0 0 0.4 217</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Matrix quantiles after imputing:</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     0%    25%    50%    75%   100% </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   0.05   0.05   0.05   0.05 226.00 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "The imputed value is: 0.05"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "input"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "Inspecting matrix"</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> 0.05 0.05 0.05 0.4 217</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> The imputed value is: 0.05</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Query label: input</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Inspecting matrix</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>          n_invalid fraction_invalid</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> infinite         0        0.0000000</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> NA               0        0.0000000</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> NaN              0        0.0000000</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> zero        285065        0.8156366</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Imputing missing values. Matrix quartiles:</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   0%  25%  50%  75% 100% </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    0    0    0    0  489 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> zero        276259        0.7904406</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Imputing missing values...</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Matrix quartiles:</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> 0 0 0 0 304.4</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Matrix quantiles after imputing:</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     0%    25%    50%    75%   100% </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   0.05   0.05   0.05   0.05 489.00 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "The imputed value is: 0.05"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "Center 10 5825"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "query"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "Inspecting matrix"</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> 0.05 0.05 0.05 0.05 304.4</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> The imputed value is: 0.05</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Locus: Center 10 5825</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Query label: query</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Inspecting matrix</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>          n_invalid fraction_invalid</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> infinite         0        0.0000000</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> NA               0        0.0000000</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> NaN              0        0.0000000</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> zero         45705        0.7846352</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Imputing missing values. Matrix quartiles:</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   0%  25%  50%  75% 100% </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    0    0    0    0   53 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> zero         21139        0.3629013</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Imputing missing values...</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Matrix quartiles:</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> 0 0 1 2 175.3</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Matrix quantiles after imputing:</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    0%   25%   50%   75%  100% </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  0.05  0.05  0.05  0.05 53.00 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "The imputed value is: 0.05"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "input"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "Inspecting matrix"</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> 0.05 0.05 1 2 175.3</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> The imputed value is: 0.05</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Query label: input</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Inspecting matrix</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>          n_invalid fraction_invalid</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> infinite         0        0.0000000</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> NA               0        0.0000000</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> NaN              0        0.0000000</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> zero         44385        0.7619742</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Imputing missing values. Matrix quartiles:</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   0%  25%  50%  75% 100% </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    0    0    0    0  275 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> zero         40018        0.6870043</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Imputing missing values...</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Matrix quartiles:</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> 0 0 0 1 258.2</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Matrix quantiles after imputing:</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     0%    25%    50%    75%   100% </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   0.05   0.05   0.05   0.05 275.00 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "The imputed value is: 0.05"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "End 60 5825"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "query"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "Inspecting matrix"</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> 0.05 0.05 0.05 1 258.2</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> The imputed value is: 0.05</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Locus: End 60 5825</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Query label: query</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Inspecting matrix</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>          n_invalid fraction_invalid</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> infinite         0        0.0000000</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> NA               0        0.0000000</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> NaN              0        0.0000000</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> zero        280985        0.8039628</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Imputing missing values. Matrix quartiles:</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   0%  25%  50%  75% 100% </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    0    0    0    0  151 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> zero        259972        0.7438398</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Imputing missing values...</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Matrix quartiles:</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> 0 0 0 0.3 56.1</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Matrix quantiles after imputing:</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     0%    25%    50%    75%   100% </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   0.05   0.05   0.05   0.05 151.00 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "The imputed value is: 0.05"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "input"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "Inspecting matrix"</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> 0.05 0.05 0.05 0.3 56.1</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> The imputed value is: 0.05</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Query label: input</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Inspecting matrix</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>          n_invalid fraction_invalid</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> infinite         0        0.0000000</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> NA               0        0.0000000</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> NaN              0        0.0000000</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> zero        285873        0.8179485</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Imputing missing values. Matrix quartiles:</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    0%   25%   50%   75%  100% </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   0.0   0.0   0.0   0.0 450.9 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> zero        277684        0.7945179</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Imputing missing values...</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Matrix quartiles:</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> 0 0 0 0 91</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Matrix quantiles after imputing:</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> 0.05 0.05 0.05 0.05 91</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> The imputed value is: 0.05</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Query label: query</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Query label: input</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Query label: query</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Query label: input</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Query label: query</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Query label: input</span>
 <span class="r-plt img"><img src="plot_start_end-1.png" alt="" width="700" height="433"></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     0%    25%    50%    75%   100% </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   0.05   0.05   0.05   0.05 450.90 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "The imputed value is: 0.05"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "query"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "input"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "query"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "input"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "query"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "input"</span>
 <span class="r-plt img"><img src="plot_start_end-2.png" alt="" width="700" height="433"></span>
 <span class="r-plt img"><img src="plot_start_end-3.png" alt="" width="700" height="433"></span>
 <span class="r-plt img"><img src="plot_start_end-4.png" alt="" width="700" height="433"></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "67 0.05 1"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "Inspecting matrix"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    Max(IP) min(Input)     pseudo </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>      68.10       0.05       1.00 </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Inspecting matrix</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>          n_invalid fraction_invalid</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> infinite         0                0</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> NA               0                0</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> NaN              0                0</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> zero             0                0</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Imputing missing values. Matrix quartiles:</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>          0%         25%         50%         75%        100% </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  0.01643489  1.00000000  1.00000000  1.00000000 16.19047619 </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Imputing missing values...</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Matrix quartiles:</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> 0.175 1 1 1.23809523809524 56</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Matrix quantiles after imputing:</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>          0%         25%         50%         75%        100% </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  0.01643489  1.00000000  1.00000000  1.00000000 16.19047619 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "The imputed value is: 0.00821744627054362"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "29 0.05 1"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "Inspecting matrix"</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> 0.175 1 1 1.23809523809524 56</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> The imputed value is: 0.0875</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    Max(IP) min(Input)     pseudo </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>      21.50       0.05       1.00 </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Inspecting matrix</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>          n_invalid fraction_invalid</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> infinite         0                0</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> NA               0                0</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> NaN              0                0</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> zero             0                0</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Imputing missing values. Matrix quartiles:</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>         0%        25%        50%        75%       100% </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  0.0362069  1.0000000  1.0000000  1.0000000 13.3333333 </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Imputing missing values...</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Matrix quartiles:</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> 0.21875 1 1 1 11.15</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Matrix quantiles after imputing:</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>         0%        25%        50%        75%       100% </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  0.0362069  1.0000000  1.0000000  1.0000000 13.3333333 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "The imputed value is: 0.0181034482758621"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "151 0.05 1"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "Inspecting matrix"</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> 0.21875 1 1 1 11.15</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> The imputed value is: 0.109375</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    Max(IP) min(Input)     pseudo </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>      20.30       0.05       1.00 </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Inspecting matrix</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>          n_invalid fraction_invalid</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> infinite         0                0</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> NA               0                0</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> NaN              0                0</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> zero             0                0</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Imputing missing values. Matrix quartiles:</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>          0%         25%         50%         75%        100% </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  0.01779661  1.00000000  1.00000000  1.00000000 44.76190476 </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Imputing missing values...</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Matrix quartiles:</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> 0.184210526315789 1 1 1 20.2857142857143</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Matrix quantiles after imputing:</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>          0%         25%         50%         75%        100% </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  0.01779661  1.00000000  1.00000000  1.00000000 44.76190476 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "The imputed value is: 0.00889830508474576"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "query"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "query"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "query"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "226 0.05 1"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "Inspecting matrix"</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> 0.184210526315789 1 1 1 20.2857142857143</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> The imputed value is: 0.0921052631578947</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Ratio label: query</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Ratio label: query</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Ratio label: query</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    Max(IP) min(Input)     pseudo </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     217.00       0.05       1.00 </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Inspecting matrix</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>          n_invalid fraction_invalid</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> infinite         0                0</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> NA               0                0</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> NaN              0                0</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> zero             0                0</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Imputing missing values. Matrix quartiles:</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>          0%         25%         50%         75%        100% </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  0.01761745  1.00000000  1.00000000  1.00000000 51.94444444 </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Imputing missing values...</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Matrix quartiles:</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> 0.175 1 1 1 16.1904761904762</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Matrix quantiles after imputing:</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>          0%         25%         50%         75%        100% </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  0.01761745  1.00000000  1.00000000  1.00000000 51.94444444 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "The imputed value is: 0.00880872483221476"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "53 0.05 1"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "Inspecting matrix"</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> 0.175 1 1 1 16.1904761904762</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> The imputed value is: 0.0875</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    Max(IP) min(Input)     pseudo </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     175.30       0.05       1.00 </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Inspecting matrix</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>          n_invalid fraction_invalid</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> infinite         0                0</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> NA               0                0</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> NaN              0                0</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> zero             0                0</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Imputing missing values. Matrix quartiles:</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>          0%         25%         50%         75%        100% </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  0.04251012  1.00000000  1.00000000  1.00000000 38.09523810 </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Imputing missing values...</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Matrix quartiles:</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> 0.21 1 1.5 2.5 33.1428571428571</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Matrix quantiles after imputing:</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>          0%         25%         50%         75%        100% </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  0.04251012  1.00000000  1.00000000  1.00000000 38.09523810 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "The imputed value is: 0.0212550607287449"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "151 0.05 1"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "Inspecting matrix"</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> 0.21 1 1.5 2.5 33.1428571428571</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> The imputed value is: 0.105</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    Max(IP) min(Input)     pseudo </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>      56.10       0.05       1.00 </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Inspecting matrix</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>          n_invalid fraction_invalid</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> infinite         0                0</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> NA               0                0</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> NaN              0                0</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> zero             0                0</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Imputing missing values. Matrix quartiles:</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>          0%         25%         50%         75%        100% </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  0.01557864  1.00000000  1.00000000  1.00000000 48.73684211 </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Imputing missing values...</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Matrix quartiles:</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> 0.175 1 1 1 10.4761904761905</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Matrix quantiles after imputing:</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> 0.175 1 1 1 10.4761904761905</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> The imputed value is: 0.0875</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Ratio label: query</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Ratio label: query</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Ratio label: query</span>
 <span class="r-plt img"><img src="plot_start_end-5.png" alt="" width="700" height="433"></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>          0%         25%         50%         75%        100% </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  0.01557864  1.00000000  1.00000000  1.00000000 48.73684211 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "The imputed value is: 0.0077893175074184"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "query"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "query"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "query"</span>
 <span class="r-plt img"><img src="plot_start_end-6.png" alt="" width="700" height="433"></span>
 <span class="r-plt img"><img src="plot_start_end-7.png" alt="" width="700" height="433"></span>
 <span class="r-plt img"><img src="plot_start_end-8.png" alt="" width="700" height="433"></span>
-<span class="r-in"><span> </span></span>
+<span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
   </div>

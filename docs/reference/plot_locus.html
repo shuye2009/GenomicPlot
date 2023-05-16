@@ -20,7 +20,7 @@ Input is computed and displayed as well."><!-- mathjax --><script src="https://c
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">GenomicPlot</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.1.4</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.1.5</span>
       </span>
     </div>
 
@@ -38,7 +38,13 @@ Input is computed and displayed as well."><!-- mathjax --><script src="https://c
       <a href="../articles/GenomicPlot_vignettes.html">GenomicPlot: an R package for efficient and flexible visualization of NGS coverage profiles</a>
     </li>
   </ul></li>
-      </ul><ul class="nav navbar-nav navbar-right"></ul></div><!--/.nav-collapse -->
+      </ul><ul class="nav navbar-nav navbar-right"><li>
+  <a href="https://github.com/shuye2009/GenomicPlot/" class="external-link">
+    <span class="fab fa-github fa-lg"></span>
+     
+  </a>
+</li>
+      </ul></div><!--/.nav-collapse -->
   </div><!--/.container -->
 </div><!--/.navbar -->
 
@@ -48,7 +54,7 @@ Input is computed and displayed as well."><!-- mathjax --><script src="https://c
   <div class="col-md-9 contents">
     <div class="page-header">
     <h1>Plot signal around custom genomic loci</h1>
-    
+    <small class="dont-index">Source: <a href="https://github.com/shuye2009/GenomicPlot/blob/HEAD/R/GenomicPlot.R" class="external-link"><code>R/GenomicPlot.R</code></a></small>
     <div class="hidden name"><code>plot_locus.Rd</code></div>
     </div>
 
@@ -199,269 +205,235 @@ Input is computed and displayed as well.</p>
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">txdb</span> <span class="op">&lt;-</span> <span class="fu">AnnotationDbi</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/AnnotationDbi/man/AnnotationDb-class.html" class="external-link">loadDb</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"txdb_chr19.sql"</span>, package<span class="op">=</span><span class="st">"GenomicPlot"</span><span class="op">)</span><span class="op">)</span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">txdb</span> <span class="op">&lt;-</span> <span class="fu">AnnotationDbi</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/AnnotationDbi/man/AnnotationDb-class.html" class="external-link">loadDb</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"txdb_chr19.sql"</span>, package <span class="op">=</span> <span class="st">"GenomicPlot"</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="va">queryfiles</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"treat_chr19.bam"</span>, package<span class="op">=</span><span class="st">"GenomicPlot"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">queryfiles</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"treat_chr19.bam"</span>, package <span class="op">=</span> <span class="st">"GenomicPlot"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">queryfiles</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="st">"query"</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="va">inputfiles</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"input_chr19.bam"</span>, package<span class="op">=</span><span class="st">"GenomicPlot"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">inputfiles</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"input_chr19.bam"</span>, package <span class="op">=</span> <span class="st">"GenomicPlot"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">inputfiles</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="st">"input"</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="va">centerfiles</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"test_clip_peak_chr19.bed"</span>, package<span class="op">=</span><span class="st">"GenomicPlot"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">centerfiles</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"test_clip_peak_chr19.bed"</span>, package <span class="op">=</span> <span class="st">"GenomicPlot"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">centerfiles</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="st">"clipPeak"</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="va">importParams</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>offset<span class="op">=</span><span class="op">-</span><span class="fl">1</span>, fix_width<span class="op">=</span><span class="fl">0</span>, fix_point<span class="op">=</span><span class="st">"start"</span>, norm<span class="op">=</span><span class="cn">TRUE</span>, </span></span>
-<span class="r-in"><span>useScore<span class="op">=</span><span class="cn">FALSE</span>, outRle<span class="op">=</span><span class="cn">TRUE</span>, useSizeFactor<span class="op">=</span><span class="cn">FALSE</span>, genome<span class="op">=</span><span class="st">"hg19"</span><span class="op">)</span></span></span>
-<span class="r-in"><span> </span></span>
-<span class="r-in"><span><span class="va">df</span> <span class="op">&lt;-</span> <span class="fu">plot_locus</span><span class="op">(</span>queryFiles<span class="op">=</span><span class="va">queryfiles</span>, centerFiles<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">centerfiles</span>, <span class="st">"exon"</span><span class="op">)</span>, txdb<span class="op">=</span><span class="va">txdb</span>, </span></span>
-<span class="r-in"><span>ext<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">200</span>,<span class="fl">200</span><span class="op">)</span>, hl<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">50</span>, <span class="fl">50</span><span class="op">)</span>, shade<span class="op">=</span><span class="cn">TRUE</span>, smooth<span class="op">=</span><span class="cn">FALSE</span>, importParams<span class="op">=</span><span class="va">importParams</span>, </span></span>
-<span class="r-in"><span>verbose<span class="op">=</span><span class="cn">TRUE</span>, binSize<span class="op">=</span><span class="fl">10</span>, refPoint<span class="op">=</span><span class="st">"center"</span>, Xlab<span class="op">=</span><span class="st">"Center"</span>, Ylab<span class="op">=</span><span class="st">"Coverage/base/gene"</span>, </span></span>
-<span class="r-in"><span>inputFiles<span class="op">=</span><span class="va">inputfiles</span>, stranded<span class="op">=</span><span class="cn">TRUE</span>, heatmap<span class="op">=</span><span class="cn">TRUE</span>, scale<span class="op">=</span><span class="cn">FALSE</span>, outPrefix<span class="op">=</span><span class="cn">NULL</span>, </span></span>
-<span class="r-in"><span>rmOutlier<span class="op">=</span><span class="fl">0</span>, transform<span class="op">=</span><span class="st">"log2"</span>, statsMethod<span class="op">=</span><span class="st">"wilcox.test"</span>, heatRange<span class="op">=</span><span class="cn">NULL</span>, nc<span class="op">=</span><span class="fl">2</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "Reading bam file: C:/Users/greenblatt/AppData/Local/Temp/RtmpuKLw25/temp_libpath57068a86f55/GenomicPlot/extdata/treat_chr19.bam"</span>
+<span class="r-in"><span><span class="va">importParams</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>  offset <span class="op">=</span> <span class="op">-</span><span class="fl">1</span>, fix_width <span class="op">=</span> <span class="fl">0</span>, fix_point <span class="op">=</span> <span class="st">"start"</span>, norm <span class="op">=</span> <span class="cn">TRUE</span>,</span></span>
+<span class="r-in"><span>  useScore <span class="op">=</span> <span class="cn">FALSE</span>, outRle <span class="op">=</span> <span class="cn">TRUE</span>, useSizeFactor <span class="op">=</span> <span class="cn">FALSE</span>, genome <span class="op">=</span> <span class="st">"hg19"</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="va">df</span> <span class="op">&lt;-</span> <span class="fu">plot_locus</span><span class="op">(</span></span></span>
+<span class="r-in"><span>  queryFiles <span class="op">=</span> <span class="va">queryfiles</span>, centerFiles <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">centerfiles</span>, <span class="st">"exon"</span><span class="op">)</span>, txdb <span class="op">=</span> <span class="va">txdb</span>,</span></span>
+<span class="r-in"><span>  ext <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">200</span>, <span class="fl">200</span><span class="op">)</span>, hl <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">50</span>, <span class="fl">50</span><span class="op">)</span>, shade <span class="op">=</span> <span class="cn">TRUE</span>, smooth <span class="op">=</span> <span class="cn">FALSE</span>, importParams <span class="op">=</span> <span class="va">importParams</span>,</span></span>
+<span class="r-in"><span>  verbose <span class="op">=</span> <span class="cn">TRUE</span>, binSize <span class="op">=</span> <span class="fl">10</span>, refPoint <span class="op">=</span> <span class="st">"center"</span>, Xlab <span class="op">=</span> <span class="st">"Center"</span>, Ylab <span class="op">=</span> <span class="st">"Coverage/base/gene"</span>,</span></span>
+<span class="r-in"><span>  inputFiles <span class="op">=</span> <span class="va">inputfiles</span>, stranded <span class="op">=</span> <span class="cn">TRUE</span>, heatmap <span class="op">=</span> <span class="cn">TRUE</span>, scale <span class="op">=</span> <span class="cn">FALSE</span>, outPrefix <span class="op">=</span> <span class="cn">NULL</span>,</span></span>
+<span class="r-in"><span>  rmOutlier <span class="op">=</span> <span class="fl">0</span>, transform <span class="op">=</span> <span class="st">"log2"</span>, statsMethod <span class="op">=</span> <span class="st">"wilcox.test"</span>, heatRange <span class="op">=</span> <span class="cn">NULL</span>, nc <span class="op">=</span> <span class="fl">2</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Reading bamfile: C:/Users/greenblatt/AppData/Local/Temp/RtmpiQE4hr/temp_libpath167c637a5c73/GenomicPlot/extdata/treat_chr19.bam</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> 144852 </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> bam file C:/Users/greenblatt/AppData/Local/Temp/RtmpuKLw25/temp_libpath57068a86f55/GenomicPlot/extdata/treat_chr19.bam is loaded</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> cached .rds file is modified using new input parameters</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "Reading bam file: C:/Users/greenblatt/AppData/Local/Temp/RtmpuKLw25/temp_libpath57068a86f55/GenomicPlot/extdata/input_chr19.bam"</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Bam file C:/Users/greenblatt/AppData/Local/Temp/RtmpiQE4hr/temp_libpath167c637a5c73/GenomicPlot/extdata/treat_chr19.bam is loaded</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Cached .rds file is modified using new input parameters</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Reading bamfile: C:/Users/greenblatt/AppData/Local/Temp/RtmpiQE4hr/temp_libpath167c637a5c73/GenomicPlot/extdata/input_chr19.bam</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> 240639 </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> bam file C:/Users/greenblatt/AppData/Local/Temp/RtmpuKLw25/temp_libpath57068a86f55/GenomicPlot/extdata/input_chr19.bam is loaded</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> cached .rds file is modified using new input parameters</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "Reading bed file: C:/Users/greenblatt/AppData/Local/Temp/RtmpuKLw25/temp_libpath57068a86f55/GenomicPlot/extdata/test_clip_peak_chr19.bed"</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> cached .rds file is used</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "computing coverage for Sample"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "size of query regions 144852"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "query"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "preparing window regions"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "clipPeak"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "number of window regions 15717"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "Inspecting matrix"</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Bam file C:/Users/greenblatt/AppData/Local/Temp/RtmpiQE4hr/temp_libpath167c637a5c73/GenomicPlot/extdata/input_chr19.bam is loaded</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Cached .rds file is modified using new input parameters</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Reading bedfile: C:/Users/greenblatt/AppData/Local/Temp/RtmpiQE4hr/temp_libpath167c637a5c73/GenomicPlot/extdata/test_clip_peak_chr19.bed</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Cached .rds file is modified using new input parameters</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Computing coverage for Sample...</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> size of query regions: 144852</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Query label: query</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Preparing window regions...</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Center label: clipPeak</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Number of window regions 15717</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Inspecting matrix</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>          n_invalid fraction_invalid</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> infinite         0        0.0000000</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> NA               0        0.0000000</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> NaN              0        0.0000000</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> zero        581335        0.9246914</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Imputing missing values. Matrix quartiles:</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>       0%      25%      50%      75%     100% </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   0.0000   0.0000   0.0000   0.0000 541.2421 </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Imputing missing values...</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Matrix quartiles:</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> 0 0 0 0 541.242095380112</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Matrix quantiles after imputing:</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>          0%         25%         50%         75%        100% </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   0.3451799   0.3451799   0.3451799   0.3451799 541.2420954 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "The imputed value is: 0.345179907767929"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "Dimension of fullMatrix"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 15717    40</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "Number of unique window regions"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "preparing window regions"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "exon"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "number of window regions 12403"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "Inspecting matrix"</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> 0.345179907767929 0.345179907767929 0.345179907767929 0.345179907767929 541.242095380112</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> The imputed value is: 0.345179907767929</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Dimension of fullMatrix:</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> 15717 40</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Preparing window regions...</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Center label: exon</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Number of window regions 12403</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Inspecting matrix</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>          n_invalid fraction_invalid</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> infinite         0        0.0000000</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> NA               0        0.0000000</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> NaN              0        0.0000000</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> zero        480128        0.9677659</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Imputing missing values. Matrix quartiles:</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>       0%      25%      50%      75%     100% </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  0.00000  0.00000  0.00000  0.00000 30.37583 </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Imputing missing values...</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Matrix quartiles:</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> 0 0 0 0 30.3758318835777</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Matrix quantiles after imputing:</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>         0%        25%        50%        75%       100% </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  0.3451799  0.3451799  0.3451799  0.3451799 30.3758319 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "The imputed value is: 0.345179907767929"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "Dimension of fullMatrix"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 12403    40</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "Number of unique window regions"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "size of query regions 240639"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "input"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "preparing window regions"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "clipPeak"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "number of window regions 15717"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "Inspecting matrix"</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> 0.345179907767929 0.345179907767929 0.345179907767929 0.345179907767929 30.3758318835777</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> The imputed value is: 0.345179907767929</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Dimension of fullMatrix:</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> 12403 40</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> size of query regions: 240639</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Query label: input</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Preparing window regions...</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Center label: clipPeak</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Number of window regions 15717</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Inspecting matrix</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>          n_invalid fraction_invalid</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> infinite         0        0.0000000</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> NA               0        0.0000000</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> NaN              0        0.0000000</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> zero        587220        0.9340523</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Imputing missing values. Matrix quartiles:</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>       0%      25%      50%      75%     100% </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   0.0000   0.0000   0.0000   0.0000 796.2134 </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Imputing missing values...</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Matrix quartiles:</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> 0 0 0 0 796.213415115588</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Matrix quantiles after imputing:</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>          0%         25%         50%         75%        100% </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   0.2077801   0.2077801   0.2077801   0.2077801 796.2134151 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "The imputed value is: 0.207780118767116"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "Dimension of fullMatrix"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 15717    40</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "Number of unique window regions"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "preparing window regions"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "exon"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "number of window regions 12403"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "Inspecting matrix"</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> 0.207780118767116 0.207780118767116 0.207780118767116 0.207780118767116 796.213415115588</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> The imputed value is: 0.207780118767116</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Dimension of fullMatrix:</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> 15717 40</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Preparing window regions...</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Center label: exon</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Number of window regions 12403</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Inspecting matrix</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>          n_invalid fraction_invalid</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> infinite         0         0.000000</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> NA               0         0.000000</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> NaN              0         0.000000</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> zero        476430         0.960312</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Imputing missing values. Matrix quartiles:</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>       0%      25%      50%      75%     100% </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   0.0000   0.0000   0.0000   0.0000 170.3797 </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Imputing missing values...</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Matrix quartiles:</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> 0 0 0 0 170.379697389035</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Matrix quantiles after imputing:</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>          0%         25%         50%         75%        100% </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   0.2077801   0.2077801   0.2077801   0.2077801 170.3796974 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "The imputed value is: 0.207780118767116"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "Dimension of fullMatrix"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 12403    40</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "Number of unique window regions"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "collecting coverage data"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "query"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "clipPeak"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "drawing heatmap"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "quantile(fullMatrix, c(seq(0.9, 1, 0.005)), na.rm=TRUE)"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>         90%       90.5%         91%       91.5%         92%       92.5% </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   0.3451799   0.3451799   0.3451799   0.3451799   0.3451799   0.6903598 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>         93%       93.5%         94%       94.5%         95%       95.5% </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   0.6903598   0.6903598   0.6903598   0.6903598   0.6903598   0.6903598 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>         96%       96.5%         97%       97.5%         98%       98.5% </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   1.3807196   1.3807196   1.3807196   2.0710794   2.0710794   2.7614393 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>         99%       99.5%        100% </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   2.7614393   4.1421589 541.2420954 </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> 0.207780118767116 0.207780118767116 0.207780118767116 0.207780118767116 170.379697389035</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> The imputed value is: 0.207780118767116</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Dimension of fullMatrix:</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> 12403 40</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Collecting coverage data...</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Query label: query</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Center label: clipPeak</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Drawing heatmap</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> quantile(fullMatrix, c(seq(0.9, 1, 0.005)), na.rm=TRUE)</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> 0.345179907767929 0.345179907767929 0.345179907767929 0.345179907767929 0.345179907767929 0.690359815535857 0.690359815535857 0.690359815535857 0.690359815535857 0.690359815535857 0.690359815535857 0.690359815535857 1.38071963107171 1.38071963107171 1.38071963107171 2.07107944660757 2.07107944660757 2.76143926214343 2.76143926214343 4.14215889321514 541.242095380112</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> `use_raster` is automatically set to TRUE for a matrix with more than</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> 2000 rows. You can control `use_raster` argument by explicitly setting</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> TRUE/FALSE to it.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Set `ht_opt$message = FALSE` to turn off this message.</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "exon"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "drawing heatmap"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "quantile(fullMatrix, c(seq(0.9, 1, 0.005)), na.rm=TRUE)"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>        90%      90.5%        91%      91.5%        92%      92.5%        93% </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  0.3451799  0.3451799  0.3451799  0.3451799  0.3451799  0.3451799  0.3451799 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>      93.5%        94%      94.5%        95%      95.5%        96%      96.5% </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  0.3451799  0.3451799  0.3451799  0.3451799  0.3451799  0.3451799  0.3451799 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>        97%      97.5%        98%      98.5%        99%      99.5%       100% </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  0.6903598  0.6903598  0.6903598  1.3807196  1.3807196  2.7614393 30.3758319 </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Center label: exon</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Drawing heatmap</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> quantile(fullMatrix, c(seq(0.9, 1, 0.005)), na.rm=TRUE)</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> 0.345179907767929 0.345179907767929 0.345179907767929 0.345179907767929 0.345179907767929 0.345179907767929 0.345179907767929 0.345179907767929 0.345179907767929 0.345179907767929 0.345179907767929 0.345179907767929 0.345179907767929 0.345179907767929 0.690359815535857 0.690359815535857 0.690359815535857 1.38071963107171 1.38071963107171 2.76143926214343 30.3758318835777</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> `use_raster` is automatically set to TRUE for a matrix with more than</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> 2000 rows. You can control `use_raster` argument by explicitly setting</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> TRUE/FALSE to it.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Set `ht_opt$message = FALSE` to turn off this message.</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "input"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "clipPeak"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "drawing heatmap"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "quantile(fullMatrix, c(seq(0.9, 1, 0.005)), na.rm=TRUE)"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>         90%       90.5%         91%       91.5%         92%       92.5% </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   0.2077801   0.2077801   0.2077801   0.2077801   0.2077801   0.2077801 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>         93%       93.5%         94%       94.5%         95%       95.5% </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   0.2077801   0.4155602   0.4155602   0.4155602   0.4155602   0.4155602 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>         96%       96.5%         97%       97.5%         98%       98.5% </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   0.4155602   0.4155602   0.8311205   0.8311205   0.8311205   1.2466807 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>         99%       99.5%        100% </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   1.6622410   2.4933614 796.2134151 </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Query label: input</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Center label: clipPeak</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Drawing heatmap</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> quantile(fullMatrix, c(seq(0.9, 1, 0.005)), na.rm=TRUE)</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> 0.207780118767116 0.207780118767116 0.207780118767116 0.207780118767116 0.207780118767116 0.207780118767116 0.207780118767116 0.415560237534232 0.415560237534232 0.415560237534232 0.415560237534232 0.415560237534232 0.415560237534232 0.415560237534232 0.831120475068464 0.831120475068464 0.831120475068464 1.2466807126027 1.66224095013693 2.49336142520539 796.213415115588</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> `use_raster` is automatically set to TRUE for a matrix with more than</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> 2000 rows. You can control `use_raster` argument by explicitly setting</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> TRUE/FALSE to it.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Set `ht_opt$message = FALSE` to turn off this message.</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "exon"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "drawing heatmap"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "quantile(fullMatrix, c(seq(0.9, 1, 0.005)), na.rm=TRUE)"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>         90%       90.5%         91%       91.5%         92%       92.5% </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   0.2077801   0.2077801   0.2077801   0.2077801   0.2077801   0.2077801 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>         93%       93.5%         94%       94.5%         95%       95.5% </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   0.2077801   0.2077801   0.2077801   0.2077801   0.2077801   0.2077801 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>         96%       96.5%         97%       97.5%         98%       98.5% </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   0.2077801   0.4155602   0.4155602   0.4155602   0.8311205   0.8311205 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>         99%       99.5%        100% </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   1.2466807   2.0778012 170.3796974 </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Center label: exon</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Drawing heatmap</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> quantile(fullMatrix, c(seq(0.9, 1, 0.005)), na.rm=TRUE)</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> 0.207780118767116 0.207780118767116 0.207780118767116 0.207780118767116 0.207780118767116 0.207780118767116 0.207780118767116 0.207780118767116 0.207780118767116 0.207780118767116 0.207780118767116 0.207780118767116 0.207780118767116 0.415560237534232 0.415560237534232 0.415560237534232 0.831120475068464 0.831120475068464 1.2466807126027 2.07780118767116 170.379697389035</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> `use_raster` is automatically set to TRUE for a matrix with more than</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> 2000 rows. You can control `use_raster` argument by explicitly setting</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> TRUE/FALSE to it.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Set `ht_opt$message = FALSE` to turn off this message.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Plotting profile and boxplot...</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Beds: query</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Centers: clipPeak</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Beds: query</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Centers: exon</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Beds: query</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Centers: clipPeak exon</span>
 <span class="r-plt img"><img src="plot_locus-1.png" alt="" width="700" height="433"></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "Plotting profile and boxplot"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "query"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "clipPeak"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "query"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "exon"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "query"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "clipPeak" "exon"    </span>
 <span class="r-plt img"><img src="plot_locus-2.png" alt="" width="700" height="433"></span>
 <span class="r-plt img"><img src="plot_locus-3.png" alt="" width="700" height="433"></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Beds: input</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Centers: clipPeak</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Beds: input</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Centers: exon</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Beds: input</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Centers: clipPeak exon</span>
 <span class="r-plt img"><img src="plot_locus-4.png" alt="" width="700" height="433"></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "input"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "clipPeak"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "input"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "exon"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "input"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "clipPeak" "exon"    </span>
 <span class="r-plt img"><img src="plot_locus-5.png" alt="" width="700" height="433"></span>
 <span class="r-plt img"><img src="plot_locus-6.png" alt="" width="700" height="433"></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "Computing Ratio over input"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "541.242095380112 0.207780118767116 1"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "Inspecting matrix"</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Computing Ratio over input...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     Max(IP)  min(Input)      pseudo </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 541.2420954   0.2077801   1.0000000 </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Inspecting matrix</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>          n_invalid fraction_invalid</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> infinite         0                0</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> NA               0                0</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> NaN              0                0</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> zero             0                0</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Imputing missing values. Matrix quartiles:</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>           0%          25%          50%          75%         100% </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  0.009091656  1.113762254  1.113762254  1.113762254 11.435695573 </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Imputing missing values...</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Matrix quartiles:</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> 0.00909165592495747 1.11376225429267 1.11376225429267 1.11376225429267 11.4356955730733</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Matrix quantiles after imputing:</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>           0%          25%          50%          75%         100% </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  0.009091656  1.113762254  1.113762254  1.113762254 11.435695573 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "The imputed value is: 0.00454582796247873"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "30.3758318835777 0.207780118767116 1"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "Inspecting matrix"</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> 0.00909165592495747 1.11376225429267 1.11376225429267 1.11376225429267 11.4356955730733</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> The imputed value is: 0.00454582796247873</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    Max(IP) min(Input)     pseudo </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 30.3758319  0.2077801  1.0000000 </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Inspecting matrix</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>          n_invalid fraction_invalid</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> infinite         0                0</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> NA               0                0</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> NaN              0                0</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> zero             0                0</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> Imputing missing values. Matrix quartiles:</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>          0%         25%         50%         75%        100% </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  0.02599262  1.11376225  1.11376225  1.11376225 11.11665648 </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Imputing missing values...</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Matrix quartiles:</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> 0.0259926216885756 1.11376225429267 1.11376225429267 1.11376225429267 11.1166564766366</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Matrix quantiles after imputing:</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>          0%         25%         50%         75%        100% </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  0.02599262  1.11376225  1.11376225  1.11376225 11.11665648 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "The imputed value is: 0.0129963108442878"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "collecting ratio data"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "query"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "clipPeak"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "drawing heatmap"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "quantile(fullMatrix, c(seq(0.9, 1, 0.005)), na.rm=TRUE)"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>       90%     90.5%       91%     91.5%       92%     92.5%       93%     93.5% </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 0.1554413 0.1554413 0.1554413 0.1554413 0.1554413 0.1554413 0.2559572 0.4849725 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>       94%     94.5%       95%     95.5%       96%     96.5%       97%     97.5% </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 0.4849725 0.4849725 0.4849725 0.4849725 0.7500246 0.9790399 0.9790399 0.9790399 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>       98%     98.5%       99%     99.5%      100% </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1.3463880 1.3463880 1.6389270 1.8820307 3.5154722 </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> 0.0259926216885756 1.11376225429267 1.11376225429267 1.11376225429267 11.1166564766366</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> The imputed value is: 0.0129963108442878</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Collecting ratio data...</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Ratio label: query</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Center label: clipPeak</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Drawing heatmap</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> quantile(fullMatrix, c(seq(0.9, 1, 0.005)), na.rm=TRUE)</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> 0.155441305246638 0.155441305246638 0.155441305246638 0.155441305246638 0.155441305246638 0.155441305246638 0.255957233221887 0.484972545868312 0.484972545868312 0.484972545868312 0.484972545868312 0.484972545868312 0.750024586746437 0.979039899392862 0.979039899392862 0.979039899392862 1.34638800414741 1.34638800414741 1.63892696450105 1.88203065110151 3.51547221483931</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> `use_raster` is automatically set to TRUE for a matrix with more than</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> 2000 rows. You can control `use_raster` argument by explicitly setting</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> TRUE/FALSE to it.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Set `ht_opt$message = FALSE` to turn off this message.</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "exon"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "drawing heatmap"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "quantile(fullMatrix, c(seq(0.9, 1, 0.005)), na.rm=TRUE)"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>       90%     90.5%       91%     91.5%       92%     92.5%       93%     93.5% </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 0.1554413 0.1554413 0.1554413 0.1554413 0.1554413 0.1554413 0.1554413 0.1554413 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>       94%     94.5%       95%     95.5%       96%     96.5%       97%     97.5% </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 0.1554413 0.1554413 0.1554413 0.1554413 0.1554413 0.1554413 0.1554413 0.4849725 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>       98%     98.5%       99%     99.5%      100% </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 0.4849725 0.9790399 0.9790399 1.3463880 3.4746510 </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Center label: exon</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Drawing heatmap</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> quantile(fullMatrix, c(seq(0.9, 1, 0.005)), na.rm=TRUE)</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> 0.155441305246638 0.155441305246638 0.155441305246638 0.155441305246638 0.155441305246638 0.155441305246638 0.155441305246638 0.155441305246638 0.155441305246638 0.155441305246638 0.155441305246638 0.155441305246638 0.155441305246638 0.155441305246638 0.155441305246638 0.484972545868312 0.484972545868312 0.979039899392862 0.979039899392862 1.34638800414741 3.47465103313716</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> `use_raster` is automatically set to TRUE for a matrix with more than</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> 2000 rows. You can control `use_raster` argument by explicitly setting</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> TRUE/FALSE to it.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Set `ht_opt$message = FALSE` to turn off this message.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Plotting ratio profile and boxplot...</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Beds: query</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Centers: clipPeak</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Beds: query</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Centers: exon</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Beds: query</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Centers: clipPeak exon</span>
 <span class="r-plt img"><img src="plot_locus-7.png" alt="" width="700" height="433"></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "Plotting ratio profile and boxplot"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "query"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "clipPeak"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "query"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "exon"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "query"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "clipPeak" "exon"    </span>
 <span class="r-plt img"><img src="plot_locus-8.png" alt="" width="700" height="433"></span>
 <span class="r-plt img"><img src="plot_locus-9.png" alt="" width="700" height="433"></span>
 <span class="r-plt img"><img src="plot_locus-10.png" alt="" width="700" height="433"></span>
