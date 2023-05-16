@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">GenomicPlot</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.1.4</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.1.5</span>
       </span>
     </div>
 
@@ -35,7 +35,13 @@
       <a href="../articles/GenomicPlot_vignettes.html">GenomicPlot: an R package for efficient and flexible visualization of NGS coverage profiles</a>
     </li>
   </ul></li>
-      </ul><ul class="nav navbar-nav navbar-right"></ul></div><!--/.nav-collapse -->
+      </ul><ul class="nav navbar-nav navbar-right"><li>
+  <a href="https://github.com/shuye2009/GenomicPlot/" class="external-link">
+    <span class="fab fa-github fa-lg"></span>
+     
+  </a>
+</li>
+      </ul></div><!--/.nav-collapse -->
   </div><!--/.container -->
 </div><!--/.navbar -->
 
@@ -45,7 +51,7 @@
   <div class="col-md-9 contents">
     <div class="page-header">
     <h1>Parallel execution of countOverlaps</h1>
-    
+    <small class="dont-index">Source: <a href="https://github.com/shuye2009/GenomicPlot/blob/HEAD/R/Parallel.R" class="external-link"><code>R/Parallel.R</code></a></small>
     <div class="hidden name"><code>parallel_countOverlaps.Rd</code></div>
     </div>
 
@@ -86,6 +92,54 @@
     <p>Shuye Pu</p>
     </div>
 
+    <div id="ref-examples">
+    <h2>Examples</h2>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">queryFiles</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"treat_chr19.bam"</span>, package <span class="op">=</span> <span class="st">"GenomicPlot"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">queryFiles</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="st">"query"</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="va">inputFiles</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"input_chr19.bam"</span>, package <span class="op">=</span> <span class="st">"GenomicPlot"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">inputFiles</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="st">"input"</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="va">importParams</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>  offset <span class="op">=</span> <span class="op">-</span><span class="fl">1</span>, fix_width <span class="op">=</span> <span class="fl">0</span>, fix_point <span class="op">=</span> <span class="st">"start"</span>, norm <span class="op">=</span> <span class="cn">FALSE</span>,</span></span>
+<span class="r-in"><span>  useScore <span class="op">=</span> <span class="cn">FALSE</span>, outRle <span class="op">=</span> <span class="cn">FALSE</span>, useSizeFactor <span class="op">=</span> <span class="cn">FALSE</span>, genome <span class="op">=</span> <span class="st">"hg19"</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="va">out_list</span> <span class="op">&lt;-</span> <span class="fu"><a href="handle_input.html">handle_input</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>  inputFiles <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">queryFiles</span>, <span class="va">inputFiles</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>  importParams <span class="op">=</span> <span class="va">importParams</span>, verbose <span class="op">=</span> <span class="cn">TRUE</span>, nc <span class="op">=</span> <span class="fl">2</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Reading bamfile: C:/Users/greenblatt/AppData/Local/Temp/RtmpiQE4hr/temp_libpath167c637a5c73/GenomicPlot/extdata/treat_chr19.bam</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> 144852 </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Bam file C:/Users/greenblatt/AppData/Local/Temp/RtmpiQE4hr/temp_libpath167c637a5c73/GenomicPlot/extdata/treat_chr19.bam is loaded</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Cached .rds file is modified using new input parameters</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Reading bamfile: C:/Users/greenblatt/AppData/Local/Temp/RtmpiQE4hr/temp_libpath167c637a5c73/GenomicPlot/extdata/input_chr19.bam</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> 240639 </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Bam file C:/Users/greenblatt/AppData/Local/Temp/RtmpiQE4hr/temp_libpath167c637a5c73/GenomicPlot/extdata/input_chr19.bam is loaded</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Cached .rds file is modified using new input parameters</span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="va">seqi</span> <span class="op">&lt;-</span> <span class="fu">GenomeInfoDb</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/GenomeInfoDb/man/Seqinfo-class.html" class="external-link">Seqinfo</a></span><span class="op">(</span>genome <span class="op">=</span> <span class="st">"hg19"</span><span class="op">)</span> </span></span>
+<span class="r-in"><span><span class="va">grange_list</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">lapply</a></span><span class="op">(</span><span class="va">out_list</span>, <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="va">x</span><span class="op">$</span><span class="va">query</span><span class="op">)</span> </span></span>
+<span class="r-in"><span><span class="va">tilewidth</span> <span class="op">&lt;-</span> <span class="fl">100000</span> </span></span>
+<span class="r-in"><span><span class="va">tileBins</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/GenomicRanges/man/tileGenome.html" class="external-link">tileGenome</a></span><span class="op">(</span><span class="va">seqi</span>, tilewidth <span class="op">=</span> <span class="va">tilewidth</span>, cut.last.tile.in.chrom <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
+<span class="r-in"><span> </span></span>
+<span class="r-in"><span><span class="va">score_list1</span> <span class="op">&lt;-</span> <span class="fu">parallel_countOverlaps</span><span class="op">(</span><span class="va">grange_list</span>, <span class="va">tileBins</span>, nc <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://pillar.r-lib.org/reference/glimpse.html" class="external-link">glimpse</a></span><span class="op">(</span><span class="va">score_list1</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> List of 2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ query: int [1:32488] 0 0 0 0 0 0 0 0 0 0 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ input: int [1:32488] 0 0 0 0 0 0 0 0 0 0 ...</span>
+<span class="r-in"><span><span class="va">score_list2</span> <span class="op">&lt;-</span> <span class="fu">parallel_countOverlaps</span><span class="op">(</span><span class="va">grange_list</span>, <span class="va">tileBins</span>, nc <span class="op">=</span> <span class="fl">2</span>, switch <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://pillar.r-lib.org/reference/glimpse.html" class="external-link">glimpse</a></span><span class="op">(</span><span class="va">score_list2</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> List of 2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ query: Named int [1:127699] 1 1 1 1 1 1 1 1 1 1 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..- attr(*, "names")= chr [1:127699] "D00573:210:CABT5ANXX:2:2203:4758:57946" "D00573:210:CABT5ANXX:2:2205:15205:71615" "D00573:210:CABT5ANXX:2:1109:13891:82005" "D00573:210:CABT5ANXX:2:2210:15732:4306" ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  $ input: Named int [1:187355] 1 1 1 1 1 1 1 1 1 1 ...</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ..- attr(*, "names")= chr [1:187355] "D00573:243:CBWYDANXX:5:2303:6304:34320" "D00573:243:CBWYDANXX:5:2305:11032:7501" "D00573:243:CBWYDANXX:5:2304:15139:2080" "D00573:243:CBWYDANXX:5:1307:18117:17235" ...</span>
+<span class="r-in"><span></span></span>
+</code></pre></div>
+    </div>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top"><h2 data-toc-skip>Contents</h2>

@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">GenomicPlot</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.1.4</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.1.5</span>
       </span>
     </div>
 
@@ -35,7 +35,13 @@
       <a href="../articles/GenomicPlot_vignettes.html">GenomicPlot: an R package for efficient and flexible visualization of NGS coverage profiles</a>
     </li>
   </ul></li>
-      </ul><ul class="nav navbar-nav navbar-right"></ul></div><!--/.nav-collapse -->
+      </ul><ul class="nav navbar-nav navbar-right"><li>
+  <a href="https://github.com/shuye2009/GenomicPlot/" class="external-link">
+    <span class="fab fa-github fa-lg"></span>
+     
+  </a>
+</li>
+      </ul></div><!--/.nav-collapse -->
   </div><!--/.container -->
 </div><!--/.navbar -->
 
@@ -45,7 +51,7 @@
   <div class="col-md-9 contents">
     <div class="page-header">
     <h1>Preprocess scoreMatrix before plotting</h1>
-    
+    <small class="dont-index">Source: <a href="https://github.com/shuye2009/GenomicPlot/blob/HEAD/R/HandleDataMatrix.R" class="external-link"><code>R/HandleDataMatrix.R</code></a></small>
     <div class="hidden name"><code>process_scoreMatrix.Rd</code></div>
     </div>
 
@@ -93,13 +99,93 @@
     </div>
     <div id="details">
     <h2>Details</h2>
-    <p>If inputFiles is null, all operations (impute, scale, rmOutlier and transform) can be applied to the score matrix, in the order of impute -&gt; rmOutlier -&gt; transform -&gt; scale. When inputFiles are provided, only impute and rmOutlier can be applied to the score matrix, and transform and scale will affect ratio calculation, especially when log2 of ratio is intended, however, all these operations can be applied to the resulting ratio matrix. In order to avoid introducing distortion into the post-processed data, use caution when applying these operations.</p>
+    <p>If inputFiles for the plotting function is null, all operations (impute, scale, rmOutlier and transform) can be applied to the score matrix, in the order of impute -&gt; rmOutlier -&gt; transform -&gt; scale. When inputFiles are provided, only impute and rmOutlier can be applied to the score matrix, as transform and scale will affect ratio calculation, especially when log2 transformation of the ratio is intended. However, all these operations can be applied to the resulting ratio matrix. In order to avoid introducing distortion into the post-processed data, use caution when applying these operations.</p>
     </div>
     <div id="author">
     <h2>Author</h2>
     <p>Shuye Pu</p>
     </div>
 
+    <div id="ref-examples">
+    <h2>Examples</h2>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">fullMatrix</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/Lognormal.html" class="external-link">rlnorm</a></span><span class="op">(</span><span class="fl">100</span><span class="op">)</span>, ncol <span class="op">=</span> <span class="fl">10</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="kw">for</span> <span class="op">(</span><span class="va">i</span> <span class="kw">in</span> <span class="fl">5</span><span class="op">:</span><span class="fl">6</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span>  <span class="va">fullMatrix</span><span class="op">[</span><span class="va">i</span>, <span class="fl">4</span><span class="op">:</span><span class="fl">7</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="cn">NaN</span></span></span>
+<span class="r-in"><span>  <span class="va">fullMatrix</span><span class="op">[</span><span class="va">i</span><span class="op">+</span><span class="fl">1</span>, <span class="fl">4</span><span class="op">:</span><span class="fl">7</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="cn">NA</span></span></span>
+<span class="r-in"><span>  <span class="va">fullMatrix</span><span class="op">[</span><span class="va">i</span><span class="op">+</span><span class="fl">2</span>, <span class="fl">4</span><span class="op">:</span><span class="fl">7</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="op">-</span><span class="cn">Inf</span></span></span>
+<span class="r-in"><span>  <span class="va">fullMatrix</span><span class="op">[</span><span class="va">i</span><span class="op">-</span><span class="fl">1</span>, <span class="fl">4</span><span class="op">:</span><span class="fl">7</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fl">0</span></span></span>
+<span class="r-in"><span>  <span class="va">fullMatrix</span><span class="op">[</span><span class="va">i</span><span class="op">-</span><span class="fl">2</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">3</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="cn">Inf</span></span></span>
+<span class="r-in"><span><span class="op">}</span></span></span>
+<span class="r-in"><span><span class="va">fullMatrix</span><span class="op">[</span><span class="fl">9</span>, <span class="fl">4</span><span class="op">:</span><span class="fl">7</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Uniform.html" class="external-link">runif</a></span><span class="op">(</span><span class="fl">4</span><span class="op">)</span> <span class="op">+</span> <span class="fl">90</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="va">wo</span> <span class="op">&lt;-</span> <span class="fu">process_scoreMatrix</span><span class="op">(</span><span class="va">fullMatrix</span>, rmOutlier <span class="op">=</span> <span class="fl">3</span>, verbose <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Inspecting matrix</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          n_invalid fraction_invalid</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> infinite        10             0.10</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> NA               8             0.08</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> NaN              4             0.04</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> zero             8             0.08</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Imputing missing values...</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Matrix quartiles:</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> 0 0 0.687252945778437 2.03539311347142 90.9118664462585</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Matrix quantiles after imputing:</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> 0.0345654936779461 0.0345654936779461 0.687252945778437 2.03539311347142 90.9118664462585</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> The imputed value is: 0.0345654936779461</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Outlier detected:</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Maximum of the matrix 90.9118664462585</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Median of row max 4.79206042859457</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Median absolute deviation (mad) of row max 3.40096177135035</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Mulitplier of mad 3</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Up_bound and replace value 14.9949457426456</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> percentile of up_bound0.95</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Pumber of outlier rows2</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Number of outliers5</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Fraction of outliers 0.05</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Values of outliers:</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> 90.2051386407111 90.9118664462585 90.7047755708918 90.4543539362494 32.083498725835</span>
+<span class="r-in"><span><span class="va">tf</span> <span class="op">&lt;-</span> <span class="fu">process_scoreMatrix</span><span class="op">(</span><span class="va">fullMatrix</span>, </span></span>
+<span class="r-in"><span>  rmOutlier <span class="op">=</span> <span class="fl">0</span>, transform <span class="op">=</span> <span class="st">"log2"</span>, verbose <span class="op">=</span> <span class="cn">TRUE</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Inspecting matrix</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          n_invalid fraction_invalid</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> infinite        10             0.10</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> NA               8             0.08</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> NaN              4             0.04</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> zero             8             0.08</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Imputing missing values...</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Matrix quartiles:</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> 0 0 0.687252945778437 2.03539311347142 90.9118664462585</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Matrix quantiles after imputing:</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> 0.0345654936779461 0.0345654936779461 0.687252945778437 2.03539311347142 90.9118664462585</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> The imputed value is: 0.0345654936779461</span>
+<span class="r-in"><span><span class="va">scaled</span> <span class="op">&lt;-</span> <span class="fu">process_scoreMatrix</span><span class="op">(</span><span class="va">fullMatrix</span>, scale <span class="op">=</span> <span class="cn">TRUE</span>, verbose <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Inspecting matrix</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>          n_invalid fraction_invalid</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> infinite        10             0.10</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> NA               8             0.08</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> NaN              4             0.04</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> zero             8             0.08</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Imputing missing values...</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Matrix quartiles:</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> 0 0 0.687252945778437 2.03539311347142 90.9118664462585</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Matrix quantiles after imputing:</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> 0.0345654936779461 0.0345654936779461 0.687252945778437 2.03539311347142 90.9118664462585</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> The imputed value is: 0.0345654936779461</span>
+<span class="r-in"><span>  </span></span>
+</code></pre></div>
+    </div>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top"><h2 data-toc-skip>Contents</h2>

@@ -41,7 +41,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="index.html">GenomicPlot</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.1.4</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.1.5</span>
       </span>
     </div>
 
@@ -63,7 +63,14 @@
   </ul>
 </li>
       </ul>
-<ul class="nav navbar-nav navbar-right"></ul>
+<ul class="nav navbar-nav navbar-right">
+<li>
+  <a href="https://github.com/shuye2009/GenomicPlot/" class="external-link">
+    <span class="fab fa-github fa-lg"></span>
+     
+  </a>
+</li>
+      </ul>
 </div>
 <!--/.nav-collapse -->
   </div>
@@ -89,100 +96,108 @@
 <p>You can install the development version of GenomicPlot from <a href="https://github.com/shuye2009/GenomicPlot" class="external-link">GitHub</a> with:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># install.packages("devtools")</span></span>
-<span><span class="fu">devtools</span><span class="fu">::</span><span class="fu"><a href="https://remotes.r-lib.org/reference/install_github.html" class="external-link">install_github</a></span><span class="op">(</span><span class="st">"shuye2009/GenomicPlot"</span>, build_manual<span class="op">=</span><span class="cn">TRUE</span>, build_vignettes<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu">devtools</span><span class="fu">::</span><span class="fu"><a href="https://remotes.r-lib.org/reference/install_github.html" class="external-link">install_github</a></span><span class="op">(</span><span class="st">"shuye2009/GenomicPlot"</span>, build_manual <span class="op">=</span> <span class="cn">TRUE</span>, build_vignettes <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
 <p>Or download the source package from the latest release on <a href="https://github.com/shuye2009/GenomicPlot" class="external-link">GitHub</a> and run in R:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"path-to-source-package/GenomicPlot_x.x.x.tar.gz"</span>, repos<span class="op">=</span><span class="cn">NULL</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"path-to-source-package/GenomicPlot_x.x.x.tar.gz"</span>, repos <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span></code></pre></div>
 <p>where “path-to-source-package” is the absolute path to the file “GenomicPlot_x.x.x.tar.gz”, substitute ‘x’ with the version number of your downloaded package ## Examples</p>
 <p>The following is a basic example which shows you how to visualize ChIP-seq peaks and iCLIP-seq peaks in different parts of genes.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
-<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">GenomicPlot</span><span class="op">)</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/shuye2009/GenomicPlot" class="external-link">GenomicPlot</a></span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">txdb</span> <span class="op">&lt;-</span> <span class="fu">AnnotationDbi</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/AnnotationDbi/man/AnnotationDb-class.html" class="external-link">loadDb</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"txdb_chr19.sql"</span>, package<span class="op">=</span><span class="st">"GenomicPlot"</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="va">gf</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/prepare_5parts_genomic_features.html">prepare_5parts_genomic_features</a></span><span class="op">(</span><span class="va">txdb</span>, meta<span class="op">=</span><span class="cn">TRUE</span>, nbins<span class="op">=</span><span class="fl">100</span>, fiveP<span class="op">=</span><span class="op">-</span><span class="fl">2000</span>, threeP<span class="op">=</span><span class="fl">1000</span>, longest<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span></span>
+<span><span class="va">txdb</span> <span class="op">&lt;-</span> <span class="fu">AnnotationDbi</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/AnnotationDbi/man/AnnotationDb-class.html" class="external-link">loadDb</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"txdb_chr19.sql"</span>, package <span class="op">=</span> <span class="st">"GenomicPlot"</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">gf</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/prepare_5parts_genomic_features.html">prepare_5parts_genomic_features</a></span><span class="op">(</span><span class="va">txdb</span>, meta <span class="op">=</span> <span class="cn">TRUE</span>, nbins <span class="op">=</span> <span class="fl">100</span>, fiveP <span class="op">=</span> <span class="op">-</span><span class="fl">2000</span>, threeP <span class="op">=</span> <span class="fl">1000</span>, longest <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">queryfiles</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"test_chip_peak_chr19.narrowPeak"</span>, package<span class="op">=</span><span class="st">"GenomicPlot"</span><span class="op">)</span>,</span>
-<span>                <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"test_chip_peak_chr19.bed"</span>, package<span class="op">=</span><span class="st">"GenomicPlot"</span><span class="op">)</span>,</span>
-<span>                <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"test_clip_peak_chr19.bed"</span>, package<span class="op">=</span><span class="st">"GenomicPlot"</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">queryfiles</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"test_chip_peak_chr19.narrowPeak"</span>, package <span class="op">=</span> <span class="st">"GenomicPlot"</span><span class="op">)</span>,</span>
+<span>                <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"test_chip_peak_chr19.bed"</span>, package <span class="op">=</span> <span class="st">"GenomicPlot"</span><span class="op">)</span>,</span>
+<span>                <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"test_clip_peak_chr19.bed"</span>, package <span class="op">=</span> <span class="st">"GenomicPlot"</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">queryfiles</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"NarrowPeak"</span>, <span class="st">"SummitPeak"</span>, <span class="st">"iCLIPPeak"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">op</span> <span class="op">&lt;-</span> <span class="st">"test_plot_5parts_metagene"</span></span>
 <span></span>
-<span><span class="va">importParams</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>offset<span class="op">=</span><span class="fl">0</span>, fix_width<span class="op">=</span><span class="fl">100</span>, fix_point<span class="op">=</span><span class="st">"center"</span>, norm<span class="op">=</span><span class="cn">FALSE</span>, useScore<span class="op">=</span><span class="cn">FALSE</span>,</span>
-<span>                          outRle<span class="op">=</span><span class="cn">TRUE</span>, useSizeFactor<span class="op">=</span><span class="cn">FALSE</span>, genome<span class="op">=</span><span class="st">"hg19"</span><span class="op">)</span></span>
+<span><span class="va">importParams</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>offset <span class="op">=</span> <span class="fl">0</span>, fix_width <span class="op">=</span> <span class="fl">100</span>, fix_point <span class="op">=</span> <span class="st">"center"</span>, norm <span class="op">=</span> <span class="cn">FALSE</span>, useScore <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>                          outRle <span class="op">=</span> <span class="cn">TRUE</span>, useSizeFactor <span class="op">=</span> <span class="cn">FALSE</span>, genome <span class="op">=</span> <span class="st">"hg19"</span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu"><a href="reference/plot_5parts_metagene.html">plot_5parts_metagene</a></span><span class="op">(</span>queryFiles<span class="op">=</span><span class="va">queryfiles</span>, </span>
-<span>                     gFeatures<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>metaF<span class="op">=</span><span class="va">gf</span><span class="op">)</span>, </span>
-<span>                     inputFiles<span class="op">=</span><span class="cn">NULL</span>, </span>
-<span>                     importParams<span class="op">=</span><span class="va">importParams</span>,</span>
-<span>                     verbose<span class="op">=</span><span class="cn">FALSE</span>, </span>
-<span>                     smooth<span class="op">=</span><span class="cn">TRUE</span>, </span>
-<span>                     scale<span class="op">=</span><span class="cn">FALSE</span>, </span>
-<span>                     stranded<span class="op">=</span><span class="cn">TRUE</span>, </span>
-<span>                     outPrefix<span class="op">=</span><span class="va">op</span>, </span>
-<span>                     transform<span class="op">=</span><span class="cn">NA</span>, </span>
-<span>                     heatmap<span class="op">=</span><span class="cn">TRUE</span>,</span>
-<span>                     rmOutlier<span class="op">=</span><span class="fl">0</span>, </span>
-<span>                     heatRange<span class="op">=</span><span class="cn">NULL</span>,</span>
-<span>                     nc<span class="op">=</span><span class="fl">4</span><span class="op">)</span></span>
+<span><span class="fu"><a href="reference/plot_5parts_metagene.html">plot_5parts_metagene</a></span><span class="op">(</span>queryFiles <span class="op">=</span> <span class="va">queryfiles</span>, </span>
+<span>                     gFeatures <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>metaF <span class="op">=</span> <span class="va">gf</span><span class="op">)</span>, </span>
+<span>                     inputFiles <span class="op">=</span> <span class="cn">NULL</span>, </span>
+<span>                     importParams <span class="op">=</span> <span class="va">importParams</span>,</span>
+<span>                     verbose <span class="op">=</span> <span class="cn">FALSE</span>, </span>
+<span>                     smooth <span class="op">=</span> <span class="cn">TRUE</span>, </span>
+<span>                     scale <span class="op">=</span> <span class="cn">FALSE</span>, </span>
+<span>                     stranded <span class="op">=</span> <span class="cn">TRUE</span>, </span>
+<span>                     outPrefix <span class="op">=</span> <span class="va">op</span>, </span>
+<span>                     transform <span class="op">=</span> <span class="cn">NA</span>, </span>
+<span>                     heatmap <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>                     rmOutlier <span class="op">=</span> <span class="fl">0</span>, </span>
+<span>                     heatRange <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>                     nc <span class="op">=</span> <span class="fl">4</span><span class="op">)</span></span>
 <span>                     </span></code></pre></div>
-<p><img src="./tests/test_output/test_plot_5parts_metagene1_1.png" alt="image1"><img src="./tests/test_output/test_plot_5parts_metagene1_2.png" alt="image1"><img src="./tests/test_output/test_plot_5parts_metagene1_3.png" alt="image1"></p>
+<p><img src="./inst/tests/test_output/test_plot_5parts_metagene1_1.png" alt="image1"><img src="./inst/tests/test_output/test_plot_5parts_metagene1_2.png" alt="image1"><img src="./inst/tests/test_output/test_plot_5parts_metagene1_3.png" alt="image1"></p>
 <p>The following example shows you how to visualize distance between iCLIP_peaks/ChIP-seq narrowPeaks and ChIP-seq summit Peaks.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="va">op</span> <span class="op">&lt;-</span> <span class="st">"test_plot_locus"</span></span>
 <span></span>
-<span><span class="va">importParams</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>offset<span class="op">=</span><span class="fl">0</span>, fix_width<span class="op">=</span><span class="fl">0</span>, fix_point<span class="op">=</span><span class="st">"center"</span>, norm<span class="op">=</span><span class="cn">FALSE</span>, useScore<span class="op">=</span><span class="cn">FALSE</span>,</span>
-<span>                          outRle<span class="op">=</span><span class="cn">TRUE</span>, useSizeFactor<span class="op">=</span><span class="cn">FALSE</span>, genome<span class="op">=</span><span class="st">"hg19"</span><span class="op">)</span></span>
+<span><span class="va">importParams</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>offset <span class="op">=</span> <span class="fl">0</span>, fix_width <span class="op">=</span> <span class="fl">0</span>, fix_point <span class="op">=</span> <span class="st">"center"</span>, norm <span class="op">=</span> <span class="cn">FALSE</span>, useScore <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>                          outRle <span class="op">=</span> <span class="cn">TRUE</span>, useSizeFactor <span class="op">=</span> <span class="cn">FALSE</span>, genome <span class="op">=</span> <span class="st">"hg19"</span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu"><a href="reference/plot_locus.html">plot_locus</a></span><span class="op">(</span>queryFiles<span class="op">=</span><span class="va">queryfiles</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>,<span class="fl">3</span><span class="op">)</span><span class="op">]</span>, </span>
-<span>                     centerFiles<span class="op">=</span><span class="va">queryfiles</span><span class="op">[</span><span class="fl">2</span><span class="op">]</span>, </span>
-<span>                     ext<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">1000</span>, <span class="fl">1000</span><span class="op">)</span>, </span>
-<span>                     hl<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">100</span>, <span class="fl">100</span><span class="op">)</span>, </span>
-<span>                     inputFiles<span class="op">=</span><span class="cn">NULL</span>,                              </span>
-<span>                     importParams<span class="op">=</span><span class="va">importParams</span>, </span>
-<span>                     shade<span class="op">=</span><span class="cn">TRUE</span>, </span>
-<span>                     binSize<span class="op">=</span><span class="fl">10</span>, </span>
-<span>                     refPoint<span class="op">=</span><span class="st">"center"</span>, </span>
-<span>                     Xlab<span class="op">=</span><span class="st">"Summit"</span>,</span>
-<span>                     verbose<span class="op">=</span><span class="cn">FALSE</span>, </span>
-<span>                     smooth<span class="op">=</span><span class="cn">TRUE</span>, </span>
-<span>                     scale<span class="op">=</span><span class="cn">FALSE</span>, </span>
-<span>                     stranded<span class="op">=</span><span class="cn">TRUE</span>, </span>
-<span>                     outPrefix<span class="op">=</span><span class="va">op</span>, </span>
-<span>                     transform<span class="op">=</span><span class="cn">NA</span>, </span>
-<span>                     heatmap<span class="op">=</span><span class="cn">TRUE</span>,</span>
-<span>                     heatRange<span class="op">=</span><span class="cn">NULL</span>,</span>
-<span>                     rmOutlier<span class="op">=</span><span class="fl">0</span>, </span>
-<span>                     nc<span class="op">=</span><span class="fl">4</span><span class="op">)</span></span>
+<span><span class="fu"><a href="reference/plot_locus.html">plot_locus</a></span><span class="op">(</span>queryFiles <span class="op">=</span> <span class="va">queryfiles</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>,<span class="fl">3</span><span class="op">)</span><span class="op">]</span>, </span>
+<span>                     centerFiles <span class="op">=</span> <span class="va">queryfiles</span><span class="op">[</span><span class="fl">2</span><span class="op">]</span>, </span>
+<span>                     ext <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">1000</span>, <span class="fl">1000</span><span class="op">)</span>, </span>
+<span>                     hl <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">-</span><span class="fl">100</span>, <span class="fl">100</span><span class="op">)</span>, </span>
+<span>                     inputFiles <span class="op">=</span> <span class="cn">NULL</span>,                              </span>
+<span>                     importParams <span class="op">=</span> <span class="va">importParams</span>, </span>
+<span>                     shade <span class="op">=</span> <span class="cn">TRUE</span>, </span>
+<span>                     binSize <span class="op">=</span> <span class="fl">10</span>, </span>
+<span>                     refPoint <span class="op">=</span> <span class="st">"center"</span>, </span>
+<span>                     Xlab <span class="op">=</span> <span class="st">"Summit"</span>,</span>
+<span>                     verbose <span class="op">=</span> <span class="cn">FALSE</span>, </span>
+<span>                     smooth <span class="op">=</span> <span class="cn">TRUE</span>, </span>
+<span>                     scale <span class="op">=</span> <span class="cn">FALSE</span>, </span>
+<span>                     stranded <span class="op">=</span> <span class="cn">TRUE</span>, </span>
+<span>                     outPrefix <span class="op">=</span> <span class="va">op</span>, </span>
+<span>                     transform <span class="op">=</span> <span class="cn">NA</span>, </span>
+<span>                     heatmap <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>                     heatRange <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>                     rmOutlier <span class="op">=</span> <span class="fl">0</span>, </span>
+<span>                     nc <span class="op">=</span> <span class="fl">4</span><span class="op">)</span></span>
 <span>                     </span></code></pre></div>
-<p><img src="./tests/test_output/test_plot_locus1_1.png" alt="image1"><img src="./tests/test_output/test_plot_locus1_2.png" alt="image1"><img src="./tests/test_output/test_plot_locus1_3.png" alt="image1"><img src="./tests/test_output/test_plot_locus1_4.png" alt="image1"></p>
-<p>The following example shows you how to annotate ChIP-seq peaks. The annotation statistics is shown in “test_plot_peak_annotation.pdf”. The detailed annotation is in the table “summitPeak_targeted_annotated_gene.tab”.</p>
+<p><img src="./inst/tests/test_output/test_plot_locus1_1.png" alt="image1"><img src="./inst/tests/test_output/test_plot_locus1_2.png" alt="image1"><img src="./inst/tests/test_output/test_plot_locus1_3.png" alt="image1"><img src="./inst/tests/test_output/test_plot_locus1_4.png" alt="image1"></p>
+<p>The following example shows you how to annotate ChIP-seq peaks. The annotation statistics is shown in “test_plot_peak_annotation.png”. The detailed annotation is in the table “summitPeak_targeted_annotated_gene.tab”.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span></span>
 <span><span class="va">op</span> <span class="op">&lt;-</span> <span class="st">"test_plot_peak_annotation"</span></span>
 <span></span>
-<span><span class="va">gtffile</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"gencode.v19.annotation_chr19.gtf"</span>, package<span class="op">=</span><span class="st">"GenomicPlot"</span><span class="op">)</span></span>
+<span><span class="va">gtffile</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata"</span>, <span class="st">"gencode.v19.annotation_chr19.gtf"</span>, package <span class="op">=</span> <span class="st">"GenomicPlot"</span><span class="op">)</span></span>
 <span></span>
-<span><span class="va">importParams</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>offset<span class="op">=</span><span class="fl">0</span>, fix_width<span class="op">=</span><span class="fl">21</span>, fix_point<span class="op">=</span><span class="st">"center"</span>, norm<span class="op">=</span><span class="cn">FALSE</span>, useScore<span class="op">=</span><span class="cn">FALSE</span>,</span>
-<span>                          outRle<span class="op">=</span><span class="cn">FALSE</span>, useSizeFactor<span class="op">=</span><span class="cn">FALSE</span>, genome<span class="op">=</span><span class="st">"hg19"</span><span class="op">)</span></span>
+<span><span class="va">importParams</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>offset <span class="op">=</span> <span class="fl">0</span>, fix_width <span class="op">=</span> <span class="fl">21</span>, fix_point <span class="op">=</span> <span class="st">"center"</span>, norm <span class="op">=</span> <span class="cn">FALSE</span>, useScore <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>                          outRle <span class="op">=</span> <span class="cn">FALSE</span>, useSizeFactor <span class="op">=</span> <span class="cn">FALSE</span>, genome <span class="op">=</span> <span class="st">"hg19"</span><span class="op">)</span></span>
 <span>                          </span>
-<span><span class="fu"><a href="reference/plot_peak_annotation.html">plot_peak_annotation</a></span><span class="op">(</span>peakFile<span class="op">=</span><span class="va">queryfiles</span><span class="op">[</span><span class="fl">2</span><span class="op">]</span>, </span>
-<span>                     gtfFile<span class="op">=</span><span class="va">gtffile</span>, </span>
-<span>                     importParams<span class="op">=</span><span class="va">importParams</span>, </span>
-<span>                     fiveP<span class="op">=</span><span class="op">-</span><span class="fl">1000</span>, </span>
-<span>                     threeP<span class="op">=</span><span class="fl">1000</span>, </span>
-<span>                     outPrefix<span class="op">=</span><span class="va">op</span>, </span>
-<span>                     verbose<span class="op">=</span><span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
-<p><img src="./tests/test_output/test_plot_peak_annotation1_1.png" alt="image1"><img src="./tests/test_output/test_plot_peak_annotation1_2.png" alt="image1"><img src="./tests/test_output/test_plot_peak_annotation1_3.png" alt="image1"><img src="./tests/test_output/test_plot_peak_annotation1_4.png" alt="image1"></p>
+<span><span class="fu"><a href="reference/plot_peak_annotation.html">plot_peak_annotation</a></span><span class="op">(</span>peakFile <span class="op">=</span> <span class="va">queryfiles</span><span class="op">[</span><span class="fl">2</span><span class="op">]</span>, </span>
+<span>                     gtfFile <span class="op">=</span> <span class="va">gtffile</span>, </span>
+<span>                     importParams <span class="op">=</span> <span class="va">importParams</span>, </span>
+<span>                     fiveP <span class="op">=</span> <span class="op">-</span><span class="fl">1000</span>, </span>
+<span>                     threeP <span class="op">=</span> <span class="fl">1000</span>, </span>
+<span>                     outPrefix <span class="op">=</span> <span class="va">op</span>, </span>
+<span>                     verbose <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
+<p><img src="./inst/tests/test_output/test_plot_peak_annotation1_1.png" alt="image1"><img src="./inst/tests/test_output/test_plot_peak_annotation1_2.png" alt="image1"><img src="./inst/tests/test_output/test_plot_peak_annotation1_3.png" alt="image1"><img src="./inst/tests/test_output/test_plot_peak_annotation1_4.png" alt="image1"></p>
 <p>For more examples, please check out the package vignette using browseVignettes(“GenomicPlot”).</p>
 </div>
 </div>
   </div>
 
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
-    <div class="license">
+    <div class="links">
+<h2 data-toc-skip>Links</h2>
+<ul class="list-unstyled">
+<li><a href="https://github.com/shuye2009/GenomicPlot/" class="external-link">Browse source code</a></li>
+<li><a href="https://github.com/shuye2009/GenomicPlot/issues" class="external-link">Report a bug</a></li>
+</ul>
+</div>
+
+<div class="license">
 <h2 data-toc-skip>License</h2>
 <ul class="list-unstyled">
 <li><a href="https://www.r-project.org/Licenses/GPL-2" class="external-link">GPL-2</a></li>

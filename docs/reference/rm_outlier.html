@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">GenomicPlot</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.1.4</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.1.5</span>
       </span>
     </div>
 
@@ -35,7 +35,13 @@
       <a href="../articles/GenomicPlot_vignettes.html">GenomicPlot: an R package for efficient and flexible visualization of NGS coverage profiles</a>
     </li>
   </ul></li>
-      </ul><ul class="nav navbar-nav navbar-right"></ul></div><!--/.nav-collapse -->
+      </ul><ul class="nav navbar-nav navbar-right"><li>
+  <a href="https://github.com/shuye2009/GenomicPlot/" class="external-link">
+    <span class="fab fa-github fa-lg"></span>
+     
+  </a>
+</li>
+      </ul></div><!--/.nav-collapse -->
   </div><!--/.container -->
 </div><!--/.navbar -->
 
@@ -45,7 +51,7 @@
   <div class="col-md-9 contents">
     <div class="page-header">
     <h1>Remove outliers from scoreMatrix</h1>
-    
+    <small class="dont-index">Source: <a href="https://github.com/shuye2009/GenomicPlot/blob/HEAD/R/HandleDataMatrix.R" class="external-link"><code>R/HandleDataMatrix.R</code></a></small>
     <div class="hidden name"><code>rm_outlier.Rd</code></div>
     </div>
 
@@ -84,31 +90,45 @@
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">fullmatrix</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">100</span><span class="op">)</span>, ncol<span class="op">=</span><span class="fl">10</span><span class="op">)</span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">fullmatrix</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/Normal.html" class="external-link">rnorm</a></span><span class="op">(</span><span class="fl">100</span><span class="op">)</span>, ncol <span class="op">=</span> <span class="fl">10</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">maxm</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html" class="external-link">max</a></span><span class="op">(</span><span class="va">fullmatrix</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">fullmatrix</span><span class="op">[</span><span class="fl">3</span>,<span class="fl">9</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="va">maxm</span> <span class="op">+</span> <span class="fl">1000</span></span></span>
-<span class="r-in"><span><span class="va">fullmatrix</span><span class="op">[</span><span class="fl">8</span>,<span class="fl">1</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="va">maxm</span> <span class="op">+</span> <span class="fl">500</span></span></span>
-<span class="r-in"><span><span class="fu">rm_outlier</span><span class="op">(</span><span class="va">fullmatrix</span>, verbose<span class="op">=</span><span class="cn">TRUE</span>, multiplier<span class="op">=</span><span class="fl">100</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "Outlier detected:"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "maximum of the matrix 1002.86198970522"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "median of row max 1.62495436639617"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "median absolute deviation (mad) of row max 1.04738440487143"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "mulitplier of mad 100"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "up_bound and replace value 106.36339485354"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "percentile of up_bound 0.98"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "number of outlier rows 2"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "number of outliers 2"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "fraction of outliers 0.02"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "values of outliers"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1]  502.862 1002.862</span>
-<span class="r-in"><span><span class="fu">rm_outlier</span><span class="op">(</span><span class="va">fullmatrix</span>, verbose<span class="op">=</span><span class="cn">TRUE</span>, multiplier<span class="op">=</span><span class="fl">1000</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "Outlier not detected:"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "maximum of the matrix 1002.86198970522"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "median of row max 1.62495436639617"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "median absolute deviation (mad) of row max 1.04738440487143"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "mulitplier of mad 1000"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "up_bound and replace value 1049.00935923783"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "percentile of up_bound 1"</span>
+<span class="r-in"><span><span class="va">fullmatrix</span><span class="op">[</span><span class="fl">3</span>, <span class="fl">9</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="va">maxm</span> <span class="op">+</span> <span class="fl">1000</span></span></span>
+<span class="r-in"><span><span class="va">fullmatrix</span><span class="op">[</span><span class="fl">8</span>, <span class="fl">1</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="va">maxm</span> <span class="op">+</span> <span class="fl">500</span></span></span>
+<span class="r-in"><span><span class="fu">rm_outlier</span><span class="op">(</span><span class="va">fullmatrix</span>, verbose <span class="op">=</span> <span class="cn">TRUE</span>, multiplier <span class="op">=</span> <span class="fl">100</span><span class="op">)</span></span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Outlier detected:</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Maximum of the matrix 1002.83914623209</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Median of row max 1.59714666447751</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Median absolute deviation (mad) of row max 1.3857628456952</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Mulitplier of mad 100</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Up_bound and replace value 140.173431233997</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> percentile of up_bound0.98</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Pumber of outlier rows2</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Number of outliers2</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Fraction of outliers 0.02</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Values of outliers:</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> 502.839146232089 1002.83914623209</span>
+<span class="r-in"><span><span class="fu">rm_outlier</span><span class="op">(</span><span class="va">fullmatrix</span>, verbose <span class="op">=</span> <span class="cn">TRUE</span>, multiplier <span class="op">=</span> <span class="fl">1000</span><span class="op">)</span></span></span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Outlier not detected:</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Maximum of the matrix 1002.83914623209</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Median of row max 1.59714666447751</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Median absolute deviation (mad) of row max 1.3857628456952</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Mulitplier of mad 1000</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Up_bound and replace value 1387.35999235968</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> Percentile of up_bound 1</span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
