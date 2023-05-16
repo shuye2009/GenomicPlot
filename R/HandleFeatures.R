@@ -580,8 +580,9 @@ get_txdb_features <- function(txdb,
     queries <- unique(ol@from)
 
     cl <- start_parallel(nc = nc)
-    parallel::clusterEvalQ(cl, library("GenomicRanges"))
+ 
     parallel::clusterExport(cl, varlist = c("TTS", "gene_gr", "ol"), envir = environment())
+    parallel::clusterExport(cl, varlist = c("nearest", "runValue", "strand", "start", "end"), envir = environment())
 
     out <- parallel::parLapply(cl, queries, function(tts_idx) {
       gene_idx <- ol@to[ol@from == tts_idx]

@@ -35,7 +35,7 @@
 #' @importFrom scales percent rescale
 #' @importFrom IRanges mergeByOverlaps width
 #' @importFrom GenomicRanges trim shift resize promoters flank countOverlaps coverage granges grglist tileGenome setdiff narrow
-#' @importFrom GenomicRanges binnedAverage findOverlaps GRanges GRangesList mcols mcols<- makeGRangesFromDataFrame
+#' @importFrom GenomicRanges nearest findOverlaps GRanges GRangesList mcols mcols<- makeGRangesFromDataFrame
 #' @importFrom GenomicFeatures transcriptLengths exonsBy intronsByTranscript threeUTRsByTranscript fiveUTRsByTranscript
 #' @importFrom GenomicFeatures cdsBy genes transcripts makeTxDbFromGRanges makeTxDbFromGFF makeTxDbFromEnsembl
 #' @importFrom ComplexHeatmap HeatmapAnnotation Heatmap draw
