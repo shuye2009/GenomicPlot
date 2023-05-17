@@ -15,8 +15,8 @@ GenomicRanges (>= 1.46.1), GenomicFeatures, Rsamtools, ggplot2 (>= 3.3.5), tidyr
 You can install the development version of GenomicPlot from [GitHub](https://github.com/shuye2009/GenomicPlot) with:
 
 ``` r
-# install.packages("devtools")
-devtools::install_github("shuye2009/GenomicPlot", build_manual = TRUE, build_vignettes = TRUE)
+# install.packages("remotes")
+remotes::install_github("shuye2009/GenomicPlot", build_manual = TRUE, build_vignettes = TRUE)
 ```
 Or download the source package from the latest release on [GitHub](https://github.com/shuye2009/GenomicPlot) and run in R:
 
@@ -32,7 +32,10 @@ The following is a basic example which shows you how to visualize ChIP-seq peaks
 
 library(GenomicPlot)
 
-txdb <- AnnotationDbi::loadDb(system.file("extdata", "txdb_chr19.sql", package = "GenomicPlot"))
+gtffile <- system.file("extdata", "gencode.v19.annotation_chr19.gtf", package = "GenomicPlot")
+gff <- RCAS::importGtf(saveObjectAsRds = TRUE, filePath = gtffile)
+txdb <- makeTxDbFromGRanges(gff)
+
 gf <- prepare_5parts_genomic_features(txdb, meta = TRUE, nbins = 100, fiveP = -2000, threeP = 1000, longest = TRUE)
 
 queryfiles <- c(system.file("extdata", "test_chip_peak_chr19.narrowPeak", package = "GenomicPlot"),

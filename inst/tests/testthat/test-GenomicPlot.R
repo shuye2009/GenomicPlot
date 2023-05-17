@@ -15,7 +15,8 @@ outdir <- "../test_output"
 setwd(outdir)
 
 gtffile <- system.file("extdata", "gencode.v19.annotation_chr19.gtf", package = "GenomicPlot")
-txdb <- AnnotationDbi::loadDb(system.file("extdata", "txdb_chr19.sql", package = "GenomicPlot"))
+gff <- RCAS::importGtf(saveObjectAsRds = TRUE, filePath = gtffile)
+txdb <- makeTxDbFromGRanges(gff)
 
 bedQueryFiles <- c(
   system.file("extdata", "test_chip_peak_chr19.narrowPeak", package = "GenomicPlot"),
@@ -139,28 +140,20 @@ test_that("testing plot_locus", {
     nc = 2
   )
   pdf_to_png(op)
-
-  queryfiles <- c(bamQueryFiles, chipQureyFiles)
-  inputfiles <- c(bamInputFiles, chipInputFiles)
-
-  importParams <- list(
-    offset = 0, fix_width = 150, fix_point = "start", norm = TRUE,
-    useScore = FALSE, outRle = TRUE, useSizeFactor = TRUE, genome = "hg19"
-  )
-
+  
   op <- "test_plot_locus2"
   plot_locus(
-    queryFiles = queryfiles,
+    queryFiles = chipQureyFiles,
     centerFiles = bedQueryFiles[2:3],
     ext = c(-500, 500),
     hl = c(-100, 100),
     shade = TRUE,
     smooth = TRUE,
-    importParams = importParams,
+    importParams = chipimportParams,
     binSize = 10,
     refPoint = "center",
     Xlab = "Center",
-    inputFiles = inputfiles,
+    inputFiles = chipInputFiles,
     stranded = TRUE,
     scale = FALSE,
     outPrefix = op,
@@ -175,15 +168,10 @@ test_that("testing plot_locus", {
 })
 test_that("testing plot_peak_annotation", {
   op <- "test_plot_peak_annotation1"
-  peakimportParams <- list(
-    offset = 0, fix_width = 100, fix_point = "center", norm = FALSE,
-    useScore = FALSE, outRle = FALSE, useSizeFactor = FALSE, genome = "hg19"
-  )
-
   plot_peak_annotation(
     peakFile = bedQueryFiles[2],
     gtfFile = gtffile,
-    importParams = peakimportParams,
+    importParams = bedimportParams,
     fiveP = -2000,
     dsTSS = 200,
     threeP = 1000,
@@ -193,15 +181,10 @@ test_that("testing plot_peak_annotation", {
   pdf_to_png(op)
 
   op <- "test_plot_peak_annotation2"
-  peakimportParams <- list(
-    offset = 0, fix_width = 21, fix_point = "center", norm = FALSE,
-    useScore = FALSE, outRle = FALSE, useSizeFactor = FALSE, genome = "hg19"
-  )
-
   plot_peak_annotation(
     peakFile = bedQueryFiles[3],
     gtfFile = gtffile,
-    importParams = peakimportParams,
+    importParams = bedimportParams,
     fiveP = -1000,
     dsTSS = 0,
     threeP = 2000,
@@ -212,24 +195,16 @@ test_that("testing plot_peak_annotation", {
 })
 
 test_that("testing plot_region", {
-  queryfiles <- c(bamQueryFiles, chipQureyFiles)
-  inputfiles <- c(bamInputFiles, chipInputFiles)
-
-  importParams <- list(
-    offset = 0, fix_width = 150, fix_point = "start", norm = TRUE,
-    useScore = FALSE, outRle = TRUE, useSizeFactor = FALSE, genome = "hg19"
-  )
-
   op <- "test_plot_region"
   plot_region(
-    queryFiles = queryfiles,
+    queryFiles = chipQureyFiles,
     centerFiles = bedQueryFiles[1],
-    inputFiles = inputfiles,
+    inputFiles = chipInputFiles,
     nbins = 100,
     heatmap = TRUE,
     scale = FALSE,
     regionName = "narrowPeak",
-    importParams = importParams,
+    importParams = chipimportParams,
     verbose = FALSE,
     fiveP = -500,
     threeP = 500,

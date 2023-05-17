@@ -14,9 +14,9 @@
 #' @author Shuye Pu
 #'
 #' @examples
-#' txdb <- AnnotationDbi::loadDb(system.file("extdata", "txdb_chr19.sql",
-#'   package = "GenomicPlot"
-#' ))
+#' gtffile <- system.file("extdata", "gencode.v19.annotation_chr19.gtf", package = "GenomicPlot")
+#' gff <- RCAS::importGtf(saveObjectAsRds = TRUE, filePath = gtffile)
+#' txdb <- makeTxDbFromGRanges(gff)
 #' longestTx <- extract_longest_tx(txdb, plot = FALSE)
 #'
 #' @export extract_longest_tx
@@ -197,9 +197,10 @@ extract_longest_tx <- function(txdb,
 #' @author Shuye Pu
 #'
 #' @examples
-#' txdb <- AnnotationDbi::loadDb(system.file("extdata", "txdb_chr19.sql",
-#'   package = "GenomicPlot"
-#' ))
+#' gtffile <- system.file("extdata", "gencode.v19.annotation_chr19.gtf", package = "GenomicPlot")
+#' gff <- RCAS::importGtf(saveObjectAsRds = TRUE, filePath = gtffile)
+#' txdb <- makeTxDbFromGRanges(gff)
+#' 
 #' output <- get_genomic_feature_coordinates(txdb,
 #'   featureName = "cds", featureSource = "gencode",
 #'   export = FALSE, longest = TRUE, protein_coding = TRUE
@@ -338,9 +339,9 @@ get_genomic_feature_coordinates <- function(txdb,
 #' @author Shuye Pu
 #'
 #' @examples
-#' txdb <- AnnotationDbi::loadDb(system.file("extdata", "txdb_chr19.sql",
-#'   package = "GenomicPlot"
-#' ))
+#' gtffile <- system.file("extdata", "gencode.v19.annotation_chr19.gtf", package = "GenomicPlot")
+#' gff <- RCAS::importGtf(saveObjectAsRds = TRUE, filePath = gtffile)
+#' txdb <- makeTxDbFromGRanges(gff)
 #'
 #' gf <- prepare_3parts_genomic_features(txdb,
 #'   meta = FALSE, nbins = 100, fiveP = -1000, threeP = 1000,
@@ -433,9 +434,9 @@ prepare_3parts_genomic_features <- function(txdb,
 #' @author Shuye Pu
 #'
 #' @examples
-#' txdb <- AnnotationDbi::loadDb(system.file("extdata", "txdb_chr19.sql",
-#'   package = "GenomicPlot"
-#' ))
+#' gtffile <- system.file("extdata", "gencode.v19.annotation_chr19.gtf", package = "GenomicPlot")
+#' gff <- RCAS::importGtf(saveObjectAsRds = TRUE, filePath = gtffile)
+#' txdb <- makeTxDbFromGRanges(gff)
 #'
 #' gf <- prepare_5parts_genomic_features(txdb,
 #'   meta = TRUE, nbins = 100, fiveP = -1000, threeP = 1000,
@@ -540,9 +541,9 @@ prepare_5parts_genomic_features <- function(txdb,
 #' @author Shuye Pu
 #'
 #' @examples
-#' txdb <- AnnotationDbi::loadDb(system.file("extdata", "txdb_chr19.sql",
-#'   package = "GenomicPlot"
-#' ))
+#' gtffile <- system.file("extdata", "gencode.v19.annotation_chr19.gtf", package = "GenomicPlot")
+#' gff <- RCAS::importGtf(saveObjectAsRds = TRUE, filePath = gtffile)
+#' txdb <- makeTxDbFromGRanges(gff)
 #'
 #' f <- get_txdb_features(txdb, dsTSS = 100, fiveP = -100, threeP = 100)
 #'
@@ -648,7 +649,9 @@ get_txdb_features <- function(txdb,
 #' @author Shuye Pu
 #'
 #' @examples
-#' txdb <- AnnotationDbi::loadDb(system.file("extdata", "txdb_chr19.sql", package = "GenomicPlot"))
+#' gtffile <- system.file("extdata", "gencode.v19.annotation_chr19.gtf", package = "GenomicPlot")
+#' gff <- RCAS::importGtf(saveObjectAsRds = TRUE, filePath = gtffile)
+#' txdb <- makeTxDbFromGRanges(gff)
 #' f <- get_txdb_features(txdb, dsTSS = 100, fiveP = 0, threeP = 1000)
 #'
 #' p <- RCAS::importBed(system.file("extdata", "test_chip_peak_chr19.bed", package = "GenomicPlot"))
