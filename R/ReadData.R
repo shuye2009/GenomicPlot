@@ -14,6 +14,9 @@
 #' 'useSizeFactor', logical, indicating whether the library size should be adjusted with a size factor, using the 'calcNormFactors' function in the edgeR package, only applicable to ChIPseq data.
 #' @param nc integer, number of cores for parallel processing
 #' @param verbose logical, whether to output additional information
+#' @param useRds logical, whether to use existing .rds file
+#' @param saveRds logical, whether to save .rds file
+#' @param overrideRds logical, whether to modify existing .rds file
 #'
 #' @details when 'useScore' is TRUE, the score column of the bed file will be used in the metadata column 'score' of the GRanges object, or the 'Values' field of the RleList object. Otherwise the value 1 will be used instead. When the intended use of the input bed is a reference feature, both 'useScore' and 'outRle' should be set to FALSE.
 #'
@@ -29,35 +32,38 @@
 #' inputFiles <- system.file("extdata", "input_chr19.bam", package = "GenomicPlot")
 #' names(inputFiles) <- "input"
 #'
-#' importParams <- list(
+#' bamimportParams <- list(
 #'   offset = -1, fix_width = 0, fix_point = "start", norm = TRUE,
-#'   useScore = FALSE, outRle = TRUE, useSizeFactor = TRUE, genome = "hg19"
+#'   useScore = FALSE, outRle = TRUE, useSizeFactor = FALSE, genome = "hg19"
 #' )
 #'
 #' out_list <- handle_input(
 #'   inputFiles = c(queryFiles, inputFiles),
-#'   importParams = importParams, verbose = TRUE, nc = 2
+#'   importParams = bamimportParams, verbose = TRUE, nc = 2
 #' )
 #'
 #' queryFiles <- system.file("extdata", "test_wig_chr19_+.wig", package = "GenomicPlot")
 #' names(queryFiles) <- "test_wig"
 #'
-#' importParams <- list(
+#' wigimportParams <- list(
 #'   offset = 0, fix_width = 0, fix_point = "start", norm = FALSE,
 #'   useScore = FALSE, outRle = TRUE, useSizeFactor = FALSE, genome = "hg19"
 #' )
 #'
-#' out <- handle_input(queryFiles, importParams, verbose = TRUE) 
+#' out <- handle_input(queryFiles, wigimportParams, verbose = TRUE) 
 #' 
 #' queryFiles <- system.file("extdata", "test_wig_chr19_+.bw", package = "GenomicPlot")
 #' names(queryFiles) <- "test_bw" 
 #'  
-#' out <- handle_input(queryFiles, importParams, verbose = TRUE) 
+#' out <- handle_input(queryFiles, wigimportParams, verbose = TRUE) 
 #' 
 #' @export handle_input
 
 handle_input <- function(inputFiles,
                          importParams = NULL,
+                         useRds = TRUE,
+                         saveRds = TRUE,
+                         overrideRds = TRUE,
                          verbose = FALSE,
                          nc = 2) {
   if (any(is.null(names(inputFiles)))) stop("Each file must have a name attribute!")
@@ -71,20 +77,24 @@ handle_input <- function(inputFiles,
   inputFUN <- function(funName, inputFile, importParams, verbose) {
     fileName <- basename(inputFile)
     dirName <- dirname(inputFile)
-    if (file.exists(file.path(dirName, paste0(fileName, ".rds")))) {
+    if (file.exists(file.path(dirName, paste0(fileName, ".rds"))) && useRds) {
       temp <- readRDS(file.path(dirName, paste0(fileName, ".rds")))
       if (identical(temp$param, importParams)) {
         out <- temp$Rle
         if (verbose) message("Cached .rds file is used\n")
       } else {
         out <- funName(inputFile = inputFile, importParams, verbose)
-        saveRDS(list(param = importParams, Rle = out), file.path(dirName, paste0(fileName, ".rds")))
-        if (verbose) message("Cached .rds file is modified using new input parameters\n")
+        if(overrideRds){
+           saveRDS(list(param = importParams, Rle = out), file.path(dirName, paste0(fileName, ".rds")))
+           if (verbose) message("Cached .rds file is modified using new input parameters\n")
+        }
       }
     } else {
       out <- funName(inputFile = inputFile, importParams, verbose)
-      saveRDS(list(param = importParams, Rle = out), file.path(dirName, paste0(fileName, ".rds")))
-      if (verbose) message("Input data is cached as .rds file for fast reloading\n")
+      if(saveRds){
+         saveRDS(list(param = importParams, Rle = out), file.path(dirName, paste0(fileName, ".rds")))
+         if (verbose) message("Input data is cached as .rds file for fast reloading\n")  
+      }
     }
     return(out)
   }
@@ -151,24 +161,6 @@ handle_input <- function(inputFiles,
 #'
 #' @author Shuye Pu
 #' 
-#' @examples
-#' queryFiles <- system.file("extdata", "chip_treat_chr19.bam", package = "GenomicPlot")
-#' names(queryFiles) <- "query"
-#'
-#' inputFiles <- system.file("extdata", "chip_input_chr19.bam", package = "GenomicPlot")
-#' names(inputFiles) <- "input"
-#'
-#' importParams <- list(
-#'   offset = 0, fix_width = 140, fix_point = "start", norm = FALSE,
-#'   useScore = FALSE, outRle = FALSE, useSizeFactor = FALSE, genome = "hg19"
-#' )
-#'
-#' out_list <- handle_input(
-#'   inputFiles = c(queryFiles, inputFiles),
-#'   importParams = importParams, verbose = TRUE, nc = 2
-#' )
-#'
-#' res <- effective_size(out_list, outRle = TRUE, genome = "hg19", nc = 2, verbose = TRUE)
 #'
 #' @export effective_size
 #'
@@ -240,12 +232,12 @@ effective_size <- function(outlist,
 #' queryFiles <- system.file("extdata", "test_chip_peak_chr19.narrowPeak", package = "GenomicPlot")
 #' names(queryFiles) <- "narrowPeak"
 #'
-#' importParams <- list(
-#'   offset = 0, fix_width = 0, fix_point = "start", norm = FALSE,
-#'   useScore = TRUE, outRle = TRUE, useSizeFactor = FALSE, genome = "hg19"
+#' bedimportParams <- list(
+#'   offset = 0, fix_width = 100, fix_point = "center", norm = FALSE,
+#'   useScore = FALSE, outRle = TRUE, useSizeFactor = FALSE, genome = "hg19"
 #' )
 #'
-#' out <- handle_bed(queryFiles, importParams, verbose = TRUE)
+#' out <- handle_bed(queryFiles, bedimportParams, verbose = TRUE)
 #' lapply(out$query, sum)
 #'
 #' @export handle_bed
@@ -324,18 +316,6 @@ handle_bed <- function(inputFile,
 #'
 #' @author Shuye Pu
 #' 
-#' @examples 
-#' queryFiles <- system.file("extdata", "chip_treat_chr19.bam", package = "GenomicPlot")
-#' names(queryFiles) <- "query"
-#'
-#' importParams <- list(
-#'   offset = 0, fix_width = 140, fix_point = "start", norm = FALSE,
-#'   useScore = FALSE, outRle = TRUE, useSizeFactor = FALSE, genome = "hg19"
-#' )
-#'
-#' out <- handle_bam(queryFiles, importParams, verbose = TRUE)
-#' lapply(out$query, sum)
-#' 
 #' @export handle_bam
 #'
 handle_bam <- function(inputFile,
@@ -397,17 +377,6 @@ handle_bam <- function(inputFile,
 #' @return a list object with four elements, 'query' is a list GRanges objects or RleList objects, 'size' is the estimated library size, 'type' is the input file type, weight' is the name of the metadata column to be used as weight for coverage calculation
 #'
 #' @author Shuye Pu 
-#' @examples 
-#' queryFiles <- system.file("extdata", "test_wig_chr19_+.bw", package = "GenomicPlot")
-#' names(queryFiles) <- "test_bw"
-#'
-#' importParams <- list(
-#'   offset = 0, fix_width = 0, fix_point = "start", norm = FALSE,
-#'   useScore = FALSE, outRle = TRUE, useSizeFactor = FALSE, genome = "hg19"
-#' )
-#'
-#' out <- handle_bw(queryFiles, importParams, verbose = TRUE)
-#' lapply(out$query, sum)
 #'
 #' @export handle_bw
 #'
@@ -466,18 +435,6 @@ handle_bw <- function(inputFile,
 #' @return a list object with four elements, 'query' is a list GRanges objects or RleList objects, 'size' is the library size, 'type' is the input file type, 'weight' is the name of the metadata column to be used as weight for coverage calculation
 #'
 #' @author Shuye Pu 
-#' 
-#' @examples 
-#' queryFiles <- system.file("extdata", "test_wig_chr19_+.wig", package = "GenomicPlot")
-#' names(queryFiles) <- "test_wig"
-#'
-#' importParams <- list(
-#'   offset = 0, fix_width = 0, fix_point = "start", norm = FALSE,
-#'   useScore = FALSE, outRle = TRUE, useSizeFactor = FALSE, genome = "hg19"
-#' )
-#'
-#' out <- handle_wig(queryFiles, importParams, verbose = TRUE)
-#' lapply(out$query, sum)
 #'
 #' @export handle_wig
 #'

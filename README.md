@@ -43,15 +43,17 @@ queryfiles <- c(system.file("extdata", "test_chip_peak_chr19.narrowPeak", packag
                 system.file("extdata", "test_clip_peak_chr19.bed", package = "GenomicPlot"))
 names(queryfiles) <- c("NarrowPeak", "SummitPeak", "iCLIPPeak")
 
-op <- "test_plot_5parts_metagene"
+bedimportParams <- list(
+  offset = 0, fix_width = 100, fix_point = "center", norm = FALSE,
+  useScore = FALSE, outRle = TRUE, useSizeFactor = FALSE, genome = "hg19"
+)
 
-importParams <- list(offset = 0, fix_width = 100, fix_point = "center", norm = FALSE, useScore = FALSE,
-                          outRle = TRUE, useSizeFactor = FALSE, genome = "hg19")
+op <- "test_plot_5parts_metagene"
 
 plot_5parts_metagene(queryFiles = queryfiles, 
                      gFeatures = list(metaF = gf), 
                      inputFiles = NULL, 
-                     importParams = importParams,
+                     importParams = bedimportParams,
                      verbose = FALSE, 
                      smooth = TRUE, 
                      scale = FALSE, 
@@ -74,15 +76,12 @@ The following example shows you how to visualize distance between iCLIP_peaks/Ch
 
 op <- "test_plot_locus"
 
-importParams <- list(offset = 0, fix_width = 0, fix_point = "center", norm = FALSE, useScore = FALSE,
-                          outRle = TRUE, useSizeFactor = FALSE, genome = "hg19")
-
 plot_locus(queryFiles = queryfiles[c(1,3)], 
                      centerFiles = queryfiles[2], 
                      ext = c(-1000, 1000), 
                      hl = c(-100, 100), 
                      inputFiles = NULL,                              
-                     importParams = importParams, 
+                     importParams = bedimportParams, 
                      shade = TRUE, 
                      binSize = 10, 
                      refPoint = "center", 
@@ -110,14 +109,9 @@ The following example shows you how to annotate ChIP-seq peaks. The annotation s
 
 op <- "test_plot_peak_annotation"
 
-gtffile <- system.file("extdata", "gencode.v19.annotation_chr19.gtf", package = "GenomicPlot")
-
-importParams <- list(offset = 0, fix_width = 21, fix_point = "center", norm = FALSE, useScore = FALSE,
-                          outRle = FALSE, useSizeFactor = FALSE, genome = "hg19")
-                          
 plot_peak_annotation(peakFile = queryfiles[2], 
                      gtfFile = gtffile, 
-                     importParams = importParams, 
+                     importParams = bedimportParams, 
                      fiveP = -1000, 
                      threeP = 1000, 
                      outPrefix = op, 

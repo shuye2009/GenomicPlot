@@ -78,7 +78,9 @@ A line plot will be displayed for both start and end of feature. If Input files 
 computed and displayed as well.
 }
 \examples{
-txdb <- AnnotationDbi::loadDb(system.file("extdata", "txdb_chr19.sql", package = "GenomicPlot"))
+gtffile <- system.file("extdata", "gencode.v19.annotation_chr19.gtf", package = "GenomicPlot")
+gff <- RCAS::importGtf(saveObjectAsRds = TRUE, filePath = gtffile)
+txdb <- makeTxDbFromGRanges(gff)
 
 queryfiles <- system.file("extdata", "chip_treat_chr19.bam", package = "GenomicPlot")
 names(queryfiles) <- "query"
@@ -89,14 +91,14 @@ names(inputfiles) <- "input"
 centerfiles <- system.file("extdata", "test_chip_peak_chr19.narrowPeak", package = "GenomicPlot")
 names(centerfiles) <- "narrowPeak"
 
-importParams <- list(
-  offset = 0, fix_width = 150, fix_point = "start", norm = FALSE,
-  useScore = FALSE, outRle = TRUE, useSizeFactor = TRUE, genome = "hg19"
+chipimportParams <- list(
+  offset = 0, fix_width = 150, fix_point = "start", norm = TRUE,
+  useScore = FALSE, outRle = TRUE, useSizeFactor = FALSE, genome = "hg19"
 )
 
 df <- plot_start_end(
   queryFiles = queryfiles, inputFiles = inputfiles,
-  centerFiles = c("gene", centerfiles), txdb = txdb, importParams = importParams, binSize = 10,
+  centerFiles = c("gene", centerfiles), txdb = txdb, importParams = chipimportParams, binSize = 10,
   insert = 100, verbose = TRUE, ext = c(-500, 100, -100, 500), hl = c(-50, 50, -50, 50), stranded = TRUE,
   scale = FALSE, smooth = TRUE, rmOutlier = 0, outPrefix = NULL, transform = NA, shade = TRUE,
   Ylab = "Coverage/base/gene", nc = 2

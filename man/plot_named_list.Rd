@@ -16,7 +16,9 @@ a ggplot object
 This is a helper function for displaying function arguments for a plotting function. If the runtime value of the argument is a small object, its values is displayed, otherwise, only the name of the value of the argument is displayed.
 }
 \examples{
-txdb <- AnnotationDbi::loadDb(system.file("extdata", "txdb_chr19.sql", package = "GenomicPlot"))
+gtffile <- system.file("extdata", "gencode.v19.annotation_chr19.gtf", package = "GenomicPlot")
+gff <- RCAS::importGtf(saveObjectAsRds = TRUE, filePath = gtffile)
+txdb <- makeTxDbFromGRanges(gff)
 
 queryfiles <- system.file("extdata", "treat_chr19.bam", package = "GenomicPlot")
 names(queryfiles) <- "query"
@@ -29,14 +31,14 @@ gfeatures <- prepare_5parts_genomic_features(txdb,
   threeP = 1000, longest = TRUE, verbose = FALSE
 )
 
-importParams <- list(
-  offset = 0, fix_width = 150, fix_point = "start", norm = TRUE,
+bamimportParams <- list(
+  offset = -1, fix_width = 0, fix_point = "start", norm = TRUE,
   useScore = FALSE, outRle = TRUE, useSizeFactor = FALSE, genome = "hg19"
 )
 
 alist <- list(
   "txdb" = txdb, "treat" = queryfiles, "control" = inputfiles, 
-  "feature" = gfeatures, "param" = importParams
+  "feature" = gfeatures, "param" = bamimportParams
 )
 
 GenomicPlot:::plot_named_list(alist)

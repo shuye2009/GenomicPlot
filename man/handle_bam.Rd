@@ -22,19 +22,6 @@ This is a function for read NGS reads data in bam format, store the input data i
 \details{
 The reads are filtered using mapq score >= 10 by default, only mapped reads are counted towards library size.
 }
-\examples{
-queryFiles <- system.file("extdata", "chip_treat_chr19.bam", package = "GenomicPlot")
-names(queryFiles) <- "query"
-
-importParams <- list(
-  offset = 0, fix_width = 140, fix_point = "start", norm = FALSE,
-  useScore = FALSE, outRle = TRUE, useSizeFactor = FALSE, genome = "hg19"
-)
-
-out <- handle_bam(queryFiles, importParams, verbose = TRUE)
-lapply(out$query, sum)
-
-}
 \author{
 Shuye Pu
 }

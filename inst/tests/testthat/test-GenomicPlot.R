@@ -15,7 +15,7 @@ outdir <- "../test_output"
 setwd(outdir)
 
 gtffile <- system.file("extdata", "gencode.v19.annotation_chr19.gtf", package = "GenomicPlot")
-gff <- RCAS::importGtf(saveObjectAsRds = TRUE, filePath = gtffile)
+gff <- RCAS::importGtf(readFromRds = TRUE, filePath = gtffile)
 txdb <- makeTxDbFromGRanges(gff)
 
 bedQueryFiles <- c(
@@ -47,7 +47,7 @@ names(chipInputFiles) <- "chip_input"
 
 chipimportParams <- list(
   offset = 0, fix_width = 150, fix_point = "start", norm = TRUE,
-  useScore = FALSE, outRle = TRUE, useSizeFactor = TRUE, genome = "hg19"
+  useScore = FALSE, outRle = TRUE, useSizeFactor = FALSE, genome = "hg19"
 )
 
 

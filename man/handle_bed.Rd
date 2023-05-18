@@ -23,12 +23,12 @@ This is a function for read peaks data in bed format, store the input data in a 
 queryFiles <- system.file("extdata", "test_chip_peak_chr19.narrowPeak", package = "GenomicPlot")
 names(queryFiles) <- "narrowPeak"
 
-importParams <- list(
-  offset = 0, fix_width = 0, fix_point = "start", norm = FALSE,
-  useScore = TRUE, outRle = TRUE, useSizeFactor = FALSE, genome = "hg19"
+bedimportParams <- list(
+  offset = 0, fix_width = 100, fix_point = "center", norm = FALSE,
+  useScore = FALSE, outRle = TRUE, useSizeFactor = FALSE, genome = "hg19"
 )
 
-out <- handle_bed(queryFiles, importParams, verbose = TRUE)
+out <- handle_bed(queryFiles, bedimportParams, verbose = TRUE)
 lapply(out$query, sum)
 
 }

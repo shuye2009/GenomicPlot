@@ -4,20 +4,34 @@
 \alias{handle_input}
 \title{Hand input of NGS data with various formats}
 \usage{
-handle_input(inputFiles, importParams = NULL, verbose = FALSE, nc = 2)
+handle_input(
+  inputFiles,
+  importParams = NULL,
+  useRds = TRUE,
+  saveRds = TRUE,
+  overrideRds = TRUE,
+  verbose = FALSE,
+  nc = 2
+)
 }
 \arguments{
 \item{inputFiles}{a vector of strings denoting file names}
 
-\item{importParams}{a list with the 8 elements: list(offset, fix_width, fix_point, useScore, outRle, norm, genome, useSizeFactor). Details are as follows:
+\item{importParams}{a list with the 9 elements: list(offset, fix_width, fix_point, useScore, outRle, norm, genome, useSizeFactor). Details are as follows:
 'offset', an integer, -1 indicating the bam reads should be shrunk to the -1 position at the 5'end of the reads, which corresponds to the cross link site in iCLIP.
 'fix_width', an integer defining how long the reads should be extended to, ignored when offset is not 0.
 'fix_point', a string in c("start", "end", "center") denoting the anchor point for extension, ignored when offset is not 0.
-'useScore', logical, indicating whether the 'score' column of the bed file should be used in calculation of coverage.
+'useScore', logical, indicating whether the 'score' column of the bed file should be used in calculation of coverage. 
 'outRle', logical, indicating whether the output should be RleList objects or GRanges objects.
 'norm', logical, indicating whether the output RleList should be normalized to RPM using library sizes.
 'genome', a string denoting the genome name and version.
 'useSizeFactor', logical, indicating whether the library size should be adjusted with a size factor, using the 'calcNormFactors' function in the edgeR package, only applicable to ChIPseq data.}
+
+\item{useRds}{logical, whether to use existing .rds file}
+
+\item{saveRds}{logical, whether to save .rds file}
+
+\item{overrideRds}{logical, whether to modify existing .rds file}
 
 \item{verbose}{logical, whether to output additional information}
 
@@ -40,15 +54,30 @@ names(queryFiles) <- "query"
 inputFiles <- system.file("extdata", "input_chr19.bam", package = "GenomicPlot")
 names(inputFiles) <- "input"
 
-importParams <- list(
+bamimportParams <- list(
   offset = -1, fix_width = 0, fix_point = "start", norm = TRUE,
-  useScore = FALSE, outRle = TRUE, useSizeFactor = TRUE, genome = "hg19"
+  useScore = FALSE, outRle = TRUE, useSizeFactor = FALSE, genome = "hg19"
 )
 
 out_list <- handle_input(
   inputFiles = c(queryFiles, inputFiles),
-  importParams = importParams, verbose = TRUE, nc = 2
+  importParams = bamimportParams, verbose = TRUE, nc = 2
 )
+
+queryFiles <- system.file("extdata", "test_wig_chr19_+.wig", package = "GenomicPlot")
+names(queryFiles) <- "test_wig"
+
+wigimportParams <- list(
+  offset = 0, fix_width = 0, fix_point = "start", norm = FALSE,
+  useScore = FALSE, outRle = TRUE, useSizeFactor = FALSE, genome = "hg19"
+)
+
+out <- handle_input(queryFiles, wigimportParams, verbose = TRUE) 
+
+queryFiles <- system.file("extdata", "test_wig_chr19_+.bw", package = "GenomicPlot")
+names(queryFiles) <- "test_bw" 
+ 
+out <- handle_input(queryFiles, wigimportParams, verbose = TRUE) 
 
 }
 \author{

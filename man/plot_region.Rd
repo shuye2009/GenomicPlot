@@ -81,25 +81,28 @@ a dataframe containing the data used for plotting
 Plot reads or peak Coverage/base/gene of samples given in the query files inside regions defined in the centerFiles. The upstream and downstream flanking windows can be given separately. If Input files are provided, ratio over Input is computed and displayed as well.
 }
 \examples{
-txdb <- AnnotationDbi::loadDb(system.file("extdata", "txdb_chr19.sql", package = "GenomicPlot"))
+gtffile <- system.file("extdata", "gencode.v19.annotation_chr19.gtf", package = "GenomicPlot")
+gff <- RCAS::importGtf(saveObjectAsRds = TRUE, filePath = gtffile)
+txdb <- makeTxDbFromGRanges(gff)
+
 queryfiles <- system.file("extdata", "chip_treat_chr19.bam", package = "GenomicPlot")
 names(queryfiles) <- "query"
 inputfiles <- system.file("extdata", "chip_input_chr19.bam", package = "GenomicPlot")
 names(inputfiles) <- "input"
 centerfiles <- system.file("extdata", "test_chip_peak_chr19.narrowPeak", package = "GenomicPlot")
 names(centerfiles) <- "narrowPeak"
-op <- NULL
-importParams <- list(
+
+chipimportParams <- list(
   offset = 0, fix_width = 150, fix_point = "start", norm = TRUE,
-  useScore = FALSE, outRle = TRUE, useSizeFactor = TRUE, genome = "hg19"
+  useScore = FALSE, outRle = TRUE, useSizeFactor = FALSE, genome = "hg19"
 )
 
 plot_region(
   queryFiles = queryfiles, centerFiles = centerfiles, txdb = NULL, regionName = "region",
-  inputFiles = inputfiles, nbins = 100, importParams = importParams, verbose = TRUE,
-  scale = FALSE, heatmap = TRUE, fiveP = -1000, threeP = 1000, smooth = TRUE, stranded = TRUE, transform = "log2",
-  outPrefix = NULL, rmOutlier = 0, heatRange = NULL, Ylab = "Coverage/base/gene",
-  statsMethod = "wilcox.test", nc = 2
+  inputFiles = inputfiles, nbins = 100, importParams = chipimportParams, verbose = TRUE,
+  scale = FALSE, heatmap = TRUE, fiveP = -1000, threeP = 1000, smooth = TRUE, 
+  stranded = TRUE, transform = "log2", outPrefix = NULL, rmOutlier = 0, heatRange = NULL, 
+  Ylab = "Coverage/base/gene", statsMethod = "wilcox.test", nc = 2
 )
 
 }

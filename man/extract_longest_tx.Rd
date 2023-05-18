@@ -24,9 +24,9 @@ gene. The longest transcript is defined as the isoform that has the longest tran
 with longer CDS is selected. If the lengths of CDS tie again, the transcript with smaller id is selected arbitrarily.
 }
 \examples{
-txdb <- AnnotationDbi::loadDb(system.file("extdata", "txdb_chr19.sql",
-  package = "GenomicPlot"
-))
+gtffile <- system.file("extdata", "gencode.v19.annotation_chr19.gtf", package = "GenomicPlot")
+gff <- RCAS::importGtf(saveObjectAsRds = TRUE, filePath = gtffile)
+txdb <- makeTxDbFromGRanges(gff)
 longestTx <- extract_longest_tx(txdb, plot = FALSE)
 
 }

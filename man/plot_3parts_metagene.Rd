@@ -65,9 +65,9 @@ can be given separately, the parameter 'meta' controls if gene or metagene plots
 is computed and displayed as well.
 }
 \examples{
-txdb <- AnnotationDbi::loadDb(system.file("extdata", "txdb_chr19.sql",
-  package = "GenomicPlot"
-))
+gtffile <- system.file("extdata", "gencode.v19.annotation_chr19.gtf", package = "GenomicPlot")
+gff <- RCAS::importGtf(saveObjectAsRds = TRUE, filePath = gtffile)
+txdb <- makeTxDbFromGRanges(gff)
 
 queryfiles <- system.file("extdata", "treat_chr19.bam", package = "GenomicPlot")
 names(queryfiles) <- "query"
@@ -80,8 +80,8 @@ gfeatures <- prepare_3parts_genomic_features(txdb,
   nbins = 100, fiveP = -1000, threeP = 1000, longest = TRUE, protein_coding = TRUE, verbose = FALSE
 )
 
-importParams <- list(
-  offset = 0, fix_width = 150, fix_point = "start", norm = TRUE,
+bamimportParams <- list(
+  offset = -1, fix_width = 0, fix_point = "start", norm = TRUE,
   useScore = FALSE, outRle = TRUE, useSizeFactor = FALSE, genome = "hg19"
 )
 
@@ -89,7 +89,7 @@ df <- plot_3parts_metagene(
   queryFiles = queryfiles, gFeatures = gfeatures,
   inputFiles = inputfiles, scale = FALSE, verbose = TRUE,
   Ylab = "Coverage/base/gene",
-  importParams = importParams, smooth = TRUE, stranded = TRUE,
+  importParams = bamimportParams, smooth = TRUE, stranded = TRUE,
   outPrefix = NULL, heatmap = TRUE, rmOutlier = 0, heatRange = NULL,
   transform = "log2", nc = 2
 )

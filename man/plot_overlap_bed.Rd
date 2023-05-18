@@ -44,13 +44,13 @@ queryFiles <- c(
 )
 names(queryFiles) <- c("narrowPeak", "summitPeak", "clipPeak")
 
-handleBedParams <- list(
-  fix_width = 100, fix_point = "center", useScore = FALSE, outRle = FALSE,
-  offset = 0, norm = FALSE, useSizeFactor = FALSE, genome = "hg19"
+bedimportParams <- list(
+  offset = 0, fix_width = 100, fix_point = "center", norm = FALSE,
+  useScore = FALSE, outRle = FALSE, useSizeFactor = FALSE, genome = "hg19"
 )
 
 p <- plot_overlap_bed(
-  bedList = queryFiles, importParams = handleBedParams, pairOnly = FALSE,
+  bedList = queryFiles, importParams = bedimportParams, pairOnly = FALSE,
   stranded = FALSE
 )
 

@@ -22,20 +22,21 @@ a list of numeric vectors
 Function for parallel computation of countOverlaps function in the GenomicRanges package
 }
 \examples{
-queryFiles <- system.file("extdata", "treat_chr19.bam", package = "GenomicPlot")
-names(queryFiles) <- "query"
+bedQueryFiles <- c(
+  system.file("extdata", "test_chip_peak_chr19.narrowPeak", package = "GenomicPlot"),
+  system.file("extdata", "test_chip_peak_chr19.bed", package = "GenomicPlot"),
+  system.file("extdata", "test_clip_peak_chr19.bed", package = "GenomicPlot")
+)
+names(bedQueryFiles) <- c("NarrowPeak", "SummitPeak", "iCLIPPeak")
 
-inputFiles <- system.file("extdata", "input_chr19.bam", package = "GenomicPlot")
-names(inputFiles) <- "input"
-
-importParams <- list(
-  offset = -1, fix_width = 0, fix_point = "start", norm = FALSE,
-  useScore = FALSE, outRle = FALSE, useSizeFactor = FALSE, genome = "hg19"
+bedimportParams <- list(
+   offset = 0, fix_width = 100, fix_point = "center", norm = FALSE,
+   useScore = FALSE, outRle = FALSE, useSizeFactor = FALSE, genome = "hg19"
 )
 
 out_list <- handle_input(
-  inputFiles = c(queryFiles, inputFiles),
-  importParams = importParams, verbose = TRUE, nc = 2
+   inputFiles = bedQueryFiles,
+   importParams = bedimportParams, overrideRds = FALSE, verbose = TRUE, nc = 2
 )
 
 seqi <- GenomeInfoDb::Seqinfo(genome = "hg19") 

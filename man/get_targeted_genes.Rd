@@ -23,7 +23,9 @@ Annotate each peak with genomic features based on overlap, and produce summary s
 used in \code{plot_peak_annotation}
 }
 \examples{
-txdb <- AnnotationDbi::loadDb(system.file("extdata", "txdb_chr19.sql", package = "GenomicPlot"))
+gtffile <- system.file("extdata", "gencode.v19.annotation_chr19.gtf", package = "GenomicPlot")
+gff <- RCAS::importGtf(saveObjectAsRds = TRUE, filePath = gtffile)
+txdb <- makeTxDbFromGRanges(gff)
 f <- get_txdb_features(txdb, dsTSS = 100, fiveP = 0, threeP = 1000)
 
 p <- RCAS::importBed(system.file("extdata", "test_chip_peak_chr19.bed", package = "GenomicPlot"))

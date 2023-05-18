@@ -39,12 +39,12 @@ Function for parallel computation of scoreMatrixBin. The 'windows' parameter of 
 queryFiles <- system.file("extdata", "chip_treat_chr19.bam", package = "GenomicPlot")
 names(queryFiles) <- "query"
 
-importParams <- list(
-  offset = 0, fix_width = 140, fix_point = "start", norm = FALSE,
+chipimportParams <- list(
+  offset = 0, fix_width = 150, fix_point = "start", norm = TRUE,
   useScore = FALSE, outRle = TRUE, useSizeFactor = FALSE, genome = "hg19"
 )
 
-queryRegion <- handle_bam(queryFiles, importParams, verbose = TRUE)$query
+queryRegion <- handle_input(queryFiles, chipimportParams, verbose = TRUE)[[1]]$query
 
 windowFiles <- system.file("extdata", "test_chip_peak_chr19.narrowPeak", 
   package = "GenomicPlot"

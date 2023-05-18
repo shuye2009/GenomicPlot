@@ -22,19 +22,6 @@ This is a function for read NGS coverage data in bigwig format, store the input 
 \details{
 For stranded files, forward and reverse strands are stored in separate files, with '+' or 'p' in the forward strand file name and '-' or 'm' in the reverse strand  file name.
 }
-\examples{
-queryFiles <- system.file("extdata", "test_wig_chr19_+.bw", package = "GenomicPlot")
-names(queryFiles) <- "test_bw"
-
-importParams <- list(
-  offset = 0, fix_width = 0, fix_point = "start", norm = FALSE,
-  useScore = FALSE, outRle = TRUE, useSizeFactor = FALSE, genome = "hg19"
-)
-
-out <- handle_bw(queryFiles, importParams, verbose = TRUE)
-lapply(out$query, sum)
-
-}
 \author{
 Shuye Pu
 }

@@ -124,7 +124,7 @@ plot_start_end_with_random <- function(queryFiles,
     bedparam$norm <- FALSE
     bedparam$useScore <- FALSE
     bedparam$outRle <- FALSE
-    feature <- handle_input(inputFiles = centerFile, bedparam, verbose = verbose, nc = nc)[[1]]$query
+    feature <- handle_input(inputFiles = centerFile, bedparam, overrideRds = FALSE, verbose = verbose, nc = nc)[[1]]$query
     featureName <- names(centerFile)
   } else {
     stop("centerfile does not exit or the feature name is not supported!")
@@ -465,12 +465,12 @@ plot_start_end_with_random <- function(queryFiles,
 #'
 #' chipimportParams <- list(
 #'   offset = 0, fix_width = 150, fix_point = "start", norm = TRUE,
-#'   useScore = FALSE, outRle = TRUE, useSizeFactor = TRUE, genome = "hg19"
+#'   useScore = FALSE, outRle = TRUE, useSizeFactor = FALSE, genome = "hg19"
 #' )
 #'
 #' df <- plot_start_end(
 #'   queryFiles = queryfiles, inputFiles = inputfiles,
-#'   centerFiles = c("gene", centerfiles), txdb = txdb, importParams = importParams, binSize = 10,
+#'   centerFiles = c("gene", centerfiles), txdb = txdb, importParams = chipimportParams, binSize = 10,
 #'   insert = 100, verbose = TRUE, ext = c(-500, 100, -100, 500), hl = c(-50, 50, -50, 50), stranded = TRUE,
 #'   scale = FALSE, smooth = TRUE, rmOutlier = 0, outPrefix = NULL, transform = NA, shade = TRUE,
 #'   Ylab = "Coverage/base/gene", nc = 2
@@ -547,7 +547,7 @@ plot_start_end <- function(queryFiles,
       features[[featureName]] <- feature
     } else if (file.exists(featureName)) {
       names(featureName) <- names(centerFiles)[centerFiles == featureName]
-      feature <- handle_input(featureName, bedparam, verbose = verbose, nc = nc)
+      feature <- handle_input(featureName, bedparam, overrideRds = FALSE, verbose = verbose, nc = nc)
       featureGR <- feature[[1]]$query
       featureGR <- featureGR[width(featureGR) > minimal_width]
       feature[[1]]$query <- featureGR
@@ -1144,7 +1144,7 @@ plot_3parts_metagene <- function(queryFiles,
 #' 
 #' chipimportParams <- list(
 #'   offset = 0, fix_width = 150, fix_point = "start", norm = TRUE,
-#'   useScore = FALSE, outRle = TRUE, useSizeFactor = TRUE, genome = "hg19"
+#'   useScore = FALSE, outRle = TRUE, useSizeFactor = FALSE, genome = "hg19"
 #' )
 #'
 #' plot_region(
@@ -1223,7 +1223,7 @@ plot_region <- function(queryFiles,
       centerInputs[[featureName]] <- feature
     } else if (file.exists(featureName)) {
       names(featureName) <- names(centerFiles)[centerFiles == featureName]
-      feature <- handle_input(featureName, bedparam, verbose = verbose, nc = nc)
+      feature <- handle_input(featureName, bedparam, overrideRds = FALSE, verbose = verbose, nc = nc)
       centerInputs[[names(feature)[1]]] <- feature[[1]]
     } else {
       stop("featureName is not supported!")
@@ -2167,7 +2167,7 @@ plot_locus <- function(queryFiles,
       centerInputs[[featureName]] <- feature
     } else if (file.exists(featureName)) {
       names(featureName) <- names(centerFiles)[centerFiles == featureName]
-      feature <- handle_input(featureName, bedparam, verbose = verbose, nc = nc)
+      feature <- handle_input(featureName, bedparam, overrideRds = FALSE, verbose = verbose, nc = nc)
       centerInputs[[names(feature)[1]]] <- feature[[1]]
     } else {
       stop("featureName is not supported or the file does not exist, please check your file name and path!")
@@ -2755,7 +2755,7 @@ plot_locus_with_random <- function(queryFiles,
   bedparam$outRle <- FALSE
   bedparam$useSizeFactor <- FALSE
 
-  centerInputs <- handle_input(centerFiles, bedparam, verbose = verbose, nc = nc)
+  centerInputs <- handle_input(centerFiles, bedparam, overrideRds = FALSE, verbose = verbose, nc = nc)
   centerLabels <- names(centerInputs)
 
   for (queryLabel in queryLabels) {
@@ -3059,26 +3059,23 @@ plot_locus_with_random <- function(queryFiles,
 #' @return a dataframe of read counts per bin perl sample
 #'
 #' @examples
-#' queryFiles <- c(
-#'   system.file("extdata", "chip_treat_chr19.bam", package = "GenomicPlot"),
-#'   system.file("extdata", "treat_chr19.bam", package = "GenomicPlot")
+#' # Due to file size limitation, peak files are used instead.
+#' 
+#' bedQueryFiles <- c(
+#'   system.file("extdata", "test_chip_peak_chr19.narrowPeak", package = "GenomicPlot"),
+#'   system.file("extdata", "test_chip_peak_chr19.bed", package = "GenomicPlot"),
+#'   system.file("extdata", "test_clip_peak_chr19.bed", package = "GenomicPlot")
 #' )
-#' names(queryFiles) <- c("chip_query", "clip_query")
-#'
-#' inputFiles <- c(
-#'   system.file("extdata", "chip_input_chr19.bam", package = "GenomicPlot"),
-#'   system.file("extdata", "input_chr19.bam", package = "GenomicPlot")
-#' )
-#' names(inputFiles) <- c("chip_input", "clip_input")
-#'
-#' chipimportParams <- list(
-#'   offset = 0, fix_width = 150, fix_point = "start", norm = TRUE,
-#'   useScore = FALSE, outRle = TRUE, useSizeFactor = TRUE, genome = "hg19"
+#' names(bedQueryFiles) <- c("NarrowPeak", "SummitPeak", "iCLIPPeak")
+#' 
+#' bedimportParams <- list(
+#'    offset = 0, fix_width = 100, fix_point = "center", norm = FALSE,
+#'    useScore = FALSE, outRle = FALSE, useSizeFactor = FALSE, genome = "hg19"
 #' )
 #'
 #' plot_bam_correlation(
-#'   bamfiles = c(queryFiles, inputFiles), binSize = 10000, outPrefix = NULL,
-#'   importParams = chipimportParams, nc = 2
+#'   bamfiles = bedQueryFiles, binSize = 10000, outPrefix = NULL,
+#'   importParams = bedimportParams, nc = 2
 #' )
 #'
 #' @export plot_bam_correlation
@@ -3228,7 +3225,7 @@ plot_bam_correlation <- function(bamfiles,
 #'
 #' bedimportParams <- list(
 #'   offset = 0, fix_width = 100, fix_point = "center", norm = FALSE,
-#'   useScore = FALSE, outRle = TRUE, useSizeFactor = FALSE, genome = "hg19"
+#'   useScore = FALSE, outRle = FALSE, useSizeFactor = FALSE, genome = "hg19"
 #' )
 #'
 #' plot_peak_annotation(
@@ -3256,7 +3253,7 @@ plot_peak_annotation <- function(peakFile,
   peakLabel <- names(peakFile)
   importParams$useScore <- FALSE
   importParams$outRle <- FALSE
-  bedin <- handle_input(inputFiles = peakFile, importParams)
+  bedin <- handle_input(inputFiles = peakFile, importParams = importParams, overrideRds = FALSE)
   peak <- bedin[[peakLabel]]$query
 
   stranded <- TRUE
@@ -3611,7 +3608,7 @@ plot_peak_annotation <- function(peakFile,
 #'
 #' bedimportParams <- list(
 #'   offset = 0, fix_width = 100, fix_point = "center", norm = FALSE,
-#'   useScore = FALSE, outRle = TRUE, useSizeFactor = FALSE, genome = "hg19"
+#'   useScore = FALSE, outRle = FALSE, useSizeFactor = FALSE, genome = "hg19"
 #' )
 #'
 #' p <- plot_overlap_bed(
@@ -3631,7 +3628,7 @@ plot_overlap_bed <- function(bedList,
                              stranded = TRUE,
                              hw = c(8, 8),
                              verbose = FALSE) {
-  inputList <- handle_input(bedList, importParams)
+  inputList <- handle_input(bedList, importParams, overrideRds = FALSE)
   names(inputList) <- names(bedList)
   grList <- lapply(inputList, function(x) x$query)
   sizeList <- lapply(inputList, function(x) x$size)

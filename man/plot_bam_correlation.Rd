@@ -36,26 +36,23 @@ a dataframe of read counts per bin perl sample
 plot correlation in reads coverage distributions along the genome for bam files
 }
 \examples{
-queryFiles <- c(
-  system.file("extdata", "chip_treat_chr19.bam", package = "GenomicPlot"),
-  system.file("extdata", "treat_chr19.bam", package = "GenomicPlot")
-)
-names(queryFiles) <- c("chip_query", "clip_query")
+# Due to file size limitation, peak files are used instead.
 
-inputFiles <- c(
-  system.file("extdata", "chip_input_chr19.bam", package = "GenomicPlot"),
-  system.file("extdata", "input_chr19.bam", package = "GenomicPlot")
+bedQueryFiles <- c(
+  system.file("extdata", "test_chip_peak_chr19.narrowPeak", package = "GenomicPlot"),
+  system.file("extdata", "test_chip_peak_chr19.bed", package = "GenomicPlot"),
+  system.file("extdata", "test_clip_peak_chr19.bed", package = "GenomicPlot")
 )
-names(inputFiles) <- c("chip_input", "clip_input")
+names(bedQueryFiles) <- c("NarrowPeak", "SummitPeak", "iCLIPPeak")
 
-importParams <- list(
-  offset = 0, fix_width = 0, fix_point = "start", norm = FALSE,
-  useScore = FALSE, outRle = FALSE, useSizeFactor = FALSE, genome = "hg19"
+bedimportParams <- list(
+   offset = 0, fix_width = 100, fix_point = "center", norm = FALSE,
+   useScore = FALSE, outRle = FALSE, useSizeFactor = FALSE, genome = "hg19"
 )
 
 plot_bam_correlation(
-  bamfiles = c(queryFiles, inputFiles), binSize = 10000, outPrefix = NULL,
-  importParams = importParams, nc = 2
+  bamfiles = bedQueryFiles, binSize = 10000, outPrefix = NULL,
+  importParams = bedimportParams, nc = 2
 )
 
 }
