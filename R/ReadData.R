@@ -83,6 +83,7 @@ handle_input <- function(inputFiles,
         out <- temp$Rle
         if (verbose) message("Cached .rds file is used\n")
       } else {
+        if (!file.exists(inputFile)) stop("file does not exist, please check your file name and path!")
         out <- funName(inputFile = inputFile, importParams, verbose)
         if(overrideRds){
            saveRDS(list(param = importParams, Rle = out), file.path(dirName, paste0(fileName, ".rds")))
@@ -90,6 +91,7 @@ handle_input <- function(inputFiles,
         }
       }
     } else {
+      if (!file.exists(inputFile)) stop("file does not exist, please check your file name and path!")
       out <- funName(inputFile = inputFile, importParams, verbose)
       if(saveRds){
          saveRDS(list(param = importParams, Rle = out), file.path(dirName, paste0(fileName, ".rds")))
@@ -100,7 +102,7 @@ handle_input <- function(inputFiles,
   }
 
   outlist <- lapply(inputFiles, function(inputFile) {
-    if (!file.exists(inputFile)) stop("file does not exist, please check your file name and path!")
+    
     if (grepl("\\.bed|BED|Bed|narrowPeak|broadPeak$", inputFile)) {
       fileType <- "bed"
       if (verbose) message("Reading ", fileType, "file: ", inputFile, "\n")
