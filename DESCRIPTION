@@ -27,7 +27,7 @@ Suggests: knitr, rmarkdown, AnnotationHub, AnnotationDbi, R.utils, BSgenome.Hsap
    BiocFileCache, TxDb.Hsapiens.UCSC.hg19.knownGene (>= 3.2.2)
 biocViews: AlternativeSplicing, ChIPSeq, Coverage, GeneExpression, RNASeq, Sequencing, Software, 
    Transcription, Visualization, Annotation
-RoxygenNote: 7.2.1
+RoxygenNote: 7.2.3
 VignetteBuilder: knitr
 BugReports: https://github.com/shuye2009/GenomicPlot/issues
 URL: https://github.com/shuye2009/GenomicPlot
