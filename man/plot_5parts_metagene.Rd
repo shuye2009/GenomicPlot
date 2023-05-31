@@ -62,35 +62,6 @@ a dataframe containing the data used for plotting
 \description{
 Plot reads or peak Coverage/base/gene of samples given in the query files around genes. The upstream and downstream windows flanking genes can be given separately, metagene plots are generated with 5'UTR, CDS and 3'UTR segments. The length of each segments are prorated according to the median length of each segments. If Input files are provided, ratio over Input is computed and displayed as well.
 }
-\examples{
-gtffile <- system.file("extdata", "gencode.v19.annotation_chr19.gtf", package = "GenomicPlot")
-gff <- RCAS::importGtf(saveObjectAsRds = TRUE, filePath = gtffile)
-txdb <- makeTxDbFromGRanges(gff)
-
-queryfiles <- system.file("extdata", "treat_chr19.bam", package = "GenomicPlot")
-names(queryfiles) <- "query"
-
-inputfiles <- system.file("extdata", "input_chr19.bam", package = "GenomicPlot")
-names(inputfiles) <- "input"
-
-gfeatures <- prepare_5parts_genomic_features(txdb,
-  meta = TRUE, nbins = 100, fiveP = -1000,
-  threeP = 1000, longest = TRUE, verbose = FALSE
-)
-
-bamimportParams <- list(
-  offset = -1, fix_width = 0, fix_point = "start", norm = TRUE,
-  useScore = FALSE, outRle = TRUE, useSizeFactor = FALSE, genome = "hg19"
-)
-
-df <- plot_5parts_metagene(
-  queryFiles = queryfiles, gFeatures = list("metagene" = gfeatures),
-  inputFiles = inputfiles, scale = FALSE, verbose = FALSE, Ylab = "Coverage/base/gene",
-  importParams = bamimportParams, smooth = TRUE, stranded = TRUE, outPrefix = NULL, 
-  heatmap = TRUE, rmOutlier = 0, heatRange = NULL, transform = "log2", nc = 2
-)
-
-}
 \author{
 Shuye Pu
 }
