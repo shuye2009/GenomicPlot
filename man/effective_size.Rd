@@ -7,7 +7,7 @@
 effective_size(outlist, outRle, genome = "hg19", nc = 2, verbose = FALSE)
 }
 \arguments{
-\item{outlist}{a list of list objects with four elements, 'query' is either a GRanges object or an RleList object, 'size' is the library size, 'type' is the input file type, 'weight' is the name of the metadata column}
+\item{outlist}{a list of list objects with four elements, 'query' is a GRanges object, 'size' is the library size, 'type' is the input file type, 'weight' is the name of the metadata column}
 
 \item{outRle}{logical, indicating whether the 'query' element of the output should be an RleList object or a GRanges object}
 
@@ -22,6 +22,26 @@ a list of list objects with four elements ('query', 'size', 'type', 'weight'), w
 }
 \description{
 This is a helper function for handle_input. edgeR::calcNormFactors function is used to estimate normalizing factors, which is used to multiply library sizes.
+}
+\examples{
+queryFiles <- system.file("extdata", "chip_treat_chr19.bam", package = "GenomicPlot")
+names(queryFiles) <- "query"
+
+inputFiles <- system.file("extdata", "chip_input_chr19.bam", package = "GenomicPlot")
+names(inputFiles) <- "input"
+
+chipImportParams <- list(
+offset = 0, fix_width = 150, fix_point = "start", norm = TRUE,
+useScore = FALSE, outRle = FALSE, useSizeFactor = FALSE, genome = "hg19"
+)
+
+out_list <- handle_input(
+  inputFiles = c(queryFiles, inputFiles),
+  importParams = chipImportParams, verbose = TRUE, nc = 2
+)
+
+out <- effective_size(out_list, outRle = TRUE)
+
 }
 \author{
 Shuye Pu

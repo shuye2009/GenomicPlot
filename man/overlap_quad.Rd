@@ -18,6 +18,7 @@ a VennDiagram object
 This is a helper function for Venn diagram plot. A Venn diagram is plotted as output. For GRanges, as A overlap B may not be the same as B overlap A, the order of GRanges in a list matters, certain order may produce error.
 }
 \examples{
+
 test_list <- list(A = c(1, 2, 3, 4, 5), B = c(4, 5, 7), C = c(1, 3), D = 6)
 overlap_quad(test_list, intersect)
 
@@ -45,6 +46,7 @@ subject2 <- GRanges("chr19",
 overlap_quad(list(subject1 = subject1, subject2 = subject2, query1 = query1,
   query2 = query2), filter_by_overlaps_stranded
 )
+
 }
 \author{
 Shuye Pu

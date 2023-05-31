@@ -256,16 +256,16 @@ rm_outlier <- function(fullmatrix,
     outliers <- fullmatrix[fullmatrix > up_bound]
 
     if (verbose) {
-      message("Outlier detected:\n")
-      message("Maximum of the matrix ", max(fullmatrix))
-      message("\nMedian of row max ", median(rowmax))
-      message("\nMedian absolute deviation (mad) of row max ", M)
-      message("\nMulitplier of mad ", multiplier)
-      message("\nUp_bound and replace value ", up_bound)
-      message("\npercentile of up_bound", percentile)
-      message("\nPumber of outlier rows", length(which(rowmax > up_bound)))
-      message("\nNumber of outliers", length(outliers))
-      message("\nFraction of outliers ", length(outliers) / (nrow(fullmatrix) * ncol(fullmatrix)))
+      message("Outlier detected!!!\n")
+      message("Maximum of the matrix: ", max(fullmatrix))
+      message("\nMedian of row max: ", median(rowmax))
+      message("\nMedian absolute deviation (mad) of row max: ", M)
+      message("\nMulitplier of mad: ", multiplier)
+      message("\nUp_bound and replace value: ", up_bound)
+      message("\npercentile of up_bound: ", percentile)
+      message("\nPumber of outlier rows: ", length(which(rowmax > up_bound)))
+      message("\nNumber of outliers: ", length(outliers))
+      message("\nFraction of outliers: ", length(outliers) / (nrow(fullmatrix) * ncol(fullmatrix)))
       message("\nValues of outliers:\n")
       message(paste(outliers, collapse = " "), "\n")
     }
@@ -274,12 +274,12 @@ rm_outlier <- function(fullmatrix,
   } else {
     if (verbose) {
       message("Outlier not detected:\n")
-      message("Maximum of the matrix ", max(rowmax))
-      message("\nMedian of row max ", median(rowmax))
-      message("\nMedian absolute deviation (mad) of row max ", M)
-      message("\nMulitplier of mad ", multiplier)
-      message("\nUp_bound and replace value ", up_bound)
-      message("\nPercentile of up_bound ", percentile, "\n")
+      message("Maximum of the matrix: ", max(rowmax))
+      message("\nMedian of row max: ", median(rowmax))
+      message("\nMedian absolute deviation (mad) of row max: ", M)
+      message("\nMulitplier of mad: ", multiplier)
+      message("\nUp_bound and replace value: ", up_bound)
+      message("\nPercentile of up_bound: ", percentile, "\n")
     }
   }
 

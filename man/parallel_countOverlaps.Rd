@@ -46,8 +46,6 @@ tileBins <- tileGenome(seqi, tilewidth = tilewidth, cut.last.tile.in.chrom = TRU
  
 score_list1 <- parallel_countOverlaps(grange_list, tileBins, nc = 2)
 dplyr::glimpse(score_list1)
-score_list2 <- parallel_countOverlaps(grange_list, tileBins, nc = 2, switch = TRUE)
-dplyr::glimpse(score_list2)
 
 }
 \author{

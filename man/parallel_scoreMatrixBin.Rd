@@ -67,12 +67,6 @@ out <- parallel_scoreMatrixBin(
   stranded = TRUE,
   nc = 2
 )
-
-\donttest{
-draw_matrix_heatmap(out, dataName = "chipData", labels_col = NULL, 
-  levels_col = NULL, ranking = "Sum", ranges = NULL, verbose = FALSE)
-} 
- 
 }
 \author{
 Shuye Pu

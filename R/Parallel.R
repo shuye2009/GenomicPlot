@@ -20,15 +20,12 @@ start_parallel <- function(nc = 2,
   n.cores <- detectCores()
   fnc <- min(nc, as.integer(n.cores - 1))
 
-  switch(Sys.info()[["sysname"]],
-    Windows = {
-      my.cluster <- makeCluster(fnc, type = "PSOCK")
-    },
-    Linux = {
-      my.cluster <- makeCluster(fnc, type = "FORK")
-    }
-  )
-
+  if (Sys.info()[["sysname"]] == "Windows") {
+    my.cluster <- makeCluster(fnc, type = "PSOCK")
+  } else {
+    my.cluster <- makeCluster(fnc, type = "FORK")
+  }
+  
   if (verbose) message("Using ", fnc, " out of ", n.cores, " cores!\n")
 
   invisible(my.cluster)
@@ -105,12 +102,7 @@ stop_parallel <- function(cl) {
 #'   stranded = TRUE,
 #'   nc = 2
 #' )
-#' 
-#' \donttest{
-#' draw_matrix_heatmap(out, dataName = "chipData", labels_col = NULL, 
-#'   levels_col = NULL, ranking = "Sum", ranges = NULL, verbose = FALSE)
-#' } 
-#'  
+#
 #' @export parallel_scoreMatrixBin
 #'
 #'
@@ -179,8 +171,6 @@ parallel_scoreMatrixBin <- function(queryRegions,
 #'  
 #' score_list1 <- parallel_countOverlaps(grange_list, tileBins, nc = 2)
 #' dplyr::glimpse(score_list1)
-#' score_list2 <- parallel_countOverlaps(grange_list, tileBins, nc = 2, switch = TRUE)
-#' dplyr::glimpse(score_list2)
 #'
 #' @export parallel_countOverlaps
 #'

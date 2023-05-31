@@ -18,6 +18,7 @@ a VennDiagram object
 This is a helper function for Venn diagram plot. A Venn diagram is plotted as output. For GRanges, as A overlap B may not be the same as B overlap A, the order of GRanges in a list matters, certain order may produce error.
 }
 \examples{
+
 test_list <- list(A = c(1, 2, 3, 4, 5), B = c(4, 5, 7), C = c(1, 3))
 overlap_triple(test_list, intersect)
 

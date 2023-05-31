@@ -27,32 +27,6 @@
 #' @return a list of two objects, the first is a GRanges object, the second is a GRangesList object
 #' @author Shuye Pu
 #'
-#' @examples
-#' gtffile <- system.file("extdata", "gencode.v19.annotation_chr19.gtf", package = "GenomicPlot")
-#' gff <- RCAS::importGtf(saveObjectAsRds = TRUE, filePath = gtffile)
-#' txdb <- makeTxDbFromGRanges(gff)
-#'
-#' queryFiles <- system.file("extdata", "treat_chr19.bam", package = "GenomicPlot")
-#' names(queryFiles) <- "query"
-#'
-#' inputFiles <- system.file("extdata", "input_chr19.bam", package = "GenomicPlot")
-#' names(inputFiles) <- "input"
-#'
-#' ext <- c(-500, 200, -200, 500)
-#' hl <- c(-50, 50, -50, 50)
-#'
-#' bamimportParams <- list(
-#'   offset = -1, fix_width = 0, fix_point = "start", norm = TRUE,
-#'   useScore = FALSE, outRle = TRUE, useSizeFactor = FALSE, genome = "hg19"
-#' )
-#'
-#' plot_start_end_with_random(
-#'   queryFiles = c(queryFiles), inputFiles = c(inputFiles), txdb = txdb,
-#'   centerFile = "intron", binSize = 10, importParams = bamimportParams, ext = ext, hl = hl,
-#'   randomize = TRUE, verbose = TRUE, insert = 100, stranded = TRUE, scale = FALSE, smooth = TRUE,
-#'   outPrefix = NULL, nc = 2
-#' )
-#'
 #' @export plot_start_end_with_random
 #'
 #'
@@ -449,33 +423,6 @@ plot_start_end_with_random <- function(queryFiles,
 #' @return a list of two objects, the first is a GRanges object, the second is a GRangesList object
 #' @author Shuye Pu
 #'
-#' @examples
-#' gtffile <- system.file("extdata", "gencode.v19.annotation_chr19.gtf", package = "GenomicPlot")
-#' gff <- RCAS::importGtf(saveObjectAsRds = TRUE, filePath = gtffile)
-#' txdb <- makeTxDbFromGRanges(gff)
-#'
-#' queryfiles <- system.file("extdata", "chip_treat_chr19.bam", package = "GenomicPlot")
-#' names(queryfiles) <- "query"
-#'
-#' inputfiles <- system.file("extdata", "chip_input_chr19.bam", package = "GenomicPlot")
-#' names(inputfiles) <- "input"
-#'
-#' centerfiles <- system.file("extdata", "test_chip_peak_chr19.narrowPeak", package = "GenomicPlot")
-#' names(centerfiles) <- "narrowPeak"
-#'
-#' chipimportParams <- list(
-#'   offset = 0, fix_width = 150, fix_point = "start", norm = TRUE,
-#'   useScore = FALSE, outRle = TRUE, useSizeFactor = FALSE, genome = "hg19"
-#' )
-#'
-#' df <- plot_start_end(
-#'   queryFiles = queryfiles, inputFiles = inputfiles,
-#'   centerFiles = c("gene", centerfiles), txdb = txdb, importParams = chipimportParams, binSize = 10,
-#'   insert = 100, verbose = TRUE, ext = c(-500, 100, -100, 500), hl = c(-50, 50, -50, 50), stranded = TRUE,
-#'   scale = FALSE, smooth = TRUE, rmOutlier = 0, outPrefix = NULL, transform = NA, shade = TRUE,
-#'   Ylab = "Coverage/base/gene", nc = 2
-#' )
-#'
 #' @export plot_start_end
 #'
 
@@ -798,36 +745,6 @@ plot_start_end <- function(queryFiles,
 #' @return a dataframe containing the data used for plotting
 #' @author Shuye Pu
 #'
-#' @examples
-#' gtffile <- system.file("extdata", "gencode.v19.annotation_chr19.gtf", package = "GenomicPlot")
-#' gff <- RCAS::importGtf(saveObjectAsRds = TRUE, filePath = gtffile)
-#' txdb <- makeTxDbFromGRanges(gff)
-#'
-#' queryfiles <- system.file("extdata", "treat_chr19.bam", package = "GenomicPlot")
-#' names(queryfiles) <- "query"
-#'
-#' inputfiles <- system.file("extdata", "input_chr19.bam", package = "GenomicPlot")
-#' names(inputfiles) <- "input"
-#'
-#' gfeatures <- prepare_3parts_genomic_features(txdb,
-#'   featureName = "transcript", meta = TRUE,
-#'   nbins = 100, fiveP = -1000, threeP = 1000, longest = TRUE, protein_coding = TRUE, verbose = FALSE
-#' )
-#'
-#' bamimportParams <- list(
-#'   offset = -1, fix_width = 0, fix_point = "start", norm = TRUE,
-#'   useScore = FALSE, outRle = TRUE, useSizeFactor = FALSE, genome = "hg19"
-#' )
-#' 
-#' df <- plot_3parts_metagene(
-#'   queryFiles = queryfiles, gFeatures = gfeatures,
-#'   inputFiles = inputfiles, scale = FALSE, verbose = TRUE,
-#'   Ylab = "Coverage/base/gene",
-#'   importParams = bamimportParams, smooth = TRUE, stranded = TRUE,
-#'   outPrefix = NULL, heatmap = TRUE, rmOutlier = 0, heatRange = NULL,
-#'   transform = "log2", nc = 2
-#' )
-#'
 #' @export plot_3parts_metagene
 
 
@@ -1129,31 +1046,6 @@ plot_3parts_metagene <- function(queryFiles,
 #'
 #' @return a dataframe containing the data used for plotting
 #' @author Shuye Pu
-#'
-#' @examples
-#' gtffile <- system.file("extdata", "gencode.v19.annotation_chr19.gtf", package = "GenomicPlot")
-#' gff <- RCAS::importGtf(saveObjectAsRds = TRUE, filePath = gtffile)
-#' txdb <- makeTxDbFromGRanges(gff)
-#' 
-#' queryfiles <- system.file("extdata", "chip_treat_chr19.bam", package = "GenomicPlot")
-#' names(queryfiles) <- "query"
-#' inputfiles <- system.file("extdata", "chip_input_chr19.bam", package = "GenomicPlot")
-#' names(inputfiles) <- "input"
-#' centerfiles <- system.file("extdata", "test_chip_peak_chr19.narrowPeak", package = "GenomicPlot")
-#' names(centerfiles) <- "narrowPeak"
-#' 
-#' chipimportParams <- list(
-#'   offset = 0, fix_width = 150, fix_point = "start", norm = TRUE,
-#'   useScore = FALSE, outRle = TRUE, useSizeFactor = FALSE, genome = "hg19"
-#' )
-#'
-#' plot_region(
-#'   queryFiles = queryfiles, centerFiles = centerfiles, txdb = NULL, regionName = "region",
-#'   inputFiles = inputfiles, nbins = 100, importParams = chipimportParams, verbose = TRUE,
-#'   scale = FALSE, heatmap = TRUE, fiveP = -1000, threeP = 1000, smooth = TRUE, 
-#'   stranded = TRUE, transform = "log2", outPrefix = NULL, rmOutlier = 0, heatRange = NULL, 
-#'   Ylab = "Coverage/base/gene", statsMethod = "wilcox.test", nc = 2
-#' )
 #'
 #' @export plot_region
 
@@ -1709,7 +1601,7 @@ plot_region <- function(queryFiles,
 #'
 #' df <- plot_5parts_metagene(
 #'   queryFiles = queryfiles, gFeatures = list("metagene" = gfeatures),
-#'   inputFiles = inputfiles, scale = FALSE, verbose = TRUE, Ylab = "Coverage/base/gene",
+#'   inputFiles = inputfiles, scale = FALSE, verbose = FALSE, Ylab = "Coverage/base/gene",
 #'   importParams = bamimportParams, smooth = TRUE, stranded = TRUE, outPrefix = NULL, 
 #'   heatmap = TRUE, rmOutlier = 0, heatRange = NULL, transform = "log2", nc = 2
 #' )
@@ -2049,34 +1941,6 @@ plot_5parts_metagene <- function(queryFiles,
 #'
 #' @return a list of two dataframes containing the data used for plotting and for statistical testing
 #' @author Shuye Pu
-#'
-#' @examples
-#' gtffile <- system.file("extdata", "gencode.v19.annotation_chr19.gtf", package = "GenomicPlot")
-#' gff <- RCAS::importGtf(saveObjectAsRds = TRUE, filePath = gtffile)
-#' txdb <- makeTxDbFromGRanges(gff)
-#'
-#' queryfiles <- system.file("extdata", "treat_chr19.bam", package = "GenomicPlot")
-#' names(queryfiles) <- "query"
-#'
-#' inputfiles <- system.file("extdata", "input_chr19.bam", package = "GenomicPlot")
-#' names(inputfiles) <- "input"
-#'
-#' centerfiles <- system.file("extdata", "test_clip_peak_chr19.bed", package = "GenomicPlot")
-#' names(centerfiles) <- "clipPeak"
-#'
-#' bamimportParams <- list(
-#'   offset = -1, fix_width = 0, fix_point = "start", norm = TRUE,
-#'   useScore = FALSE, outRle = TRUE, useSizeFactor = FALSE, genome = "hg19"
-#' )
-#'
-#' df <- plot_locus(
-#'   queryFiles = queryfiles, centerFiles = c(centerfiles, "exon"), txdb = txdb,
-#'   ext = c(-200, 200), hl = c(-50, 50), shade = TRUE, smooth = FALSE, 
-#'   importParams = bamimportParams, verbose = TRUE, binSize = 10, refPoint = "center", 
-#'   Xlab = "Center", Ylab = "Coverage/base/gene", inputFiles = inputfiles, 
-#'   stranded = TRUE, heatmap = TRUE, scale = FALSE, outPrefix = NULL, rmOutlier = 0, 
-#'   transform = "log2", statsMethod = "wilcox.test", heatRange = NULL, nc = 2
-#' )
 #'
 #' @export plot_locus
 
@@ -2625,34 +2489,6 @@ plot_locus <- function(queryFiles,
 #' @return a dataframe containing the data used for plotting
 #' @author Shuye Pu
 #'
-#' @examples
-#' gtffile <- system.file("extdata", "gencode.v19.annotation_chr19.gtf", package = "GenomicPlot")
-#' gff <- RCAS::importGtf(saveObjectAsRds = TRUE, filePath = gtffile)
-#' txdb <- makeTxDbFromGRanges(gff)
-#'
-#' queryfiles <- system.file("extdata", "treat_chr19.bam", package = "GenomicPlot")
-#' names(queryfiles) <- "query"
-#'
-#' inputfiles <- system.file("extdata", "input_chr19.bam", package = "GenomicPlot")
-#' names(inputfiles) <- "input"
-#'
-#' centerfiles <- system.file("extdata", "test_clip_peak_chr19.bed", package = "GenomicPlot")
-#' names(centerfiles) <- "clipPeak"
-#'
-#' bamimportParams <- list(
-#'   offset = -1, fix_width = 0, fix_point = "start", norm = TRUE,
-#'   useScore = FALSE, outRle = TRUE, useSizeFactor = FALSE, genome = "hg19"
-#' )
-#'
-#' df <- plot_locus_with_random(
-#'   queryFiles = queryfiles, centerFiles = c(centerfiles), txdb = txdb,
-#'   ext = c(-200, 200), hl = c(-20, 20), shade = TRUE, smooth = TRUE, 
-#'   importParams = bamimportParams, verbose = TRUE, binSize = 10, 
-#'   refPoint = "center", Xlab = "Center", Ylab = "Coverage/base/gene",
-#'   inputFiles = inputfiles, stranded = TRUE, scale = FALSE, outPrefix = NULL, 
-#'   rmOutlier = 0, transform = NA, statsMethod = "wilcox.test", nc = 2
-#' )
-#'
 #' @export plot_locus_with_random
 
 plot_locus_with_random <- function(queryFiles,
@@ -3059,23 +2895,21 @@ plot_locus_with_random <- function(queryFiles,
 #' @return a dataframe of read counts per bin perl sample
 #'
 #' @examples
-#' # Due to file size limitation, peak files are used instead.
 #' 
-#' bedQueryFiles <- c(
-#'   system.file("extdata", "test_chip_peak_chr19.narrowPeak", package = "GenomicPlot"),
-#'   system.file("extdata", "test_chip_peak_chr19.bed", package = "GenomicPlot"),
-#'   system.file("extdata", "test_clip_peak_chr19.bed", package = "GenomicPlot")
+#' bamQueryFiles <- c(
+#'   system.file("extdata", "chip_input_chr19.bam", package = "GenomicPlot"),
+#'   system.file("extdata", "chip_treat_chr19.bam", package = "GenomicPlot")
 #' )
-#' names(bedQueryFiles) <- c("NarrowPeak", "SummitPeak", "iCLIPPeak")
+#' names(bamQueryFiles) <- c("chip_input", "chip_treat")
 #' 
-#' bedimportParams <- list(
-#'    offset = 0, fix_width = 100, fix_point = "center", norm = FALSE,
+#' bamImportParams <- list(
+#'    offset = 0, fix_width = 150, fix_point = "start", norm = FALSE,
 #'    useScore = FALSE, outRle = FALSE, useSizeFactor = FALSE, genome = "hg19"
 #' )
 #'
 #' plot_bam_correlation(
-#'   bamfiles = bedQueryFiles, binSize = 10000, outPrefix = NULL,
-#'   importParams = bedimportParams, nc = 2
+#'   bamfiles = bamQueryFiles, binSize = 100000, outPrefix = NULL,
+#'   importParams = bamImportParams, nc = 2, verbose = FALSE
 #' )
 #'
 #' @export plot_bam_correlation
@@ -3218,9 +3052,11 @@ plot_bam_correlation <- function(bamfiles,
 #' @author Shuye Pu
 #' @examples
 #'
-#' gtfFile <- system.file("extdata", "gencode.v19.annotation_chr19.gtf", package = "GenomicPlot")
+#' gtfFile <- system.file("extdata", "gencode.v19.annotation_chr19.gtf", 
+#'   package = "GenomicPlot")
 #'
-#' centerFile <- system.file("extdata", "test_chip_peak_chr19.bed", package = "GenomicPlot")
+#' centerFile <- system.file("extdata", "test_chip_peak_chr19.bed", 
+#'   package = " GenomicPlot")
 #' names(centerFile) <- c("summitPeak")
 #'
 #' bedimportParams <- list(

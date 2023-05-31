@@ -153,7 +153,7 @@ handle_input <- function(inputFiles,
 #'
 #' @description This is a helper function for handle_input. edgeR::calcNormFactors function is used to estimate normalizing factors, which is used to multiply library sizes.
 #'
-#' @param outlist a list of list objects with four elements, 'query' is either a GRanges object or an RleList object, 'size' is the library size, 'type' is the input file type, 'weight' is the name of the metadata column
+#' @param outlist a list of list objects with four elements, 'query' is a GRanges object, 'size' is the library size, 'type' is the input file type, 'weight' is the name of the metadata column
 #' @param outRle logical, indicating whether the 'query' element of the output should be an RleList object or a GRanges object
 #' @param genome a string denoting the genome name and version
 #' @param nc integer, number of cores for parallel processing
@@ -163,6 +163,24 @@ handle_input <- function(inputFiles,
 #'
 #' @author Shuye Pu
 #' 
+#' @examples
+#' queryFiles <- system.file("extdata", "chip_treat_chr19.bam", package = "GenomicPlot")
+#' names(queryFiles) <- "query"
+#'
+#' inputFiles <- system.file("extdata", "chip_input_chr19.bam", package = "GenomicPlot")
+#' names(inputFiles) <- "input"
+#'
+#' chipImportParams <- list(
+#' offset = 0, fix_width = 150, fix_point = "start", norm = TRUE,
+#' useScore = FALSE, outRle = FALSE, useSizeFactor = FALSE, genome = "hg19"
+#' )
+#'
+#' out_list <- handle_input(
+#'   inputFiles = c(queryFiles, inputFiles),
+#'   importParams = chipImportParams, verbose = TRUE, nc = 2
+#' )
+#' 
+#' out <- effective_size(out_list, outRle = TRUE)
 #'
 #' @export effective_size
 #'
@@ -318,6 +336,20 @@ handle_bed <- function(inputFile,
 #'
 #' @author Shuye Pu
 #' 
+#' @examples
+#' 
+#' queryFiles <- system.file("extdata", "treat_chr19.bam", package = "GenomicPlot")
+#' names(queryFiles) <- "query"
+#'
+#' bamimportParams <- list(
+#'   offset = -1, fix_width = 0, fix_point = "start", norm = TRUE,
+#'   useScore = FALSE, outRle = TRUE, useSizeFactor = FALSE, genome = "hg19"
+#' )
+#'
+#' out <- handle_bam(
+#'   inputFile = queryFiles, importParams = bamimportParams, verbose = TRUE
+#' )
+#' 
 #' @export handle_bam
 #'
 handle_bam <- function(inputFile,
@@ -380,6 +412,18 @@ handle_bam <- function(inputFile,
 #'
 #' @author Shuye Pu 
 #'
+#' @examples
+#' 
+#' queryFiles <- system.file("extdata", "test_wig_chr19_+.bw", package = "GenomicPlot")
+#' names(queryFiles) <- "test_bw"
+#'
+#' wigimportParams <- list(
+#'   offset = 0, fix_width = 0, fix_point = "start", norm = FALSE,
+#'   useScore = FALSE, outRle = TRUE, useSizeFactor = FALSE, genome = "hg19"
+#' )
+#'
+#' out <- handle_bw(queryFiles, wigimportParams, verbose = TRUE)
+#' 
 #' @export handle_bw
 #'
 handle_bw <- function(inputFile,
@@ -438,6 +482,18 @@ handle_bw <- function(inputFile,
 #'
 #' @author Shuye Pu 
 #'
+#' @examples
+#' 
+#' queryFiles <- system.file("extdata", "test_wig_chr19_+.wig", package = "GenomicPlot")
+#' names(queryFiles) <- "test_wig"
+#'
+#' wigimportParams <- list(
+#'   offset = 0, fix_width = 0, fix_point = "start", norm = FALSE,
+#'   useScore = FALSE, outRle = TRUE, useSizeFactor = FALSE, genome = "hg19"
+#' )
+#'
+#' out <- handle_wig(queryFiles, wigimportParams, verbose = TRUE) 
+#' 
 #' @export handle_wig
 #'
 handle_wig <- function(inputFile,
@@ -468,7 +524,16 @@ handle_wig <- function(inputFile,
 #' @param verbose logical, whether to output additional information
 #'
 #' @return path to the negative .wig/bw file or NULL
+#' 
+#' @author Shuye Pu
 #'
+#' @examples
+#' 
+#' queryFile <- system.file("extdata", "test_wig_chr19_+.wig", package = "GenomicPlot")
+#' names(queryFile) <- "test_wig"
+#'
+#' out <- GenomicPlot:::find_mate (inputFile = queryFile, verbose = TRUE) 
+#' 
 #' @keywords internal
 
 

@@ -85,7 +85,7 @@ bamimportParams <- list(
 
 df <- plot_5parts_metagene(
   queryFiles = queryfiles, gFeatures = list("metagene" = gfeatures),
-  inputFiles = inputfiles, scale = FALSE, verbose = TRUE, Ylab = "Coverage/base/gene",
+  inputFiles = inputfiles, scale = FALSE, verbose = FALSE, Ylab = "Coverage/base/gene",
   importParams = bamimportParams, smooth = TRUE, stranded = TRUE, outPrefix = NULL, 
   heatmap = TRUE, rmOutlier = 0, heatRange = NULL, transform = "log2", nc = 2
 )

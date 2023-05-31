@@ -23,10 +23,6 @@
 #' names(labels_col) <- rep(levels_col, c(15, 60, 25))
 #'
 #' draw_matrix_heatmap(fullMatrix, dataName = "test", labels_col, levels_col)
-#' draw_matrix_heatmap(fullMatrix,
-#'   dataName = "test", labels_col, levels_col,
-#'   ranking = "Hierarchical"
-#' )
 #'
 #' @export draw_matrix_heatmap
 #'
@@ -809,6 +805,7 @@ draw_rank_plot <- function(stat_df,
 #' @author Shuye Pu
 #'
 #' @examples
+#' 
 #' stat_df <- data.frame(
 #'   Feature = rep(c("A", "B"), c(200, 300)),
 #'   Intensity = c(rnorm(200, 2, 5), rnorm(300, 3, 5)),
@@ -823,6 +820,7 @@ draw_rank_plot <- function(stat_df,
 #'   xc = "Feature", yc = "value", fc = "type",
 #'   Ylab = "value", comp = list(c(1, 2), c(3, 4), c(1, 3), c(2, 4)), nf = 2
 #' ))
+#' 
 #' @export draw_combo_plot
 
 draw_combo_plot <- function(stat_df,
@@ -1060,20 +1058,6 @@ draw_stacked_profile <- function(plot_df,
 #'
 #'overlap_pair(list(query = query, subject = subject), filter_by_overlaps_stranded)
 #'
-#' ## the following will generate an error
-#' \donttest{
-#' short <- GRanges("chr19", 
-#'   IRanges(rep(c(10, 15), 1), width=c(10, 20)), 
-#'   strand=c("+", "+")
-#' )
-#' 
-#' long <- GRanges("chr19", 
-#'   IRanges(rep(c(11, 15, 10), 1), width=c(10, 20, 10)), 
-#'   strand=c("+", "+", "+")
-#' )
-#' 
-#' #overlap_pair(list(query = long, subject = short), filter_by_overlaps_stranded)
-#' }
 #'
 #' @export overlap_pair
 
@@ -1105,6 +1089,7 @@ overlap_pair <- function(apair,
 #' @author Shuye Pu
 #' 
 #' @examples 
+#' 
 #' test_list <- list(A = c(1, 2, 3, 4, 5), B = c(4, 5, 7), C = c(1, 3))
 #' overlap_triple(test_list, intersect)
 #' 
@@ -1163,6 +1148,7 @@ overlap_triple <- function(atriple,
 #' @author Shuye Pu
 #'
 #' @examples 
+#' 
 #' test_list <- list(A = c(1, 2, 3, 4, 5), B = c(4, 5, 7), C = c(1, 3), D = 6)
 #' overlap_quad(test_list, intersect)
 #' 
@@ -1190,6 +1176,7 @@ overlap_triple <- function(atriple,
 #' overlap_quad(list(subject1 = subject1, subject2 = subject2, query1 = query1,
 #'   query2 = query2), filter_by_overlaps_stranded
 #' )
+#' 
 #' @export overlap_quad
 #'
 overlap_quad <- function(aquad,

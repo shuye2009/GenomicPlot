@@ -14,6 +14,7 @@
 #' @author Shuye Pu
 #'
 #' @examples
+#' 
 #' gtffile <- system.file("extdata", "gencode.v19.annotation_chr19.gtf", package = "GenomicPlot")
 #' gff <- RCAS::importGtf(saveObjectAsRds = TRUE, filePath = gtffile)
 #' txdb <- makeTxDbFromGRanges(gff)
@@ -197,6 +198,7 @@ extract_longest_tx <- function(txdb,
 #' @author Shuye Pu
 #'
 #' @examples
+#' 
 #' gtffile <- system.file("extdata", "gencode.v19.annotation_chr19.gtf", package = "GenomicPlot")
 #' gff <- RCAS::importGtf(saveObjectAsRds = TRUE, filePath = gtffile)
 #' txdb <- makeTxDbFromGRanges(gff)
@@ -649,6 +651,7 @@ get_txdb_features <- function(txdb,
 #' @author Shuye Pu
 #'
 #' @examples
+#' 
 #' gtffile <- system.file("extdata", "gencode.v19.annotation_chr19.gtf", package = "GenomicPlot")
 #' gff <- RCAS::importGtf(saveObjectAsRds = TRUE, filePath = gtffile)
 #' txdb <- makeTxDbFromGRanges(gff)
@@ -656,9 +659,6 @@ get_txdb_features <- function(txdb,
 #'
 #' p <- RCAS::importBed(system.file("extdata", "test_chip_peak_chr19.bed", package = "GenomicPlot"))
 #' ann <- get_targeted_genes(peak = p, features = f, stranded = FALSE)
-#'
-#' pp <- RCAS::importBed(system.file("extdata", "test_clip_peak_chr19.bed", package = "GenomicPlot"))
-#' ann <- get_targeted_genes(peak = pp, features = f, stranded = TRUE)
 #'
 #' @note used in \code{plot_peak_annotation}
 #' @export get_targeted_genes
@@ -779,6 +779,9 @@ make_subTxDb_from_GTF <- function(gtfFile,
   }
   
   subgff <- gff[gff$gene_name %in% geneList]
+  maploss <- length(geneList) - length(subgff)
+  message("In make_subTxDb_from_GTF, number of gene symbols failed to map: ", maploss, "\n")
+  
   TxDb <- makeTxDbFromGRanges(subgff)
 
   return(TxDb)

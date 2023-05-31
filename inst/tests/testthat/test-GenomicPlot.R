@@ -287,3 +287,31 @@ test_that("testing plot_locus_with_random", {
   )
   pdf_to_png(op)
 })
+
+# remove files not used by README.md and GenomicPlot_vignettes.rmd
+pngs <- list.files(pattern = "*.png")
+used_pngs <- c("test_plot_5parts_metagene1_1.png",
+               "test_plot_5parts_metagene1_2.png",
+               "test_plot_5parts_metagene1_3.png",
+               "test_plot_locus1_1.png",
+               "test_plot_locus1_2.png",
+               "test_plot_locus1_3.png",
+               "test_plot_locus1_4.png",
+               "test_plot_peak_annotation1_1.png",
+               "test_plot_peak_annotation1_2.png",
+               "test_plot_peak_annotation1_3.png",
+               "test_plot_peak_annotation1_4.png",
+               "test_plot_5parts_metagene2_2.png",
+               "test_plot_5parts_metagene2_3.png",
+               "test_plot_3parts_metagene_2.png",
+               "test_plot_3parts_metagene_3.png",
+               "test_plot_region_4.png",
+               "test_plot_start_end_3.png",
+               "test_plot_start_end_4.png",
+               "test_plot_locus2_7.png",
+               "test_plot_locus2_8.png",
+               "test_plot_locus_with_random_27.png",
+               "test_plot_locus_with_random_28.png")
+unused_pngs <- pngs[!pngs %in% used_pngs]
+unlink(unused_pngs)
+unlink("*.pdf")

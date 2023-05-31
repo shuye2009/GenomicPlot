@@ -77,33 +77,6 @@ a list of two objects, the first is a GRanges object, the second is a GRangesLis
 \description{
 Plot reads or peak Coverage/base/gene of samples given in the query files around stat, end and center of genomic features or custom feature given in a .bed file. The upstream and downstream windows can be given separately. If Input files are provided, ratio over Input is computed and displayed as well. A random feature can be generated to serve as a background for contrasting.
 }
-\examples{
-gtffile <- system.file("extdata", "gencode.v19.annotation_chr19.gtf", package = "GenomicPlot")
-gff <- RCAS::importGtf(saveObjectAsRds = TRUE, filePath = gtffile)
-txdb <- makeTxDbFromGRanges(gff)
-
-queryFiles <- system.file("extdata", "treat_chr19.bam", package = "GenomicPlot")
-names(queryFiles) <- "query"
-
-inputFiles <- system.file("extdata", "input_chr19.bam", package = "GenomicPlot")
-names(inputFiles) <- "input"
-
-ext <- c(-500, 200, -200, 500)
-hl <- c(-50, 50, -50, 50)
-
-bamimportParams <- list(
-  offset = -1, fix_width = 0, fix_point = "start", norm = TRUE,
-  useScore = FALSE, outRle = TRUE, useSizeFactor = FALSE, genome = "hg19"
-)
-
-plot_start_end_with_random(
-  queryFiles = c(queryFiles), inputFiles = c(inputFiles), txdb = txdb,
-  centerFile = "intron", binSize = 10, importParams = bamimportParams, ext = ext, hl = hl,
-  randomize = TRUE, verbose = TRUE, insert = 100, stranded = TRUE, scale = FALSE, smooth = TRUE,
-  outPrefix = NULL, nc = 2
-)
-
-}
 \author{
 Shuye Pu
 }

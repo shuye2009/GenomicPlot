@@ -34,20 +34,6 @@ subject <- GRanges("chr19",
 
 overlap_pair(list(query = query, subject = subject), filter_by_overlaps_stranded)
 
-## the following will generate an error
-\donttest{
-short <- GRanges("chr19", 
-  IRanges(rep(c(10, 15), 1), width=c(10, 20)), 
-  strand=c("+", "+")
-)
-
-long <- GRanges("chr19", 
-  IRanges(rep(c(11, 15, 10), 1), width=c(10, 20, 10)), 
-  strand=c("+", "+", "+")
-)
-
-#overlap_pair(list(query = long, subject = short), filter_by_overlaps_stranded)
-}
 
 }
 \author{
