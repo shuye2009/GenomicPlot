@@ -4,13 +4,7 @@
 #' @import ggplot2
 #' @import Rsamtools
 #' @import GenomicFeatures
-#' @import GenomicRanges
-#' @import dplyr
-#' @import GenomeInfoDb
-#' @import stats
-#' @import BiocGenerics
 #' @import parallel
-#' @import grid
 #' @import graphics
 #' @import utils
 #' @importFrom parallel detectCores clusterExport parLapply makeCluster stopCluster clusterApply
