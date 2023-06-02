@@ -11,7 +11,7 @@ pdf_to_png <- function(op) {
   }
 }
 
-outdir <- "../test_output"
+outdir <- "./test_output"
 setwd(outdir)
 
 gtffile <- system.file("extdata", "gencode.v19.annotation_chr19.gtf", package = "GenomicPlot")

@@ -3,7 +3,7 @@ library(testthat)
 
 Sys.setenv("R_TESTS" = "")
 
-outdir <- "../test_output"
+outdir <- "./test_output"
 setwd(outdir)
 
 test_that("testing plot_bam_correlation", {
