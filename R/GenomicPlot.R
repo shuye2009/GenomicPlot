@@ -3419,12 +3419,10 @@ plot_peak_annotation <- function(peakFile,
 #'   useScore = FALSE, outRle = FALSE, useSizeFactor = FALSE, genome = "hg19"
 #' )
 #'
-#' p <- plot_overlap_bed(
+#' plot_overlap_bed(
 #'   bedList = queryFiles, importParams = bedimportParams, pairOnly = FALSE,
-#'   stranded = FALSE
+#'   stranded = FALSE, outPrefix = NULL
 #' )
-#' 
-#' p
 #'
 #' @export plot_overlap_bed
 

@@ -47,10 +47,10 @@
 #  )
 
 ## ----metagene2, echo = FALSE, fig.cap = "Profile overlay", fig.wide = TRUE----
-knitr::include_graphics("../inst/tests/test_output/test_plot_5parts_metagene2_2.png")
+knitr::include_graphics("../longtests/test_output/test_plot_5parts_metagene2_2.png")
 
 ## ----metagene3, echo = FALSE, fig.cap = "Ratio-over-input profile and heatmap", fig.wide = TRUE----
-knitr::include_graphics("../inst/tests/test_output/test_plot_5parts_metagene2_3.png")
+knitr::include_graphics("../longtests/test_output/test_plot_5parts_metagene2_3.png")
 
 ## ---- eval = FALSE, fig.show = 'hold', fig.keep = 'all', fig.align = 'center', fig.dim = c(7,7)----
 #  
@@ -88,10 +88,10 @@ knitr::include_graphics("../inst/tests/test_output/test_plot_5parts_metagene2_3.
 #  )
 
 ## ----gene2, echo = FALSE, fig.cap = "Profile overlay", fig.wide = TRUE--------
-knitr::include_graphics("../inst/tests/test_output/test_plot_3parts_metagene_2.png")
+knitr::include_graphics("../longtests/test_output/test_plot_3parts_metagene_2.png")
 
 ## ----gene3, echo = FALSE, fig.cap = "Ratio-over-input profile and heatmap", fig.wide = TRUE----
-knitr::include_graphics("../inst/tests/test_output/test_plot_3parts_metagene_3.png")
+knitr::include_graphics("../longtests/test_output/test_plot_3parts_metagene_3.png")
 
 ## ---- eval = FALSE, fig.show = 'hold', fig.keep = 'all', fig.align = 'center', fig.dim = c(7,7)----
 #  centerfiles <- system.file("extdata", "test_chip_peak_chr19.narrowPeak",
@@ -127,7 +127,7 @@ knitr::include_graphics("../inst/tests/test_output/test_plot_3parts_metagene_3.p
 #  )
 
 ## ----region5, echo = FALSE, fig.cap = "Ratio-over-input profile", fig.wide = TRUE----
-knitr::include_graphics("../inst/tests/test_output/test_plot_region_4.png")
+knitr::include_graphics("../longtests/test_output/test_plot_region_4.png")
 
 ## ---- eval = FALSE, fig.show = 'hold', fig.keep = 'all', fig.align = 'center', fig.dim = c(7,7)----
 #  
@@ -156,10 +156,10 @@ knitr::include_graphics("../inst/tests/test_output/test_plot_region_4.png")
 #  )
 
 ## ----intron1, echo = FALSE, fig.cap = "Query and input sample profiles in start, center and end of intron", fig.wide = TRUE----
-knitr::include_graphics("../inst/tests/test_output/test_plot_start_end_3.png")
+knitr::include_graphics("../longtests/test_output/test_plot_start_end_3.png")
 
 ## ----intron2, echo = FALSE, fig.cap = "Ratio-over profile in start, center and end of intron", fig.wide = TRUE----
-knitr::include_graphics("../inst/tests/test_output/test_plot_start_end_4.png")
+knitr::include_graphics("../longtests/test_output/test_plot_start_end_4.png")
 
 ## ---- eval = FALSE, fig.show = 'hold', fig.keep = 'all', fig.align = 'center', fig.dim = c(7,7)----
 #  centerfiles <- c(
@@ -200,10 +200,10 @@ knitr::include_graphics("../inst/tests/test_output/test_plot_start_end_4.png")
 #  )
 
 ## ----locus42, echo = FALSE, fig.cap = "Ratio-over-input profile around chip peaks and clip peaks", fig.wide = TRUE----
-knitr::include_graphics("../inst/tests/test_output/test_plot_locus2_7.png")
+knitr::include_graphics("../longtests/test_output/test_plot_locus2_7.png")
 
 ## ----locus5, echo = FALSE, fig.cap = "Ratio-over-input stats around chip peaks and clip peaks", fig.wide = TRUE----
-knitr::include_graphics("../inst/tests/test_output/test_plot_locus2_8.png")
+knitr::include_graphics("../longtests/test_output/test_plot_locus2_8.png")
 
 ## ---- eval = FALSE, fig.show = 'hold', fig.keep = 'all', fig.align = 'center', fig.dim = c(7,7)----
 #  
@@ -242,10 +242,10 @@ knitr::include_graphics("../inst/tests/test_output/test_plot_locus2_8.png")
 #  )
 
 ## ----locusr11, echo = FALSE, fig.cap = "Ratio-over-input for clip signal around clip peaks in 5'UTR", fig.wide = TRUE----
-knitr::include_graphics("../inst/tests/test_output/test_plot_locus_with_random_27.png")
+knitr::include_graphics("../longtests/test_output/test_plot_locus_with_random_27.png")
 
 ## ----locusr12, echo = FALSE, fig.cap = "Ratio-over-input for clip signal around clip peaks in 5'UTR", fig.wide = TRUE----
-knitr::include_graphics("../inst/tests/test_output/test_plot_locus_with_random_28.png")
+knitr::include_graphics("../longtests/test_output/test_plot_locus_with_random_28.png")
 
 ## ---- eval = FALSE, fig.show = 'hold', fig.keep = 'all', fig.align = 'center', fig.dim = c(7,7)----
 #  gtffile <- system.file("extdata", "gencode.v19.annotation_chr19.gtf",
@@ -273,10 +273,10 @@ knitr::include_graphics("../inst/tests/test_output/test_plot_locus_with_random_2
 #  )
 
 ## ----annotation1, echo = FALSE, fig.cap = "Distribution of chip peak in various types of gene", fig.wide = TRUE----
-knitr::include_graphics("../inst/tests/test_output/test_plot_peak_annotation1_1.png")
+knitr::include_graphics("../longtests/test_output/test_plot_peak_annotation1_1.png")
 
 ## ----annotation2, echo = FALSE, fig.cap = "Distribution of chip peak in various parts of gene", fig.wide = TRUE----
-knitr::include_graphics("../inst/tests/test_output/test_plot_peak_annotation1_2.png")
+knitr::include_graphics("../longtests/test_output/test_plot_peak_annotation1_2.png")
 
 ## ----sessionInfo, echo=FALSE--------------------------------------------------
 sessionInfo()
