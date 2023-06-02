@@ -24,7 +24,7 @@ Imports: methods, Rsamtools, parallel, tidyr, rtracklayer (>= 1.54.0),
    circlize, viridis, ggsignif (>= 0.6.3), ggsci (>= 2.9), genomation (>= 1.26.0), ggpubr, grDevices, graphics, 
    stats, utils
 Suggests: knitr, rmarkdown, AnnotationHub, AnnotationDbi, R.utils, BSgenome.Hsapiens.UCSC.hg19 (>= 1.4.3), 
-   BiocFileCache, TxDb.Hsapiens.UCSC.hg19.knownGene (>= 3.2.2), BiocStyle
+   BiocFileCache, TxDb.Hsapiens.UCSC.hg19.knownGene (>= 3.2.2), BiocStyle, testthat, magick
 biocViews: AlternativeSplicing, ChIPSeq, Coverage, GeneExpression, RNASeq, Sequencing, Software, 
    Transcription, Visualization, Annotation
 RoxygenNote: 7.2.3
