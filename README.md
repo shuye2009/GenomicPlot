@@ -48,7 +48,7 @@ bedimportParams <- list(
   useScore = FALSE, outRle = TRUE, useSizeFactor = FALSE, genome = "hg19"
 )
 
-op <- "test_plot_5parts_metagene"
+op <- "test_plot_5parts_metagene1"
 
 plot_5parts_metagene(queryFiles = queryfiles, 
                      gFeatures = list(metaF = gf), 
@@ -74,7 +74,7 @@ The following example shows you how to visualize distance between iCLIP_peaks/Ch
 
 ``` r
 
-op <- "test_plot_locus"
+op <- "test_plot_locus1"
 
 plot_locus(queryFiles = queryfiles[c(1,3)], 
                      centerFiles = queryfiles[2], 
@@ -107,7 +107,7 @@ The following example shows you how to annotate ChIP-seq peaks. The annotation s
 
 ``` r
 
-op <- "test_plot_peak_annotation"
+op <- "test_plot_peak_annotation1"
 
 plot_peak_annotation(peakFile = queryfiles[2], 
                      gtfFile = gtffile, 
