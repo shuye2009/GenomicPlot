@@ -4,20 +4,12 @@
 \alias{handle_input}
 \title{Hand input of NGS data with various formats}
 \usage{
-handle_input(
-  inputFiles,
-  importParams = NULL,
-  useRds = TRUE,
-  saveRds = TRUE,
-  overrideRds = TRUE,
-  verbose = FALSE,
-  nc = 2
-)
+handle_input(inputFiles, importParams = NULL, verbose = FALSE, nc = 2)
 }
 \arguments{
 \item{inputFiles}{a vector of strings denoting file names}
 
-\item{importParams}{a list with the 9 elements: list(offset, fix_width, fix_point, useScore, outRle, norm, genome, useSizeFactor). Details are as follows:
+\item{importParams}{a list with the 8 elements: list(offset, fix_width, fix_point, useScore, outRle, norm, genome, useSizeFactor). Details are as follows:
 'offset', an integer, -1 indicating the bam reads should be shrunk to the -1 position at the 5'end of the reads, which corresponds to the cross link site in iCLIP.
 'fix_width', an integer defining how long the reads should be extended to, ignored when offset is not 0.
 'fix_point', a string in c("start", "end", "center") denoting the anchor point for extension, ignored when offset is not 0.
@@ -26,12 +18,6 @@ handle_input(
 'norm', logical, indicating whether the output RleList should be normalized to RPM using library sizes.
 'genome', a string denoting the genome name and version.
 'useSizeFactor', logical, indicating whether the library size should be adjusted with a size factor, using the 'calcNormFactors' function in the edgeR package, only applicable to ChIPseq data.}
-
-\item{useRds}{logical, whether to use existing .rds file}
-
-\item{saveRds}{logical, whether to save .rds file}
-
-\item{overrideRds}{logical, whether to modify existing .rds file}
 
 \item{verbose}{logical, whether to output additional information}
 

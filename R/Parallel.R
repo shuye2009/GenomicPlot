@@ -120,7 +120,7 @@ parallel_scoreMatrixBin <- function(queryRegions,
   cl <- start_parallel(nc)
   wRs <- split(windowRs, factor(cut(seq_along(windowRs), breaks = nc)))
 
-  clusterExport(cl, varlist = c("ScoreMatrixBin"), envir = environment())
+  clusterExport(cl, varlist = c("ScoreMatrixBin", "seqinfo", "mcols"), envir = environment())
   clusterExport(cl, varlist = c("queryRegions", "bin_num", "bin_op", "weight_col", "stranded"), envir = environment())
   smc <- parLapply(cl, wRs, call_scoreMatrixBin)
   stop_parallel(cl)
@@ -161,7 +161,7 @@ parallel_scoreMatrixBin <- function(queryRegions,
 #' 
 #' out_list <- handle_input(
 #'    inputFiles = bedQueryFiles,
-#'    importParams = bedimportParams, overrideRds = FALSE, verbose = TRUE, nc = 2
+#'    importParams = bedimportParams, verbose = TRUE, nc = 2
 #' )
 #' 
 #' seqi <- GenomeInfoDb::Seqinfo(genome = "hg19") 

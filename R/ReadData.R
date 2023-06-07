@@ -3,7 +3,7 @@
 #' @description This is a wrapper function for read NGS data in different file formats, store the input data in a list of GRanges objects or RleList objects. File names end in bed|bam|bw|bigwig|bigWig|BigWig|BW|BIGWIG are recognized, and a list of files with mixed formats are allowed.
 #'
 #' @param inputFiles a vector of strings denoting file names
-#' @param importParams a list with the 9 elements: list(offset, fix_width, fix_point, useScore, outRle, norm, genome, useSizeFactor). Details are as follows:
+#' @param importParams a list with the 8 elements: list(offset, fix_width, fix_point, useScore, outRle, norm, genome, useSizeFactor). Details are as follows:
 #' 'offset', an integer, -1 indicating the bam reads should be shrunk to the -1 position at the 5'end of the reads, which corresponds to the cross link site in iCLIP.
 #' 'fix_width', an integer defining how long the reads should be extended to, ignored when offset is not 0.
 #' 'fix_point', a string in c("start", "end", "center") denoting the anchor point for extension, ignored when offset is not 0.
@@ -12,11 +12,9 @@
 #' 'norm', logical, indicating whether the output RleList should be normalized to RPM using library sizes.
 #' 'genome', a string denoting the genome name and version.
 #' 'useSizeFactor', logical, indicating whether the library size should be adjusted with a size factor, using the 'calcNormFactors' function in the edgeR package, only applicable to ChIPseq data.
+#' 
 #' @param nc integer, number of cores for parallel processing
 #' @param verbose logical, whether to output additional information
-#' @param useRds logical, whether to use existing .rds file
-#' @param saveRds logical, whether to save .rds file
-#' @param overrideRds logical, whether to modify existing .rds file
 #'
 #' @details when 'useScore' is TRUE, the score column of the bed file will be used in the metadata column 'score' of the GRanges object, or the 'Values' field of the RleList object. Otherwise the value 1 will be used instead. When the intended use of the input bed is a reference feature, both 'useScore' and 'outRle' should be set to FALSE.
 #'
@@ -61,9 +59,6 @@
 
 handle_input <- function(inputFiles,
                          importParams = NULL,
-                         useRds = TRUE,
-                         saveRds = TRUE,
-                         overrideRds = TRUE,
                          verbose = FALSE,
                          nc = 2) {
   if (any(is.null(names(inputFiles)))) stop("Each file must have a name attribute!")
@@ -77,7 +72,7 @@ handle_input <- function(inputFiles,
   inputFUN <- function(funName, inputFile, importParams, verbose) {
     fileName <- basename(inputFile)
     dirName <- dirname(inputFile)
-    if (file.exists(file.path(dirName, paste0(fileName, ".rds"))) && useRds) {
+    if (file.exists(file.path(dirName, paste0(fileName, ".rds")))) {
       temp <- readRDS(file.path(dirName, paste0(fileName, ".rds")))
       if (identical(temp$param, importParams)) {
         out <- temp$Rle
@@ -85,7 +80,7 @@ handle_input <- function(inputFiles,
       } else {
         if (!file.exists(inputFile)) stop("file does not exist, please check your file name and path!")
         out <- funName(inputFile = inputFile, importParams, verbose)
-        if(overrideRds){
+        if(file.access(dirName, mode = 2)[1] == 0){
            saveRDS(list(param = importParams, Rle = out), file.path(dirName, paste0(fileName, ".rds")))
            if (verbose) message("Cached .rds file is modified using new input parameters\n")
         }
@@ -93,7 +88,7 @@ handle_input <- function(inputFiles,
     } else {
       if (!file.exists(inputFile)) stop("file does not exist, please check your file name and path!")
       out <- funName(inputFile = inputFile, importParams, verbose)
-      if(saveRds){
+      if(file.access(dirName, mode = 2)[1] == 0){
          saveRDS(list(param = importParams, Rle = out), file.path(dirName, paste0(fileName, ".rds")))
          if (verbose) message("Input data is cached as .rds file for fast reloading\n")  
       }

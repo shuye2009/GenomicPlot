@@ -1,3 +1,10 @@
+---
+title:
+  README
+output:
+  html_document: default
+  pdf_document: default
+---
 
 # GenomicPlot
 
@@ -24,6 +31,7 @@ Or download the source package from the latest release on [GitHub](https://githu
 install.packages("path-to-source-package/GenomicPlot_x.x.x.tar.gz", repos = NULL)
 ```
 where "path-to-source-package" is the absolute path to the file "GenomicPlot_x.x.x.tar.gz", substitute 'x' with the version number of your downloaded package
+
 ## Examples
 
 The following is a basic example which shows you how to visualize ChIP-seq peaks and iCLIP-seq peaks in different parts of genes.
@@ -48,7 +56,7 @@ bedimportParams <- list(
   useScore = FALSE, outRle = TRUE, useSizeFactor = FALSE, genome = "hg19"
 )
 
-op <- "test_plot_5parts_metagene"
+op <- "test_plot_5parts_metagene1"
 
 plot_5parts_metagene(queryFiles = queryfiles, 
                      gFeatures = list(metaF = gf), 
@@ -66,22 +74,37 @@ plot_5parts_metagene(queryFiles = queryfiles,
                      nc = 4)
                      
 ```
-![image1](./inst/tests/test_output/test_plot_5parts_metagene1_1.png)
-![image1](./inst/tests/test_output/test_plot_5parts_metagene1_2.png)
-![image1](./inst/tests/test_output/test_plot_5parts_metagene1_3.png)
+![Fig. 1 Peak distribution along the length of genes](./longtests/test_output/test_plot_5parts_metagene1.pdf)
 
 The following example shows you how to visualize distance between iCLIP_peaks/ChIP-seq narrowPeaks and ChIP-seq summit Peaks.
 
 ``` r
+centerfiles <- c(
+  system.file("extdata", "test_clip_peak_chr19.bed", package = "GenomicPlot"),
+  system.file("extdata", "test_chip_peak_chr19.bed", package = "GenomicPlot")
+)
+names(centerfiles) <- c("iCLIPPeak", "SummitPeak")
+queryfiles <- c(
+  system.file("extdata", "chip_treat_chr19.bam", package = "GenomicPlot")
+)
+names(queryfiles) <- c("chip_bam")
+inputfiles <- c(
+  system.file("extdata", "chip_input_chr19.bam", package = "GenomicPlot")
+)
+names(inputfiles) <- c("chip_input")
+op <- "test_plot_locus2"
 
-op <- "test_plot_locus"
+chipimportParams <- list(
+  offset = 0, fix_width = 150, fix_point = "start", norm = TRUE,
+  useScore = FALSE, outRle = TRUE, useSizeFactor = FALSE, genome = "hg19"
+)
 
-plot_locus(queryFiles = queryfiles[c(1,3)], 
-                     centerFiles = queryfiles[2], 
+plot_locus(queryFiles = queryfiles, 
+                     centerFiles = centerfiles, 
                      ext = c(-1000, 1000), 
                      hl = c(-100, 100), 
-                     inputFiles = NULL,                              
-                     importParams = bedimportParams, 
+                     inputFiles = inputfiles,                              
+                     importParams = chipimportParams, 
                      shade = TRUE, 
                      binSize = 10, 
                      refPoint = "center", 
@@ -98,18 +121,21 @@ plot_locus(queryFiles = queryfiles[c(1,3)],
                      nc = 4)
                      
 ```
-![image1](./inst/tests/test_output/test_plot_locus1_1.png)
-![image1](./inst/tests/test_output/test_plot_locus1_2.png)
-![image1](./inst/tests/test_output/test_plot_locus1_3.png)
-![image1](./inst/tests/test_output/test_plot_locus1_4.png)
+![Fig. 2 Coverage around the center of peaks](./longtests/test_output/test_plot_locus2.pdf)
 
 The following example shows you how to annotate ChIP-seq peaks. The annotation statistics is shown in "test_plot_peak_annotation.png". The detailed annotation is in the table "summitPeak_targeted_annotated_gene.tab".
 
 ``` r
+gtffile <- system.file("extdata", "gencode.v19.annotation_chr19.gtf", 
+                       package = "GenomicPlot")
 
-op <- "test_plot_peak_annotation"
+centerfile <- system.file("extdata", "test_chip_peak_chr19.bed", 
+                          package = "GenomicPlot")
+names(centerfile) <- c("SummitPeak")
 
-plot_peak_annotation(peakFile = queryfiles[2], 
+op <- "test_plot_peak_annotation1"
+
+plot_peak_annotation(peakFile = centerfile, 
                      gtfFile = gtffile, 
                      importParams = bedimportParams, 
                      fiveP = -1000, 
@@ -118,10 +144,6 @@ plot_peak_annotation(peakFile = queryfiles[2],
                      verbose = TRUE)
 
 ```
-![image1](./inst/tests/test_output/test_plot_peak_annotation1_1.png)
-![image1](./inst/tests/test_output/test_plot_peak_annotation1_2.png)
-![image1](./inst/tests/test_output/test_plot_peak_annotation1_3.png)
-![image1](./inst/tests/test_output/test_plot_peak_annotation1_4.png)
+![Fig. 3 Distribution of peaks](./longtests/test_output/test_plot_peak_annotation1.pdf)
 
-For more examples, please check out the package vignette using browseVignettes("GenomicPlot").
 
