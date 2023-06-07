@@ -1,19 +1,17 @@
-## ----  eval = FALSE-----------------------------------------------------------
+## ---- install,  eval = FALSE--------------------------------------------------
 #  # install.packages("remotes")
 #  remotes::install_github("shuye2009/GenomicPlot",
 #                          build_manual = TRUE,
 #                          build_vignettes = TRUE)
 
-## ----  eval = FALSE-----------------------------------------------------------
-#  install.packages("path-to-source-package/GenomicPlot_x.x.x.tar.gz",
-#                   repos = NULL)
+## ---- global code, eval = TRUE, fig.show = 'hold', fig.keep = 'all', fig.align = 'center', fig.dim = c(7,7), fig.ncol=1, fig.sep="\n\n"----
+suppressPackageStartupMessages(library(GenomicPlot, quietly = TRUE))
+gtffile <- system.file("extdata", "gencode.v19.annotation_chr19.gtf", 
+                       package = "GenomicPlot")
+gff <- suppressMessages(RCAS::importGtf(saveObjectAsRds = TRUE, filePath = gtffile))
+txdb <- suppressWarnings(makeTxDbFromGRanges(gff))
 
-## ---- eval = FALSE, fig.show = 'hold', fig.keep = 'all', fig.align = 'center', fig.dim = c(7,7), fig.ncol=1, fig.sep="\n\n"----
-#  library(GenomicPlot, quietly = TRUE)
-#  gtffile <- system.file("extdata", "gencode.v19.annotation_chr19.gtf",
-#                         package = "GenomicPlot")
-#  gff <- RCAS::importGtf(saveObjectAsRds = TRUE, filePath = gtffile)
-#  txdb <- makeTxDbFromGRanges(gff)
+## ---- metagene code, eval = FALSE, fig.show = 'hold', fig.keep = 'all', fig.align = 'center', fig.dim = c(7,7), fig.ncol=1, fig.sep="\n\n"----
 #  
 #  gf <- prepare_5parts_genomic_features(txdb,
 #    meta = TRUE, nbins = 100, fiveP = -2000, threeP = 1000,
@@ -39,61 +37,17 @@
 #    transform = NA,
 #    smooth = TRUE,
 #    stranded = TRUE,
-#    outPrefix = NULL,
+#    outPrefix = "test_plot_5parts_metagene2",
 #    importParams = bamimportParams,
 #    heatmap = TRUE,
 #    rmOutlier = 0,
-#    nc = 5
+#    nc = 2
 #  )
 
-## ----metagene2, echo = FALSE, fig.cap = "Profile overlay", fig.wide = TRUE----
-knitr::include_graphics("../longtests/test_output/test_plot_5parts_metagene2_2.png")
+## ----metagene2, eval=TRUE, echo = FALSE, fig.cap="Metagene plot with UTR", include = TRUE, out.width="50%"----
+knitr::include_graphics("../longtests/test_output/test_plot_5parts_metagene2.pdf")
 
-## ----metagene3, echo = FALSE, fig.cap = "Ratio-over-input profile and heatmap", fig.wide = TRUE----
-knitr::include_graphics("../longtests/test_output/test_plot_5parts_metagene2_3.png")
-
-## ---- eval = FALSE, fig.show = 'hold', fig.keep = 'all', fig.align = 'center', fig.dim = c(7,7)----
-#  
-#  gf <- prepare_3parts_genomic_features(txdb,
-#    meta = FALSE, nbins = 100, fiveP = -3000, threeP = 2000,
-#    longest = TRUE
-#  )
-#  
-#  queryfiles <- system.file("extdata", "chip_treat_chr19.bam",
-#                            package = "GenomicPlot")
-#  names(queryfiles) <- "chip_bam"
-#  inputfiles <- system.file("extdata", "chip_input_chr19.bam",
-#                            package = "GenomicPlot")
-#  names(inputfiles) <- "chip_input"
-#  
-#  chipimportParams <- list(
-#    offset = 0, fix_width = 150, fix_point = "start", norm = TRUE,
-#    useScore = FALSE, outRle = TRUE, useSizeFactor = FALSE, genome = "hg19"
-#  )
-#  
-#  plot_3parts_metagene(
-#    queryFiles = queryfiles,
-#    gFeatures = gf,
-#    inputFiles = inputfiles,
-#    scale = FALSE,
-#    verbose = FALSE,
-#    transform = NA,
-#    smooth = TRUE,
-#    stranded = TRUE,
-#    outPrefix = NULL,
-#    importParams = chipimportParams,
-#    heatmap = TRUE,
-#    rmOutlier = 0,
-#    nc = 5
-#  )
-
-## ----gene2, echo = FALSE, fig.cap = "Profile overlay", fig.wide = TRUE--------
-knitr::include_graphics("../longtests/test_output/test_plot_3parts_metagene_2.png")
-
-## ----gene3, echo = FALSE, fig.cap = "Ratio-over-input profile and heatmap", fig.wide = TRUE----
-knitr::include_graphics("../longtests/test_output/test_plot_3parts_metagene_3.png")
-
-## ---- eval = FALSE, fig.show = 'hold', fig.keep = 'all', fig.align = 'center', fig.dim = c(7,7)----
+## ---- region code, eval = FALSE, fig.show = 'hold', fig.keep = 'all', fig.align = 'center', fig.dim = c(7,7)----
 #  centerfiles <- system.file("extdata", "test_chip_peak_chr19.narrowPeak",
 #                             package = "GenomicPlot")
 #  names(centerfiles) <- c("NarrowPeak")
@@ -105,6 +59,11 @@ knitr::include_graphics("../longtests/test_output/test_plot_3parts_metagene_3.pn
 #    system.file("extdata", "chip_input_chr19.bam", package = "GenomicPlot")
 #  )
 #  names(inputfiles) <- c("chip_input")
+#  
+#  chipimportParams <- list(
+#    offset = 0, fix_width = 150, fix_point = "start", norm = TRUE,
+#    useScore = FALSE, outRle = TRUE, useSizeFactor = FALSE, genome = "hg19"
+#  )
 #  
 #  plot_region(
 #    queryFiles = queryfiles,
@@ -121,47 +80,15 @@ knitr::include_graphics("../longtests/test_output/test_plot_3parts_metagene_3.pn
 #    smooth = TRUE,
 #    transform = NA,
 #    stranded = TRUE,
-#    outPrefix = NULL,
+#    outPrefix = "test_plot_region",
 #    rmOutlier = 0,
-#    nc = 5
+#    nc = 2
 #  )
 
-## ----region5, echo = FALSE, fig.cap = "Ratio-over-input profile", fig.wide = TRUE----
-knitr::include_graphics("../longtests/test_output/test_plot_region_4.png")
+## ----region, eval=TRUE, echo = FALSE, fig.cap = "Coverage of custom genomic regions", include = TRUE, out.width="50%"----
+knitr::include_graphics("../longtests/test_output/test_plot_region.pdf")
 
-## ---- eval = FALSE, fig.show = 'hold', fig.keep = 'all', fig.align = 'center', fig.dim = c(7,7)----
-#  
-#  queryfiles <- system.file("extdata", "treat_chr19.bam", package = "GenomicPlot")
-#  names(queryfiles) <- "clip_bam"
-#  inputfiles <- system.file("extdata", "input_chr19.bam", package = "GenomicPlot")
-#  names(inputfiles) <- "clip_input"
-#  ext <- c(-500, 200, -200, 500)
-#  hl <- c(-50, 50, -50, 50)
-#  
-#  plot_start_end(
-#    queryFiles = queryfiles,
-#    inputFiles = inputfiles,
-#    txdb = txdb,
-#    centerFiles = "intron",
-#    binSize = 10,
-#    importParams = bamimportParams,
-#    ext = ext,
-#    hl = hl,
-#    insert = 100,
-#    stranded = TRUE,
-#    scale = FALSE,
-#    smooth = TRUE,
-#    outPrefix = NULL,
-#    nc = 5
-#  )
-
-## ----intron1, echo = FALSE, fig.cap = "Query and input sample profiles in start, center and end of intron", fig.wide = TRUE----
-knitr::include_graphics("../longtests/test_output/test_plot_start_end_3.png")
-
-## ----intron2, echo = FALSE, fig.cap = "Ratio-over profile in start, center and end of intron", fig.wide = TRUE----
-knitr::include_graphics("../longtests/test_output/test_plot_start_end_4.png")
-
-## ---- eval = FALSE, fig.show = 'hold', fig.keep = 'all', fig.align = 'center', fig.dim = c(7,7)----
+## ---- locus code, eval = FALSE, fig.show = 'hold', fig.keep = 'all', fig.align = 'center', fig.dim = c(7,7)----
 #  centerfiles <- c(
 #    system.file("extdata", "test_clip_peak_chr19.bed", package = "GenomicPlot"),
 #    system.file("extdata", "test_chip_peak_chr19.bed", package = "GenomicPlot")
@@ -190,64 +117,19 @@ knitr::include_graphics("../longtests/test_output/test_plot_start_end_4.png")
 #    inputFiles = inputfiles,
 #    stranded = TRUE,
 #    scale = FALSE,
-#    outPrefix = NULL,
+#    outPrefix = "test_plot_locus2",
 #    verbose = FALSE,
 #    transform = NA,
 #    rmOutlier = 0,
 #    statsMethod = "wilcox.test",
 #    heatmap = TRUE,
-#    nc = 5
+#    nc = 2
 #  )
 
-## ----locus42, echo = FALSE, fig.cap = "Ratio-over-input profile around chip peaks and clip peaks", fig.wide = TRUE----
-knitr::include_graphics("../longtests/test_output/test_plot_locus2_7.png")
+## ----locus2, eval=TRUE, echo = FALSE, fig.cap = "Coverage around center of features", include = TRUE, out.width="50%"----
+knitr::include_graphics("../longtests/test_output/test_plot_locus2.pdf")
 
-## ----locus5, echo = FALSE, fig.cap = "Ratio-over-input stats around chip peaks and clip peaks", fig.wide = TRUE----
-knitr::include_graphics("../longtests/test_output/test_plot_locus2_8.png")
-
-## ---- eval = FALSE, fig.show = 'hold', fig.keep = 'all', fig.align = 'center', fig.dim = c(7,7)----
-#  
-#  centerfiles <- c(system.file("extdata", "test_clip_peak_chr19.bed",
-#                               package = "GenomicPlot"))
-#  names(centerfiles) <- c("iCLIPPeak")
-#  queryfiles <- c(system.file("extdata", "treat_chr19.bam",
-#                              package = "GenomicPlot"))
-#  names(queryfiles) <- c("clip_bam")
-#  inputfiles <- c(system.file("extdata", "input_chr19.bam",
-#                              package = "GenomicPlot"))
-#  names(inputfiles) <- c("clip_input")
-#  
-#  plot_locus_with_random(
-#    queryFiles = queryfiles,
-#    centerFiles = centerfiles,
-#    txdb,
-#    ext = c(-500, 500),
-#    hl = c(-100, 100),
-#    shade = TRUE,
-#    importParams = bamimportParams,
-#    binSize = 10,
-#    refPoint = "center",
-#    Xlab = "Center",
-#    smooth = TRUE,
-#    inputFiles = inputfiles,
-#    stranded = TRUE,
-#    scale = FALSE,
-#    outPrefix = NULL,
-#    verbose = FALSE,
-#    transform = NA,
-#    rmOutlier = 0,
-#    n_random = 1,
-#    statsMethod = "wilcox.test",
-#    nc = 5
-#  )
-
-## ----locusr11, echo = FALSE, fig.cap = "Ratio-over-input for clip signal around clip peaks in 5'UTR", fig.wide = TRUE----
-knitr::include_graphics("../longtests/test_output/test_plot_locus_with_random_27.png")
-
-## ----locusr12, echo = FALSE, fig.cap = "Ratio-over-input for clip signal around clip peaks in 5'UTR", fig.wide = TRUE----
-knitr::include_graphics("../longtests/test_output/test_plot_locus_with_random_28.png")
-
-## ---- eval = FALSE, fig.show = 'hold', fig.keep = 'all', fig.align = 'center', fig.dim = c(7,7)----
+## ---- annotation code, eval = FALSE, fig.show = 'hold', fig.keep = 'all', fig.align = 'center', fig.dim = c(7,7)----
 #  gtffile <- system.file("extdata", "gencode.v19.annotation_chr19.gtf",
 #                         package = "GenomicPlot")
 #  
@@ -257,7 +139,7 @@ knitr::include_graphics("../longtests/test_output/test_plot_locus_with_random_28
 #  
 #  bedimportParams <- list(
 #    offset = 0, fix_width = 100, fix_point = "center", norm = FALSE,
-#    useScore = FALSE, outRle = TRUE, useSizeFactor = FALSE, genome = "hg19"
+#    useScore = FALSE, outRle = FALSE, useSizeFactor = FALSE, genome = "hg19"
 #  )
 #  
 #  pa <- plot_peak_annotation(
@@ -269,14 +151,46 @@ knitr::include_graphics("../longtests/test_output/test_plot_locus_with_random_28
 #    threeP = 1000,
 #    simple = FALSE,
 #    verbose = TRUE,
-#    outPrefix = NULL
+#    outPrefix = "test_plot_peak_annotation1"
 #  )
 
-## ----annotation1, echo = FALSE, fig.cap = "Distribution of chip peak in various types of gene", fig.wide = TRUE----
-knitr::include_graphics("../longtests/test_output/test_plot_peak_annotation1_1.png")
+## ----annotation1, eval=TRUE, echo = FALSE, include = TRUE, fig.cap = "Distribution of ChIPseq peaks in various types of gene", out.width="50%"----
+knitr::include_graphics("../longtests/test_output/test_plot_peak_annotation1.pdf")
 
-## ----annotation2, echo = FALSE, fig.cap = "Distribution of chip peak in various parts of gene", fig.wide = TRUE----
-knitr::include_graphics("../longtests/test_output/test_plot_peak_annotation1_2.png")
+## ---- bam correlation, eval = TRUE, fig.show = 'hold', fig.keep = 'last', fig.align = 'center', fig.dim = c(7,7)----
+bamQueryFiles <- c(
+      system.file("extdata", "chip_input_chr19.bam", package = "GenomicPlot"),
+      system.file("extdata", "chip_treat_chr19.bam", package = "GenomicPlot")
+    )
+    names(bamQueryFiles) <- c("chip_input", "chip_treat")
+    
+    bamImportParams <- list(
+       offset = 0, fix_width = 150, fix_point = "start", norm = FALSE,
+       useScore = FALSE, outRle = FALSE, useSizeFactor = FALSE, genome = "hg19"
+    )
+   
+    plot_bam_correlation(
+      bamfiles = bamQueryFiles, binSize = 100000, outPrefix = NULL,
+      importParams = bamImportParams, nc = 2, verbose = FALSE
+    )
+
+## ---- bed overlap, eval = TRUE, fig.show = 'hold', fig.keep = 'first', fig.align = 'center', fig.dim = c(7,7)----
+  queryFiles <- c(
+    system.file("extdata", "test_chip_peak_chr19.narrowPeak", package = "GenomicPlot"),
+    system.file("extdata", "test_chip_peak_chr19.bed", package = "GenomicPlot"),
+    system.file("extdata", "test_clip_peak_chr19.bed", package = "GenomicPlot")
+  )
+  names(queryFiles) <- c("narrowPeak", "summitPeak", "clipPeak")
+ 
+  bedimportParams <- list(
+    offset = 0, fix_width = 100, fix_point = "center", norm = FALSE,
+    useScore = FALSE, outRle = FALSE, useSizeFactor = FALSE, genome = "hg19"
+  )
+ 
+  plot_overlap_bed(
+    bedList = queryFiles, importParams = bedimportParams, pairOnly = FALSE,
+    stranded = FALSE, outPrefix = NULL
+  )
 
 ## ----sessionInfo, echo=FALSE--------------------------------------------------
 sessionInfo()

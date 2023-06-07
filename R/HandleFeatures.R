@@ -582,41 +582,42 @@ get_txdb_features <- function(txdb,
     ol <- GenomicRanges::findOverlaps(TTS, gene_gr)
     queries <- unique(ol@from)
 
-    cl <- start_parallel(nc = nc)
- 
-    parallel::clusterExport(cl, varlist = c("TTS", "gene_gr", "ol"), envir = environment())
-    parallel::clusterExport(cl, varlist = c("nearest", "runValue", "strand", "start", "end", "start<-", "end<-"), envir = environment())
-
-    out <- parallel::parLapply(cl, queries, function(tts_idx) {
-      gene_idx <- ol@to[ol@from == tts_idx]
-      ogenes <- gene_gr[gene_idx]
-      ogene <- ogenes[nearest(TTS[tts_idx], ogenes, select = "arbitrary")]
-
-      if (runValue(strand(TTS[tts_idx])) == "+") {
-        dist <- start(ogene) - start(TTS[tts_idx])
-        if (dist > 0) {
-          end(TTS[tts_idx]) <- start(TTS[tts_idx]) + dist
-        } else {
-          end(TTS[tts_idx]) <- start(TTS[tts_idx])
-        }
-      } else if (runValue(strand(TTS[tts_idx])) == "-") {
-        dist <- end(TTS[tts_idx]) - end(ogene)
-        if (dist > 0) {
-          start(TTS[tts_idx]) <- end(TTS[tts_idx]) - dist
-        } else {
-          start(TTS[tts_idx]) <- end(TTS[tts_idx])
-        }
-      } else {
-        stop("invalid strand")
-      }
-      return(c(tts_idx, start(TTS[tts_idx]), end(TTS[tts_idx])))
-    })
-    stop_parallel(cl)
-
-    out1 <- as.data.frame(Reduce(rbind, out))
-    start(TTS[out1[, 1]]) <- out1[, 2]
-    end(TTS[out1[, 1]]) <- out1[, 3]
-
+    if(length(queries > 0)){
+       cl <- start_parallel(nc = nc)
+    
+       parallel::clusterExport(cl, varlist = c("TTS", "gene_gr", "ol"), envir = environment())
+       parallel::clusterExport(cl, varlist = c("nearest", "runValue", "strand", "start", "end", "start<-", "end<-"), envir = environment())
+   
+       out <- parallel::parLapply(cl, queries, function(tts_idx) {
+         gene_idx <- ol@to[ol@from == tts_idx]
+         ogenes <- gene_gr[gene_idx]
+         ogene <- ogenes[nearest(TTS[tts_idx], ogenes, select = "arbitrary")]
+   
+         if (runValue(strand(TTS[tts_idx])) == "+") {
+           dist <- start(ogene) - start(TTS[tts_idx])
+           if (dist > 0) {
+             end(TTS[tts_idx]) <- start(TTS[tts_idx]) + dist
+           } else {
+             end(TTS[tts_idx]) <- start(TTS[tts_idx])
+           }
+         } else if (runValue(strand(TTS[tts_idx])) == "-") {
+           dist <- end(TTS[tts_idx]) - end(ogene)
+           if (dist > 0) {
+             start(TTS[tts_idx]) <- end(TTS[tts_idx]) - dist
+           } else {
+             start(TTS[tts_idx]) <- end(TTS[tts_idx])
+           }
+         } else {
+           stop("invalid strand")
+         }
+         return(c(tts_idx, start(TTS[tts_idx]), end(TTS[tts_idx])))
+       })
+       stop_parallel(cl)
+   
+       out1 <- as.data.frame(Reduce(rbind, out))
+       start(TTS[out1[, 1]]) <- out1[, 2]
+       end(TTS[out1[, 1]]) <- out1[, 3]
+    }
 
     features[["TTS"]] <- TTS
   } else {
@@ -713,7 +714,9 @@ get_targeted_genes <- function(peak,
   annot_table <- bind_rows(annot_list)
   annot_table <- annot_table %>%
     group_by(chrPeak, startPeak, endPeak, strandPeak) %>%
-    filter(n() == 1 | feature_name == precedence(unique(feature_name)))
+    filter(n() == 1 | feature_name == precedence(unique(feature_name))) # if the peak is assigned 
+  # to only one feature, associate that feature withthe peak, else if the peak is assigned to multiple 
+  # features, associate the feature with the best precedence order with the peak.
 
   annot_count <- as.data.frame(annot_table %>%
     group_by(tx_name) %>%
@@ -727,14 +730,13 @@ get_targeted_genes <- function(peak,
   colnames(annot_df) <- c("tx_name", "Promoter", "5'UTR", "CDS", "3'UTR", "TTS", "Intron")
   rownames(annot_df) <- annot_df$tx_name
 
-  system.time(
-    for (i in seq_len(nrow(annot_count))) {
-      txi <- annot_count[i, 1]
-      fn <- annot_count[i, 2]
-      count <- annot_count[i, 3]
-      annot_df[txi, fn] <- count
-    }
-  )
+ 
+ for (i in seq_len(nrow(annot_count))) {
+   txi <- annot_count[i, 1]
+   fn <- annot_count[i, 2]
+   count <- annot_count[i, 3]
+   annot_df[txi, fn] <- count
+ }
 
   annot_df <- annot_df %>%
     mutate(Exon = `5'UTR` + CDS + `3'UTR`) %>%

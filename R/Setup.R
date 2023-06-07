@@ -20,7 +20,6 @@
 #' @importFrom ggsci pal_npg scale_color_npg scale_fill_npg
 #' @importFrom ggsignif geom_signif
 #' @importFrom cowplot plot_grid
-#' @importFrom forcats fct_inorder
 #' @importFrom edgeR calcNormFactors
 #' @importFrom genomation ScoreMatrixBin annotateWithFeatures
 #' @importFrom BiocGenerics strand strand<- score score<- append start start<- end end<- Reduce type

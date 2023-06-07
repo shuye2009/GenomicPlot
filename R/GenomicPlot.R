@@ -98,7 +98,7 @@ plot_start_end_with_random <- function(queryFiles,
     bedparam$norm <- FALSE
     bedparam$useScore <- FALSE
     bedparam$outRle <- FALSE
-    feature <- handle_input(inputFiles = centerFile, bedparam, overrideRds = FALSE, verbose = verbose, nc = nc)[[1]]$query
+    feature <- handle_input(inputFiles = centerFile, bedparam, verbose = verbose, nc = nc)[[1]]$query
     featureName <- names(centerFile)
   } else {
     stop("centerfile does not exit or the feature name is not supported!")
@@ -494,7 +494,7 @@ plot_start_end <- function(queryFiles,
       features[[featureName]] <- feature
     } else if (file.exists(featureName)) {
       names(featureName) <- names(centerFiles)[centerFiles == featureName]
-      feature <- handle_input(featureName, bedparam, overrideRds = FALSE, verbose = verbose, nc = nc)
+      feature <- handle_input(featureName, bedparam, verbose = verbose, nc = nc)
       featureGR <- feature[[1]]$query
       featureGR <- featureGR[width(featureGR) > minimal_width]
       feature[[1]]$query <- featureGR
@@ -1115,7 +1115,7 @@ plot_region <- function(queryFiles,
       centerInputs[[featureName]] <- feature
     } else if (file.exists(featureName)) {
       names(featureName) <- names(centerFiles)[centerFiles == featureName]
-      feature <- handle_input(featureName, bedparam, overrideRds = FALSE, verbose = verbose, nc = nc)
+      feature <- handle_input(featureName, bedparam, verbose = verbose, nc = nc)
       centerInputs[[names(feature)[1]]] <- feature[[1]]
     } else {
       stop("featureName is not supported!")
@@ -2003,7 +2003,7 @@ plot_locus <- function(queryFiles,
       centerInputs[[featureName]] <- feature
     } else if (file.exists(featureName)) {
       names(featureName) <- names(centerFiles)[centerFiles == featureName]
-      feature <- handle_input(featureName, bedparam, overrideRds = FALSE, verbose = verbose, nc = nc)
+      feature <- handle_input(featureName, bedparam, verbose = verbose, nc = nc)
       centerInputs[[names(feature)[1]]] <- feature[[1]]
     } else {
       stop("featureName is not supported or the file does not exist, please check your file name and path!")
@@ -2563,7 +2563,7 @@ plot_locus_with_random <- function(queryFiles,
   bedparam$outRle <- FALSE
   bedparam$useSizeFactor <- FALSE
 
-  centerInputs <- handle_input(centerFiles, bedparam, overrideRds = FALSE, verbose = verbose, nc = nc)
+  centerInputs <- handle_input(centerFiles, bedparam, verbose = verbose, nc = nc)
   centerLabels <- names(centerInputs)
 
   for (queryLabel in queryLabels) {
@@ -2895,7 +2895,7 @@ plot_bam_correlation <- function(bamfiles,
                                  nc = 2) {
   functionName <- as.character(match.call()[[1]])
   params <- plot_named_list(as.list(environment()))
-  print(params)
+  force(params)
 
   bamlabels <- names(bamfiles)
   importParams$outRle <- FALSE # force query to be GRanges
@@ -3015,7 +3015,7 @@ plot_bam_correlation <- function(bamfiles,
 #' @param dsTSS extension downstream of TSS for defining promoter: fiveP TSS + dsTSS
 #' @param threeP extension out of the 3' boundary of genes for defining termination region: -0 TTS + threeP
 #' @param outPrefix a string denoting output file name in pdf format
-#' @param simple logical, indicating whether 5'UTR and 3'UTR are annotated in the gtffile
+#' @param simple logical, indicating whether 5'UTR, CDS and 3'UTR are annotated in the gtfFile
 #' @param verbose, logical, to indicate whether to write the annotation results to a file
 #' @param hw a vector of two elements specifying the height and width of the output figures
 #' @param nc number of cores for parallel processing
@@ -3056,12 +3056,12 @@ plot_peak_annotation <- function(peakFile,
                                  nc = 2) {
   functionName <- as.character(match.call()[[1]])
   params <- plot_named_list(as.list(environment()))
-  print(params)
+  force(params)
 
   peakLabel <- names(peakFile)
   importParams$useScore <- FALSE
   importParams$outRle <- FALSE
-  bedin <- handle_input(inputFiles = peakFile, importParams = importParams, overrideRds = FALSE)
+  bedin <- handle_input(inputFiles = peakFile, importParams = importParams)
   peak <- bedin[[peakLabel]]$query
 
   stranded <- TRUE
@@ -3104,6 +3104,7 @@ plot_peak_annotation <- function(peakFile,
       compress = FALSE
     )
 
+    featureNames <- c("Promoter", "Exon", "TTS", "Intron")
     annot <- annotateWithFeatures(peak, features, strand.aware = TRUE, intersect.chr = FALSE)
     if (verbose) print(annot)
     precedence_count <- annot@num.precedence
@@ -3118,7 +3119,7 @@ plot_peak_annotation <- function(peakFile,
       mutate(norm_percent = norm_count / sum(norm_count)) %>%
       mutate(norm_labels = percent(norm_percent, accuracy = 0.1)) %>%
       mutate(norm_percent = round(norm_percent * 100, digits = 1)) %>%
-      mutate(feature = forcats::fct_inorder(feature))
+      mutate(feature = factor(feature, levels = featureNames))
 
     df2 <- df %>%
       mutate(
@@ -3134,15 +3135,16 @@ plot_peak_annotation <- function(peakFile,
     ap1 <- ggplot(df, aes(x = "", y = percent, fill = feature)) +
       geom_col(color = "white") +
       scale_y_continuous(breaks = df2$pos, labels = df2$labels) +
-      guides(fill = guide_legend(title = "Feature", nrow = 2)) +
+      guides(fill = guide_legend(nrow = 2)) +
       scale_fill_viridis(discrete = TRUE) +
       coord_polar(theta = "y") +
       ggtitle("Absolute count") +
       theme(
         axis.ticks = element_blank(),
         axis.title = element_blank(),
-        axis.text = element_text(size = 15),
+        axis.text = element_text(size = 12),
         legend.position = "top",
+        legend.title = element_blank(),
         panel.background = element_rect(fill = "white")
       )
 
@@ -3150,14 +3152,15 @@ plot_peak_annotation <- function(peakFile,
       geom_col(color = "white") +
       coord_polar(theta = "y") +
       scale_y_continuous(breaks = df2$norm_pos, labels = df2$norm_labels) +
-      guides(fill = guide_legend(title = "Feature", nrow = 2)) +
+      guides(fill = guide_legend(nrow = 2)) +
       scale_fill_viridis(discrete = TRUE) +
       ggtitle("Length-normalized count") +
       theme(
         axis.ticks = element_blank(),
         axis.title = element_blank(),
-        axis.text = element_text(size = 10),
+        axis.text = element_text(size = 12),
         legend.position = "top",
+        legend.title = element_blank(),
         panel.background = element_rect(fill = "white")
       )
 
@@ -3273,6 +3276,7 @@ plot_peak_annotation <- function(peakFile,
 
     if (verbose) message("Plotting piechart...\n")
 
+    featureNames <- c("Promoter", "5'UTR", "CDS", "3'UTR", "TTS", "Intron")
     dfa <- data.frame(count = precedence_c, len = lengths) %>%
       mutate(feature = rownames(.)) %>%
       mutate(percent = count / sum(count)) %>%
@@ -3282,8 +3286,7 @@ plot_peak_annotation <- function(peakFile,
       mutate(norm_percent = norm_count / sum(norm_count)) %>%
       mutate(norm_labels = scales::percent(norm_percent, accuracy = 0.1)) %>%
       mutate(norm_percent = round(norm_percent * 100, digits = 1)) %>%
-      mutate(feature = forcats::fct_inorder(feature))
-
+      mutate(feature = factor(feature, levels = featureNames))
 
     dfa2 <- dfa %>%
       mutate(
@@ -3300,12 +3303,12 @@ plot_peak_annotation <- function(peakFile,
       geom_col(color = "white") +
       coord_polar(theta = "y") +
       scale_y_continuous(breaks = dfa2$pos, labels = dfa2$labels) +
-      guides(fill = guide_legend(title = "Feature")) +
+      guides(fill = guide_legend(nrow = 2)) +
       scale_fill_viridis(discrete = TRUE) +
       theme(
         axis.ticks = element_blank(),
         axis.title = element_blank(),
-        axis.text = element_text(size = 10),
+        axis.text = element_text(size = 12),
         legend.position = "top",
         legend.title = element_blank(),
         panel.background = element_rect(fill = "white")
@@ -3314,12 +3317,12 @@ plot_peak_annotation <- function(peakFile,
       geom_col(color = "white") +
       coord_polar(theta = "y") +
       scale_y_continuous(breaks = dfa2$norm_pos, labels = dfa2$norm_labels) +
-      guides(fill = guide_legend(title = "Feature")) +
+      guides(fill = guide_legend(nrow = 2)) +
       scale_fill_viridis(discrete = TRUE) +
       theme(
         axis.ticks = element_blank(),
         axis.title = element_blank(),
-        axis.text = element_text(size = 10),
+        axis.text = element_text(size = 12),
         legend.position = "top",
         legend.title = element_blank(),
         panel.background = element_rect(fill = "white")
@@ -3337,7 +3340,7 @@ plot_peak_annotation <- function(peakFile,
       mutate(norm_percent = norm_count / sum(norm_count)) %>%
       mutate(norm_labels = scales::percent(norm_percent, accuracy = 0.1)) %>%
       mutate(norm_percent = round(norm_percent * 100, digits = 1)) %>%
-      mutate(feature = forcats::fct_inorder(feature))
+      mutate(feature = factor(feature, levels = featureNames))
 
     dfb2 <- dfb %>%
       mutate(
@@ -3352,13 +3355,13 @@ plot_peak_annotation <- function(peakFile,
     apb1 <- ggplot(dfb, aes(x = "", y = percent, fill = feature)) +
       geom_col(color = "white") +
       scale_y_continuous(breaks = dfb2$pos, labels = dfb2$labels) +
-      guides(fill = guide_legend(title = "Feature")) +
+      guides(fill = guide_legend(nrow = 2)) +
       scale_fill_viridis(discrete = TRUE) +
       coord_polar(theta = "y") +
       theme(
         axis.ticks = element_blank(),
         axis.title = element_blank(),
-        axis.text = element_text(size = 10),
+        axis.text = element_text(size = 12),
         legend.position = "top",
         legend.title = element_blank(),
         panel.background = element_rect(fill = "white")
@@ -3367,13 +3370,13 @@ plot_peak_annotation <- function(peakFile,
     apb2 <- ggplot(dfb, aes(x = "", y = norm_percent, fill = feature)) +
       geom_col(color = "white") +
       scale_y_continuous(breaks = dfb2$norm_pos, labels = dfb2$norm_labels) +
-      guides(fill = guide_legend(title = "Feature")) +
+      guides(fill = guide_legend(nrow = 2)) +
       scale_fill_viridis(discrete = TRUE) +
       coord_polar(theta = "y") +
       theme(
         axis.ticks = element_blank(),
         axis.title = element_blank(),
-        axis.text = element_text(size = 10),
+        axis.text = element_text(size = 12),
         legend.position = "top",
         legend.title = element_blank(),
         panel.background = element_rect(fill = "white")
@@ -3434,7 +3437,7 @@ plot_overlap_bed <- function(bedList,
                              stranded = TRUE,
                              hw = c(8, 8),
                              verbose = FALSE) {
-  inputList <- handle_input(bedList, importParams, overrideRds = FALSE)
+  inputList <- handle_input(bedList, importParams)
   names(inputList) <- names(bedList)
   grList <- lapply(inputList, function(x) x$query)
   sizeList <- lapply(inputList, function(x) x$size)
@@ -3462,7 +3465,7 @@ plot_overlap_bed <- function(bedList,
 
   g <- ggplot(counts_long, aes(X, Y)) +
     geom_tile(aes(fill = count)) +
-    geom_text(aes(label = count, color = "white")) +
+    geom_text(aes(label = count, color = "white", size = 10)) +
     scale_fill_viridis(discrete = FALSE) +
     theme_minimal() +
     theme(

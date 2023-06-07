@@ -20,7 +20,7 @@ Collate:
 Depends: R (>= 4.2.0), GenomicRanges (>= 1.46.1), GenomicFeatures, ggplot2 (>= 3.3.5), BiocGenerics, dplyr, grid
 Imports: methods, Rsamtools, parallel, tidyr, rtracklayer (>= 1.54.0),
    plyranges (>= 1.14.0), cowplot (>= 1.1.1), VennDiagram, ggplotify, GenomeInfoDb, IRanges,
-   ComplexHeatmap, RCAS (>= 1.20.0), scales (>= 1.2.0), GenomicAlignments (>= 1.30.0), edgeR, forcats,
+   ComplexHeatmap, RCAS (>= 1.20.0), scales (>= 1.2.0), GenomicAlignments (>= 1.30.0), edgeR,
    circlize, viridis, ggsignif (>= 0.6.3), ggsci (>= 2.9), genomation (>= 1.26.0), ggpubr, grDevices, graphics, 
    stats, utils
 Suggests: knitr, rmarkdown, AnnotationHub, AnnotationDbi, R.utils, BSgenome.Hsapiens.UCSC.hg19 (>= 1.4.3), 

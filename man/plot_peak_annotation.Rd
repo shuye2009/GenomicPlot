@@ -31,7 +31,7 @@ plot_peak_annotation(
 
 \item{threeP}{extension out of the 3' boundary of genes for defining termination region: -0 TTS + threeP}
 
-\item{simple}{logical, indicating whether 5'UTR and 3'UTR are annotated in the gtffile}
+\item{simple}{logical, indicating whether 5'UTR, CDS and 3'UTR are annotated in the gtfFile}
 
 \item{outPrefix}{a string denoting output file name in pdf format}
 

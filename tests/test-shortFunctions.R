@@ -3,9 +3,6 @@ library(testthat)
 
 Sys.setenv("R_TESTS" = "")
 
-outdir <- "./test_output"
-setwd(outdir)
-
 test_that("testing plot_bam_correlation", {
    bamQueryFiles <- c(
       system.file("extdata", "chip_input_chr19.bam", package = "GenomicPlot"),
@@ -77,4 +74,6 @@ test_that("testing plot_argument_list", {
     print(p)
     dev.off()
 })
+
+unlink("*.pdf")
  

@@ -36,7 +36,7 @@ bedimportParams <- list(
 
 out_list <- handle_input(
    inputFiles = bedQueryFiles,
-   importParams = bedimportParams, overrideRds = FALSE, verbose = TRUE, nc = 2
+   importParams = bedimportParams, verbose = TRUE, nc = 2
 )
 
 seqi <- GenomeInfoDb::Seqinfo(genome = "hg19") 

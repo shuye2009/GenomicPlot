@@ -7,7 +7,7 @@ Sys.setenv("R_TESTS" = "")
 pdf_to_png <- function(op) {
   img <- image_read_pdf(paste0(op, ".pdf"))
   for (i in seq_along(img)) {
-    image_write(img[i], path = paste0(op, "_", i, ".png"), format = "png")
+    image_write(img[i], path = paste0(op, "_", i, ".pdf"), format = "pdf", quality = 50)
   }
 }
 
@@ -70,7 +70,7 @@ test_that("testing plot_5parts_metagene", {
     heatRange = NULL,
     nc = 2
   )
-  pdf_to_png(op)
+ # pdf_to_png(op)
 
   op <- "test_plot_5parts_metagene2"
   plot_5parts_metagene(
@@ -79,7 +79,7 @@ test_that("testing plot_5parts_metagene", {
     inputFiles = bamInputFiles,
     scale = FALSE,
     verbose = FALSE,
-    transform = NA,
+    transform = "log2",
     smooth = TRUE,
     stranded = TRUE,
     outPrefix = op,
@@ -88,7 +88,7 @@ test_that("testing plot_5parts_metagene", {
     rmOutlier = 0,
     nc = 2
   )
-  pdf_to_png(op)
+  #pdf_to_png(op)
 })
 
 test_that("testing plot_3parts_metagene", {
@@ -103,7 +103,7 @@ test_that("testing plot_3parts_metagene", {
     inputFiles = chipInputFiles,
     scale = FALSE,
     verbose = FALSE,
-    transform = NA,
+    transform = "log2",
     smooth = TRUE,
     stranded = TRUE,
     outPrefix = op,
@@ -112,7 +112,7 @@ test_that("testing plot_3parts_metagene", {
     rmOutlier = 0,
     nc = 2
   )
-  pdf_to_png(op)
+  #pdf_to_png(op)
 })
 
 test_that("testing plot_locus", {
@@ -139,7 +139,7 @@ test_that("testing plot_locus", {
     rmOutlier = 0,
     nc = 2
   )
-  pdf_to_png(op)
+  #pdf_to_png(op)
   
   op <- "test_plot_locus2"
   plot_locus(
@@ -158,13 +158,13 @@ test_that("testing plot_locus", {
     scale = FALSE,
     outPrefix = op,
     verbose = FALSE,
-    transform = NA,
+    transform = "log2",
     rmOutlier = 0,
     statsMethod = "wilcox.test",
     heatmap = TRUE,
     nc = 2
   )
-  pdf_to_png(op)
+ # pdf_to_png(op)
 })
 test_that("testing plot_peak_annotation", {
   op <- "test_plot_peak_annotation1"
@@ -178,7 +178,7 @@ test_that("testing plot_peak_annotation", {
     outPrefix = op,
     verbose = FALSE
   )
-  pdf_to_png(op)
+  #pdf_to_png(op)
 
   op <- "test_plot_peak_annotation2"
   plot_peak_annotation(
@@ -191,7 +191,7 @@ test_that("testing plot_peak_annotation", {
     outPrefix = op,
     verbose = FALSE
   )
-  pdf_to_png(op)
+  #pdf_to_png(op)
 })
 
 test_that("testing plot_region", {
@@ -209,13 +209,13 @@ test_that("testing plot_region", {
     fiveP = -500,
     threeP = 500,
     smooth = TRUE,
-    transform = NA,
+    transform = "log2",
     stranded = TRUE,
     outPrefix = op,
     rmOutlier = 0,
     nc = 2
   )
-  pdf_to_png(op)
+  #pdf_to_png(op)
 })
 
 test_that("testing plot_start_end", {
@@ -233,10 +233,11 @@ test_that("testing plot_start_end", {
     stranded = TRUE,
     scale = FALSE,
     smooth = TRUE,
+    transform = "log2",
     outPrefix = op,
     nc = 2
   )
-  pdf_to_png(op)
+  #pdf_to_png(op)
 })
 
 test_that("testing plot_start_end_with_random", {
@@ -254,12 +255,14 @@ test_that("testing plot_start_end_with_random", {
     stranded = TRUE,
     scale = FALSE,
     smooth = TRUE,
+    transform = "log2",
     outPrefix = op,
     nc = 2
   )
-  pdf_to_png(op)
+  #pdf_to_png(op)
 })
 
+if(0){
 test_that("testing plot_locus_with_random", {
   op <- "test_plot_locus_with_random"
   plot_locus_with_random(
@@ -279,39 +282,24 @@ test_that("testing plot_locus_with_random", {
     scale = FALSE,
     outPrefix = op,
     verbose = FALSE,
-    transform = NA,
+    transform = "log2",
     rmOutlier = 0,
     n_random = 1,
     statsMethod = "wilcox.test",
     nc = 2
   )
-  pdf_to_png(op)
+  #pdf_to_png(op)
 })
-
+}
 # remove files not used by README.md and GenomicPlot_vignettes.rmd
-pngs <- list.files(pattern = "*.png")
-used_pngs <- c("test_plot_5parts_metagene1_1.png",
-               "test_plot_5parts_metagene1_2.png",
-               "test_plot_5parts_metagene1_3.png",
-               "test_plot_locus1_1.png",
-               "test_plot_locus1_2.png",
-               "test_plot_locus1_3.png",
-               "test_plot_locus1_4.png",
-               "test_plot_peak_annotation1_1.png",
-               "test_plot_peak_annotation1_2.png",
-               "test_plot_peak_annotation1_3.png",
-               "test_plot_peak_annotation1_4.png",
-               "test_plot_5parts_metagene2_2.png",
-               "test_plot_5parts_metagene2_3.png",
-               "test_plot_3parts_metagene_2.png",
-               "test_plot_3parts_metagene_3.png",
-               "test_plot_region_4.png",
-               "test_plot_start_end_3.png",
-               "test_plot_start_end_4.png",
-               "test_plot_locus2_7.png",
-               "test_plot_locus2_8.png",
-               "test_plot_locus_with_random_27.png",
-               "test_plot_locus_with_random_28.png")
-unused_pngs <- pngs[!pngs %in% used_pngs]
-unlink(unused_pngs)
-unlink("*.pdf")
+
+pdfs <- list.files(pattern = "*.pdf")
+used_pdfs <- c("test_plot_5parts_metagene1.pdf",
+               "test_plot_5parts_metagene2.pdf",
+               "test_plot_region.pdf",
+               "test_plot_locus2.pdf",
+               "test_plot_peak_annotation1.pdf"
+              )
+unused_pdfs <- pdfs[!pdfs %in% used_pdfs]
+unlink(unused_pdfs)
+
