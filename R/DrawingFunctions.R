@@ -620,12 +620,12 @@ draw_mean_se_barplot <- function(stat_df,
 
     levels(means_se[["x2"]]) <- levels(stat_df[["x2"]])
     means_se <- means_se %>%
-      mutate(labelx = paste0(.data[["x2"]], "\n(", N_Intensity / nf, ")")) ## now .data is means_se, not stat_df anymore
+      mutate(labelx = paste0(.data[["x2"]], "\n(", N_Intensity, ")")) ## now .data is means_se, not stat_df anymore
 
     p <- ggplot(means_se, aes(x = x2, y = mean_Intensity, group = x2, fill = x2)) +
       scale_fill_npg() +
       scale_color_npg() +
-      geom_col(stat = "identity") +
+      geom_col(position = "identity") +
       geom_errorbar(aes(ymin = lower_limit, ymax = upper_limit), position = position_dodge(width = 0.2), width = 0.2) +
       theme_classic() +
       theme(
@@ -668,7 +668,7 @@ draw_mean_se_barplot <- function(stat_df,
 #' @param Ylab a string for y-axis label
 #'
 #' @return a ggplot object
-#' @note used by \code{plot_reference_locus}, \code{plot_reference_locus_with_random}
+#' @note used by \code{plot_locus}, \code{plot_locus_with_random}
 #' @author Shuye Pu
 #'
 #' @export draw_quantile_plot

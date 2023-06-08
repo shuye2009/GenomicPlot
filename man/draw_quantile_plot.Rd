@@ -30,7 +30,7 @@ a ggplot object
 Plot quantiles as y-axis, and values as x-axis. Same as geom_ecdf, but allows sub-grouping by a second factor.
 }
 \note{
-used by \code{plot_reference_locus}, \code{plot_reference_locus_with_random}
+used by \code{plot_locus}, \code{plot_locus_with_random}
 }
 \examples{
 stat_df <- data.frame(
