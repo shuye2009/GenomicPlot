@@ -374,10 +374,10 @@ prepare_3parts_genomic_features <- function(txdb,
 
   five <- fiveP / 1000
   five <- paste0(five, "K")
-  if (fiveP == 0) five <- ""
+  if (fiveP == 0) five <- "-0K"
   three <- threeP / 1000
   three <- paste0(three, "K")
-  if (threeP == 0) three <- ""
+  if (threeP == 0) three <- "0K"
 
   featureNames <- c(five, featureName, three)
 
@@ -396,6 +396,9 @@ prepare_3parts_genomic_features <- function(txdb,
 
   promoter <- flank(gn$GRanges, width = -fiveP, both = FALSE, start = TRUE, ignore.strand = FALSE)
   TTS <- flank(gn$GRanges, width = threeP, both = FALSE, start = FALSE, ignore.strand = FALSE)
+  
+  promoter <- check_constraints(promoter, genome = txdb$user_genome[1])
+  TTS <- check_constraints(TTS, genome = txdb$user_genome[1])
 
   windowRs <- list(
     as(split(promoter, as.factor(names(promoter))), "GRangesList")[selected_tx],
@@ -460,10 +463,10 @@ prepare_5parts_genomic_features <- function(txdb,
   if (verbose) message("Preparing genomic features ...\n")
   five <- fiveP / 1000
   five <- paste0(five, "K")
-  if (fiveP == 0) five <- ""
+  if (fiveP == 0) five <- "-0K"
   three <- threeP / 1000
   three <- paste0(three, "K")
-  if (threeP == 0) three <- ""
+  if (threeP == 0) three <- "0K"
   featureNames <- c(five, "5'UTR", "CDS", "3'UTR", three)
 
   if (!meta) longest <- TRUE # always use the longest transcript to represent the gene
@@ -477,6 +480,9 @@ prepare_5parts_genomic_features <- function(txdb,
 
   promoter <- flank(gn$GRanges, width = -fiveP, both = FALSE, start = TRUE, ignore.strand = FALSE)
   TTS <- flank(gn$GRanges, width = threeP, both = FALSE, start = FALSE, ignore.strand = FALSE)
+  
+  promoter <- check_constraints(promoter, genome = txdb$user_genome[1])
+  TTS <- check_constraints(TTS, genome = txdb$user_genome[1])
 
   if (meta) {
     utr5_grl <- utr5$GRangesList
@@ -855,6 +861,7 @@ check_constraints <- function(gr,
   seqInfo <- Seqinfo(genome = genome)
   len <- seqlengths(seqInfo)
 
+  start(gr)[start(gr) < 1] <- 1
   end(gr)[end(gr) > len[as.vector(seqnames(gr))]] <- len[as.vector(seqnames(gr))][end(gr) > len[as.vector(seqnames(gr))]]
 
   if (!is.null(queryRle)) {
