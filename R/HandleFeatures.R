@@ -578,6 +578,8 @@ get_txdb_features <- function(txdb,
   )
   if (fiveP < 0) {
     promoter <- GenomicRanges::promoters(gene_gr, upstream = -fiveP, downstream = dsTSS, use.names = TRUE)
+    promoter <- check_constraints(promoter, genome = txdb$user_genome[1])
+    
     features[["Promoter"]] <- promoter
   } else {
     promoter <- NULL
@@ -585,6 +587,8 @@ get_txdb_features <- function(txdb,
 
   if (threeP > 0) {
     TTS <- GenomicRanges::flank(gene_gr, width = threeP, both = FALSE, start = FALSE, ignore.strand = FALSE)
+    TTS <- check_constraints(TTS, genome = txdb$user_genome[1])
+    
     ol <- GenomicRanges::findOverlaps(TTS, gene_gr)
     queries <- unique(ol@from)
 
@@ -852,6 +856,14 @@ gene2tx <- function(gtfFile,
 #'
 #' g <- check_constraints(gr = subject, genome = "hg19")
 #' identical(g, subject)
+#' 
+#' subject1 <- GRanges("chr19", 
+#'   IRanges(rep(c(10, 15), 2), width=c(1, 20, 400, 28)), 
+#'   strand=c("+", "+", "-", "-")
+#' )
+#'
+#' g1 <- check_constraints(gr = subject1, genome = "hg19")
+#' identical(g1, subject1)
 #' 
 #' @export check_constraints
 #'
