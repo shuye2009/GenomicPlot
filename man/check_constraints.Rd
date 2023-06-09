@@ -28,6 +28,14 @@ subject <- GRanges("chr19",
 g <- check_constraints(gr = subject, genome = "hg19")
 identical(g, subject)
 
+subject1 <- GRanges("chr19", 
+  IRanges(rep(c(10, 15), 2), width=c(1, 20, 400, 28)), 
+  strand=c("+", "+", "-", "-")
+)
+
+g1 <- check_constraints(gr = subject1, genome = "hg19")
+identical(g1, subject1)
+
 }
 \author{
 Shuye Pu

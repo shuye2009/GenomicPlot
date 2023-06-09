@@ -3598,8 +3598,9 @@ plot_overlap_genes <- function(fileList,
 plot_named_list <- function(params) {
   s <- "Plotting parameters:\n"
   for (aname in names(params)) {
-    value_length <- length(unlist(strsplit(deparse1(params[[aname]]), split = ",")))
-    if (value_length > 10) {
+    #value_length <- length(unlist(strsplit(deparse1(params[[aname]]), split = ",")))
+    osize <- object.size(params[[aname]])
+    if(osize > 1024) { #if (value_length > 10) {
       value <- deparse1(substitute(params[[aname]]))
     } else {
       value <- deparse1(params[[aname]])
