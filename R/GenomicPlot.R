@@ -54,7 +54,7 @@ plot_start_end_with_random <- function(queryFiles,
                                        Ylab = "Coverage/base/gene") {
   functionName <- as.character(match.call()[[1]])
   params <- plot_named_list(as.list(environment()))
-  print(params)
+  force(params)
 
   if (is.null(inputFiles)) {
     inputLabels <- NULL
@@ -448,7 +448,7 @@ plot_start_end <- function(queryFiles,
                            nc = 2) {
   functionName <- as.character(match.call()[[1]])
   params <- plot_named_list(as.list(environment()))
-  print(params)
+  force(params)
 
   if (is.null(inputFiles)) {
     inputLabels <- NULL
@@ -718,305 +718,6 @@ plot_start_end <- function(queryFiles,
   invisible(plot_df)
 }
 
-
-#' @title Plot promoter, gene body and TTS
-#
-#' @description Plot reads or peak Coverage/base/gene of samples given in the query files around genes. The upstream and downstream windows flanking genes
-#' can be given separately, the parameter 'meta' controls if gene or metagene plots are generated. If Input files are provided, ratio over Input
-#' is computed and displayed as well.
-#'
-#' @param queryFiles a vector of sample file names. The file should be in .bam, .bed, .wig or .bw format, mixture of formats is allowed
-#' @param gFeatures genomic features as output of the function 'prepare_3parts_genomic_features'
-#' @param inputFiles a vector of input sample file names. The file should be in .bam, .bed, .wig or .bw format, mixture of formats is allowed
-#' @param importParams a list of parameters for \code{handle_input}
-#' @param stranded logical, indicating whether the strand of the feature should be considered
-#' @param scale logical, indicating whether the score matrix should be scaled to the range 0:1, so that samples with different baseline can be compared
-#' @param smooth logical, indicating whether the line should smoothed with a spline smoothing algorithm
-#' @param heatmap logical, indicating whether a heatmap of the score matrix should be generated
-#' @param heatRange a numerical vector of two elements, defining range for heatmap color ramp generation
-#' @param rmOutlier a numeric value serving as a multiplier of the MAD in Hampel filter for outliers identification, 0 indicating not removing outliers. For Gaussian distribution, use 3, adjust based on data distribution
-#' @param outPrefix a string specifying output file prefix for plots (outPrefix.pdf)
-#' @param transform a string in c("log", "log2", "log10"), default = NA indicating no transformation of data matrix
-#' @param Ylab a string for y-axis label
-#' @param verbose logical, whether to output additional information (data used for plotting or statistical test results)
-#' @param hw a vector of two elements specifying the height and width of the output figures
-#' @param nc integer, number of cores for parallel processing
-#'
-#' @return a dataframe containing the data used for plotting
-#' @author Shuye Pu
-#'
-#' @export plot_3parts_metagene
-
-
-plot_3parts_metagene <- function(queryFiles,
-                                 gFeatures,
-                                 inputFiles = NULL,
-                                 scale = FALSE,
-                                 verbose = FALSE,
-                                 Ylab = "Coverage/base/gene",
-                                 importParams = NULL,
-                                 smooth = FALSE,
-                                 stranded = TRUE,
-                                 outPrefix = NULL,
-                                 heatmap = FALSE,
-                                 rmOutlier = 0,
-                                 heatRange = NULL,
-                                 transform = NA,
-                                 hw = c(8, 8),
-                                 nc = 2) {
-  functionName <- as.character(match.call()[[1]])
-  params <- plot_named_list(as.list(environment()))
-  print(params)
-
-  if (is.null(inputFiles)) {
-    inputLabels <- NULL
-    queryInputs <- handle_input(inputFiles = queryFiles, importParams, verbose = verbose, nc = nc)
-  } else {
-    inputLabels <- names(inputFiles)
-    queryLabels <- names(queryFiles)
-    if (length(queryFiles) == length(inputFiles)) {
-      queryInputs <- handle_input(inputFiles = c(queryFiles, inputFiles), importParams, verbose = verbose, nc = nc)
-    } else if (length(inputFiles) == 1) {
-      queryInputs <- handle_input(inputFiles = c(queryFiles, inputFiles), importParams, verbose = verbose, nc = nc)
-      queryInputs <- queryInputs[c(queryLabels, rep(inputLabels, length(queryLabels)))] # expand the list
-
-      inputLabels <- paste0(names(inputFiles), seq_along(queryFiles)) # make each inputLabels unique
-      names(queryInputs) <- c(queryLabels, inputLabels)
-    } else {
-      stop("the number of inputFiles must be 1 or equal to the number of queryFiles!")
-    }
-  }
-  queryLabels <- names(queryInputs)
-
-  if (!is.null(outPrefix)) {
-    pdf(paste(outPrefix, "pdf", sep = "."), height = hw[1], width = hw[2])
-  }
-
-  windowRs <- gFeatures$windowRs
-  featureNames <- names(windowRs)
-  if (verbose) {
-     message("Feature name: ", paste(featureNames, collapse = " "), "\n")
-     message("Window sizes: ", paste(vapply(windowRs, length, numeric(1)), collapse = " "), "\n")
-  }
-
-  nbins <- gFeatures$nbins
-  scaled_bins <- gFeatures$scaled_bins
-  meta <- gFeatures$meta
-  fiveP <- gFeatures$fiveP
-  threeP <- gFeatures$threeP
-
-  ## start overlapping
-
-  if (verbose) message("Computing coverage for queryFiles...\n")
-  scoreMatrix_list <- list()
-
-  for (queryLabel in queryLabels) {
-    myInput <- queryInputs[[queryLabel]]
-    libsize <- myInput$size
-    queryRegions <- myInput$query
-    fileType <- myInput$type
-    weight_col <- myInput$weight
-
-    for (w in featureNames) {
-      if (verbose) message("Feature name: ", w, "\n")
-      windowR <- as(windowRs[[w]], "GRangesList")
-      bin_num <- scaled_bins[w]
-
-      bin_op <- "mean"
-      fullMatrix <- parallel_scoreMatrixBin(queryRegions, windowR, bin_num, bin_op, weight_col, stranded, nc = nc)
-
-      scoreMatrix_list[[queryLabel]][[w]] <- fullMatrix
-    }
-  }
-
-  if (verbose) message("Plotting coverage for queryFiles...\n")
-  mplot_df <- NULL
-  vx <- c(1, cumsum(scaled_bins[seq_len(length(scaled_bins) - 1)]) + 1) ## x axis points for vlines that demarcate the genomic features
-  names(vx) <- featureNames
-
-  Ylab <- ifelse(!is.na(transform) && is.null(inputFiles), paste0(transform, " (", Ylab, ")"), Ylab)
-
-  if (heatmap) heatmap_list <- list()
-
-  processed_matrix <- list()
-  for (queryLabel in queryLabels) {
-    plot_df <- NULL
-
-    dims <- vapply(scoreMatrix_list[[queryLabel]], dim, numeric(2))
-
-    if (any(dims[1, ] != dims[1, 1])) {
-      message(paste(dims[1, ], collapse = " "), "\n")
-      stop("Number of genes are not equal among features, make sure all feature windows are within chromosome lengths of query regions,
-            as genomation will remvove all feature windows outside chromosome boundaries")
-    } else {
-      featureMatrix <- as.matrix(bind_cols(scoreMatrix_list[[queryLabel]]))
-      if (is.null(inputFiles)) {
-        fullMatrix <- process_scoreMatrix(fullMatrix, scale, rmOutlier, transform = transform, verbose = verbose)
-      } else {
-        fullMatrix <- process_scoreMatrix(fullMatrix, scale = FALSE, rmOutlier = rmOutlier, transform = NA, verbose = verbose)
-      }
-      processed_matrix[[queryLabel]] <- featureMatrix
-
-      colm <- apply(featureMatrix, 2, mean)
-      colsd <- apply(featureMatrix, 2, sd)
-      colse <- colsd / sqrt(nrow(featureMatrix))
-      querybed <- rep(queryLabel, ncol(featureMatrix))
-      collabel <- list()
-      featuretype <- list()
-      for (w in featureNames) {
-        if (verbose) message("Feature name: ", w, "\n")
-        if (scaled_bins[w] > 0) {
-          bin_num <- scaled_bins[w]
-          collabel[[w]] <- seq(vx[w], vx[w] + bin_num - 1)
-          featuretype[[w]] <- rep(w, bin_num)
-        }
-      }
-      collabel <- unlist(collabel)
-      featuretype <- unlist(featuretype)
-      names(collabel) <- featuretype
-
-      if (heatmap) {
-        dataname <- paste(Ylab, queryLabel, "gene", sep = ":")
-        heatmap_list[dataname] <- draw_matrix_heatmap(featureMatrix, dataName = dataname, labels_col = collabel, levels_col = featureNames, ranges = heatRange, verbose = verbose)
-      }
-
-      plot_df <- data.frame("Intensity" = colm, "sd" = colsd, "se" = colse, "Position" = collabel, "Query" = querybed, "Feature" = featuretype)
-    }
-
-    if (smooth) {
-      plot_df$Intensity <- as.vector(smooth.spline(plot_df$Intensity, df = as.integer(nbins / 5))$y)
-      plot_df$se <- as.vector(smooth.spline(plot_df$se, df = as.integer(nbins / 5))$y)
-    }
-
-    mplot_df <- rbind(mplot_df, plot_df)
-  }
-
-  mplot_df <- mutate(mplot_df, lower = Intensity - se, upper = Intensity + se)
-
-  xmax <- max(mplot_df$Position)
-  pp <- draw_region_landmark(featureNames, vx, xmax)
-  ppp <- draw_region_name(featureNames, scaled_bins, xmax)
-  marker <- plot_grid(pp, ppp, ncol = 1, align = "v", axis = "lr", rel_heights = c(1, 2))
-  ## plot individual sample lines with error band
-  plot_list <- list()
-  for (queryLabel in queryLabels) {
-    aplot_df <- mplot_df %>%
-      filter(Query == queryLabel)
-    p <- draw_region_profile(plot_df = aplot_df, cn = "Query", vx = vx, Ylab = Ylab)
-    outp <- plot_grid(p, marker, ncol = 1, align = "v", axis = "lr", rel_heights = c(10, 1))
-    plot_list[[queryLabel]] <- outp
-  }
-  rowp <- plot_grid(plotlist = plot_list, nrow = 1, align = "h")
-  # print(rowp)
-
-  if (heatmap) {
-    groblist <- lapply(heatmap_list, function(x) grid.grabExpr(draw(x, heatmap_legend_side = "left")))
-    heatp <- plot_grid(plotlist = groblist, nrow = 1, align = "h")
-
-    composite <- plot_grid(rowp, heatp, ncol = 1, align = "v")
-    print(composite)
-  } else {
-    print(rowp)
-  }
-
-  ## plot multi-sample lines with error band
-  p <- draw_region_profile(plot_df = mplot_df, cn = "Query", vx = vx, Ylab = Ylab)
-  outp <- plot_grid(p, marker, ncol = 1, align = "v", axis = "lr", rel_heights = c(10, 1))
-  print(outp)
-
-  if (!is.null(inputFiles)) {
-    if (verbose) message("Computing coverage for ratio over input...\n")
-    Ylabr <- ifelse(is.na(transform), "Ratio-over-Input", paste0(transform, " (Ratio-over-Input)"))
-    if (heatmap) heatmap_list_ratio <- list()
-
-    inputMatrix_list <- processed_matrix[inputLabels]
-    ratiolabels <- queryLabels[!queryLabels %in% inputLabels]
-    ratioMatrix_list <- processed_matrix[ratiolabels]
-
-    for (i in seq_along(ratiolabels)) {
-      fullMatrix <- ratio_over_input(ratioMatrix_list[[ratiolabels[i]]], inputMatrix_list[[inputLabels[i]]], verbose)
-      fullMatrix <- process_scoreMatrix(fullMatrix, scale, rmOutlier, transform, verbose)
-
-      ratioMatrix_list[[ratiolabels[i]]] <- fullMatrix
-    }
-
-
-    if (verbose) message("Plotting coverage for ratio over input...\n")
-    mplot_df_ratio <- NULL
-    for (ratiolabel in ratiolabels) {
-      plot_df <- NULL
-
-      featureMatrix <- ratioMatrix_list[[ratiolabel]]
-
-      colm <- apply(featureMatrix, 2, mean)
-      colsd <- apply(featureMatrix, 2, sd)
-      colse <- colsd / sqrt(nrow(featureMatrix))
-      querybed <- rep(ratiolabel, ncol(featureMatrix))
-      collabel <- list()
-      featuretype <- list()
-      for (w in featureNames) {
-        if (verbose) message("Feature name: ", w, "\n")
-        if (scaled_bins[w] > 0) {
-          bin_num <- scaled_bins[w]
-          collabel[[w]] <- seq(vx[w], vx[w] + bin_num - 1)
-          featuretype[[w]] <- rep(w, bin_num)
-        }
-      }
-      collabel <- unlist(collabel)
-      featuretype <- unlist(featuretype)
-      names(collabel) <- featuretype
-
-      if (heatmap) {
-        dataname <- paste(Ylabr, ratiolabel, "gene", sep = ":")
-        heatmap_list_ratio[dataname] <- draw_matrix_heatmap(featureMatrix, dataName = dataname, labels_col = collabel, levels_col = featureNames, ranges = heatRange, verbose = verbose)
-      }
-      plot_df <- data.frame("Intensity" = colm, "sd" = colsd, "se" = colse, "Position" = collabel, "Query" = querybed, "Feature" = featuretype)
-
-      if (smooth) {
-        plot_df$Intensity <- as.vector(smooth.spline(plot_df$Intensity, df = as.integer(nbins / 5))$y)
-        plot_df$se <- as.vector(smooth.spline(plot_df$se, df = as.integer(nbins / 5))$y)
-      }
-
-      mplot_df_ratio <- rbind(mplot_df_ratio, plot_df)
-    }
-
-    mplot_df_ratio <- mutate(mplot_df_ratio, lower = Intensity - se, upper = Intensity + se)
-
-    ## plot individual sample lines with error band
-    plot_list <- list()
-    for (ratiolabel in ratiolabels) {
-      aplot_df <- mplot_df_ratio %>%
-        filter(Query == ratiolabel)
-      p <- draw_region_profile(plot_df = aplot_df, cn = "Query", vx = vx, Ylab = Ylabr)
-      outp <- plot_grid(p, marker, ncol = 1, align = "v", axis = "lr", rel_heights = c(10, 1))
-      plot_list[[ratiolabel]] <- outp
-    }
-    rowp <- plot_grid(plotlist = plot_list, nrow = 1, align = "h")
-    # print(rowp)
-
-    if (heatmap) {
-      groblist <- lapply(heatmap_list_ratio, function(x) grid.grabExpr(draw(x, heatmap_legend_side = "left")))
-      heatp <- plot_grid(plotlist = groblist, nrow = 1, align = "h")
-      composite <- plot_grid(rowp, heatp, ncol = 1, align = "v")
-      print(composite)
-    } else {
-      print(rowp)
-    }
-
-    ## plot multi-sample lines with error band
-    p <- draw_region_profile(plot_df = mplot_df_ratio, cn = "Query", vx = vx, Ylab = Ylabr)
-    outp <- plot_grid(p, marker, ncol = 1, align = "v", axis = "lr", rel_heights = c(10, 1))
-    print(outp)
-  }
-
-  if (!is.null(outPrefix)) {
-    print(params)
-    on.exit(dev.off(), add = TRUE)
-  }
-
-  invisible(mplot_df)
-}
-
 #' @title Plot signal inside as well as around custom genomic regions
 #'
 #' @description Plot reads or peak Coverage/base/gene of samples given in the query files inside regions defined in the centerFiles. The upstream and downstream flanking windows can be given separately. If Input files are provided, ratio over Input is computed and displayed as well.
@@ -1073,7 +774,7 @@ plot_region <- function(queryFiles,
                         nc = 2) {
   functionName <- as.character(match.call()[[1]])
   params <- plot_named_list(as.list(environment()))
-  print(params)
+  force(params)
 
   if (!is.null(outPrefix)) {
     pdf(paste(outPrefix, "pdf", sep = "."), height = hw[1], width = hw[2])
@@ -1599,7 +1300,7 @@ plot_5parts_metagene <- function(queryFiles,
                                  nc = 2) {
   functionName <- as.character(match.call()[[1]])
   params <- plot_named_list(as.list(environment()))
-  print(params)
+  force(params)
 
   if (is.null(inputFiles)) {
     inputLabels <- NULL
@@ -1943,7 +1644,7 @@ plot_locus <- function(queryFiles,
                        nc = 2) {
   functionName <- as.character(match.call()[[1]])
   params <- plot_named_list(as.list(environment()))
-  print(params)
+  force(params)
 
   if (is.null(inputFiles)) {
     inputLabels <- NULL
@@ -2488,7 +2189,7 @@ plot_locus_with_random <- function(queryFiles,
                                    nc = 2) {
   functionName <- as.character(match.call()[[1]])
   params <- plot_named_list(as.list(environment()))
-  print(params)
+  force(params)
 
   if (is.null(inputFiles)) {
     inputLabels <- NULL
@@ -3600,7 +3301,7 @@ plot_named_list <- function(params) {
   for (aname in names(params)) {
     #value_length <- length(unlist(strsplit(deparse1(params[[aname]]), split = ",")))
     osize <- object.size(params[[aname]])
-    if(osize > 1024) { #if (value_length > 10) {
+    if(osize > 2048) { #if (value_length > 10) {
       value <- deparse1(substitute(params[[aname]]))
     } else {
       value <- deparse1(params[[aname]])

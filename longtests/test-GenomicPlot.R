@@ -91,30 +91,6 @@ test_that("testing plot_5parts_metagene", {
   #pdf_to_png(op)
 })
 
-test_that("testing plot_3parts_metagene", {
-  gf_gene <- prepare_3parts_genomic_features(txdb,
-    meta = FALSE, nbins = 100, fiveP = -3000, threeP = 2000,
-    longest = TRUE
-  )
-  op <- "test_plot_3parts_metagene"
-  plot_3parts_metagene(
-    queryFiles = chipQureyFiles,
-    gFeatures = gf_gene,
-    inputFiles = chipInputFiles,
-    scale = FALSE,
-    verbose = FALSE,
-    transform = "log2",
-    smooth = TRUE,
-    stranded = TRUE,
-    outPrefix = op,
-    importParams = chipimportParams,
-    heatmap = TRUE,
-    rmOutlier = 0,
-    nc = 2
-  )
-  #pdf_to_png(op)
-})
-
 test_that("testing plot_locus", {
   op <- "test_plot_locus1"
   plot_locus(
