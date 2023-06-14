@@ -125,7 +125,7 @@ handle_input <- function(inputFiles,
   importParams$outRle <- original_outRle # if modified, restore
 
   ## modify library size
-  if (importParams$useSizeFactor && length(inputFiles) > 1) {
+  if (importParams$useSizeFactor && (length(inputFiles) > 1)) {
     outlist <- effective_size(outlist = outlist, outRle = importParams$outRle, genome = importParams$genome, nc = nc)
   }
 

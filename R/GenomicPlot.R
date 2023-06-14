@@ -56,6 +56,17 @@ plot_start_end_with_random <- function(queryFiles,
   params <- plot_named_list(as.list(environment()))
   force(params)
 
+  if (!is.null(outPrefix)) {
+     while (!is.null(dev.list())) {
+        dev.off()
+     }
+     pdf(paste(outPrefix, "pdf", sep = "."), height = hw[1], width = hw[2])
+     if (verbose){
+        sf <- file(paste0(outPrefix, ".log"), open = "wt")          
+        sink(sf, type = "message")
+     } 
+  }
+  
   if (is.null(inputFiles)) {
     inputLabels <- NULL
     queryInputs <- handle_input(inputFiles = queryFiles, importParams, verbose = verbose, nc = nc)
@@ -75,13 +86,6 @@ plot_start_end_with_random <- function(queryFiles,
     }
   }
   queryLabels <- names(queryInputs)
-
-  if (!is.null(outPrefix)) {
-    while (!is.null(dev.list())) {
-      dev.off()
-    }
-    pdf(paste0(outPrefix, ".pdf"), width = hw[2], height = hw[1])
-  }
 
   feature <- rfeature <- NULL
   fs <- fe <- rfs <- rfe <- fc <- rfc <- NULL
@@ -386,6 +390,7 @@ plot_start_end_with_random <- function(queryFiles,
   if (!is.null(outPrefix)) {
     print(params)
     on.exit(dev.off(), add = TRUE)
+    if (verbose) sink()
   }
 
   invisible(plot_df)
@@ -450,6 +455,17 @@ plot_start_end <- function(queryFiles,
   params <- plot_named_list(as.list(environment()))
   force(params)
 
+  if (!is.null(outPrefix)) {
+     while (!is.null(dev.list())) {
+        dev.off()
+     }
+     pdf(paste(outPrefix, "pdf", sep = "."), height = hw[1], width = hw[2])
+     if (verbose){
+        sf <- file(paste0(outPrefix, ".log"), open = "wt")          
+        sink(sf, type = "message")
+     } 
+  }
+  
   if (is.null(inputFiles)) {
     inputLabels <- NULL
     queryInputs <- handle_input(inputFiles = queryFiles, importParams, verbose = verbose, nc = nc)
@@ -469,10 +485,6 @@ plot_start_end <- function(queryFiles,
     }
   }
   queryLabels <- names(queryInputs)
-
-  if (!is.null(outPrefix)) {
-    pdf(paste0(outPrefix, ".pdf"), height = hw[1], width = hw[2])
-  }
 
   bedparam <- importParams
   bedparam$CLIP_reads <- FALSE
@@ -713,6 +725,7 @@ plot_start_end <- function(queryFiles,
   if (!is.null(outPrefix)) {
     print(params)
     on.exit(dev.off(), add = TRUE)
+    if (verbose) sink()
   }
 
   invisible(plot_df)
@@ -777,7 +790,14 @@ plot_region <- function(queryFiles,
   force(params)
 
   if (!is.null(outPrefix)) {
-    pdf(paste(outPrefix, "pdf", sep = "."), height = hw[1], width = hw[2])
+     while (!is.null(dev.list())) {
+        dev.off()
+     }
+     pdf(paste(outPrefix, "pdf", sep = "."), height = hw[1], width = hw[2])
+     if (verbose){
+        sf <- file(paste0(outPrefix, ".log"), open = "wt")          
+        sink(sf, type = "message")
+     } 
   }
 
   if (is.null(inputFiles)) {
@@ -1250,6 +1270,7 @@ plot_region <- function(queryFiles,
   if (!is.null(outPrefix)) {
     print(params)
     on.exit(dev.off(), add = TRUE)
+    if (verbose) sink()
   }
 
   invisible(mplot_df)
@@ -1302,6 +1323,17 @@ plot_5parts_metagene <- function(queryFiles,
   params <- plot_named_list(as.list(environment()))
   force(params)
 
+  if (!is.null(outPrefix)) {
+     while (!is.null(dev.list())) {
+        dev.off()
+     }
+     pdf(paste(outPrefix, "pdf", sep = "."), height = hw[1], width = hw[2])
+     if (verbose){
+        sf <- file(paste0(outPrefix, ".log"), open = "wt")
+        sink(sf, type = "message")
+     } 
+  }
+  
   if (is.null(inputFiles)) {
     inputLabels <- NULL
     queryInputs <- handle_input(inputFiles = queryFiles, importParams, verbose = verbose, nc = nc)
@@ -1321,8 +1353,6 @@ plot_5parts_metagene <- function(queryFiles,
     }
   }
   queryLabels <- names(queryInputs)
-
-  if (!is.null(outPrefix)) pdf(paste(outPrefix, "pdf", sep = "."), height = hw[1], width = hw[2])
 
   mplot_dfs <- NULL
   mplot_dfs_ratio <- NULL
@@ -1353,7 +1383,7 @@ plot_5parts_metagene <- function(queryFiles,
     scoreMatrix_list <- list()
 
     for (queryLabel in queryLabels) {
-      if (verbose) print(queryLabel)
+      if (verbose) message(queryLabel)
       Input <- queryInputs[[queryLabel]]
       libsize <- Input$size
       queryRegions <- Input$query
@@ -1574,9 +1604,12 @@ plot_5parts_metagene <- function(queryFiles,
   if (!is.null(outPrefix)) {
     print(params)
     on.exit(dev.off(), add = TRUE)
+    if (verbose) {
+       message("plot_5parts_metagene runs successfully!\n")
+       sink()
+    }
   }
 
-  if (verbose) message("plot_5parts_metagene runs successfully!\n")
   invisible(mplot_dfs)
 }
 
@@ -1646,6 +1679,17 @@ plot_locus <- function(queryFiles,
   params <- plot_named_list(as.list(environment()))
   force(params)
 
+  if (!is.null(outPrefix)) {
+     while (!is.null(dev.list())) {
+        dev.off()
+     }
+     pdf(paste(outPrefix, "pdf", sep = "."), height = hw[1], width = hw[2])
+     if (verbose){
+        sf <- file(paste0(outPrefix, ".log"), open = "wt")          
+        sink(sf, type = "message")
+     } 
+  }
+  
   if (is.null(inputFiles)) {
     inputLabels <- NULL
     queryInputs <- handle_input(inputFiles = queryFiles, importParams, verbose = verbose, nc = nc)
@@ -1668,23 +1712,16 @@ plot_locus <- function(queryFiles,
 
   five <- ext[1] / 1000
   five <- paste0(five, "K")
-  if (ext[1] == 0) five <- ""
+  if (ext[1] == 0) five <- "-0K"
   three <- ext[2] / 1000
   three <- paste0(three, "K")
-  if (ext[2] == 0) three <- ""
+  if (ext[2] == 0) three <- "0K"
   featureNames <- c(five, Xlab, three)
 
   ext[2] <- ext[2] - (ext[2] - ext[1]) %% binSize ## to avoid binSize inconsistency, as the final binSize is dictated by bin_num
   bin_num <- round((ext[2] - ext[1]) / binSize)
   colLabel <- seq(ext[1], (ext[2] - binSize), binSize)
   names(colLabel) <- rep(featureNames, c(sum(colLabel < 0), sum(colLabel == 0), sum(colLabel > 0)))
-
-  if (!is.null(outPrefix)) {
-    while (!is.null(dev.list())) {
-      dev.off()
-    }
-    pdf(paste(outPrefix, "pdf", sep = "."), height = hw[1], width = hw[2])
-  }
 
   scoreMatrix_list <- list()
 
@@ -1710,41 +1747,46 @@ plot_locus <- function(queryFiles,
       stop("featureName is not supported or the file does not exist, please check your file name and path!")
     }
   }
+  
+  if (verbose) message("Preparing centers...\n")
   centerLabels <- names(centerInputs)
+  centerList <- list()
 
+  for (centerLabel in centerLabels) {
+   centerInput <- centerInputs[[centerLabel]]
+   centerGr <- centerInput$query
+   
+   if (verbose) message("Center label: ", centerLabel, "\n")
+
+   if (refPoint %in% c("center", "start", "end")) {
+     windowRegions <- resize(centerGr, width = 1, fix = refPoint)
+     windowRegions <- promoters(windowRegions, upstream = -ext[1], downstream = ext[2])
+     windowRegions <- check_constraints(windowRegions, importParams$genome)
+   } else {
+     stop("invalid reference point! Must be one of c('center', 'start', 'end')")
+   }
+   windowRs <- as(split(windowRegions, f = factor(names(windowRegions))), "GRangesList")
+   centerList[[centerLabel]] <- windowRs
+   if (verbose) message("Number of window regions ", length(windowRs), "\n")
+  }
+  
+  
   if (verbose) message("Computing coverage for Sample...\n")
+  
   for (queryLabel in queryLabels) {
-    myInput <- queryInputs[[queryLabel]]
-    libsize <- myInput$size
-    queryRegions <- myInput$query
-    fileType <- myInput$type
-    weight_col <- myInput$weight
-    if (verbose) {
-      message("size of query regions: ", libsize, "\n")
-      message("Query label: ", queryLabel, "\n")
-    }
-
-    for (centerLabel in centerLabels) {
-      centerInput <- centerInputs[[centerLabel]]
-      centerGr <- centerInput$query
-      if (verbose) {
-        message("Preparing window regions...\n")
-        message("Center label: ", centerLabel, "\n")
-      }
-
-      if (refPoint %in% c("center", "start", "end")) {
-        windowRegions <- resize(centerGr, width = 1, fix = refPoint)
-        windowRegions <- promoters(windowRegions, upstream = -ext[1], downstream = ext[2])
-        windowRegions <- check_constraints(windowRegions, importParams$genome, queryRegions)
-      } else {
-        stop("invalid reference point! Must be one of c('center', 'start', 'end')")
-      }
-      windowRs <- as(split(windowRegions, f = factor(names(windowRegions))), "GRangesList")
-
-      if (verbose) message("Number of window regions ", length(windowRs), "\n")
-
+     myInput <- queryInputs[[queryLabel]]
+     queryRegions <- myInput$query
+     weight_col <- myInput$weight
+     libsize <- myInput$size
+     
+     if (verbose) {
+        message("size of query regions: ", libsize, "\n")
+        message("Query label: ", queryLabel, "\n")
+     }
+     
+     for (centerLabel in centerLabels) {
       bin_op <- "mean"
-
+      windowRs <- centerList[[centerLabel]]
       fullMatrix <- parallel_scoreMatrixBin(queryRegions, windowRs, bin_num, bin_op, weight_col, stranded, nc = nc)
       if (is.null(inputFiles)) {
         fullMatrix <- process_scoreMatrix(fullMatrix, scale, rmOutlier, transform = transform, verbose = verbose)
@@ -1752,7 +1794,7 @@ plot_locus <- function(queryFiles,
         fullMatrix <- process_scoreMatrix(fullMatrix, scale = FALSE, rmOutlier = rmOutlier, transform = NA, verbose = verbose)
       }
       colnames(fullMatrix) <- as.character(colLabel)
-      rownames(fullMatrix) <- names(windowRegions)
+      rownames(fullMatrix) <- names(windowRs)
 
       scoreMatrix_list[[queryLabel]][[centerLabel]] <- fullMatrix
 
@@ -2126,6 +2168,7 @@ plot_locus <- function(queryFiles,
   if (!is.null(outPrefix)) {
     print(params)
     on.exit(dev.off(), add = TRUE)
+    if (verbose) sink()
   }
 
   invisible(list("plot" = mplot_dt, "stat" = mstat_dt))
@@ -2191,6 +2234,17 @@ plot_locus_with_random <- function(queryFiles,
   params <- plot_named_list(as.list(environment()))
   force(params)
 
+  if (!is.null(outPrefix)) {
+     while (!is.null(dev.list())) {
+        dev.off()
+     }
+     pdf(paste(outPrefix, "pdf", sep = "."), height = hw[1], width = hw[2])
+     if (verbose){
+        sf <- file(paste0(outPrefix, ".log"), open = "wt")          
+        sink(sf, type = "message")
+     } 
+  }
+  
   if (is.null(inputFiles)) {
     inputLabels <- NULL
     queryInputs <- handle_input(inputFiles = queryFiles, importParams, verbose = verbose, nc = nc)
@@ -2210,14 +2264,6 @@ plot_locus_with_random <- function(queryFiles,
     }
   }
   queryLabels <- names(queryInputs)
-
-
-  if (!is.null(outPrefix)) {
-    while (!is.null(dev.list())) {
-      dev.off()
-    }
-    pdf(paste(outPrefix, "pdf", sep = "."), height = hw[1], width = hw[2])
-  }
 
   ext[2] <- ext[2] - (ext[2] - ext[1]) %% binSize ## to avoid binSize inconsistency, as the final binSize is dictated by bin_num
   colLabel <- seq(ext[1], (ext[2] - binSize), binSize)
@@ -2484,7 +2530,7 @@ plot_locus_with_random <- function(queryFiles,
 
           refsize <- nrow(fullMatrix_list[[centerLabel]])
 
-          for (alabel in c(centerLabel, "Random")) {
+          for (alabel in c(centerLabel, "Random")) {k
             fullMatrix <- fullMatrix_list[[alabel]]
 
             colm <- apply(fullMatrix, 2, mean)
@@ -2548,6 +2594,7 @@ plot_locus_with_random <- function(queryFiles,
   if (!is.null(outPrefix)) {
     print(params)
     on.exit(dev.off(), add = TRUE)
+    if (verbose) sink()
   }
 }
 
@@ -2555,9 +2602,9 @@ plot_locus_with_random <- function(queryFiles,
 
 #' @title Plot correlation of bam files
 #'
-#' @description plot correlation in reads coverage distributions along the genome for bam files
+#' @description Plot correlation in reads coverage distributions along the genome for bam files. Generates a fingerprint plot, a heatmap of correlation coefficients with hierarchical clustering, a pairwise correlation plot and a PCA plot. 
 #'
-#' @param bamfiles a named vector of strings denoting file names
+#' @param bamFiles a named vector of strings denoting file names
 #' @param binSize an integer denoting the tile width for tiling the genome, default 1000000
 #' @param outPrefix a string denoting output file name in pdf format
 #' @param importParams a list of parameters for \code{handle_input}
@@ -2565,7 +2612,7 @@ plot_locus_with_random <- function(queryFiles,
 #' @param hw a vector of two elements specifying the height and width of the output figures
 #' @param nc integer, number of cores for parallel processing
 #'
-#' @return a dataframe of read counts per bin perl sample
+#' @return a dataframe of read counts per bin per sample
 #'
 #' @examples
 #' 
@@ -2581,13 +2628,13 @@ plot_locus_with_random <- function(queryFiles,
 #' )
 #'
 #' plot_bam_correlation(
-#'   bamfiles = bamQueryFiles, binSize = 100000, outPrefix = NULL,
+#'   bamFiles = bamQueryFiles, binSize = 100000, outPrefix = NULL,
 #'   importParams = bamImportParams, nc = 2, verbose = FALSE
 #' )
 #'
 #' @export plot_bam_correlation
 #'
-plot_bam_correlation <- function(bamfiles,
+plot_bam_correlation <- function(bamFiles,
                                  binSize = 1e6,
                                  outPrefix = NULL,
                                  importParams = NULL,
@@ -2598,10 +2645,27 @@ plot_bam_correlation <- function(bamfiles,
   params <- plot_named_list(as.list(environment()))
   force(params)
 
-  bamlabels <- names(bamfiles)
-  importParams$outRle <- FALSE # force query to be GRanges
+  if (!is.null(outPrefix)) {
+     while (!is.null(dev.list())) {
+        dev.off()
+     }
+     pdf(paste0(outPrefix, ".pdf"), width = hw[2], height = hw[1])
+     if (verbose){
+        sf <- file(paste0(outPrefix, ".log"), open = "wt")         
+        sink(sf, type = "message")
+     } 
+  }
+  
+  bamlabels <- names(bamFiles)
+  
+  if (is.null(importParams)){
+     importParams <- list(offset = 0, fix_width = 0, fix_point = "center", useScore = FALSE, outRle = FALSE, norm = FALSE, useSizeFactor = FALSE, genome = "hg19")
+  } else {
+     importParams$outRle <- FALSE # force query to be GRanges
+  }
+  
   if (verbose) message("Computing bam correlation...\n")
-  outlist <- handle_input(inputFiles = bamfiles, importParams, nc = nc)
+  outlist <- handle_input(inputFiles = bamFiles, importParams, nc = nc)
 
   seqi <- Seqinfo(genome = importParams$genome)
 
@@ -2631,8 +2695,6 @@ plot_bam_correlation <- function(bamfiles,
     mutate(cumCount = cumsum(Count)) %>%
     mutate(Rank = order(cumCount)) %>%
     mutate(Fraction = cumCount / max(cumCount), Rank = Rank / max(Rank))
-
-  if (!is.null(outPrefix)) pdf(paste0(outPrefix, ".pdf"), width = hw[2], height = hw[1])
 
   p1 <- ggplot(data = long_df, aes(x = Rank, y = Fraction, color = Sample)) +
     geom_line() +
@@ -2692,14 +2754,27 @@ plot_bam_correlation <- function(bamfiles,
       panel.background = element_blank(),
       axis.ticks = element_blank()
     )
-  print(g)
-  # grid.newpage()
+  #print(g)
+  
+  ph <- ComplexHeatmap::pheatmap(mat, col = colorRamp2(range(mat), viridis(2)), display_numbers = TRUE, heatmap_legend_param = list(title = "correlation"))
+  draw(ph)
 
-  if (length(bamfiles) < 6) pairs(log2(df + 1), lower.panel = panel.smooth, upper.panel = panel.cor, diag.panel = panel.hist, main = paste("log2(CPM/bin), bin size =", binSize))
+  if (length(bamFiles) <= 6) pairs(log2(df + 1), lower.panel = panel.smooth, upper.panel = panel.cor, diag.panel = panel.hist, main = paste("log2(CPM/bin), bin size =", binSize))
+  
+  #biplot(prcomp(t(log2(df + 1))), choices = c(1, 2), pc.biplot = TRUE, color = c("blue", "white")) # PCA plot
+  #
+  pca <- prcomp(log2(df + 1))
+  loadings <- pca$rotation
+  sdev <- pca$sdev
+  pca.var <- as.data.frame(t(apply(loadings, 1, function(x){x * sdev})))
+  pcaplot <- ggplot(pca.var, aes(x = PC1, y = PC2)) +
+     geom_text(label = rownames(pca.var))
+  print(pcaplot)
 
   if (!is.null(outPrefix)) {
     print(params)
     on.exit(dev.off(), add = TRUE)
+    if(verbose) sink()
   }
 
   invisible(df)
@@ -2770,7 +2845,17 @@ plot_peak_annotation <- function(peakFile,
     stranded <- FALSE
   }
 
-  if (!is.null(outPrefix)) pdf(paste0(outPrefix, ".pdf"), height = hw[1], width = hw[2])
+  if (!is.null(outPrefix)) {
+     while (!is.null(dev.list())) {
+        dev.off()
+     }
+     pdf(paste0(outPrefix, ".pdf"), height = hw[1], width = hw[2])
+     if (verbose){
+        sf <- file(paste0(outPrefix, ".log"), open = "wt")          
+        sink(sf, type = "message")
+     } 
+  }
+  
   gff <- RCAS::importGtf(saveObjectAsRds = TRUE, filePath = gtfFile)
   txdb <- makeTxDbFromGRanges(gff)
 
@@ -2869,6 +2954,7 @@ plot_peak_annotation <- function(peakFile,
     if (!is.null(outPrefix)) {
       print(params)
       on.exit(dev.off(), add = TRUE)
+      if (verbose) sink()
     }
     invisible(list(annotation = NULL, stat = df, simplified = NULL))
   } else {
@@ -3090,6 +3176,7 @@ plot_peak_annotation <- function(peakFile,
     if (!is.null(outPrefix)) {
       print(params)
       on.exit(dev.off(), add = TRUE)
+      if (verbose) sink()
     }
     invisible(list(annotation = dfs, stat = dfa, simplified = dfb))
   }
@@ -3138,6 +3225,14 @@ plot_overlap_bed <- function(bedList,
                              stranded = TRUE,
                              hw = c(8, 8),
                              verbose = FALSE) {
+   if (!is.null(outPrefix)){
+      pdf(paste0(outPrefix, ".pdf"), width = hw[2], height = hw[1])
+      if (verbose){
+         sf <- file(paste0(outPrefix, ".log"), open = "wt")          
+         sink(sf, type = "message")
+      } 
+   }
+   
   inputList <- handle_input(bedList, importParams)
   names(inputList) <- names(bedList)
   grList <- lapply(inputList, function(x) x$query)
@@ -3161,8 +3256,6 @@ plot_overlap_bed <- function(bedList,
     mutate(Y = rep(rownames(counts), each = ncol(counts)))
 
   pairs <- combn(grList, 2, simplify = FALSE)
-
-  if (!is.null(outPrefix)) pdf(paste0(outPrefix, ".pdf"), width = hw[2], height = hw[1])
 
   g <- ggplot(counts_long, aes(X, Y)) +
     geom_tile(aes(fill = count)) +
@@ -3204,7 +3297,10 @@ plot_overlap_bed <- function(bedList,
       }
     }
   }
-  if (!is.null(outPrefix)) on.exit(dev.off(), add = TRUE)
+  if (!is.null(outPrefix)) {
+     on.exit(dev.off(), add = TRUE)
+     if (verbose) sink()
+  }
 
   return(g)
 }

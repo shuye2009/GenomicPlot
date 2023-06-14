@@ -5,7 +5,7 @@
 \title{Plot correlation of bam files}
 \usage{
 plot_bam_correlation(
-  bamfiles,
+  bamFiles,
   binSize = 1e+06,
   outPrefix = NULL,
   importParams = NULL,
@@ -15,7 +15,7 @@ plot_bam_correlation(
 )
 }
 \arguments{
-\item{bamfiles}{a named vector of strings denoting file names}
+\item{bamFiles}{a named vector of strings denoting file names}
 
 \item{binSize}{an integer denoting the tile width for tiling the genome, default 1000000}
 
@@ -30,10 +30,10 @@ plot_bam_correlation(
 \item{nc}{integer, number of cores for parallel processing}
 }
 \value{
-a dataframe of read counts per bin perl sample
+a dataframe of read counts per bin per sample
 }
 \description{
-plot correlation in reads coverage distributions along the genome for bam files
+Plot correlation in reads coverage distributions along the genome for bam files. Generates a fingerprint plot, a heatmap of correlation coefficients with hierarchical clustering, a pairwise correlation plot and a PCA plot.
 }
 \examples{
 
@@ -49,7 +49,7 @@ bamImportParams <- list(
 )
 
 plot_bam_correlation(
-  bamfiles = bamQueryFiles, binSize = 100000, outPrefix = NULL,
+  bamFiles = bamQueryFiles, binSize = 100000, outPrefix = NULL,
   importParams = bamImportParams, nc = 2, verbose = FALSE
 )
 

@@ -128,15 +128,15 @@ impute_hm <- function(fullmatrix,
 
 #' @title Preprocess scoreMatrix before plotting
 #'
-#' @description  This is a helper function for manipulate the score matrix produced by ScoreMatrix or ScoreMatrinBin functions defined in the 'genomation' package. To facilitate downstream analysis, imputation of missing values is performed implicitly.
+#' @description  This is a helper function for manipulate the score matrix produced by ScoreMatrix or ScoreMatrinBin functions defined in the 'genomation' package. To facilitate downstream analysis, imputation of missing values is performed implicitly when log transformation is required, otherwise missing values are replaced with 0.
 #'
 #' @param fullmatrix a numeric matrix, with bins in columns and genomic windows in rows
 #' @param scale logical, indicating whether the score matrix should be scaled to the range 0:1, so that samples with different baseline can be compared
-#' @param rmOutlier logical, indicating whether a row with abnormally high values in the score matrix should be removed
+#' @param rmOutlier a numeric value to multiple the 'mad' when detecting outliers, can be adjusted based on data.  Default 0, indicating not to remove outliers.
 #' @param verbose logical, indicating whether to output additional information (data used for plotting or statistical test results)
 #' @param transform a string in c("log", "log2", "log10"), default = NA indicating no transformation of data matrix
 #'
-#' @details If inputFiles for the plotting function is null, all operations (impute, scale, rmOutlier and transform) can be applied to the score matrix, in the order of impute -> rmOutlier -> transform -> scale. When inputFiles are provided, only impute and rmOutlier can be applied to the score matrix, as transform and scale will affect ratio calculation, especially when log2 transformation of the ratio is intended. However, all these operations can be applied to the resulting ratio matrix. In order to avoid introducing distortion into the post-processed data, use caution when applying these operations.
+#' @details If inputFiles for the plotting function is null, all operations (scale, rmOutlier and transform) can be applied to the score matrix, in the order of rmOutlier -> transform -> scale. When inputFiles are provided, only rmOutlier can be applied to the score matrix, as transform and scale will affect ratio calculation, especially when log2 transformation of the ratio is intended. However, all these operations can be applied to the resulting ratio matrix. In order to avoid introducing distortion into the post-processed data, use caution when applying these operations.
 #'
 #' @return a numeric matrix with the same dimension as the fullmatrix
 #' @author Shuye Pu
@@ -172,15 +172,16 @@ process_scoreMatrix <- function(fullmatrix,
   fullmatrix[is.infinite(fullmatrix)] <- 0
   fullmatrix[is.na(fullmatrix)] <- 0
 
-  fullmatrix <- impute_hm(fullmatrix, verbose)
-
-  ## remove outliers from reference regions, using Hampel filter with 1000mad instead of 3mad.
+  ## remove outliers from reference regions, using Hampel filter with rmOutlier * mad instead of 3 * mad, which is generally used for normal distribution.
   ## if outliers are detected, replace the outliers with up bound
   if (rmOutlier > 0) {
     fullmatrix <- rm_outlier(fullmatrix, verbose = verbose, multiplier = rmOutlier)
   }
 
   if (!is.na(transform)) {
+     fullmatrix <- impute_hm(fullmatrix, verbose) # impute to avoid taking log of zero,
+     # also to avoid distortion by adding pseudocount 1 when the vast majority of 
+     # values of the matrix are less than 1, like in the case of a ratio matrix
     if (min(fullmatrix) < 0) {
       message("Negative values are found in the matrix, log transformation cannot be applied!\n")
     } else if (transform == "log") {
@@ -208,7 +209,6 @@ process_scoreMatrix <- function(fullmatrix,
   }
   fullmatrix[is.na(fullmatrix)] <- 0
 
-  # rownames(fullmatrix) <- rn
   invisible(fullmatrix)
 }
 
@@ -262,8 +262,8 @@ rm_outlier <- function(fullmatrix,
       message("\nMedian absolute deviation (mad) of row max: ", M)
       message("\nMulitplier of mad: ", multiplier)
       message("\nUp_bound and replace value: ", up_bound)
-      message("\npercentile of up_bound: ", percentile)
-      message("\nPumber of outlier rows: ", length(which(rowmax > up_bound)))
+      message("\nPercentile of up_bound: ", percentile)
+      message("\nNumber of outlier rows: ", length(which(rowmax > up_bound)))
       message("\nNumber of outliers: ", length(outliers))
       message("\nFraction of outliers: ", length(outliers) / (nrow(fullmatrix) * ncol(fullmatrix)))
       message("\nValues of outliers:\n")
@@ -432,9 +432,9 @@ ratio_over_input <- function(IP, Input, verbose = FALSE) {
   }
   
   if (verbose) {
-     out <- c(max(IP), min(Input), reg)
-     names(out) <- c("Max(IP)", "min(Input)", "pseudo")
-     print(out)
+     message("Maximum if IP matrix: ", max(IP))
+     message("Minimum of Input matrix: ", min(Input))
+     message("Pseudo number added: ", reg)
   }
   
   ratio <- (IP + reg) / (Input + reg)

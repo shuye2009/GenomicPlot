@@ -17,7 +17,7 @@ test_that("testing plot_bam_correlation", {
    
     op <- "test_plot_bam_correlation"
     plot_bam_correlation(
-      bamfiles = bamQueryFiles, binSize = 100000, outPrefix = op,
+      bamFiles = bamQueryFiles, binSize = 100000, outPrefix = op,
       importParams = bamImportParams, nc = 2, verbose = FALSE
     )
 })

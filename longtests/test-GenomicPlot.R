@@ -238,7 +238,7 @@ test_that("testing plot_start_end_with_random", {
   #pdf_to_png(op)
 })
 
-if(0){
+
 test_that("testing plot_locus_with_random", {
   op <- "test_plot_locus_with_random"
   plot_locus_with_random(
@@ -266,7 +266,7 @@ test_that("testing plot_locus_with_random", {
   )
   #pdf_to_png(op)
 })
-}
+
 # remove files not used by README.md and GenomicPlot_vignettes.rmd
 
 pdfs <- list.files(pattern = "*.pdf")

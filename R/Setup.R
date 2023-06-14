@@ -31,14 +31,14 @@
 #' @importFrom GenomicRanges nearest findOverlaps GRanges GRangesList mcols mcols<- makeGRangesFromDataFrame
 #' @importFrom GenomicFeatures transcriptLengths exonsBy intronsByTranscript threeUTRsByTranscript fiveUTRsByTranscript
 #' @importFrom GenomicFeatures cdsBy genes transcripts makeTxDbFromGRanges
-#' @importFrom ComplexHeatmap HeatmapAnnotation Heatmap draw
+#' @importFrom ComplexHeatmap HeatmapAnnotation Heatmap draw pheatmap
 #' @importFrom circlize colorRamp2
 #' @importFrom viridis viridis scale_fill_viridis
 #' @importFrom VennDiagram draw.pairwise.venn draw.triple.venn draw.quad.venn
 #' @importFrom grDevices dev.list dev.off pdf
 #' @importFrom graphics abline hist pairs panel.smooth par points rect strwidth text boxplot
 #' @importFrom utils combn head read.delim read.delim2 read.table tail type.convert write.table
-#' @importFrom stats TukeyHSD aggregate aov approx
+#' @importFrom stats TukeyHSD aggregate aov approx prcomp heatmap biplot
 #' @importFrom stats as.formula cor density dist ecdf hclust
 #' @importFrom stats ks.test mad median na.omit qqplot quantile
 #' @importFrom stats reorder sd smooth.spline wilcox.test t.test
