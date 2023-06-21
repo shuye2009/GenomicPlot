@@ -40,7 +40,7 @@ queryFiles <- system.file("extdata", "chip_treat_chr19.bam",
    package = "GenomicPlot")
 names(queryFiles) <- "query"
 
-chipimportParams <- list(
+chipimportParams <- setImportParams(
   offset = 0, fix_width = 150, fix_point = "start", norm = TRUE,
   useScore = FALSE, outRle = TRUE, useSizeFactor = FALSE, genome = "hg19"
 )
@@ -53,7 +53,7 @@ windowFiles <- system.file("extdata", "test_chip_peak_chr19.narrowPeak",
 )
 names(windowFiles) <- "narrowPeak"
 
-importParams <- list(
+importParams <- setImportParams(
   offset = 0, fix_width = 0, fix_point = "start", norm = FALSE,
   useScore = FALSE, outRle = FALSE, useSizeFactor = FALSE, genome = "hg19"
 )

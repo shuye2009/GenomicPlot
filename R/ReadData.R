@@ -1,18 +1,49 @@
-#' @title Hand input of NGS data with various formats
+#' @title set parameters for \code{handle_input} function
+#' 
+#' @description This function save as a template for setting up import parameters for reading NGS data, it provides default values for each parameter.
+#' @param offset an integer, -1 indicating the bam reads should be shrunk to the -1 position at the 5'end of the reads, which corresponds to the cross link site in iCLIP.
+#' @param fix_width an integer defining how long the reads should be extended to, ignored when offset is not 0.
+#' @param fix_point a string in c("start", "end", "center") denoting the anchor point for extension, ignored when offset is not 0.
+#' @param useScore logical, indicating whether the 'score' column of the bed file should be used in calculation of coverage. 
+#' @param outRle logical, indicating whether the output should be RleList objects or GRanges objects.
+#' @param norm logical, indicating whether the output RleList should be normalized to RPM using library sizes.
+#' @param genome a string denoting the genome name and version.
+#' @param useSizeFactor logical, indicating whether the library size should be adjusted with a size factor, using the 'calcNormFactors' function in the edgeR package, only applicable to ChIPseq data.
+#' @param saveRds logical, indicating whether the results of handle_input should be saved for fast reloading
+#' 
+#' @return a list of nine elements 
+#' 
+#' @author Shuye Pu 
+#' 
+#' @examples
+#' importParams1 <- setImportParams()
+#' importParams2 <- setImportParams(offset = -1, saveRds = TRUE)
+#' 
+#' @export setImportParams
+#' 
+setImportParams <- function(
+   offset = 0, 
+   fix_width = 0, 
+   fix_point = "start", 
+   norm = FALSE,
+   useScore = FALSE, 
+   outRle = TRUE, 
+   useSizeFactor = FALSE, 
+   saveRds = FALSE,
+   genome = "hg19") {
+   
+   return(list(offset = offset, fix_width = fix_width, fix_point = fix_point, 
+               norm = norm, useScore = useScore, outRle = outRle, 
+               useSizeFactor = useSizeFactor, saveRds = saveRds,
+               genome = genome))
+}
+
+#' @title Handle import of NGS data with various formats
 #'
-#' @description This is a wrapper function for read NGS data in different file formats, store the input data in a list of GRanges objects or RleList objects. File names end in bed|bam|bw|bigwig|bigWig|BigWig|BW|BIGWIG are recognized, and a list of files with mixed formats are allowed.
+#' @description This is a wrapper function for read NGS data in different file formats, store the input data in a list of GRanges objects or RleList objects. File names end in bed|bam|bw|bigwig|bigWig|BigWig|BW|BIGWIG are recognized, and a named list of files with mixed formats are allowed.
 #'
 #' @param inputFiles a vector of strings denoting file names
-#' @param importParams a list with the 8 elements: list(offset, fix_width, fix_point, useScore, outRle, norm, genome, useSizeFactor). Details are as follows:
-#' 'offset', an integer, -1 indicating the bam reads should be shrunk to the -1 position at the 5'end of the reads, which corresponds to the cross link site in iCLIP.
-#' 'fix_width', an integer defining how long the reads should be extended to, ignored when offset is not 0.
-#' 'fix_point', a string in c("start", "end", "center") denoting the anchor point for extension, ignored when offset is not 0.
-#' 'useScore', logical, indicating whether the 'score' column of the bed file should be used in calculation of coverage. 
-#' 'outRle', logical, indicating whether the output should be RleList objects or GRanges objects.
-#' 'norm', logical, indicating whether the output RleList should be normalized to RPM using library sizes.
-#' 'genome', a string denoting the genome name and version.
-#' 'useSizeFactor', logical, indicating whether the library size should be adjusted with a size factor, using the 'calcNormFactors' function in the edgeR package, only applicable to ChIPseq data.
-#' 
+#' @param importParams a list with the 9 elements: list(offset, fix_width, fix_point, useScore, outRle, norm, genome, useSizeFactor). Details are described in the documentation of setImportParams function
 #' @param nc integer, number of cores for parallel processing
 #' @param verbose logical, whether to output additional information
 #'
@@ -32,7 +63,7 @@
 #'    package = "GenomicPlot")
 #' names(inputFiles1) <- "input"
 #'
-#' bamimportParams <- list(
+#' bamimportParams <- setImportParams(
 #'   offset = -1, fix_width = 0, fix_point = "start", norm = TRUE,
 #'   useScore = FALSE, outRle = TRUE, useSizeFactor = FALSE, genome = "hg19"
 #' )
@@ -46,7 +77,7 @@
 #'    package = "GenomicPlot")
 #' names(queryFiles2) <- "test_wig"
 #'
-#' wigimportParams <- list(
+#' wigimportParams <- setImportParams(
 #'   offset = 0, fix_width = 0, fix_point = "start", norm = FALSE,
 #'   useScore = FALSE, outRle = TRUE, useSizeFactor = FALSE, genome = "hg19"
 #' )
@@ -67,7 +98,7 @@ handle_input <- function(inputFiles,
                          verbose = FALSE,
                          nc = 2) {
   if (any(is.null(names(inputFiles)))) stop("Each file must have a name attribute!")
-  if (is.null(importParams)) importParams <- list(offset = 0, fix_width = 0, fix_point = "center", useScore = FALSE, outRle = TRUE, norm = TRUE, useSizeFactor = FALSE, genome = "hg19")
+  if (is.null(importParams)) importParams <- setImportParams()
 
   original_outRle <- importParams$outRle
   if (importParams$useSizeFactor && length(inputFiles) > 1) {
@@ -85,7 +116,7 @@ handle_input <- function(inputFiles,
       } else {
         if (!file.exists(inputFile)) stop("file does not exist, please check your file name and path!")
         out <- funName(inputFile = inputFile, importParams, verbose)
-        if(file.access(dirName, mode = 2)[1] == 0){
+        if(importParams$saveRds && file.access(dirName, mode = 2)[1] == 0){
            saveRDS(list(param = importParams, Rle = out), file.path(dirName, paste0(fileName, ".rds")))
            if (verbose) message("Cached .rds file is modified using new input parameters\n")
         }
@@ -93,7 +124,7 @@ handle_input <- function(inputFiles,
     } else {
       if (!file.exists(inputFile)) stop("file does not exist, please check your file name and path!")
       out <- funName(inputFile = inputFile, importParams, verbose)
-      if(file.access(dirName, mode = 2)[1] == 0){
+      if(importParams$saveRds && file.access(dirName, mode = 2)[1] == 0){
          saveRDS(list(param = importParams, Rle = out), file.path(dirName, paste0(fileName, ".rds")))
          if (verbose) message("Input data is cached as .rds file for fast reloading\n")  
       }
@@ -172,7 +203,7 @@ handle_input <- function(inputFiles,
 #'    package = "GenomicPlot")
 #' names(inputFiles) <- "input"
 #'
-#' chipImportParams <- list(
+#' chipImportParams <- setImportParams(
 #'    offset = 0, fix_width = 150, fix_point = "start", norm = TRUE,
 #'    useScore = FALSE, outRle = FALSE, useSizeFactor = FALSE, genome = "hg19"
 #' )
@@ -255,7 +286,7 @@ effective_size <- function(outlist,
 #'    package = "GenomicPlot")
 #' names(queryFiles) <- "narrowPeak"
 #'
-#' bedimportParams <- list(
+#' bedimportParams <- setImportParams(
 #'   offset = 0, fix_width = 100, fix_point = "center", norm = FALSE,
 #'   useScore = FALSE, outRle = TRUE, useSizeFactor = FALSE, genome = "hg19"
 #' )
@@ -345,7 +376,7 @@ handle_bed <- function(inputFile,
 #'    package = "GenomicPlot")
 #' names(queryFiles) <- "query"
 #'
-#' bamimportParams <- list(
+#' bamimportParams <- setImportParams(
 #'   offset = -1, fix_width = 0, fix_point = "start", norm = TRUE,
 #'   useScore = FALSE, outRle = TRUE, useSizeFactor = FALSE, genome = "hg19"
 #' )
@@ -422,7 +453,7 @@ handle_bam <- function(inputFile,
 #'    package = "GenomicPlot")
 #' names(queryFiles) <- "test_bw"
 #'
-#' wigimportParams <- list(
+#' wigimportParams <- setImportParams(
 #'   offset = 0, fix_width = 0, fix_point = "start", norm = FALSE,
 #'   useScore = FALSE, outRle = TRUE, useSizeFactor = FALSE, genome = "hg19"
 #' )
@@ -493,7 +524,7 @@ handle_bw <- function(inputFile,
 #'    package = "GenomicPlot")
 #' names(queryFiles) <- "test_wig"
 #'
-#' wigimportParams <- list(
+#' wigimportParams <- setImportParams(
 #'   offset = 0, fix_width = 0, fix_point = "start", norm = FALSE,
 #'   useScore = FALSE, outRle = TRUE, useSizeFactor = FALSE, genome = "hg19"
 #' )

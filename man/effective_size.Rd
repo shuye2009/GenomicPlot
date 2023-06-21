@@ -32,7 +32,7 @@ inputFiles <- system.file("extdata", "chip_input_chr19.bam",
    package = "GenomicPlot")
 names(inputFiles) <- "input"
 
-chipImportParams <- list(
+chipImportParams <- setImportParams(
    offset = 0, fix_width = 150, fix_point = "start", norm = TRUE,
    useScore = FALSE, outRle = FALSE, useSizeFactor = FALSE, genome = "hg19"
 )

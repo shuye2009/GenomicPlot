@@ -22,7 +22,7 @@
 #' grouping <- c(1,2)
 #' names(bamQueryFiles) <- names(grouping) <- c("chip_input", "chip_treat")
 #' 
-#' bamImportParams <- list(
+#' bamImportParams <- setImportParams(
 #'    offset = 0, fix_width = 150, fix_point = "start", norm = FALSE,
 #'    useScore = FALSE, outRle = FALSE, useSizeFactor = FALSE, genome = "hg19"
 #' )
@@ -56,7 +56,7 @@ plot_bam_correlation <- function(bamFiles,
    bamlabels <- names(bamFiles)
    
    if (is.null(importParams)){
-      importParams <- list(offset = 0, fix_width = 0, fix_point = "center", useScore = FALSE, outRle = FALSE, norm = FALSE, useSizeFactor = FALSE, genome = "hg19")
+      importParams <- setImportParams(offset = 0, fix_width = 0, fix_point = "center", useScore = FALSE, outRle = FALSE, norm = FALSE, useSizeFactor = FALSE, genome = "hg19")
    } else {
       importParams$outRle <- FALSE # force imported data to be GRanges
    }

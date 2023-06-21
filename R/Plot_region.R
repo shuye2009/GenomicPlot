@@ -108,13 +108,13 @@ plot_region <- function(queryFiles,
    centerLabels <- names(centerInputs)
    
    five <- fiveP / 1000
-   five <- paste0(five, "K")
+   five <- paste0(five, "Kb")
    fiveL <- -fiveP
    if (fiveP >= 0) {
       fiveL <- 0
    }
    three <- threeP / 1000
-   three <- paste0(three, "K")
+   three <- paste0(three, "Kb")
    threeL <- threeP
    if (threeP <= 0) {
       threeL <- 0

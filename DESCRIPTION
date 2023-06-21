@@ -16,7 +16,9 @@ License: GPL-2
 Encoding: UTF-8
 LazyData: FALSE
 Collate: 
-    "DrawingFunctions.R" "GenomicPlot.R" "HandleDataMatrix.R" "HandleFeatures.R" "Parallel.R" "ReadData.R" "Setup.R"     
+    "DrawingFunctions.R" "GenomicPlot.R" "HandleDataMatrix.R" "HandleFeatures.R" "Parallel.R" "ReadData.R" "Setup.R"
+    "Plot_5parts_metagene.R" "Plot_start_end.R" "Plot_start_end_with_random.R" "Plot_region.R" "Plot_locus.R"
+    "Plot_locus_with_random.R" "Plot_peak_annotation.R" "Plot_bam_correlation.R"
 Depends: R (>= 4.3.0), GenomicRanges (>= 1.46.1), GenomicFeatures, ggplot2 (>= 3.3.5), BiocGenerics, dplyr, grid
 Imports: methods, Rsamtools, parallel, tidyr, rtracklayer (>= 1.54.0),
    plyranges (>= 1.14.0), cowplot (>= 1.1.1), VennDiagram, ggplotify, GenomeInfoDb, IRanges,

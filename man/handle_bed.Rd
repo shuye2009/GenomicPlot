@@ -24,7 +24,7 @@ queryFiles <- system.file("extdata", "test_chip_peak_chr19.narrowPeak",
    package = "GenomicPlot")
 names(queryFiles) <- "narrowPeak"
 
-bedimportParams <- list(
+bedimportParams <- setImportParams(
   offset = 0, fix_width = 100, fix_point = "center", norm = FALSE,
   useScore = FALSE, outRle = TRUE, useSizeFactor = FALSE, genome = "hg19"
 )

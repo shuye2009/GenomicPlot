@@ -75,7 +75,7 @@ stop_parallel <- function(cl) {
 #'    package = "GenomicPlot")
 #' names(queryFiles) <- "query"
 #'
-#' chipimportParams <- list(
+#' chipimportParams <- setImportParams(
 #'   offset = 0, fix_width = 150, fix_point = "start", norm = TRUE,
 #'   useScore = FALSE, outRle = TRUE, useSizeFactor = FALSE, genome = "hg19"
 #' )
@@ -88,7 +88,7 @@ stop_parallel <- function(cl) {
 #' )
 #' names(windowFiles) <- "narrowPeak"
 #'
-#' importParams <- list(
+#' importParams <- setImportParams(
 #'   offset = 0, fix_width = 0, fix_point = "start", norm = FALSE,
 #'   useScore = FALSE, outRle = FALSE, useSizeFactor = FALSE, genome = "hg19"
 #' )
@@ -157,7 +157,7 @@ parallel_scoreMatrixBin <- function(queryRegions,
 #' )
 #' names(bedQueryFiles) <- c("NarrowPeak", "SummitPeak", "iCLIPPeak")
 #' 
-#' bedimportParams <- list(
+#' bedimportParams <- setImportParams(
 #'    offset = 0, fix_width = 100, fix_point = "center", norm = FALSE,
 #'    useScore = FALSE, outRle = FALSE, useSizeFactor = FALSE, genome = "hg19"
 #' )

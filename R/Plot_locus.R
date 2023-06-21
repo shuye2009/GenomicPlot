@@ -91,11 +91,11 @@ plot_locus <- function(queryFiles,
    queryLabels <- names(queryInputs)
    
    five <- ext[1] / 1000
-   five <- paste0(five, "K")
-   if (ext[1] == 0) five <- "-0K"
+   five <- paste0(five, "Kb")
+   if (ext[1] == 0) five <- "-0Kb"
    three <- ext[2] / 1000
-   three <- paste0(three, "K")
-   if (ext[2] == 0) three <- "0K"
+   three <- paste0(three, "Kb")
+   if (ext[2] == 0) three <- "0Kb"
    featureNames <- c(five, Xlab, three)
    
    ext[2] <- ext[2] - (ext[2] - ext[1]) %% binSize ## to avoid binSize inconsistency, as the final binSize is dictated by bin_num

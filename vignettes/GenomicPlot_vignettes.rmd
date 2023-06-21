@@ -15,7 +15,7 @@ vignette: |
 
 Visualization of next generation sequencing (NGS) data at various genomic features on a genome-wide scale provides an effective way of exploring and communicating experimental results on one hand, yet poses as a tremendous challenge on the other hand, due to the huge amount of data to be processed. Existing software tools like deeptools, ngs.plot, coverageView and metagene2, while having attractive features and perform reasonably well in relatively simple scenarios, like plotting coverage profiles of fixed genomic loci or regions, have serious limitations in terms of efficiency and flexibility. For instance, deeptools requires 3 steps (3 sub-programs to be run) to generate plots from input files: first, convert .bam files to .bigwig format; second, compute coverage matrix; and last, plot genomic profiles. Huge amount of intermediate data are generated along the way and additional efforts have to be made to integrate these 3 closely related steps. All of them focus on plotting signals within genomic regions or around genomic loci, but not within or around combinations of genomic features. None of them have the capability of performing statistical tests on the data displayed in the profile plots.
 
-To meet the diverse needs of experimental biologists, we have developed GenomicPlot using rich resources available on the R platform (particularly, the Bioconductor). Our GenomicPlot has the following major features:
+To meet the diverse needs of experimental biologists, we have developed `GenomicPlot` using rich resources available on the R platform (particularly, the Bioconductor). Our `GenomicPlot` has the following major features:
 
 -   Generating genomic (with introns) or metagenomic (without introns) plots around gene body and its upstream and downstream regions, the gene body can be further segmented into 5' UTR, CDS and 3' UTR
 -   Plotting genomic profiles around the start and end of genomic features (like exons or introns), or custom defined genomic regions
@@ -71,12 +71,14 @@ gf <- prepare_5parts_genomic_features(txdb,
   longest = TRUE
 )
 
-queryfiles <- system.file("extdata", "treat_chr19.bam", package = "GenomicPlot")
+queryfiles <- system.file("extdata", "treat_chr19.bam", 
+                          package = "GenomicPlot")
 names(queryfiles) <- "clip_bam"
-inputfiles <- system.file("extdata", "input_chr19.bam", package = "GenomicPlot")
+inputfiles <- system.file("extdata", "input_chr19.bam", 
+                          package = "GenomicPlot")
 names(inputfiles) <- "clip_input"
 
-bamimportParams <- list(
+bamimportParams <- setImportParams(
   offset = -1, fix_width = 0, fix_point = "start", norm = TRUE,
   useScore = FALSE, outRle = TRUE, useSizeFactor = FALSE, genome = "hg19"
 )
@@ -90,7 +92,7 @@ plot_5parts_metagene(
   transform = NA,
   smooth = TRUE,
   stranded = TRUE,
-  outPrefix = "test_plot_5parts_metagene2",
+  outPrefix = NULL,
   importParams = bamimportParams,
   heatmap = TRUE,
   rmOutlier = 0,
@@ -98,7 +100,7 @@ plot_5parts_metagene(
 )
 ```
 ```{r metagene2, eval=TRUE, echo = FALSE, fig.cap="Metagene plot with UTR", include = TRUE, out.width="50%"}
-knitr::include_graphics("../longtests/test_output/test_plot_5parts_metagene2.pdf")
+#knitr::include_graphics("../longtests/test_output/test_plot_5parts_metagene2.pdf")
 ```
 
 ## Plot along the ranges of genomic features
@@ -118,7 +120,7 @@ inputfiles <- c(
 )
 names(inputfiles) <- c("chip_input")
 
-chipimportParams <- list(
+chipimportParams <- setImportParams(
   offset = 0, fix_width = 150, fix_point = "start", norm = TRUE,
   useScore = FALSE, outRle = TRUE, useSizeFactor = FALSE, genome = "hg19"
 )
@@ -138,17 +140,17 @@ plot_region(
   smooth = TRUE,
   transform = NA,
   stranded = TRUE,
-  outPrefix = "test_plot_region",
+  outPrefix = NULL,
   rmOutlier = 0,
   nc = 2
 )
 ```
 ```{r region, eval=TRUE, echo = FALSE, fig.cap = "Coverage of custom genomic regions", include = TRUE, out.width="50%"}
-knitr::include_graphics("../longtests/test_output/test_plot_region.pdf")
+#knitr::include_graphics("../longtests/test_output/test_plot_region.pdf")
 ```
 
 ## Plot genomic loci (start, end or center of a feature)
-Difference in signal intensity within specific regions around the reference loci can be tested, and the test statistics can be plotted as boxplot and barplot of mean +/- SE. The test can be done among loci or among samples.
+Difference in signal intensity within specific regions around the reference loci can be tested, and the test statistics can be plotted as boxplot and barplot of mean`r knitr::asis_output("\U00B1")`SE. The test can be done among loci or among samples.
 
 ```{r, locus code, eval = TRUE, fig.show = 'hold', fig.keep = 'first', fig.align = 'center', fig.dim = c(7,7)}
 centerfiles <- c(
@@ -179,7 +181,7 @@ plot_locus(
   inputFiles = inputfiles,
   stranded = TRUE,
   scale = FALSE,
-  outPrefix = "test_plot_locus2",
+  outPrefix = NULL,
   verbose = FALSE,
   transform = NA,
   rmOutlier = 0,
@@ -189,12 +191,12 @@ plot_locus(
 )
 ```
 ```{r locus2, eval=TRUE, echo = FALSE, fig.cap = "Coverage around center of features", include = TRUE, out.width="50%"}
-knitr::include_graphics("../longtests/test_output/test_plot_locus2.pdf")
+#knitr::include_graphics("../longtests/test_output/test_plot_locus2.pdf")
 ```
 
 ## Plot peak annotation statistics
 
-Aside from reads coverage profiles, distribution of binding peaks in different gene types and genomic features is also important. Peak annotation statistics are plotted as bar chart for distribution in gene types, and as pie charts for distribution in genomic features. The pie charts are plotted in two different ways: either as percentage of absolute counts or as percentage of feature length-normalized counts in each features. For DNA binding samples, the features (in order of precedence) include "Promoter", "TTS", "5'UTR", "CDS", "3'UTR" and "Intron"; for RNA binding samples, "Promoter" and "TTS" are excluded. In the following example, "Promoter" is defined as regions 2000 bp upstream of transcription start site (TSS) and 300 bp downstream TSS, "TTS" is defined as the region 1000 bp downstream cleavage site or the length between cleavage site and the start of the next gene, whichever is shorter, but these lengths can be adjusted. To save annotation results (both peak-oriented and gene-oriented), set "verbose = TRUE".
+Aside from reads coverage profiles, distribution of binding peaks in different gene types and genomic features is also important. Peak annotation statistics are plotted as bar chart for distribution in gene types, and as pie charts for distribution in genomic features. The pie charts are plotted in two different ways: either as percentage of absolute counts or as percentage of feature length-normalized counts in each features. For DNA binding samples, the features (in order of precedence) include "Promoter", "TTS" (Transcript Termination Site), "5'UTR", "CDS", "3'UTR" and "Intron"; for RNA binding samples, "Promoter" and "TTS" are excluded. In the following example, "Promoter" is defined as regions 2000 bp upstream of transcription start site (TSS) and 300 bp downstream TSS, "TTS" is defined as the region 1000 bp downstream cleavage site or the length between cleavage site and the start of the next gene, whichever is shorter, but these lengths can be adjusted. To save annotation results (both peak-oriented and gene-oriented), set `verbose = TRUE`.
 
 ```{r, annotation code, eval = TRUE, fig.show = 'hold', fig.keep = 'first', fig.align = 'center', fig.dim = c(7,7)}
 gtffile <- system.file("extdata", "gencode.v19.annotation_chr19.gtf", 
@@ -204,7 +206,7 @@ centerfile <- system.file("extdata", "test_chip_peak_chr19.bed",
                           package = "GenomicPlot")
 names(centerfile) <- c("SummitPeak")
 
-bedimportParams <- list(
+bedimportParams <- setImportParams(
   offset = 0, fix_width = 100, fix_point = "center", norm = FALSE,
   useScore = FALSE, outRle = FALSE, useSizeFactor = FALSE, genome = "hg19"
 )
@@ -217,56 +219,59 @@ pa <- plot_peak_annotation(
   dsTSS = 300,
   threeP = 1000,
   simple = FALSE,
-  verbose = TRUE,
-  outPrefix = "test_plot_peak_annotation1"
+  verbose = FALSE,
+  outPrefix = NULL
 )
 ```
 ```{r annotation1, eval=TRUE, echo = FALSE, include = TRUE, fig.cap = "Distribution of ChIPseq peaks in various types of gene", out.width="50%"}
-knitr::include_graphics("../longtests/test_output/test_plot_peak_annotation1.pdf")
+#knitr::include_graphics("../longtests/test_output/test_plot_peak_annotation1.pdf")
 ```
 # Auxillary functions{.unnumbered}
 ## Plot bam correlations
-Three plots are produced, the first one is equivalent of the 'fingerprint plot' of the deeptools (not shown), the second is a heatmap of correlation coefficients (not shown) and the last one is a composite plot showing pairwise correlations, with histograms on the main diagonal, dotplots on the lower triangle and correlation coefficients on the upper triangle.
+Four plots are produced, the first one is equivalent of the 'fingerprint plot' of the deeptools (not shown), the second is a heatmap of correlation coefficients (not shown), the third one is a composite plot showing pairwise correlations, with histograms on the main diagonal, dotplots on the lower triangle and correlation coefficients on the upper triangle, and the last one is a plot of PCA analysis of samples from which the bam files are derived.
 
 ```{r, bam correlation, eval = TRUE, fig.show = 'hold', fig.keep = 'last', fig.align = 'center', fig.dim = c(7,7)}
 bamQueryFiles <- c(
-      system.file("extdata", "chip_input_chr19.bam", package = "GenomicPlot"),
-      system.file("extdata", "chip_treat_chr19.bam", package = "GenomicPlot")
-    )
-    names(bamQueryFiles) <- c("chip_input", "chip_treat")
-    
-    bamImportParams <- list(
-       offset = 0, fix_width = 150, fix_point = "start", norm = FALSE,
-       useScore = FALSE, outRle = FALSE, useSizeFactor = FALSE, genome = "hg19"
-    )
-   
-    plot_bam_correlation(
-      bamFiles = bamQueryFiles, binSize = 100000, outPrefix = NULL,
-      importParams = bamImportParams, nc = 2, verbose = FALSE
-    )
+   system.file("extdata", "chip_input_chr19.bam", package = "GenomicPlot"),
+   system.file("extdata", "chip_treat_chr19.bam", package = "GenomicPlot")
+)
+names(bamQueryFiles) <- c("chip_input", "chip_treat")
+
+bamImportParams <- setImportParams(
+   offset = 0, fix_width = 150, fix_point = "start", norm = FALSE,
+   useScore = FALSE, outRle = FALSE, useSizeFactor = FALSE, 
+   genome = "hg19"
+)
+
+plot_bam_correlation(
+   bamFiles = bamQueryFiles, binSize = 100000, outPrefix = NULL,
+   importParams = bamImportParams, nc = 2, verbose = FALSE
+)
 ```
 
 ## Plot bed overlaps
 Due to peak width variations, the number of overlapping peaks between set A and set B may be different for each set. This asymmetry is caught with a overlap matrix in addition to Venn diagrams (not shown).
 
 ```{r, bed overlap, eval = TRUE, fig.show = 'hold', fig.keep = 'first', fig.align = 'center', fig.dim = c(7,7)}
-  queryFiles <- c(
-    system.file("extdata", "test_chip_peak_chr19.narrowPeak", 
-                package = "GenomicPlot"),
-    system.file("extdata", "test_chip_peak_chr19.bed", package = "GenomicPlot"),
-    system.file("extdata", "test_clip_peak_chr19.bed", package = "GenomicPlot")
-  )
-  names(queryFiles) <- c("narrowPeak", "summitPeak", "clipPeak")
- 
-  bedimportParams <- list(
-    offset = 0, fix_width = 100, fix_point = "center", norm = FALSE,
-    useScore = FALSE, outRle = FALSE, useSizeFactor = FALSE, genome = "hg19"
-  )
- 
-  plot_overlap_bed(
-    bedList = queryFiles, importParams = bedimportParams, pairOnly = FALSE,
-    stranded = FALSE, outPrefix = NULL
-  )
+queryFiles <- c(
+   system.file("extdata", "test_chip_peak_chr19.narrowPeak", 
+             package = "GenomicPlot"),
+   system.file("extdata", "test_chip_peak_chr19.bed", 
+             package = "GenomicPlot"),
+   system.file("extdata", "test_clip_peak_chr19.bed", 
+             package = "GenomicPlot")
+)
+names(queryFiles) <- c("narrowPeak", "summitPeak", "clipPeak")
+
+bedimportParams <- setImportParams(
+   offset = 0, fix_width = 100, fix_point = "center", norm = FALSE,
+   useScore = FALSE, outRle = FALSE, useSizeFactor = FALSE, genome = "hg19"
+)
+
+plot_overlap_bed(
+   bedList = queryFiles, importParams = bedimportParams, pairOnly = FALSE,
+   stranded = FALSE, outPrefix = NULL
+)
 ```
 
 # Appendix{.unnumbered}

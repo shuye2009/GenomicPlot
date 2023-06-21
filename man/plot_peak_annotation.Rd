@@ -56,7 +56,7 @@ centerFile <- system.file("extdata", "test_chip_peak_chr19.bed",
   package = "GenomicPlot")
 names(centerFile) <- c("summitPeak")
 
-bedimportParams <- list(
+bedimportParams <- setImportParams(
   offset = 0, fix_width = 100, fix_point = "center", norm = FALSE,
   useScore = FALSE, outRle = FALSE, useSizeFactor = FALSE, genome = "hg19"
 )

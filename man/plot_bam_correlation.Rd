@@ -47,7 +47,7 @@ bamQueryFiles <- c(
 grouping <- c(1,2)
 names(bamQueryFiles) <- names(grouping) <- c("chip_input", "chip_treat")
 
-bamImportParams <- list(
+bamImportParams <- setImportParams(
    offset = 0, fix_width = 150, fix_point = "start", norm = FALSE,
    useScore = FALSE, outRle = FALSE, useSizeFactor = FALSE, genome = "hg19"
 )

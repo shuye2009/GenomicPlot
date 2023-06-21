@@ -44,6 +44,8 @@ rank_rows <- function(fullmatrix,
 #' @param verbose logical, indicating whether to print out the stats in the console
 #' @return a numerical matrix summarizing the unusual values
 #' 
+#' @author Shuye Pu
+#' 
 #' @examples 
 #' fullMatrix <- matrix(rnorm(100), ncol = 10)
 #' for (i in 5:6) {

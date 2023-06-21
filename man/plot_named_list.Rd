@@ -34,7 +34,7 @@ gfeatures <- prepare_5parts_genomic_features(txdb,
   threeP = 1000, longest = TRUE, verbose = FALSE
 )
 
-bamimportParams <- list(
+bamimportParams <- setImportParams(
   offset = -1, fix_width = 0, fix_point = "start", norm = TRUE,
   useScore = FALSE, outRle = TRUE, useSizeFactor = FALSE, genome = "hg19"
 )

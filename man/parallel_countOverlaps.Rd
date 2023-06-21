@@ -30,7 +30,7 @@ bedQueryFiles <- c(
 )
 names(bedQueryFiles) <- c("NarrowPeak", "SummitPeak", "iCLIPPeak")
 
-bedimportParams <- list(
+bedimportParams <- setImportParams(
    offset = 0, fix_width = 100, fix_point = "center", norm = FALSE,
    useScore = FALSE, outRle = FALSE, useSizeFactor = FALSE, genome = "hg19"
 )

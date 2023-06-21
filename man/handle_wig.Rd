@@ -28,7 +28,7 @@ queryFiles <- system.file("extdata", "test_wig_chr19_+.wig",
    package = "GenomicPlot")
 names(queryFiles) <- "test_wig"
 
-wigimportParams <- list(
+wigimportParams <- setImportParams(
   offset = 0, fix_width = 0, fix_point = "start", norm = FALSE,
   useScore = FALSE, outRle = TRUE, useSizeFactor = FALSE, genome = "hg19"
 )

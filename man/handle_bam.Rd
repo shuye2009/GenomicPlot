@@ -28,7 +28,7 @@ queryFiles <- system.file("extdata", "treat_chr19.bam",
    package = "GenomicPlot")
 names(queryFiles) <- "query"
 
-bamimportParams <- list(
+bamimportParams <- setImportParams(
   offset = -1, fix_width = 0, fix_point = "start", norm = TRUE,
   useScore = FALSE, outRle = TRUE, useSizeFactor = FALSE, genome = "hg19"
 )

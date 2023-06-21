@@ -30,4 +30,7 @@ for (i in 5:6) {
 GenomicPlot:::inspect_matrix(fullMatrix, verbose = TRUE)
 
 }
+\author{
+Shuye Pu
+}
 \keyword{internal}

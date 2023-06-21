@@ -2,22 +2,14 @@
 % Please edit documentation in R/ReadData.R
 \name{handle_input}
 \alias{handle_input}
-\title{Hand input of NGS data with various formats}
+\title{Handle import of NGS data with various formats}
 \usage{
 handle_input(inputFiles, importParams = NULL, verbose = FALSE, nc = 2)
 }
 \arguments{
 \item{inputFiles}{a vector of strings denoting file names}
 
-\item{importParams}{a list with the 8 elements: list(offset, fix_width, fix_point, useScore, outRle, norm, genome, useSizeFactor). Details are as follows:
-'offset', an integer, -1 indicating the bam reads should be shrunk to the -1 position at the 5'end of the reads, which corresponds to the cross link site in iCLIP.
-'fix_width', an integer defining how long the reads should be extended to, ignored when offset is not 0.
-'fix_point', a string in c("start", "end", "center") denoting the anchor point for extension, ignored when offset is not 0.
-'useScore', logical, indicating whether the 'score' column of the bed file should be used in calculation of coverage. 
-'outRle', logical, indicating whether the output should be RleList objects or GRanges objects.
-'norm', logical, indicating whether the output RleList should be normalized to RPM using library sizes.
-'genome', a string denoting the genome name and version.
-'useSizeFactor', logical, indicating whether the library size should be adjusted with a size factor, using the 'calcNormFactors' function in the edgeR package, only applicable to ChIPseq data.}
+\item{importParams}{a list with the 9 elements: list(offset, fix_width, fix_point, useScore, outRle, norm, genome, useSizeFactor). Details are described in the documentation of setImportParams function}
 
 \item{verbose}{logical, whether to output additional information}
 
@@ -28,7 +20,7 @@ a list object with four elements, 'query' is a list GRanges objects or RleList o
 'weight' is the name of the metadata column to be used as weight for coverage calculation
 }
 \description{
-This is a wrapper function for read NGS data in different file formats, store the input data in a list of GRanges objects or RleList objects. File names end in bed|bam|bw|bigwig|bigWig|BigWig|BW|BIGWIG are recognized, and a list of files with mixed formats are allowed.
+This is a wrapper function for read NGS data in different file formats, store the input data in a list of GRanges objects or RleList objects. File names end in bed|bam|bw|bigwig|bigWig|BigWig|BW|BIGWIG are recognized, and a named list of files with mixed formats are allowed.
 }
 \details{
 when 'useScore' is TRUE, the score column of the bed file will be used in the metadata column 'score' of the GRanges object, or the 'Values' field of the RleList object. Otherwise the value 1 will be used instead. When the intended use of the input bed is a reference feature, both 'useScore' and 'outRle' should be set to FALSE.
@@ -42,7 +34,7 @@ inputFiles1 <- system.file("extdata", "input_chr19.bam",
    package = "GenomicPlot")
 names(inputFiles1) <- "input"
 
-bamimportParams <- list(
+bamimportParams <- setImportParams(
   offset = -1, fix_width = 0, fix_point = "start", norm = TRUE,
   useScore = FALSE, outRle = TRUE, useSizeFactor = FALSE, genome = "hg19"
 )
@@ -56,7 +48,7 @@ queryFiles2 <- system.file("extdata", "test_wig_chr19_+.wig",
    package = "GenomicPlot")
 names(queryFiles2) <- "test_wig"
 
-wigimportParams <- list(
+wigimportParams <- setImportParams(
   offset = 0, fix_width = 0, fix_point = "start", norm = FALSE,
   useScore = FALSE, outRle = TRUE, useSizeFactor = FALSE, genome = "hg19"
 )

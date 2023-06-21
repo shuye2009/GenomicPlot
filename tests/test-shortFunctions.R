@@ -11,7 +11,7 @@ test_that("testing parallel_scoreMatrixBin", {
    )
    names(bedQueryFiles) <- c("NarrowPeak", "SummitPeak", "iCLIPPeak")
    
-   bedimportParams <- list(
+   bedimportParams <- setImportParams(
       offset = 0, fix_width = 100, fix_point = "center", norm = FALSE,
       useScore = FALSE, outRle = FALSE, useSizeFactor = FALSE, genome = "hg19"
    )
@@ -33,7 +33,7 @@ test_that("testing parallel_scoreMatrixBin", {
    queryFiles <- system.file("extdata", "chip_treat_chr19.bam", package = "GenomicPlot")
    names(queryFiles) <- "query"
    
-   chipimportParams <- list(
+   chipimportParams <- setImportParams(
      offset = 0, fix_width = 150, fix_point = "start", norm = TRUE,
      useScore = FALSE, outRle = TRUE, useSizeFactor = FALSE, genome = "hg19"
    )
@@ -45,7 +45,7 @@ test_that("testing parallel_scoreMatrixBin", {
    )
    names(windowFiles) <- "narrowPeak"
    
-   importParams <- list(
+   importParams <- setImportParams(
      offset = 0, fix_width = 0, fix_point = "start", norm = FALSE,
      useScore = FALSE, outRle = FALSE, useSizeFactor = FALSE, genome = "hg19"
    )
@@ -73,7 +73,7 @@ test_that("testing handle_bed", {
       package = "GenomicPlot")
    names(queryFiles) <- "narrowPeak"
    
-   bedimportParams <- list(
+   bedimportParams <- setImportParams(
      offset = 0, fix_width = 100, fix_point = "center", norm = FALSE,
      useScore = FALSE, outRle = TRUE, useSizeFactor = FALSE, genome = "hg19"
    )
@@ -90,7 +90,7 @@ test_that("testing effective_size", {
     package = "GenomicPlot")
    names(inputFiles) <- "input"
    
-   chipImportParams <- list(
+   chipImportParams <- setImportParams(
    offset = 0, fix_width = 150, fix_point = "start", norm = TRUE,
    useScore = FALSE, outRle = FALSE, useSizeFactor = FALSE, genome = "hg19"
    )
@@ -116,7 +116,7 @@ test_that("testing handle_input", {
       package = "GenomicPlot")
    names(queryFiles3) <- "test_bw" 
    
-   importParams <- list(
+   importParams <- setImportParams(
      offset = 0, fix_width = 0, fix_point = "start", norm = FALSE,
      useScore = FALSE, outRle = TRUE, useSizeFactor = FALSE, genome = "hg19"
    )
@@ -230,7 +230,7 @@ test_that("testing overlap_quad", {
      strand=c("+", "-", "-", "+")
    )
    
-   overlap_quad(list(subject1 = subject1, subject2 = subject2, query1 = query1,
+   p <- overlap_quad(list(subject1 = subject1, subject2 = subject2, query1 = query1,
      query2 = query2), filter_by_overlaps_stranded
    )  
 })
@@ -254,7 +254,7 @@ test_that("testing overlap_triple", {
      strand=c("+", "-", "-", "+")
    )
    
-   overlap_triple(list(subject1 = subject1, subject2 = subject2, query = query),
+   p <- overlap_triple(list(subject1 = subject1, subject2 = subject2, query = query),
      filter_by_overlaps_stranded
    )
 })
@@ -273,7 +273,7 @@ test_that("testing overlap_pair", {
      strand=c("+", "-", "-", "+")
    )
    
-   overlap_pair(list(query = query, subject = subject), filter_by_overlaps_stranded)   
+   p <- overlap_pair(list(query = query, subject = subject), filter_by_overlaps_stranded)   
 })
 
 test_that("testing draw_combo_plot", {
@@ -287,10 +287,10 @@ test_that("testing draw_combo_plot", {
      names_to = "type", values_to = "value"
    )
    
-   print(draw_combo_plot(stat_df_long,
+   p <- draw_combo_plot(stat_df_long,
      xc = "Feature", yc = "value", fc = "type",
      Ylab = "value", comp = list(c(1, 2), c(3, 4), c(1, 3), c(2, 4)), nf = 2
-   ))
+   )
 })
 test_that("testing draw_rank_plot", {
    stat_df <- data.frame(
@@ -302,8 +302,8 @@ test_that("testing draw_rank_plot", {
      Height = c(rnorm(20, 5, 5), rnorm(30, 1, 5))
    )
    
-   print(draw_rank_plot(stat_df, xc = "Feature", yc = "Intensity", Ylab = "Intensity"))
-   print(draw_rank_plot(stat_df1, xc = "Feature", yc = "Height", Ylab = "Height"))   
+   p1 <- draw_rank_plot(stat_df, xc = "Feature", yc = "Intensity", Ylab = "Intensity")
+   p2 <- draw_rank_plot(stat_df1, xc = "Feature", yc = "Height", Ylab = "Height")   
 })
 test_that("testing draw_quantile_plot", {
    stat_df <- data.frame(
@@ -316,9 +316,9 @@ test_that("testing draw_quantile_plot", {
      values_to = "value"
    )
    
-   print(draw_quantile_plot(stat_df, xc = "Feature", yc = "Intensity"))
-   print(draw_quantile_plot(stat_df, xc = "Feature", yc = "Height"))
-   print(draw_quantile_plot(stat_df_long, xc = "Feature", yc = "value", fc = "type", Ylab = "value"))   
+   p1 <- draw_quantile_plot(stat_df, xc = "Feature", yc = "Intensity")
+   p2 <- draw_quantile_plot(stat_df, xc = "Feature", yc = "Height")
+   p3 <- draw_quantile_plot(stat_df_long, xc = "Feature", yc = "value", fc = "type", Ylab = "value") 
 })
 test_that("testing draw_mean_se_barplot", {
    stat_df <- data.frame(
@@ -401,7 +401,7 @@ test_that("testing draw_matrix_heatmap", {
    levels_col <- c("start", "center", "end")
    names(labels_col) <- rep(levels_col, c(15, 60, 25))
    
-   draw_matrix_heatmap(fullMatrix, dataName = "test", labels_col, levels_col)
+   p <- draw_matrix_heatmap(fullMatrix, dataName = "test", labels_col, levels_col)
 })
 
 test_that("testing plot_bam_correlation", {
@@ -411,20 +411,18 @@ test_that("testing plot_bam_correlation", {
     )
     names(bamQueryFiles) <- c("chip_input", "chip_treat")
     
-    bamImportParams <- list(
+    bamImportParams <- setImportParams(
        offset = 0, fix_width = 150, fix_point = "start", norm = FALSE,
        useScore = FALSE, outRle = FALSE, useSizeFactor = FALSE, genome = "hg19"
     )
    
-    op <- "test_plot_bam_correlation"
     plot_bam_correlation(
-      bamFiles = bamQueryFiles, binSize = 100000, outPrefix = op,
+      bamFiles = bamQueryFiles, binSize = 100000, outPrefix = NULL,
       importParams = bamImportParams, nc = 2, verbose = FALSE
     )
 })
  
 test_that("testing plot_overlap_bed", {
-  op <- "test_plot_overlap_bed"
   queryFiles <- c(
     system.file("extdata", "test_chip_peak_chr19.narrowPeak", package = "GenomicPlot"),
     system.file("extdata", "test_chip_peak_chr19.bed", package = "GenomicPlot"),
@@ -432,14 +430,14 @@ test_that("testing plot_overlap_bed", {
   )
   names(queryFiles) <- c("narrowPeak", "summitPeak", "clipPeak")
  
-  bedimportParams <- list(
+  bedimportParams <- setImportParams(
     offset = 0, fix_width = 100, fix_point = "center", norm = FALSE,
     useScore = FALSE, outRle = FALSE, useSizeFactor = FALSE, genome = "hg19"
   )
  
   plot_overlap_bed(
     bedList = queryFiles, importParams = bedimportParams, pairOnly = FALSE,
-    stranded = FALSE, outPrefix = op
+    stranded = FALSE, outPrefix = NULL
   )
 })
 
@@ -461,7 +459,7 @@ test_that("testing plot_argument_list", {
       threeP = 1000, longest = TRUE, verbose = FALSE
     )
    
-    bamimportParams <- list(
+    bamimportParams <- setImportParams(
       offset = -1, fix_width = 0, fix_point = "start", norm = TRUE,
       useScore = FALSE, outRle = TRUE, useSizeFactor = FALSE, genome = "hg19"
     )
@@ -472,9 +470,6 @@ test_that("testing plot_argument_list", {
     )
     
     p <- GenomicPlot:::plot_named_list(alist)
-    pdf("test_plot_argument_list.pdf")
-    print(p)
-    dev.off()
 })
 
 
@@ -486,7 +481,7 @@ test_that("testing plot_peak_annotation", {
                              package = "GenomicPlot")
    names(centerFile) <- c("summitPeak")
    
-   bedimportParams <- list(
+   bedimportParams <- setImportParams(
       offset = 0, fix_width = 100, fix_point = "center", norm = FALSE,
       useScore = FALSE, outRle = FALSE, useSizeFactor = FALSE, genome = "hg19"
    )

@@ -23,7 +23,7 @@
 #' )
 #' names(queryFiles) <- c("narrowPeak", "summitPeak", "clipPeak")
 #'
-#' bedimportParams <- list(
+#' bedimportParams <- setImportParams(
 #'   offset = 0, fix_width = 100, fix_point = "center", norm = FALSE,
 #'   useScore = FALSE, outRle = FALSE, useSizeFactor = FALSE, genome = "hg19"
 #' )
@@ -48,7 +48,7 @@ plot_overlap_bed <- function(bedList,
    }
    
    if (is.null(importParams)){
-      importParams <- list(offset = 0, fix_width = 0, fix_point = "center", useScore = FALSE, outRle = FALSE, norm = FALSE, useSizeFactor = FALSE, genome = "hg19")
+      importParams <- setImportParams(offset = 0, fix_width = 0, fix_point = "center", useScore = FALSE, outRle = FALSE, norm = FALSE, useSizeFactor = FALSE, genome = "hg19")
    } else {
       importParams$outRle <- FALSE # force imported data to be GRanges
    }
@@ -213,7 +213,7 @@ plot_overlap_genes <- function(fileList,
 #'   threeP = 1000, longest = TRUE, verbose = FALSE
 #' )
 #'
-#' bamimportParams <- list(
+#' bamimportParams <- setImportParams(
 #'   offset = -1, fix_width = 0, fix_point = "start", norm = TRUE,
 #'   useScore = FALSE, outRle = TRUE, useSizeFactor = FALSE, genome = "hg19"
 #' )

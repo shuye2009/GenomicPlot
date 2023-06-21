@@ -18,7 +18,7 @@ bedQueryFiles <- c(
 )
 names(bedQueryFiles) <- c("NarrowPeak", "SummitPeak", "iCLIPPeak")
 
-bedimportParams <- list(
+bedimportParams <- setImportParams(
   offset = 0, fix_width = 100, fix_point = "center", norm = FALSE,
   useScore = FALSE, outRle = TRUE, useSizeFactor = FALSE, genome = "hg19"
 )
@@ -28,7 +28,7 @@ names(bamQueryFiles) <- "clip_bam"
 bamInputFiles <- system.file("extdata", "input_chr19.bam", package = "GenomicPlot")
 names(bamInputFiles) <- "clip_input"
 
-bamimportParams <- list(
+bamimportParams <- setImportParams(
   offset = -1, fix_width = 0, fix_point = "start", norm = TRUE,
   useScore = FALSE, outRle = TRUE, useSizeFactor = FALSE, genome = "hg19"
 )
@@ -38,7 +38,7 @@ names(chipQureyFiles) <- "chip_bam"
 chipInputFiles <- system.file("extdata", "chip_input_chr19.bam", package = "GenomicPlot")
 names(chipInputFiles) <- "chip_input"
 
-chipimportParams <- list(
+chipimportParams <- setImportParams(
   offset = 0, fix_width = 150, fix_point = "start", norm = TRUE,
   useScore = FALSE, outRle = TRUE, useSizeFactor = FALSE, genome = "hg19"
 )
@@ -236,8 +236,6 @@ test_that("testing plot_start_end_with_random", {
 
 pdfs <- list.files(pattern = "*.pdf")
 used_pdfs <- c("test_plot_5parts_metagene1.pdf",
-               "test_plot_5parts_metagene2.pdf",
-               "test_plot_region.pdf",
                "test_plot_locus2.pdf",
                "test_plot_peak_annotation1.pdf"
               )
