@@ -37,9 +37,11 @@ Extract genomic coordinates and make bed or bed 12 files from a TxDb object for 
 }
 \examples{
 
-gtffile <- system.file("extdata", "gencode.v19.annotation_chr19.gtf", package = "GenomicPlot")
+gtffile <- system.file("extdata", "gencode.v19.annotation_chr19.gtf", 
+   package = "GenomicPlot")
 gff <- RCAS::importGtf(saveObjectAsRds = TRUE, filePath = gtffile)
 txdb <- makeTxDbFromGRanges(gff)
+txdb$user_genome <- "hg19"
 
 output <- get_genomic_feature_coordinates(txdb,
   featureName = "cds", featureSource = "gencode",

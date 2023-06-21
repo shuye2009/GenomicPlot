@@ -24,12 +24,15 @@ used in \code{plot_peak_annotation}
 }
 \examples{
 
-gtffile <- system.file("extdata", "gencode.v19.annotation_chr19.gtf", package = "GenomicPlot")
+gtffile <- system.file("extdata", "gencode.v19.annotation_chr19.gtf", 
+   package = "GenomicPlot")
 gff <- RCAS::importGtf(saveObjectAsRds = TRUE, filePath = gtffile)
 txdb <- makeTxDbFromGRanges(gff)
+txdb$user_genome <- "hg19"
 f <- get_txdb_features(txdb, dsTSS = 100, fiveP = 0, threeP = 1000)
 
-p <- RCAS::importBed(system.file("extdata", "test_chip_peak_chr19.bed", package = "GenomicPlot"))
+p <- RCAS::importBed(system.file("extdata", "test_chip_peak_chr19.bed", 
+   package = "GenomicPlot"))
 ann <- get_targeted_genes(peak = p, features = f, stranded = FALSE)
 
 }

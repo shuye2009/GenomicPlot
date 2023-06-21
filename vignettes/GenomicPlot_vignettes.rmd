@@ -32,10 +32,19 @@ The following packages are prerequisites:
 
 GenomicRanges (>= 1.46.1), GenomicFeatures, Rsamtools, ggplot2 (>= 3.3.5), tidyr, rtracklayer (>= 1.54.0), plyranges (>= 1.14.0), dplyr (>= 1.0.8), cowplot (>= 1.1.1), VennDiagram, ggplotify, GenomeInfoDb, IRanges, ComplexHeatmap, RCAS (>= 1.20.0), scales (>= 1.2.0), GenomicAlignments (>= 1.30.0), edgeR, forcats, circlize, viridis, ggsignif (>= 0.6.3), ggsci (>= 2.9), genomation (>= 1.26.0), ggpubr
 
-You can install the development version from `r Githubpkg("shuye2009/GenomicPlot", "GenomicPlot")` with:
+You can install the development version from Bioconductor:
 
-```{r, install,  eval = FALSE}
-# install.packages("remotes")
+``` {r, install1,  eval = FALSE}
+if (!require("BiocManager", quietly = TRUE))
+    install.packages("BiocManager")
+BiocManager::install("GenomicPlot", version = "devel")
+```
+
+or from [Github]("shuye2009/GenomicPlot") with:
+
+```{r, install2,  eval = FALSE}
+if (!require("remotes", quietly = TRUE))
+   install.packages("remotes")
 remotes::install_github("shuye2009/GenomicPlot", 
                         build_manual = TRUE, 
                         build_vignettes = TRUE)
@@ -50,10 +59,12 @@ The lengths of each part of the genes are prorated based on the median length of
 suppressPackageStartupMessages(library(GenomicPlot, quietly = TRUE))
 gtffile <- system.file("extdata", "gencode.v19.annotation_chr19.gtf", 
                        package = "GenomicPlot")
-gff <- suppressMessages(RCAS::importGtf(saveObjectAsRds = TRUE, filePath = gtffile))
+gff <- suppressMessages(RCAS::importGtf(saveObjectAsRds = TRUE, 
+                                        filePath = gtffile))
 txdb <- suppressWarnings(makeTxDbFromGRanges(gff))
+txdb$user_genome <- "hg19"
 ```
-```{r, metagene code, eval = FALSE, fig.show = 'hold', fig.keep = 'all', fig.align = 'center', fig.dim = c(7,7), fig.ncol=1, fig.sep="\n\n"}
+```{r, metagene code, eval = TRUE, fig.show = 'hold', fig.keep = 'first', fig.align = 'center', fig.dim = c(7,7), fig.ncol=1, fig.sep="\n\n"}
 
 gf <- prepare_5parts_genomic_features(txdb,
   meta = TRUE, nbins = 100, fiveP = -2000, threeP = 1000,
@@ -94,7 +105,7 @@ knitr::include_graphics("../longtests/test_output/test_plot_5parts_metagene2.pdf
 
 Signal profiles along with heatmaps in genomic features or user defined genomic regions provided through a .bed file or narrowPeak file can be plotted. Multiple samples (.bam files) and multiple set of regions (.bed file) can be overlayed on the same figure, or can be output as various combinations. When input files (for input samples) are available, ratio-over-input are displayed as well. Statistical comparisons between samples or between features can be plotted as boxplots or barplots of means`r knitr::asis_output("\U00B1")`SE.
 
-```{r, region code, eval = FALSE, fig.show = 'hold', fig.keep = 'all', fig.align = 'center', fig.dim = c(7,7)}
+```{r, region code, eval = TRUE, fig.show = 'hold', fig.keep = 'first', fig.align = 'center', fig.dim = c(7,7)}
 centerfiles <- system.file("extdata", "test_chip_peak_chr19.narrowPeak", 
                            package = "GenomicPlot")
 names(centerfiles) <- c("NarrowPeak")
@@ -139,7 +150,7 @@ knitr::include_graphics("../longtests/test_output/test_plot_region.pdf")
 ## Plot genomic loci (start, end or center of a feature)
 Difference in signal intensity within specific regions around the reference loci can be tested, and the test statistics can be plotted as boxplot and barplot of mean +/- SE. The test can be done among loci or among samples.
 
-```{r, locus code, eval = FALSE, fig.show = 'hold', fig.keep = 'all', fig.align = 'center', fig.dim = c(7,7)}
+```{r, locus code, eval = TRUE, fig.show = 'hold', fig.keep = 'first', fig.align = 'center', fig.dim = c(7,7)}
 centerfiles <- c(
   system.file("extdata", "test_clip_peak_chr19.bed", package = "GenomicPlot"),
   system.file("extdata", "test_chip_peak_chr19.bed", package = "GenomicPlot")
@@ -185,7 +196,7 @@ knitr::include_graphics("../longtests/test_output/test_plot_locus2.pdf")
 
 Aside from reads coverage profiles, distribution of binding peaks in different gene types and genomic features is also important. Peak annotation statistics are plotted as bar chart for distribution in gene types, and as pie charts for distribution in genomic features. The pie charts are plotted in two different ways: either as percentage of absolute counts or as percentage of feature length-normalized counts in each features. For DNA binding samples, the features (in order of precedence) include "Promoter", "TTS", "5'UTR", "CDS", "3'UTR" and "Intron"; for RNA binding samples, "Promoter" and "TTS" are excluded. In the following example, "Promoter" is defined as regions 2000 bp upstream of transcription start site (TSS) and 300 bp downstream TSS, "TTS" is defined as the region 1000 bp downstream cleavage site or the length between cleavage site and the start of the next gene, whichever is shorter, but these lengths can be adjusted. To save annotation results (both peak-oriented and gene-oriented), set "verbose = TRUE".
 
-```{r, annotation code, eval = FALSE, fig.show = 'hold', fig.keep = 'all', fig.align = 'center', fig.dim = c(7,7)}
+```{r, annotation code, eval = TRUE, fig.show = 'hold', fig.keep = 'first', fig.align = 'center', fig.dim = c(7,7)}
 gtffile <- system.file("extdata", "gencode.v19.annotation_chr19.gtf", 
                        package = "GenomicPlot")
 
@@ -230,7 +241,7 @@ bamQueryFiles <- c(
     )
    
     plot_bam_correlation(
-      bamfiles = bamQueryFiles, binSize = 100000, outPrefix = NULL,
+      bamFiles = bamQueryFiles, binSize = 100000, outPrefix = NULL,
       importParams = bamImportParams, nc = 2, verbose = FALSE
     )
 ```
@@ -240,7 +251,8 @@ Due to peak width variations, the number of overlapping peaks between set A and 
 
 ```{r, bed overlap, eval = TRUE, fig.show = 'hold', fig.keep = 'first', fig.align = 'center', fig.dim = c(7,7)}
   queryFiles <- c(
-    system.file("extdata", "test_chip_peak_chr19.narrowPeak", package = "GenomicPlot"),
+    system.file("extdata", "test_chip_peak_chr19.narrowPeak", 
+                package = "GenomicPlot"),
     system.file("extdata", "test_chip_peak_chr19.bed", package = "GenomicPlot"),
     system.file("extdata", "test_clip_peak_chr19.bed", package = "GenomicPlot")
   )

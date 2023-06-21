@@ -446,10 +446,9 @@ draw_boxplot_by_factor <- function(stat_df,
 #' @return a ggplot object
 #' @export draw_boxplot_wo_outlier
 #' @examples
-#' stat_df <- data.frame(Feature = rep(c("A", "B"), c(20, 30)), Intensity = c(
-#'   rnorm(20, 2),
-#'   rnorm(30, 3)
-#' ))
+#' stat_df <- data.frame(Feature = rep(c("A", "B"), c(20, 30)), 
+#'    Intensity = c(rnorm(20, 2), rnorm(30, 3)))
+#'    
 #' p <- draw_boxplot_wo_outlier(stat_df,
 #'   xc = "Feature", yc = "Intensity",
 #'   Ylab = "Signal Intensity"
@@ -538,7 +537,8 @@ draw_boxplot_wo_outlier <- function(stat_df,
 #'   Feature = rep(c("A", "B"), c(20, 30)),
 #'   Intensity = c(rnorm(20, 2), rnorm(30, 3))
 #' )
-#' p <- draw_mean_se_barplot(stat_df, xc = "Feature", yc = "Intensity", Ylab = "Intensity")
+#' p <- draw_mean_se_barplot(stat_df, xc = "Feature", yc = "Intensity", 
+#'    Ylab = "Intensity")
 #' p
 #' @export draw_mean_se_barplot
 #'
@@ -686,7 +686,8 @@ draw_mean_se_barplot <- function(stat_df,
 #'
 #' print(draw_quantile_plot(stat_df, xc = "Feature", yc = "Intensity"))
 #' print(draw_quantile_plot(stat_df, xc = "Feature", yc = "Height"))
-#' print(draw_quantile_plot(stat_df_long, xc = "Feature", yc = "value", fc = "type", Ylab = "value"))
+#' print(draw_quantile_plot(stat_df_long, xc = "Feature", yc = "value", 
+#'    fc = "type", Ylab = "value"))
 #'
 draw_quantile_plot <- function(stat_df,
                                xc = "Feature",
@@ -756,8 +757,10 @@ draw_quantile_plot <- function(stat_df,
 #'   Height = c(rnorm(20, 5, 5), rnorm(30, 1, 5))
 #' )
 #'
-#' print(draw_rank_plot(stat_df, xc = "Feature", yc = "Intensity", Ylab = "Intensity"))
-#' print(draw_rank_plot(stat_df1, xc = "Feature", yc = "Height", Ylab = "Height"))
+#' print(draw_rank_plot(stat_df, xc = "Feature", yc = "Intensity", 
+#'    Ylab = "Intensity"))
+#' print(draw_rank_plot(stat_df1, xc = "Feature", yc = "Height", 
+#'    Ylab = "Height"))
 #'
 draw_rank_plot <- function(stat_df,
                            xc = "Feature",
@@ -1056,7 +1059,8 @@ draw_stacked_profile <- function(plot_df,
 #'   strand=c("+", "-", "-", "+")
 #' )
 #'
-#'overlap_pair(list(query = query, subject = subject), filter_by_overlaps_stranded)
+#'overlap_pair(list(query = query, subject = subject), 
+#' filter_by_overlaps_stranded)
 #'
 #'
 #' @export overlap_pair

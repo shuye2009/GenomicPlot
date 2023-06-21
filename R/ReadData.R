@@ -24,11 +24,13 @@
 #' @author Shuye Pu
 #'
 #' @examples
-#' queryFiles <- system.file("extdata", "treat_chr19.bam", package = "GenomicPlot")
-#' names(queryFiles) <- "query"
+#' queryFiles1 <- system.file("extdata", "treat_chr19.bam", 
+#'    package = "GenomicPlot")
+#' names(queryFiles1) <- "query"
 #'
-#' inputFiles <- system.file("extdata", "input_chr19.bam", package = "GenomicPlot")
-#' names(inputFiles) <- "input"
+#' inputFiles1 <- system.file("extdata", "input_chr19.bam", 
+#'    package = "GenomicPlot")
+#' names(inputFiles1) <- "input"
 #'
 #' bamimportParams <- list(
 #'   offset = -1, fix_width = 0, fix_point = "start", norm = TRUE,
@@ -36,24 +38,27 @@
 #' )
 #'
 #' out_list <- handle_input(
-#'   inputFiles = c(queryFiles, inputFiles),
+#'   inputFiles = c(queryFiles1, inputFiles1),
 #'   importParams = bamimportParams, verbose = TRUE, nc = 2
 #' )
 #'
-#' queryFiles <- system.file("extdata", "test_wig_chr19_+.wig", package = "GenomicPlot")
-#' names(queryFiles) <- "test_wig"
+#' queryFiles2 <- system.file("extdata", "test_wig_chr19_+.wig", 
+#'    package = "GenomicPlot")
+#' names(queryFiles2) <- "test_wig"
 #'
 #' wigimportParams <- list(
 #'   offset = 0, fix_width = 0, fix_point = "start", norm = FALSE,
 #'   useScore = FALSE, outRle = TRUE, useSizeFactor = FALSE, genome = "hg19"
 #' )
 #'
-#' out <- handle_input(queryFiles, wigimportParams, verbose = TRUE) 
+#' out <- handle_input(queryFiles2, wigimportParams, verbose = TRUE) 
 #' 
-#' queryFiles <- system.file("extdata", "test_wig_chr19_+.bw", package = "GenomicPlot")
-#' names(queryFiles) <- "test_bw" 
+#' queryFiles3 <- system.file("extdata", "test_wig_chr19_+.bw", 
+#'    package = "GenomicPlot")
+#' names(queryFiles3) <- "test_bw" 
 #'  
-#' out <- handle_input(queryFiles, wigimportParams, verbose = TRUE) 
+#' out <- handle_input(c(querifile1, queryfiles2, queryFiles3), 
+#'    wigimportParams, verbose = TRUE) 
 #' 
 #' @export handle_input
 
@@ -159,15 +164,17 @@ handle_input <- function(inputFiles,
 #' @author Shuye Pu
 #' 
 #' @examples
-#' queryFiles <- system.file("extdata", "chip_treat_chr19.bam", package = "GenomicPlot")
+#' queryFiles <- system.file("extdata", "chip_treat_chr19.bam",  
+#'    package = "GenomicPlot")
 #' names(queryFiles) <- "query"
 #'
-#' inputFiles <- system.file("extdata", "chip_input_chr19.bam", package = "GenomicPlot")
+#' inputFiles <- system.file("extdata", "chip_input_chr19.bam", 
+#'    package = "GenomicPlot")
 #' names(inputFiles) <- "input"
 #'
 #' chipImportParams <- list(
-#' offset = 0, fix_width = 150, fix_point = "start", norm = TRUE,
-#' useScore = FALSE, outRle = FALSE, useSizeFactor = FALSE, genome = "hg19"
+#'    offset = 0, fix_width = 150, fix_point = "start", norm = TRUE,
+#'    useScore = FALSE, outRle = FALSE, useSizeFactor = FALSE, genome = "hg19"
 #' )
 #'
 #' out_list <- handle_input(
@@ -244,7 +251,8 @@ effective_size <- function(outlist,
 #' @author Shuye Pu 
 #' 
 #' @examples 
-#' queryFiles <- system.file("extdata", "test_chip_peak_chr19.narrowPeak", package = "GenomicPlot")
+#' queryFiles <- system.file("extdata", "test_chip_peak_chr19.narrowPeak", 
+#'    package = "GenomicPlot")
 #' names(queryFiles) <- "narrowPeak"
 #'
 #' bedimportParams <- list(
@@ -333,7 +341,8 @@ handle_bed <- function(inputFile,
 #' 
 #' @examples
 #' 
-#' queryFiles <- system.file("extdata", "treat_chr19.bam", package = "GenomicPlot")
+#' queryFiles <- system.file("extdata", "treat_chr19.bam", 
+#'    package = "GenomicPlot")
 #' names(queryFiles) <- "query"
 #'
 #' bamimportParams <- list(
@@ -409,7 +418,8 @@ handle_bam <- function(inputFile,
 #'
 #' @examples
 #' 
-#' queryFiles <- system.file("extdata", "test_wig_chr19_+.bw", package = "GenomicPlot")
+#' queryFiles <- system.file("extdata", "test_wig_chr19_+.bw", 
+#'    package = "GenomicPlot")
 #' names(queryFiles) <- "test_bw"
 #'
 #' wigimportParams <- list(
@@ -479,7 +489,8 @@ handle_bw <- function(inputFile,
 #'
 #' @examples
 #' 
-#' queryFiles <- system.file("extdata", "test_wig_chr19_+.wig", package = "GenomicPlot")
+#' queryFiles <- system.file("extdata", "test_wig_chr19_+.wig", 
+#'    package = "GenomicPlot")
 #' names(queryFiles) <- "test_wig"
 #'
 #' wigimportParams <- list(
@@ -524,7 +535,8 @@ handle_wig <- function(inputFile,
 #'
 #' @examples
 #' 
-#' queryFile <- system.file("extdata", "test_wig_chr19_+.wig", package = "GenomicPlot")
+#' queryFile <- system.file("extdata", "test_wig_chr19_+.wig", 
+#'    package = "GenomicPlot")
 #' names(queryFile) <- "test_wig"
 #'
 #' out <- GenomicPlot:::find_mate (inputFile = queryFile, verbose = TRUE) 

@@ -25,9 +25,11 @@ with longer CDS is selected. If the lengths of CDS tie again, the transcript wit
 }
 \examples{
 
-gtffile <- system.file("extdata", "gencode.v19.annotation_chr19.gtf", package = "GenomicPlot")
+gtffile <- system.file("extdata", "gencode.v19.annotation_chr19.gtf", 
+   package = "GenomicPlot")
 gff <- RCAS::importGtf(saveObjectAsRds = TRUE, filePath = gtffile)
 txdb <- makeTxDbFromGRanges(gff)
+txdb$user_genome <- "hg19"
 longestTx <- extract_longest_tx(txdb, plot = FALSE)
 
 }

@@ -16,14 +16,17 @@ a ggplot object
 This is a helper function for displaying function arguments for a plotting function. If the runtime value of the argument is a small object, its values is displayed, otherwise, only the name of the value of the argument is displayed.
 }
 \examples{
-gtffile <- system.file("extdata", "gencode.v19.annotation_chr19.gtf", package = "GenomicPlot")
+gtffile <- system.file("extdata", "gencode.v19.annotation_chr19.gtf", 
+   package = "GenomicPlot")
 gff <- RCAS::importGtf(saveObjectAsRds = TRUE, filePath = gtffile)
 txdb <- makeTxDbFromGRanges(gff)
 
-queryfiles <- system.file("extdata", "treat_chr19.bam", package = "GenomicPlot")
+queryfiles <- system.file("extdata", "treat_chr19.bam", 
+   package = "GenomicPlot")
 names(queryfiles) <- "query"
 
-inputfiles <- system.file("extdata", "input_chr19.bam", package = "GenomicPlot")
+inputfiles <- system.file("extdata", "input_chr19.bam", 
+   package = "GenomicPlot")
 names(inputfiles) <- "input"
 
 gfeatures <- prepare_5parts_genomic_features(txdb,

@@ -36,7 +36,8 @@ a numeric matrix
 Function for parallel computation of scoreMatrixBin. The 'windows' parameter of the scoreMatrixBin method is split into nc chunks, and scoreMatrixBin is called on each chunk simultaneously to speed up the computation.
 }
 \examples{
-queryFiles <- system.file("extdata", "chip_treat_chr19.bam", package = "GenomicPlot")
+queryFiles <- system.file("extdata", "chip_treat_chr19.bam", 
+   package = "GenomicPlot")
 names(queryFiles) <- "query"
 
 chipimportParams <- list(
@@ -44,7 +45,8 @@ chipimportParams <- list(
   useScore = FALSE, outRle = TRUE, useSizeFactor = FALSE, genome = "hg19"
 )
 
-queryRegion <- handle_input(queryFiles, chipimportParams, verbose = TRUE)[[1]]$query
+queryRegion <- handle_input(queryFiles, chipimportParams, 
+   verbose = TRUE)[[1]]$query
 
 windowFiles <- system.file("extdata", "test_chip_peak_chr19.narrowPeak", 
   package = "GenomicPlot"

@@ -32,7 +32,8 @@ subject <- GRanges("chr19",
   strand=c("+", "-", "-", "+")
 )
 
-overlap_pair(list(query = query, subject = subject), filter_by_overlaps_stranded)
+overlap_pair(list(query = query, subject = subject), 
+filter_by_overlaps_stranded)
 
 
 }

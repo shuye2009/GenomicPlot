@@ -31,8 +31,10 @@ stat_df1 <- data.frame(
   Height = c(rnorm(20, 5, 5), rnorm(30, 1, 5))
 )
 
-print(draw_rank_plot(stat_df, xc = "Feature", yc = "Intensity", Ylab = "Intensity"))
-print(draw_rank_plot(stat_df1, xc = "Feature", yc = "Height", Ylab = "Height"))
+print(draw_rank_plot(stat_df, xc = "Feature", yc = "Intensity", 
+   Ylab = "Intensity"))
+print(draw_rank_plot(stat_df1, xc = "Feature", yc = "Height", 
+   Ylab = "Height"))
 
 }
 \author{

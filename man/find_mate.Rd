@@ -19,7 +19,8 @@ Find the file name of the negative strand, if a .wig/bw file for positive strand
 }
 \examples{
 
-queryFile <- system.file("extdata", "test_wig_chr19_+.wig", package = "GenomicPlot")
+queryFile <- system.file("extdata", "test_wig_chr19_+.wig", 
+   package = "GenomicPlot")
 names(queryFile) <- "test_wig"
 
 out <- GenomicPlot:::find_mate (inputFile = queryFile, verbose = TRUE) 

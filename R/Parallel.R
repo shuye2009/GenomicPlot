@@ -71,7 +71,8 @@ stop_parallel <- function(cl) {
 #' @author Shuye Pu
 #' 
 #' @examples 
-#' queryFiles <- system.file("extdata", "chip_treat_chr19.bam", package = "GenomicPlot")
+#' queryFiles <- system.file("extdata", "chip_treat_chr19.bam", 
+#'    package = "GenomicPlot")
 #' names(queryFiles) <- "query"
 #'
 #' chipimportParams <- list(
@@ -79,7 +80,8 @@ stop_parallel <- function(cl) {
 #'   useScore = FALSE, outRle = TRUE, useSizeFactor = FALSE, genome = "hg19"
 #' )
 #'
-#' queryRegion <- handle_input(queryFiles, chipimportParams, verbose = TRUE)[[1]]$query
+#' queryRegion <- handle_input(queryFiles, chipimportParams, 
+#'    verbose = TRUE)[[1]]$query
 #' 
 #' windowFiles <- system.file("extdata", "test_chip_peak_chr19.narrowPeak", 
 #'   package = "GenomicPlot"
@@ -148,9 +150,10 @@ parallel_scoreMatrixBin <- function(queryRegions,
 #' 
 #' @examples 
 #' bedQueryFiles <- c(
-#'   system.file("extdata", "test_chip_peak_chr19.narrowPeak", package = "GenomicPlot"),
-#'   system.file("extdata", "test_chip_peak_chr19.bed", package = "GenomicPlot"),
-#'   system.file("extdata", "test_clip_peak_chr19.bed", package = "GenomicPlot")
+#'  system.file("extdata", "test_chip_peak_chr19.narrowPeak", 
+#'     package = "GenomicPlot"),
+#'  system.file("extdata", "test_chip_peak_chr19.bed", package = "GenomicPlot"),
+#'  system.file("extdata", "test_clip_peak_chr19.bed", package = "GenomicPlot")
 #' )
 #' names(bedQueryFiles) <- c("NarrowPeak", "SummitPeak", "iCLIPPeak")
 #' 
@@ -167,7 +170,8 @@ parallel_scoreMatrixBin <- function(queryRegions,
 #' seqi <- GenomeInfoDb::Seqinfo(genome = "hg19") 
 #' grange_list <- lapply(out_list, function(x) x$query) 
 #' tilewidth <- 100000 
-#' tileBins <- tileGenome(seqi, tilewidth = tilewidth, cut.last.tile.in.chrom = TRUE)
+#' tileBins <- tileGenome(seqi, tilewidth = tilewidth, 
+#'    cut.last.tile.in.chrom = TRUE)
 #'  
 #' score_list1 <- parallel_countOverlaps(grange_list, tileBins, nc = 2)
 #' dplyr::glimpse(score_list1)

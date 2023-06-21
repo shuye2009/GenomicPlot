@@ -24,7 +24,8 @@ For stranded files, forward and reverse strands are stored in separate files, wi
 }
 \examples{
 
-queryFiles <- system.file("extdata", "test_wig_chr19_+.wig", package = "GenomicPlot")
+queryFiles <- system.file("extdata", "test_wig_chr19_+.wig", 
+   package = "GenomicPlot")
 names(queryFiles) <- "test_wig"
 
 wigimportParams <- list(

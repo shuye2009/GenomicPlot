@@ -45,7 +45,8 @@ stat_df_long <- tidyr::pivot_longer(stat_df,
 
 print(draw_quantile_plot(stat_df, xc = "Feature", yc = "Intensity"))
 print(draw_quantile_plot(stat_df, xc = "Feature", yc = "Height"))
-print(draw_quantile_plot(stat_df_long, xc = "Feature", yc = "value", fc = "type", Ylab = "value"))
+print(draw_quantile_plot(stat_df_long, xc = "Feature", yc = "value", 
+   fc = "type", Ylab = "value"))
 
 }
 \author{

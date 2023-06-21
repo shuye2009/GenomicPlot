@@ -23,9 +23,10 @@ Function for parallel computation of countOverlaps function in the GenomicRanges
 }
 \examples{
 bedQueryFiles <- c(
-  system.file("extdata", "test_chip_peak_chr19.narrowPeak", package = "GenomicPlot"),
-  system.file("extdata", "test_chip_peak_chr19.bed", package = "GenomicPlot"),
-  system.file("extdata", "test_clip_peak_chr19.bed", package = "GenomicPlot")
+ system.file("extdata", "test_chip_peak_chr19.narrowPeak", 
+    package = "GenomicPlot"),
+ system.file("extdata", "test_chip_peak_chr19.bed", package = "GenomicPlot"),
+ system.file("extdata", "test_clip_peak_chr19.bed", package = "GenomicPlot")
 )
 names(bedQueryFiles) <- c("NarrowPeak", "SummitPeak", "iCLIPPeak")
 
@@ -42,7 +43,8 @@ out_list <- handle_input(
 seqi <- GenomeInfoDb::Seqinfo(genome = "hg19") 
 grange_list <- lapply(out_list, function(x) x$query) 
 tilewidth <- 100000 
-tileBins <- tileGenome(seqi, tilewidth = tilewidth, cut.last.tile.in.chrom = TRUE)
+tileBins <- tileGenome(seqi, tilewidth = tilewidth, 
+   cut.last.tile.in.chrom = TRUE)
  
 score_list1 <- parallel_countOverlaps(grange_list, tileBins, nc = 2)
 dplyr::glimpse(score_list1)

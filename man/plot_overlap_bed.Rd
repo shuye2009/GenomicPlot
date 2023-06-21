@@ -38,9 +38,12 @@ This function takes a list of up to 4 bed file names, and produce a Venn diagram
 \examples{
 
 queryFiles <- c(
-  system.file("extdata", "test_chip_peak_chr19.narrowPeak", package = "GenomicPlot"),
-  system.file("extdata", "test_chip_peak_chr19.bed", package = "GenomicPlot"),
-  system.file("extdata", "test_clip_peak_chr19.bed", package = "GenomicPlot")
+  system.file("extdata", "test_chip_peak_chr19.narrowPeak", 
+  package = "GenomicPlot"),
+  system.file("extdata", "test_chip_peak_chr19.bed", 
+  package = "GenomicPlot"),
+  system.file("extdata", "test_clip_peak_chr19.bed", 
+  package = "GenomicPlot")
 )
 names(queryFiles) <- c("narrowPeak", "summitPeak", "clipPeak")
 

@@ -20,7 +20,8 @@ a list object with four elements, 'query' is a list GRanges objects or RleList o
 This is a function for read peaks data in bed format, store the input data in a list of GRanges objects or RleList objects.
 }
 \examples{
-queryFiles <- system.file("extdata", "test_chip_peak_chr19.narrowPeak", package = "GenomicPlot")
+queryFiles <- system.file("extdata", "test_chip_peak_chr19.narrowPeak", 
+   package = "GenomicPlot")
 names(queryFiles) <- "narrowPeak"
 
 bedimportParams <- list(

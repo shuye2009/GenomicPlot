@@ -348,10 +348,11 @@ aov_TukeyHSD <- function(df,
 #' @author Shuye Pu
 #'
 #' @examples
-#' gr2 <- GenomicRanges::GRanges(c("chr1", "chr1"), IRanges::IRanges(c(7, 13), width = 3),
-#'   strand = c("+", "-")
+#' gr2 <- GenomicRanges::GRanges(c("chr1", "chr1"), 
+#'    IRanges::IRanges(c(7, 13), width = 3), strand = c("+", "-")
 #' )
-#' GenomicRanges::mcols(gr2) <- data.frame(score = c(0.3, 0.9), cat = c(TRUE, FALSE))
+#' GenomicRanges::mcols(gr2) <- data.frame(score = c(0.3, 0.9), 
+#'    cat = c(TRUE, FALSE))
 #' df2 <- gr2df(gr2)
 #'
 #' @export gr2df

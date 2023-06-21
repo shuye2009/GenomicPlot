@@ -24,7 +24,8 @@ The reads are filtered using mapq score >= 10 by default, only mapped reads are 
 }
 \examples{
 
-queryFiles <- system.file("extdata", "treat_chr19.bam", package = "GenomicPlot")
+queryFiles <- system.file("extdata", "treat_chr19.bam", 
+   package = "GenomicPlot")
 names(queryFiles) <- "query"
 
 bamimportParams <- list(
