@@ -1,10 +1,3 @@
----
-title:
-  README
-output:
-  html_document: default
-  pdf_document: default
----
 
 # GenomicPlot
 
@@ -29,10 +22,11 @@ BiocManager::install("GenomicPlot", version = "devel")
 or from [GitHub](https://github.com/shuye2009/GenomicPlot) with:
 
 ``` r
-# install.packages("remotes")
+if (!require("remotes", quietly = TRUE))
+   install.packages("remotes")
 remotes::install_github("shuye2009/GenomicPlot", build_manual = TRUE, build_vignettes = TRUE)
 ```
-Or download the source package from the latest release on [GitHub](https://github.com/shuye2009/GenomicPlot) and run in R:
+or download the source package from the latest release on [GitHub](https://github.com/shuye2009/GenomicPlot) and run in R:
 
 ``` r
 install.packages("path-to-source-package/GenomicPlot_x.x.x.tar.gz", repos = NULL)
@@ -101,8 +95,8 @@ inputfiles <- c(
 names(inputfiles) <- c("chip_input")
 op <- "test_plot_locus2"
 
-chipimportParams <- list(
-  offset = 0, fix_width = 150, fix_point = "start", norm = TRUE,
+chipimportParams <- setImportParams(
+  offset = 0, fix_width = 150, fix_point = "start", norm = TRUE, saveRds = FALSE,
   useScore = FALSE, outRle = TRUE, useSizeFactor = FALSE, genome = "hg19"
 )
 

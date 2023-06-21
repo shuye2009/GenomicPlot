@@ -1,8 +1,3 @@
----
-output:
-  html_document: default
-  pdf_document: default
----
 
 # CHANGES IN VERSION 0.99.12
 
@@ -13,7 +8,7 @@ output:
    
 ## SIGNIFICANT CHANGES
    - The function plot_3parts_metagene is removed.
-   - Add setImportParam function to profive default import paramters.
+   - Add setImportParams function to provide default import parameters.
    - Add saveRds option to import parameters to control saving of imported data, the default is FALSE.
    
 ## BUG FIXES
