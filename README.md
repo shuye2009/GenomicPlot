@@ -45,6 +45,7 @@ gtffile <- system.file("extdata", "gencode.v19.annotation_chr19.gtf",
 package = "GenomicPlot")
 gff <- RCAS::importGtf(saveObjectAsRds = TRUE, filePath = gtffile)
 txdb <- makeTxDbFromGRanges(gff)
+txdb$user_genome <- "hg19"
 
 gf <- prepare_5parts_genomic_features(txdb, meta = TRUE, nbins = 100, 
 fiveP = -2000, threeP = 1000, longest = TRUE)
