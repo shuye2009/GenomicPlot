@@ -9,20 +9,24 @@ make_subTxDb_from_GTF(gtfFile, geneList, geneCol = 1)
 \arguments{
 \item{gtfFile}{path to a GTF file}
 
-\item{geneList}{path to a tab-delimited text file with one gene name on each line, or a character vector of gene names}
+\item{geneList}{path to a tab-delimited text file with one gene name on each 
+line, or a character vector of gene names}
 
-\item{geneCol}{the position of the column that containing gene names in the case that geneList is a file}
+\item{geneCol}{the position of the column that containing gene names in the 
+case that geneList is a file}
 }
 \value{
 a TxDb object
 }
 \description{
-Make a partial TxDb object given a GTF file and a list of gene names in a file or in a character vector.
+Make a partial TxDb object given a GTF file and a list of gene 
+names in a file or in a character vector.
 }
 \examples{
 
-gtfFile <- system.file("extdata", "gencode.v19.annotation_chr19.gtf", 
-   package = "GenomicPlot") 
+gtfFile <- system.file("extdata", "gencode.v19.annotation_chr19.gtf",
+    package = "GenomicPlot"
+)
 genes <- c("RPRD1A", "RPAP2", "RPRD1B", "RPRD2", "ZNF281", "YTHDF2")
 
 txdb <- make_subTxDb_from_GTF(gtfFile = gtfFile, geneList = genes)

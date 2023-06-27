@@ -9,58 +9,75 @@ handle_input(inputFiles, importParams = NULL, verbose = FALSE, nc = 2)
 \arguments{
 \item{inputFiles}{a vector of strings denoting file names}
 
-\item{importParams}{a list with the 9 elements: list(offset, fix_width, fix_point, useScore, outRle, norm, genome, useSizeFactor). Details are described in the documentation of setImportParams function}
+\item{importParams}{a list with the 9 elements: list(offset, fix_width, 
+fix_point, useScore, outRle, norm, genome, useSizeFactor). Details are 
+described in the documentation of \code{\link{setImportParams}} function}
 
 \item{verbose}{logical, whether to output additional information}
 
 \item{nc}{integer, number of cores for parallel processing}
 }
 \value{
-a list object with four elements, 'query' is a list GRanges objects or RleList objects, 'size' is the library size, 'type' is the input file type,
-'weight' is the name of the metadata column to be used as weight for coverage calculation
+a list object with four elements, 'query' is a list GRanges objects 
+or RleList objects, 'size' is the library size, 'type' is the input file 
+type, 'weight' is the name of the metadata column to be used as weight for 
+coverage calculation
 }
 \description{
-This is a wrapper function for read NGS data in different file formats, store the input data in a list of GRanges objects or RleList objects. File names end in bed|bam|bw|bigwig|bigWig|BigWig|BW|BIGWIG are recognized, and a named list of files with mixed formats are allowed.
+This is a wrapper function for read NGS data in different file 
+formats, store the input data in a list of GRanges objects or RleList 
+objects. File names end in bed|bam|bw|bigwig|bigWig|BigWig|BW|BIGWIG are 
+recognized, and a named list of files with mixed formats are allowed.
 }
 \details{
-when 'useScore' is TRUE, the score column of the bed file will be used in the metadata column 'score' of the GRanges object, or the 'Values' field of the RleList object. Otherwise the value 1 will be used instead. When the intended use of the input bed is a reference feature, both 'useScore' and 'outRle' should be set to FALSE.
+when 'useScore' is TRUE, the score column of the bed file will be 
+used in the metadata column 'score' of the GRanges object, or the 'Values' 
+field of the RleList object. Otherwise the value 1 will be used instead. When 
+the intended use of the input bed is a reference feature, both 'useScore' and 
+'outRle' should be set to FALSE.
 }
 \examples{
-queryFiles1 <- system.file("extdata", "treat_chr19.bam", 
-   package = "GenomicPlot")
+queryFiles1 <- system.file("extdata", "treat_chr19.bam",
+    package = "GenomicPlot"
+)
 names(queryFiles1) <- "query"
 
-inputFiles1 <- system.file("extdata", "input_chr19.bam", 
-   package = "GenomicPlot")
+inputFiles1 <- system.file("extdata", "input_chr19.bam",
+    package = "GenomicPlot"
+)
 names(inputFiles1) <- "input"
 
 bamimportParams <- setImportParams(
-  offset = -1, fix_width = 0, fix_point = "start", norm = TRUE,
-  useScore = FALSE, outRle = TRUE, useSizeFactor = FALSE, genome = "hg19"
+    offset = -1, fix_width = 0, fix_point = "start", norm = TRUE,
+    useScore = FALSE, outRle = TRUE, useSizeFactor = FALSE, genome = "hg19"
 )
 
 out_list <- handle_input(
-  inputFiles = c(queryFiles1, inputFiles1),
-  importParams = bamimportParams, verbose = TRUE, nc = 2
+    inputFiles = c(queryFiles1, inputFiles1),
+    importParams = bamimportParams, verbose = TRUE, nc = 2
 )
 
-queryFiles2 <- system.file("extdata", "test_wig_chr19_+.wig", 
-   package = "GenomicPlot")
+queryFiles2 <- system.file("extdata", "test_wig_chr19_+.wig",
+    package = "GenomicPlot"
+)
 names(queryFiles2) <- "test_wig"
 
 wigimportParams <- setImportParams(
-  offset = 0, fix_width = 0, fix_point = "start", norm = FALSE,
-  useScore = FALSE, outRle = TRUE, useSizeFactor = FALSE, genome = "hg19"
+    offset = 0, fix_width = 0, fix_point = "start", norm = FALSE,
+    useScore = FALSE, outRle = TRUE, useSizeFactor = FALSE, genome = "hg19"
 )
 
-out <- handle_input(queryFiles2, wigimportParams, verbose = TRUE) 
+out <- handle_input(queryFiles2, wigimportParams, verbose = TRUE)
 
-queryFiles3 <- system.file("extdata", "test_wig_chr19_+.bw", 
-   package = "GenomicPlot")
-names(queryFiles3) <- "test_bw" 
- 
-out <- handle_input(c(querifile1, queryfiles2, queryFiles3), 
-   wigimportParams, verbose = TRUE) 
+queryFiles3 <- system.file("extdata", "test_wig_chr19_+.bw",
+    package = "GenomicPlot"
+)
+names(queryFiles3) <- "test_bw"
+
+out <- handle_input(c(queryFiles1, queryFiles2, queryFiles3),
+    wigimportParams,
+    verbose = TRUE
+)
 
 }
 \author{

@@ -4,7 +4,7 @@
 <!-- badges: start -->
 <!-- badges: end -->
 
-The goal of GenomicPlot is to create an efficient visualization tool for next generation sequencing (NGS) data with rich functionality and flexibility. GenomicPlot enables plotting of NGS data in various formats (bam, bed, wig and bigwig); both coverage and enrichment over input can be computed and displayed with respect to genomic features (such as UTR, CDS, enhancer), and user defined genomic loci or regions. Statistical tests on signal intensity within user defined regions of interest can be performed and presented as box plots or pie charts. Parallel processing is enabled to speed up computation on multi-core platforms. In addition to genomic plots which is suitable for displaying of coverage of genomic DNA (such as ChIP-seq data), metagenomic (without introns) plots can also be made for RNA-seq or CLIP-seq data as well. For peak annotation, peaks targeting exonic and intronic regions of genomic features (5'UTR, CDS, 3'UTR) are counted separately.
+The goal of GenomicPlot is to provide an efficient visualization tool for next generation sequencing (NGS) data with rich functionality and flexibility. GenomicPlot enables plotting of NGS data in various formats (bam, bed, wig and bigwig); both coverage and enrichment over input can be computed and displayed with respect to genomic features (such as UTR, CDS, enhancer), and user defined genomic loci or regions. Statistical tests on signal intensity within user defined regions of interest can be performed and presented as box plots or pie charts. Parallel processing is enabled to speed up computation on multi-core platforms. In addition to genomic plots which is suitable for displaying of coverage of genomic DNA (such as ChIP-seq data), metagenomic (without introns) plots can also be made for RNA-seq or CLIP-seq data as well. For peak annotation, peaks targeting exonic and intronic regions of genomic features (5'UTR, CDS, 3'UTR) are counted separately.
 
 ## Installation
 
@@ -41,15 +41,20 @@ The following is a basic example which shows you how to visualize ChIP-seq peaks
 
 library(GenomicPlot)
 
-gtffile <- system.file("extdata", "gencode.v19.annotation_chr19.gtf", package = "GenomicPlot")
+gtffile <- system.file("extdata", "gencode.v19.annotation_chr19.gtf", 
+package = "GenomicPlot")
 gff <- RCAS::importGtf(saveObjectAsRds = TRUE, filePath = gtffile)
 txdb <- makeTxDbFromGRanges(gff)
 
-gf <- prepare_5parts_genomic_features(txdb, meta = TRUE, nbins = 100, fiveP = -2000, threeP = 1000, longest = TRUE)
+gf <- prepare_5parts_genomic_features(txdb, meta = TRUE, nbins = 100, 
+fiveP = -2000, threeP = 1000, longest = TRUE)
 
-queryfiles <- c(system.file("extdata", "test_chip_peak_chr19.narrowPeak", package = "GenomicPlot"),
-                system.file("extdata", "test_chip_peak_chr19.bed", package = "GenomicPlot"),
-                system.file("extdata", "test_clip_peak_chr19.bed", package = "GenomicPlot"))
+queryfiles <- c(system.file("extdata", "test_chip_peak_chr19.narrowPeak",
+                package = "GenomicPlot"),
+                system.file("extdata", "test_chip_peak_chr19.bed", 
+                package = "GenomicPlot"),
+                system.file("extdata", "test_clip_peak_chr19.bed", 
+                package = "GenomicPlot"))
 names(queryfiles) <- c("NarrowPeak", "SummitPeak", "iCLIPPeak")
 
 bedimportParams <- setImportParams(
@@ -96,8 +101,9 @@ names(inputfiles) <- c("chip_input")
 op <- "test_plot_locus2"
 
 chipimportParams <- setImportParams(
-  offset = 0, fix_width = 150, fix_point = "start", norm = TRUE, saveRds = FALSE,
-  useScore = FALSE, outRle = TRUE, useSizeFactor = FALSE, genome = "hg19"
+  offset = 0, fix_width = 150, fix_point = "start", norm = TRUE, 
+  saveRds = FALSE, useScore = FALSE, outRle = TRUE, useSizeFactor = FALSE, 
+  genome = "hg19"
 )
 
 plot_locus(queryFiles = queryfiles, 

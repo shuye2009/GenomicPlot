@@ -23,34 +23,43 @@ draw_mean_se_barplot(
 
 \item{yc}{a string denoting column name for numeric data to be plotted}
 
-\item{fc}{a string denoting column name for sub-grouping based on an additional factor}
+\item{fc}{a string denoting column name for sub-grouping based on an 
+additional factor}
 
-\item{comp}{a list of vectors denoting pair-wise comparisons to be performed between groups}
+\item{comp}{a list of vectors denoting pair-wise comparisons to be performed 
+between groups}
 
 \item{Xlab}{a string for x-axis label}
 
 \item{Ylab}{a string for y-axis label}
 
-\item{Ylim}{a numeric vector of two elements, defining custom limits of y-axis}
+\item{Ylim}{a numeric vector of two elements, defining custom limits of 
+y-axis}
 
-\item{nf}{a integer normalizing factor for correct count of observations when the data table has two factors, such as those produced by pivot_longer, equals to the number of factors}
+\item{nf}{a integer normalizing factor for correct count of observations when 
+the data table has two factors, such as those produced by pivot_longer, 
+equals to the number of factors}
 }
 \value{
 a ggplot object
 }
 \description{
-Plot barplot for mean with standard error bars, no p-value significance levels are displayed, but ANOVA p-value is provided as tag and TukeyHSD test are displayed as caption.
+Plot barplot for mean with standard error bars, no p-value 
+significance levels are displayed, but ANOVA p-value is provided as tag and 
+TukeyHSD test are displayed as caption.
 }
 \note{
-used by \code{plot_locus}, \code{plot_locus_with_random}
+used by \code{\link{plot_locus}}, \code{\link{plot_locus_with_random}}
 }
 \examples{
 stat_df <- data.frame(
-  Feature = rep(c("A", "B"), c(20, 30)),
-  Intensity = c(rnorm(20, 2), rnorm(30, 3))
+    Feature = rep(c("A", "B"), c(20, 30)),
+    Intensity = c(rnorm(20, 2), rnorm(30, 3))
 )
-p <- draw_mean_se_barplot(stat_df, xc = "Feature", yc = "Intensity", 
-   Ylab = "Intensity")
+p <- draw_mean_se_barplot(stat_df,
+    xc = "Feature", yc = "Intensity",
+    Ylab = "Intensity"
+)
 p
 }
 \author{

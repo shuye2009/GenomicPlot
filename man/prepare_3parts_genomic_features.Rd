@@ -19,9 +19,11 @@ prepare_3parts_genomic_features(
 \arguments{
 \item{txdb}{a TxDb object defined in the GenomicFeatures package}
 
-\item{featureName}{one of the gene feature in c("utr3", "utr5", "cds", "intron", "exon", "transcript")}
+\item{featureName}{one of the gene feature in c("utr3", "utr5", "cds", 
+"transcript")}
 
-\item{meta}{logical, indicating whether a metagene (intron excluded) or gene (intron included) plot should be produced}
+\item{meta}{logical, indicating whether a metagene (intron excluded) or 
+genomic (intron included) plot should be produced}
 
 \item{nbins}{an integer defines the total number of bins}
 
@@ -29,28 +31,34 @@ prepare_3parts_genomic_features(
 
 \item{threeP}{extension out of the 3' boundary of gene}
 
-\item{longest}{logical, indicating whether the output should be limited to the longest transcript of each gene}
+\item{longest}{logical, indicating whether the output should be limited to 
+the longest transcript of each gene}
 
-\item{protein_coding}{logical, indicating whether to limit to protein_coding genes}
+\item{protein_coding}{logical, indicating whether to limit to protein_coding 
+genes}
 
 \item{verbose}{logical, whether to output additional information}
 }
 \value{
-a named list with the elements c("windowRs", "nbins", "scaled_bins", "fiveP", "threeP", "meta", "longest")
+a named list with the elements c("windowRs", "nbins", "scaled_bins", 
+ "fiveP", "threeP", "meta", "longest")
 }
 \description{
-This is a helper function for 'plot_3parts_metagene', used to speed up plotting of multiple data sets with the same configuration. Use featureName='transcript' and meta=FALSE and longest=TRUE for genes.
+This is a helper function for 'plot_3parts_metagene', used to 
+speed up plotting of multiple data sets with the same configuration. Use 
+featureName='transcript' and meta=FALSE and longest=TRUE for genes.
 }
 \examples{
-gtffile <- system.file("extdata", "gencode.v19.annotation_chr19.gtf", 
-   package = "GenomicPlot")
+gtffile <- system.file("extdata", "gencode.v19.annotation_chr19.gtf",
+    package = "GenomicPlot"
+)
 gff <- RCAS::importGtf(saveObjectAsRds = TRUE, filePath = gtffile)
 txdb <- makeTxDbFromGRanges(gff)
 txdb$user_genome <- "hg19"
 
 gf <- prepare_3parts_genomic_features(txdb,
-  meta = FALSE, nbins = 100, fiveP = -1000, threeP = 1000,
-  longest = FALSE
+    meta = FALSE, nbins = 100, fiveP = -1000, threeP = 1000,
+    longest = FALSE
 )
 
 }

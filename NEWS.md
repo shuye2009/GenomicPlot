@@ -10,6 +10,7 @@
    - The function plot_3parts_metagene is removed.
    - Add setImportParams function to provide default import parameters.
    - Add saveRds option to import parameters to control saving of imported data, the default is FALSE.
+   - Add data type and missing file checking for function arguments
    
 ## BUG FIXES
    None

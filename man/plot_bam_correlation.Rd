@@ -41,20 +41,20 @@ Plot correlation in reads coverage distributions along the genome for bam files.
 \examples{
 
 bamQueryFiles <- c(
-  system.file("extdata", "chip_input_chr19.bam", package = "GenomicPlot"),
-  system.file("extdata", "chip_treat_chr19.bam", package = "GenomicPlot")
+    system.file("extdata", "chip_input_chr19.bam", package = "GenomicPlot"),
+    system.file("extdata", "chip_treat_chr19.bam", package = "GenomicPlot")
 )
-grouping <- c(1,2)
+grouping <- c(1, 2)
 names(bamQueryFiles) <- names(grouping) <- c("chip_input", "chip_treat")
 
 bamImportParams <- setImportParams(
-   offset = 0, fix_width = 150, fix_point = "start", norm = FALSE,
-   useScore = FALSE, outRle = FALSE, useSizeFactor = FALSE, genome = "hg19"
+    offset = 0, fix_width = 150, fix_point = "start", norm = FALSE,
+    useScore = FALSE, outRle = FALSE, useSizeFactor = FALSE, genome = "hg19"
 )
 
 plot_bam_correlation(
-  bamFiles = bamQueryFiles, binSize = 100000, outPrefix = NULL,
-  importParams = bamImportParams, nc = 2, verbose = FALSE
+    bamFiles = bamQueryFiles, binSize = 100000, outPrefix = NULL,
+    importParams = bamImportParams, nc = 2, verbose = FALSE
 )
 
 }

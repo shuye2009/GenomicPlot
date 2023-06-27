@@ -9,7 +9,8 @@ draw_region_landmark(featureNames, vx, xmax)
 \arguments{
 \item{featureNames}{a string vector giving names of sub-regions}
 
-\item{vx}{a vector on integers denoting the x coordinates of start of each sub-region}
+\item{vx}{a vector on integers denoting the x coordinates of start of each 
+sub-region}
 
 \item{xmax}{an integer denoting the left most boundary}
 }
@@ -17,10 +18,11 @@ draw_region_landmark(featureNames, vx, xmax)
 a ggplot object
 }
 \description{
-Plot a gene centered polygon for demarcating gene and its upstream and downstream regions
+Plot a gene centered polygon for demarcating gene and its 
+upstream and downstream regions
 }
 \note{
-used by \code{plot_3parts_metagene}, \code{plot_5parts_metagene}, \code{plot_region}
+used by \code{\link{plot_5parts_metagene}}, \code{\link{plot_region}}
 }
 \examples{
 fn <- c("5'UTR", "CDS", "3'UTR")

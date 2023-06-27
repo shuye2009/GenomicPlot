@@ -9,13 +9,19 @@ overlap_quad(aquad, overlap_fun)
 \arguments{
 \item{aquad}{a list of four vectors}
 
-\item{overlap_fun}{the name of the function that defines overlap}
+\item{overlap_fun}{the name of the function that defines overlap, depending 
+on the type of object in the vectors. For GRanges, use 
+\code{\link{filter_by_overlaps_stranded}} or 
+\code{\link{filter_by_nonoverlaps_stranded}}, for gene names, use intersect.}
 }
 \value{
 a VennDiagram object
 }
 \description{
-This is a helper function for Venn diagram plot. A Venn diagram is plotted as output. For GRanges, as A overlap B may not be the same as B overlap A, the order of GRanges in a list matters, certain order may produce error.
+This is a helper function for Venn diagram plot. A Venn diagram 
+is plotted as output. For GRanges, as A overlap B may not be the same as B 
+overlap A, the order of GRanges in a list matters, certain order may produce 
+an error.
 }
 \examples{
 
@@ -23,29 +29,30 @@ test_list <- list(A = c(1, 2, 3, 4, 5), B = c(4, 5, 7), C = c(1, 3), D = 6)
 overlap_quad(test_list, intersect)
 
 ## GRanges overlap
-query1 <- GRanges("chr19", 
-  IRanges(rep(c(10, 15), 2), width=c(1, 20, 40, 50)), 
-  strand=c("+", "+", "-", "-")
+query1 <- GRanges("chr19",
+    IRanges(rep(c(10, 15), 2), width = c(1, 20, 40, 50)),
+    strand = c("+", "+", "-", "-")
 )
 
-query2 <- GRanges("chr19", 
-  IRanges(rep(c(1, 15), 2), width=c(1, 20, 40, 50)), 
-  strand=c("+", "+", "-", "-")
+query2 <- GRanges("chr19",
+    IRanges(rep(c(1, 15), 2), width = c(1, 20, 40, 50)),
+    strand = c("+", "+", "-", "-")
 )
 
-subject1 <- GRanges("chr19", 
-  IRanges(rep(c(13, 150), 2), width=c(10, 14, 20, 28)), 
-  strand=c("+", "-", "-", "+")
+subject1 <- GRanges("chr19",
+    IRanges(rep(c(13, 150), 2), width = c(10, 14, 20, 28)),
+    strand = c("+", "-", "-", "+")
 )
 
-subject2 <- GRanges("chr19", 
-  IRanges(rep(c(13, 50), 2), width=c(10, 14, 20, 21)), 
-  strand=c("+", "-", "-", "+")
+subject2 <- GRanges("chr19",
+    IRanges(rep(c(13, 50), 2), width = c(10, 14, 20, 21)),
+    strand = c("+", "-", "-", "+")
 )
 
-overlap_quad(list(subject1 = subject1, subject2 = subject2, query1 = query1,
-  query2 = query2), filter_by_overlaps_stranded
-)
+overlap_quad(list(
+    subject1 = subject1, subject2 = subject2, query1 = query1,
+    query2 = query2
+), filter_by_overlaps_stranded)
 
 }
 \author{

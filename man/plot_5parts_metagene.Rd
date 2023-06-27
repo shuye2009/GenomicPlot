@@ -24,35 +24,48 @@ plot_5parts_metagene(
 )
 }
 \arguments{
-\item{queryFiles}{a vector of sample file names. The file should be in .bam, .bed, .wig or .bw format, mixture of formats is allowed}
+\item{queryFiles}{a vector of sample file names. The file should be in .bam, 
+.bed, .wig or .bw format, mixture of formats is allowed}
 
-\item{gFeatures_list}{a list of genomic features as output of the function 'prepare_5parts_genomic_features'}
+\item{gFeatures_list}{a list of genomic features as output of the function 
+\code{\link{prepare_5parts_genomic_features}}}
 
-\item{inputFiles}{a vector of input sample file names. The file should be in .bam, .bed, .wig or .bw format, mixture of formats is allowed}
+\item{inputFiles}{a vector of input sample file names. The file should be in 
+.bam, .bed, .wig or .bw format, mixture of formats is allowed}
 
 \item{importParams}{a list of parameters for \code{handle_input}}
 
-\item{verbose}{logical, indicating whether to output additional information (data used for plotting or statistical test results)}
+\item{verbose}{logical, indicating whether to output additional information 
+(data used for plotting or statistical test results)}
 
 \item{transform}{logical, whether to log2 transform the matrix}
 
-\item{smooth}{logical, indicating whether the line should smoothed with a spline smoothing algorithm}
+\item{smooth}{logical, indicating whether the line should smoothed with a 
+spline smoothing algorithm}
 
-\item{scale}{logical, indicating whether the score matrix should be scaled to the range 0:1, so that samples with different baseline can be compared}
+\item{scale}{logical, indicating whether the score matrix should be scaled to 
+the range 0:1, so that samples with different baseline can be compared}
 
-\item{stranded}{logical, indicating whether the strand of the feature should be considered}
+\item{stranded}{logical, indicating whether the strand of the feature should 
+be considered}
 
-\item{outPrefix}{a string specifying output file prefix for plots (outPrefix.pdf)}
+\item{outPrefix}{a string specifying output file prefix for plots 
+(outPrefix.pdf)}
 
-\item{heatmap}{logical, indicating whether a heatmap of the score matrix should be generated}
+\item{heatmap}{logical, indicating whether a heatmap of the score matrix 
+should be generated}
 
-\item{heatRange}{a numerical vector of two elements, defining range for heatmap color ramp generation}
+\item{heatRange}{a numerical vector of two elements, defining range for 
+heatmap color ramp generation}
 
-\item{rmOutlier}{a numeric value serving as a multiplier of the MAD in Hampel filter for outliers identification, 0 indicating not removing outliers. For Gaussian distribution, use 3, adjust based on data distribution}
+\item{rmOutlier}{a numeric value serving as a multiplier of the MAD in Hampel 
+filter for outliers identification, 0 indicating not removing outliers. 
+For Gaussian distribution, use 3, adjust based on data distribution.}
 
 \item{Ylab}{a string for y-axis label}
 
-\item{hw}{a vector of two elements specifying the height and width of the output figures}
+\item{hw}{a vector of two elements specifying the height and width of the 
+output figures}
 
 \item{nc}{integer, number of cores for parallel processing}
 }
@@ -60,7 +73,12 @@ plot_5parts_metagene(
 a dataframe containing the data used for plotting
 }
 \description{
-Plot reads or peak Coverage/base/gene of samples given in the query files around genes. The upstream and downstream windows flanking genes can be given separately, metagene plots are generated with 5'UTR, CDS and 3'UTR segments. The length of each segments are prorated according to the median length of each segments. If Input files are provided, ratio over Input is computed and displayed as well.
+Plot reads or peak Coverage/base/gene of samples given in the 
+query files around genes. The upstream and downstream windows flanking genes 
+can be given separately, metagene plots are generated with 5'UTR, CDS and 
+3'UTR segments. The length of each segments are prorated according to the 
+median length of each segments. If Input files are provided, ratio over Input 
+is computed and displayed as well.
 }
 \author{
 Shuye Pu

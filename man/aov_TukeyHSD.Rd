@@ -15,24 +15,27 @@ aov_TukeyHSD(df, xc = "Group", yc = "Intensity", op = NULL, verbose = FALSE)
 
 \item{op}{output prefix for statistical analysis results}
 
-\item{verbose}{logical, to indicate whether a file should be produced to save the test results}
+\item{verbose}{logical, to indicate whether a file should be produced to 
+save the test results}
 }
 \value{
-a list of two elements, the first is the p-value of ANOVA test and the second is a matrix of the output of TukeyHSD tests
+a list of two elements, the first is the p-value of ANOVA test and 
+the second is a matrix of the output of TukeyHSD tests
 }
 \description{
-This is a helper function for performing one-way ANOVA analysis and post hoc Tukey's Honest Significant Differences tests
+This is a helper function for performing one-way ANOVA analysis 
+and post hoc Tukey's Honest Significant Differences tests
 }
 \note{
 used in \code{plot_locus}
 }
 \examples{
 stat_df <- data.frame(
-  Feature = rep(c("A", "B"), c(20, 30)),
-  Intensity = c(rnorm(20, 2), rnorm(30, 3))
+    Feature = rep(c("A", "B"), c(20, 30)),
+    Intensity = c(rnorm(20, 2), rnorm(30, 3))
 )
 
-out <- aov_TukeyHSD(stat_df, xc="Feature")
+out <- aov_TukeyHSD(stat_df, xc = "Feature")
 out
 
 }

@@ -19,33 +19,39 @@ parallel_countOverlaps(grange_list, tileBins, nc = 2, switch = FALSE)
 a list of numeric vectors
 }
 \description{
-Function for parallel computation of countOverlaps function in the GenomicRanges package
+Function for parallel computation of countOverlaps function in 
+the GenomicRanges package
 }
 \examples{
 bedQueryFiles <- c(
- system.file("extdata", "test_chip_peak_chr19.narrowPeak", 
-    package = "GenomicPlot"),
- system.file("extdata", "test_chip_peak_chr19.bed", package = "GenomicPlot"),
- system.file("extdata", "test_clip_peak_chr19.bed", package = "GenomicPlot")
+    system.file("extdata", "test_chip_peak_chr19.narrowPeak",
+        package = "GenomicPlot"
+    ),
+    system.file("extdata", "test_chip_peak_chr19.bed", 
+        package = "GenomicPlot"),
+    system.file("extdata", "test_clip_peak_chr19.bed", 
+        package = "GenomicPlot")
 )
 names(bedQueryFiles) <- c("NarrowPeak", "SummitPeak", "iCLIPPeak")
 
 bedimportParams <- setImportParams(
-   offset = 0, fix_width = 100, fix_point = "center", norm = FALSE,
-   useScore = FALSE, outRle = FALSE, useSizeFactor = FALSE, genome = "hg19"
+    offset = 0, fix_width = 100, fix_point = "center", norm = FALSE,
+    useScore = FALSE, outRle = FALSE, useSizeFactor = FALSE, genome = "hg19"
 )
 
 out_list <- handle_input(
-   inputFiles = bedQueryFiles,
-   importParams = bedimportParams, verbose = TRUE, nc = 2
+    inputFiles = bedQueryFiles,
+    importParams = bedimportParams, verbose = TRUE, nc = 2
 )
 
-seqi <- GenomeInfoDb::Seqinfo(genome = "hg19") 
-grange_list <- lapply(out_list, function(x) x$query) 
-tilewidth <- 100000 
-tileBins <- tileGenome(seqi, tilewidth = tilewidth, 
-   cut.last.tile.in.chrom = TRUE)
- 
+seqi <- GenomeInfoDb::Seqinfo(genome = "hg19")
+grange_list <- lapply(out_list, function(x) x$query)
+tilewidth <- 100000
+tileBins <- tileGenome(seqi,
+    tilewidth = tilewidth,
+    cut.last.tile.in.chrom = TRUE
+)
+
 score_list1 <- parallel_countOverlaps(grange_list, tileBins, nc = 2)
 dplyr::glimpse(score_list1)
 

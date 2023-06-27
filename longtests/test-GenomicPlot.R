@@ -6,13 +6,15 @@ Sys.setenv("R_TESTS" = "")
 outdir <- "./test_output"
 setwd(outdir)
 
-gtffile <- system.file("extdata", "gencode.v19.annotation_chr19.gtf", package = "GenomicPlot")
-gff <- RCAS::importGtf(readFromRds = TRUE, filePath = gtffile)
+gtffile <- system.file("extdata", "gencode.v19.annotation_chr19.gtf", 
+                       package = "GenomicPlot")
+gff <- RCAS::importGtf(saveObjectAsRds = TRUE, filePath = gtffile)
 txdb <- makeTxDbFromGRanges(gff)
 txdb$user_genome <- "hg19"
 
 bedQueryFiles <- c(
-  system.file("extdata", "test_chip_peak_chr19.narrowPeak", package = "GenomicPlot"),
+  system.file("extdata", "test_chip_peak_chr19.narrowPeak", 
+              package = "GenomicPlot"),
   system.file("extdata", "test_chip_peak_chr19.bed", package = "GenomicPlot"),
   system.file("extdata", "test_clip_peak_chr19.bed", package = "GenomicPlot")
 )
@@ -23,9 +25,11 @@ bedimportParams <- setImportParams(
   useScore = FALSE, outRle = TRUE, useSizeFactor = FALSE, genome = "hg19"
 )
 
-bamQueryFiles <- system.file("extdata", "treat_chr19.bam", package = "GenomicPlot")
+bamQueryFiles <- system.file("extdata", "treat_chr19.bam", 
+                             package = "GenomicPlot")
 names(bamQueryFiles) <- "clip_bam"
-bamInputFiles <- system.file("extdata", "input_chr19.bam", package = "GenomicPlot")
+bamInputFiles <- system.file("extdata", "input_chr19.bam", 
+                             package = "GenomicPlot")
 names(bamInputFiles) <- "clip_input"
 
 bamimportParams <- setImportParams(
@@ -33,9 +37,11 @@ bamimportParams <- setImportParams(
   useScore = FALSE, outRle = TRUE, useSizeFactor = FALSE, genome = "hg19"
 )
 
-chipQureyFiles <- system.file("extdata", "chip_treat_chr19.bam", package = "GenomicPlot")
+chipQureyFiles <- system.file("extdata", "chip_treat_chr19.bam",
+                              package = "GenomicPlot")
 names(chipQureyFiles) <- "chip_bam"
-chipInputFiles <- system.file("extdata", "chip_input_chr19.bam", package = "GenomicPlot")
+chipInputFiles <- system.file("extdata", "chip_input_chr19.bam",
+                              package = "GenomicPlot")
 names(chipInputFiles) <- "chip_input"
 
 chipimportParams <- setImportParams(
@@ -46,7 +52,8 @@ chipimportParams <- setImportParams(
 
 test_that("testing plot_5parts_metagene", {
   gf <- prepare_5parts_genomic_features(txdb, meta = TRUE, nbins = 100, 
-                                        fiveP = -2000, threeP = 1000, longest = TRUE)
+                                        fiveP = -2000, threeP = 1000, 
+                                        longest = TRUE)
   op <- "test_plot_5parts_metagene1"
   plot_5parts_metagene(
     queryFiles = bedQueryFiles,

@@ -17,21 +17,31 @@ setImportParams(
 )
 }
 \arguments{
-\item{offset}{an integer, -1 indicating the bam reads should be shrunk to the -1 position at the 5'end of the reads, which corresponds to the cross link site in iCLIP.}
+\item{offset}{an integer, -1 indicating the bam reads should be shrunk to the 
+-1 position at the 5'end of the reads, which corresponds to the cross link 
+site in iCLIP.}
 
-\item{fix_width}{an integer defining how long the reads should be extended to, ignored when offset is not 0.}
+\item{fix_width}{an integer defining how long the reads should be extended 
+to, ignored when offset is not 0.}
 
-\item{fix_point}{a string in c("start", "end", "center") denoting the anchor point for extension, ignored when offset is not 0.}
+\item{fix_point}{a string in c("start", "end", "center") denoting the anchor 
+point for extension, ignored when offset is not 0.}
 
-\item{norm}{logical, indicating whether the output RleList should be normalized to RPM using library sizes.}
+\item{norm}{logical, indicating whether the output RleList should be 
+normalized to RPM using library sizes.}
 
-\item{useScore}{logical, indicating whether the 'score' column of the bed file should be used in calculation of coverage.}
+\item{useScore}{logical, indicating whether the 'score' column of the bed 
+file should be used in calculation of coverage.}
 
-\item{outRle}{logical, indicating whether the output should be RleList objects or GRanges objects.}
+\item{outRle}{logical, indicating whether the output should be RleList 
+objects or GRanges objects.}
 
-\item{useSizeFactor}{logical, indicating whether the library size should be adjusted with a size factor, using the 'calcNormFactors' function in the edgeR package, only applicable to ChIPseq data.}
+\item{useSizeFactor}{logical, indicating whether the library size should be 
+adjusted with a size factor, using the 'calcNormFactors' function in the 
+edgeR package, only applicable to ChIPseq data.}
 
-\item{saveRds}{logical, indicating whether the results of handle_input should be saved for fast reloading}
+\item{saveRds}{logical, indicating whether the results of handle_input should 
+be saved for fast reloading}
 
 \item{genome}{a string denoting the genome name and version.}
 }
@@ -39,7 +49,9 @@ setImportParams(
 a list of nine elements
 }
 \description{
-This function save as a template for setting up import parameters for reading NGS data, it provides default values for each parameter.
+This function save as a template for setting up import 
+parameters for reading NGS data, it provides default values for each 
+parameter.
 }
 \examples{
 importParams1 <- setImportParams()

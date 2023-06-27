@@ -21,11 +21,14 @@ plot_overlap_bed(
 
 \item{importParams}{a list of parameters for \code{handle_input}}
 
-\item{pairOnly}{logical, indicating whether only pair-wise overlap is desirable}
+\item{pairOnly}{logical, indicating whether only pair-wise overlap is 
+desirable}
 
-\item{stranded}{logical, indicating whether the feature is stranded. For nonstranded feature, only "*" is accepted as strand}
+\item{stranded}{logical, indicating whether the feature is stranded. For 
+nonstranded feature, only "*" is accepted as strand}
 
-\item{hw}{a vector of two elements specifying the height and width of the output figures}
+\item{hw}{a vector of two elements specifying the height and width of the 
+output figures}
 
 \item{verbose}{logical, indicating whether to output additional information}
 }
@@ -33,28 +36,32 @@ plot_overlap_bed(
 a ggplot object
 }
 \description{
-This function takes a list of up to 4 bed file names, and produce a Venn diagram
+This function takes a list of up to 4 bed file names, and 
+produce a Venn diagram
 }
 \examples{
 
 queryFiles <- c(
-  system.file("extdata", "test_chip_peak_chr19.narrowPeak", 
-  package = "GenomicPlot"),
-  system.file("extdata", "test_chip_peak_chr19.bed", 
-  package = "GenomicPlot"),
-  system.file("extdata", "test_clip_peak_chr19.bed", 
-  package = "GenomicPlot")
+    system.file("extdata", "test_chip_peak_chr19.narrowPeak",
+        package = "GenomicPlot"
+    ),
+    system.file("extdata", "test_chip_peak_chr19.bed",
+        package = "GenomicPlot"
+    ),
+    system.file("extdata", "test_clip_peak_chr19.bed",
+        package = "GenomicPlot"
+    )
 )
 names(queryFiles) <- c("narrowPeak", "summitPeak", "clipPeak")
 
 bedimportParams <- setImportParams(
-  offset = 0, fix_width = 100, fix_point = "center", norm = FALSE,
-  useScore = FALSE, outRle = FALSE, useSizeFactor = FALSE, genome = "hg19"
+    offset = 0, fix_width = 100, fix_point = "center", norm = FALSE,
+    useScore = FALSE, outRle = FALSE, useSizeFactor = FALSE, genome = "hg19"
 )
 
 plot_overlap_bed(
-  bedList = queryFiles, importParams = bedimportParams, pairOnly = FALSE,
-  stranded = FALSE, outPrefix = NULL
+    bedList = queryFiles, importParams = bedimportParams, pairOnly = FALSE,
+    stranded = FALSE, outPrefix = NULL
 )
 
 }

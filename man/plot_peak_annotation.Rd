@@ -19,51 +19,62 @@ plot_peak_annotation(
 )
 }
 \arguments{
-\item{peakFile}{a string denoting the peak file name, only .bed format is allowed}
+\item{peakFile}{a string denoting the peak file name, only .bed format is 
+allowed}
 
 \item{gtfFile}{path to a gene annotation gtf file with gene_biotype field}
 
 \item{importParams}{a list of parameters for \code{handle_input}}
 
-\item{fiveP}{extension out of the 5' boundary of genes for defining promoter: fiveP TSS + dsTSS}
+\item{fiveP}{extension out of the 5' boundary of genes for defining promoter: 
+fiveP TSS + dsTSS}
 
-\item{dsTSS}{extension downstream of TSS for defining promoter: fiveP TSS + dsTSS}
+\item{dsTSS}{extension downstream of TSS for defining promoter: fiveP TSS + 
+dsTSS}
 
-\item{threeP}{extension out of the 3' boundary of genes for defining termination region: -0 TTS + threeP}
+\item{threeP}{extension out of the 3' boundary of genes for defining 
+termination region: -0 TTS + threeP}
 
-\item{simple}{logical, indicating whether 5'UTR, CDS and 3'UTR are annotated in the gtfFile}
+\item{simple}{logical, indicating whether 5'UTR, CDS and 3'UTR are annotated 
+in the gtfFile}
 
 \item{outPrefix}{a string denoting output file name in pdf format}
 
-\item{verbose, }{logical, to indicate whether to write the annotation results to a file}
+\item{verbose, }{logical, to indicate whether to write the annotation results 
+to a file}
 
-\item{hw}{a vector of two elements specifying the height and width of the output figures}
+\item{hw}{a vector of two elements specifying the height and width of the 
+output figures}
 
 \item{nc}{number of cores for parallel processing}
 }
 \value{
-a list of two dataframes, 'annotation' is the annotation per peak, 'stat' is the summary stats for pie chart
+a list of two dataframes, 'annotation' is the annotation per peak, 
+ 'stat' is the summary stats for pie chart
 }
 \description{
-Produce a table of transcripts targeted by peaks, and generate plots for target gene types, and peak distribution in genomic features
+Produce a table of transcripts targeted by peaks, and generate 
+plots for target gene types, and peak distribution in genomic features
 }
 \examples{
 
-gtfFile <- system.file("extdata", "gencode.v19.annotation_chr19.gtf", 
-  package = "GenomicPlot")
+gtfFile <- system.file("extdata", "gencode.v19.annotation_chr19.gtf",
+    package = "GenomicPlot"
+)
 
-centerFile <- system.file("extdata", "test_chip_peak_chr19.bed", 
-  package = "GenomicPlot")
+centerFile <- system.file("extdata", "test_chip_peak_chr19.bed",
+    package = "GenomicPlot"
+)
 names(centerFile) <- c("summitPeak")
 
 bedimportParams <- setImportParams(
-  offset = 0, fix_width = 100, fix_point = "center", norm = FALSE,
-  useScore = FALSE, outRle = FALSE, useSizeFactor = FALSE, genome = "hg19"
+    offset = 0, fix_width = 100, fix_point = "center", norm = FALSE,
+    useScore = FALSE, outRle = FALSE, useSizeFactor = FALSE, genome = "hg19"
 )
 
 plot_peak_annotation(
-  peakFile = centerFile, gtfFile = gtfFile, importParams = bedimportParams,
-  fiveP = -2000, dsTSS = 200, threeP = 2000, simple = FALSE
+    peakFile = centerFile, gtfFile = gtfFile, importParams = bedimportParams,
+    fiveP = -2000, dsTSS = 200, threeP = 2000, simple = FALSE
 )
 
 }

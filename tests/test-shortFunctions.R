@@ -5,8 +5,10 @@ Sys.setenv("R_TESTS" = "")
 
 test_that("testing parallel_scoreMatrixBin", {
    bedQueryFiles <- c(
-     system.file("extdata", "test_chip_peak_chr19.narrowPeak", package = "GenomicPlot"),
-     system.file("extdata", "test_chip_peak_chr19.bed", package = "GenomicPlot"),
+     system.file("extdata", "test_chip_peak_chr19.narrowPeak", 
+                 package = "GenomicPlot"),
+     system.file("extdata", "test_chip_peak_chr19.bed", 
+                 package = "GenomicPlot"),
      system.file("extdata", "test_clip_peak_chr19.bed", package = "GenomicPlot")
    )
    names(bedQueryFiles) <- c("NarrowPeak", "SummitPeak", "iCLIPPeak")
@@ -24,13 +26,15 @@ test_that("testing parallel_scoreMatrixBin", {
    seqi <- GenomeInfoDb::Seqinfo(genome = "hg19") 
    grange_list <- lapply(out_list, function(x) x$query) 
    tilewidth <- 100000 
-   tileBins <- tileGenome(seqi, tilewidth = tilewidth, cut.last.tile.in.chrom = TRUE)
+   tileBins <- tileGenome(seqi, tilewidth = tilewidth, 
+                          cut.last.tile.in.chrom = TRUE)
     
    score_list1 <- parallel_countOverlaps(grange_list, tileBins, nc = 2)
 })
 
 test_that("testing parallel_scoreMatrixBin", {
-   queryFiles <- system.file("extdata", "chip_treat_chr19.bam", package = "GenomicPlot")
+   queryFiles <- system.file("extdata", "chip_treat_chr19.bam", 
+                             package = "GenomicPlot")
    names(queryFiles) <- "query"
    
    chipimportParams <- setImportParams(
@@ -38,7 +42,8 @@ test_that("testing parallel_scoreMatrixBin", {
      useScore = FALSE, outRle = TRUE, useSizeFactor = FALSE, genome = "hg19"
    )
    
-   queryRegion <- handle_input(queryFiles, chipimportParams, verbose = TRUE)[[1]]$query
+   queryRegion <- handle_input(queryFiles, chipimportParams, 
+                               verbose = TRUE)[[1]]$query
    
    windowFiles <- system.file("extdata", "test_chip_peak_chr19.narrowPeak", 
      package = "GenomicPlot"
@@ -155,10 +160,12 @@ test_that("testing ratio_over_input", {
 })
 
 test_that("testing gr2df", {
-   gr2 <- GenomicRanges::GRanges(c("chr1", "chr1"), IRanges::IRanges(c(7, 13), width = 3),
+   gr2 <- GenomicRanges::GRanges(c("chr1", "chr1"), IRanges::IRanges(c(7, 13),
+                                                                     width = 3),
      strand = c("+", "-")
    )
-   GenomicRanges::mcols(gr2) <- data.frame(score = c(0.3, 0.9), cat = c(TRUE, FALSE))
+   GenomicRanges::mcols(gr2) <- data.frame(score = c(0.3, 0.9),
+                                           cat = c(TRUE, FALSE))
    df2 <- gr2df(gr2)
 })
 
@@ -230,7 +237,8 @@ test_that("testing overlap_quad", {
      strand=c("+", "-", "-", "+")
    )
    
-   p <- overlap_quad(list(subject1 = subject1, subject2 = subject2, query1 = query1,
+   p <- overlap_quad(list(subject1 = subject1, subject2 = subject2,
+                          query1 = query1,
      query2 = query2), filter_by_overlaps_stranded
    )  
 })
@@ -254,7 +262,8 @@ test_that("testing overlap_triple", {
      strand=c("+", "-", "-", "+")
    )
    
-   p <- overlap_triple(list(subject1 = subject1, subject2 = subject2, query = query),
+   p <- overlap_triple(list(subject1 = subject1, subject2 = subject2,
+                            query = query),
      filter_by_overlaps_stranded
    )
 })
@@ -273,7 +282,8 @@ test_that("testing overlap_pair", {
      strand=c("+", "-", "-", "+")
    )
    
-   p <- overlap_pair(list(query = query, subject = subject), filter_by_overlaps_stranded)   
+   p <- overlap_pair(list(query = query, subject = subject), 
+                     filter_by_overlaps_stranded)   
 })
 
 test_that("testing draw_combo_plot", {
@@ -302,8 +312,10 @@ test_that("testing draw_rank_plot", {
      Height = c(rnorm(20, 5, 5), rnorm(30, 1, 5))
    )
    
-   p1 <- draw_rank_plot(stat_df, xc = "Feature", yc = "Intensity", Ylab = "Intensity")
-   p2 <- draw_rank_plot(stat_df1, xc = "Feature", yc = "Height", Ylab = "Height")   
+   p1 <- draw_rank_plot(stat_df, xc = "Feature", yc = "Intensity",
+                        Ylab = "Intensity")
+   p2 <- draw_rank_plot(stat_df1, xc = "Feature", yc = "Height", 
+                        Ylab = "Height")   
 })
 test_that("testing draw_quantile_plot", {
    stat_df <- data.frame(
@@ -318,20 +330,20 @@ test_that("testing draw_quantile_plot", {
    
    p1 <- draw_quantile_plot(stat_df, xc = "Feature", yc = "Intensity")
    p2 <- draw_quantile_plot(stat_df, xc = "Feature", yc = "Height")
-   p3 <- draw_quantile_plot(stat_df_long, xc = "Feature", yc = "value", fc = "type", Ylab = "value") 
+   p3 <- draw_quantile_plot(stat_df_long, xc = "Feature", yc = "value", 
+                            fc = "type", Ylab = "value") 
 })
 test_that("testing draw_mean_se_barplot", {
    stat_df <- data.frame(
         Feature = rep(c("A", "B"), c(20, 30)),
         Intensity = c(rnorm(20, 2), rnorm(30, 3))
       )
-      p <- draw_mean_se_barplot(stat_df, xc = "Feature", yc = "Intensity", Ylab = "Intensity")  
+      p <- draw_mean_se_barplot(stat_df, xc = "Feature", yc = "Intensity", 
+                                Ylab = "Intensity")  
 })
 test_that("testing draw_boxplot_wo_outlier", {
-   stat_df <- data.frame(Feature = rep(c("A", "B"), c(20, 30)), Intensity = c(
-        rnorm(20, 2),
-        rnorm(30, 3)
-      ))
+   stat_df <- data.frame(Feature = rep(c("A", "B"), c(20, 30)), 
+                         Intensity = c(rnorm(20, 2), rnorm(30, 3)))
       p <- draw_boxplot_wo_outlier(stat_df,
         xc = "Feature", yc = "Intensity",
         Ylab = "Signal Intensity"
@@ -401,7 +413,8 @@ test_that("testing draw_matrix_heatmap", {
    levels_col <- c("start", "center", "end")
    names(labels_col) <- rep(levels_col, c(15, 60, 25))
    
-   p <- draw_matrix_heatmap(fullMatrix, dataName = "test", labels_col, levels_col)
+   p <- draw_matrix_heatmap(fullMatrix, dataName = "test", labels_col,
+                            levels_col)
 })
 
 test_that("testing plot_bam_correlation", {
@@ -424,7 +437,8 @@ test_that("testing plot_bam_correlation", {
  
 test_that("testing plot_overlap_bed", {
   queryFiles <- c(
-    system.file("extdata", "test_chip_peak_chr19.narrowPeak", package = "GenomicPlot"),
+    system.file("extdata", "test_chip_peak_chr19.narrowPeak",
+                package = "GenomicPlot"),
     system.file("extdata", "test_chip_peak_chr19.bed", package = "GenomicPlot"),
     system.file("extdata", "test_clip_peak_chr19.bed", package = "GenomicPlot")
   )
@@ -443,15 +457,18 @@ test_that("testing plot_overlap_bed", {
 
 test_that("testing plot_argument_list", {
    
-    gtffile <- system.file("extdata", "gencode.v19.annotation_chr19.gtf", package = "GenomicPlot")
+    gtffile <- system.file("extdata", "gencode.v19.annotation_chr19.gtf",
+                           package = "GenomicPlot")
     gff <- RCAS::importGtf(saveObjectAsRds = TRUE, filePath = gtffile)
     txdb <- makeTxDbFromGRanges(gff)
     txdb$user_genome <- "hg19"
    
-    queryfiles <- system.file("extdata", "treat_chr19.bam", package = "GenomicPlot")
+    queryfiles <- system.file("extdata", "treat_chr19.bam",
+                              package = "GenomicPlot")
     names(queryfiles) <- "query"
    
-    inputfiles <- system.file("extdata", "input_chr19.bam", package = "GenomicPlot")
+    inputfiles <- system.file("extdata", "input_chr19.bam", 
+                              package = "GenomicPlot")
     names(inputfiles) <- "input"
    
     gfeatures <- prepare_5parts_genomic_features(txdb,
@@ -508,5 +525,5 @@ test_that("testing plot_overlap_genes", {
    plot_overlap_genes(testfiles, c(3,2,1,1), pairOnly = FALSE)
 })
 
-unlink("*.pdf")
+
  

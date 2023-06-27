@@ -21,11 +21,16 @@ get_txdb_features(txdb, fiveP = -1000, dsTSS = 300, threeP = 1000, nc = 2)
 a GRangesList object
 }
 \description{
-Get genomic coordinates of promoter, 5'UTR, CDS, 3'UTR, TTS and intron for the longest transcript of protein-coding genes. The range of promoter is defined by fiveP and dsTSS upstream and downstream TSS, respectively, the TTS ranges from the 3' end of the gene to threeP downstream, or the start of a downstream gene, whichever is closer.
+Get genomic coordinates of promoter, 5'UTR, CDS, 3'UTR, TTS and 
+intron for the longest transcript of protein-coding genes. The range of 
+promoter is defined by fiveP and dsTSS upstream and downstream TSS, 
+respectively, the TTS ranges from the 3' end of the gene to threeP 
+downstream, or the start of a downstream gene, whichever is closer.
 }
 \examples{
-gtffile <- system.file("extdata", "gencode.v19.annotation_chr19.gtf", 
-   package = "GenomicPlot")
+gtffile <- system.file("extdata", "gencode.v19.annotation_chr19.gtf",
+    package = "GenomicPlot"
+)
 gff <- RCAS::importGtf(saveObjectAsRds = TRUE, filePath = gtffile)
 txdb <- makeTxDbFromGRanges(gff)
 txdb$user_genome <- "hg19"

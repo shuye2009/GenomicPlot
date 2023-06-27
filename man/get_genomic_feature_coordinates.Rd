@@ -16,36 +16,57 @@ get_genomic_feature_coordinates(
 \arguments{
 \item{txdb}{a TxDb object defined in the GenomicFeatures package}
 
-\item{featureName}{one of the genomic feature in c("utr3", "utr5", "cds", "intron", "exon", "transcript", "gene")}
+\item{featureName}{one of the genomic feature in c("utr3", "utr5", "cds", 
+"intron", "exon", "transcript", "gene")}
 
-\item{featureSource}{the name of the gtf/gff3 file or the online database from which txdb is derived, used as name of output file}
+\item{featureSource}{the name of the gtf/gff3 file or the online database 
+from which txdb is derived, used as name of output file}
 
 \item{export}{logical, indicating if the bed file should be produced}
 
-\item{longest}{logical, indicating whether the output should be limited to the longest transcript of each gene}
+\item{longest}{logical, indicating whether the output should be limited to 
+the longest transcript of each gene}
 
-\item{protein_coding}{logical, indicating whether to limit to protein_coding genes}
+\item{protein_coding}{logical, indicating whether to limit to protein_coding 
+genes}
 }
 \value{
-a list of three objects, the first is a GRanges object, the second is a GRangesList object, the last is the output file name if export is TRUE
+a list of three objects, the first is a GRanges object, the second is 
+ a GRangesList object, the last is the output file name if export is TRUE.
 }
 \description{
-Extract genomic coordinates and make bed or bed 12 files from a TxDb object for a variety of annotated genomic features. The output of this function is a list. The first element of the list is a GRanges object that provide the start and end information of the feature. The second element is a GRangesList providing information for sub-components. The third element is the name of a bed file.
-     For "utr3", "utr5", "cds" and "transcript", the GRanges object denotes the start and end of the feature in one transcript, and the range is named by the transcript id and may span introns; the GrangesList object is a list of exons comprising each feature and indexed on transcript id. The bed file is in bed12 format.
-     For "exon" and "intron", the GRanges object denotes unnamed ranges of individual exon and intron, and the GrangesList object is a list of exons or introns belonging to one transcript and indexed on transcript id. The bed file is in bed6 format.
-     For "gene", both GRanges object and GRangesList object have the same ranges and names. The bed file is in bed6 format.
+Extract genomic coordinates and make bed or bed 12 files from a 
+TxDb object for a variety of annotated genomic features. The output of this 
+function is a list. The first element of the list is a GRanges object that 
+provide the start and end information of the feature. The second element is a 
+GRangesList providing information for sub-components. The third element is 
+the name of a bed file.
+}
+\details{
+For "utr3", "utr5", "cds" and "transcript", the GRanges object 
+denotes the start and end of the feature in one transcript, and the range is 
+named by the transcript id and may span introns; the GrangesList object is a 
+list of exons comprising each feature and indexed on transcript id. The bed 
+file is in bed12 format. 
+     For "exon" and "intron", the GRanges object denotes unnamed ranges of 
+individual exon and intron, and the GrangesList object is a list of exons or 
+introns belonging to one transcript and indexed on transcript id. The bed 
+file is in bed6 format.
+     For "gene", both GRanges object and GRangesList object have the same 
+ranges and names. The bed file is in bed6 format.
 }
 \examples{
 
-gtffile <- system.file("extdata", "gencode.v19.annotation_chr19.gtf", 
-   package = "GenomicPlot")
+gtffile <- system.file("extdata", "gencode.v19.annotation_chr19.gtf",
+    package = "GenomicPlot"
+)
 gff <- RCAS::importGtf(saveObjectAsRds = TRUE, filePath = gtffile)
 txdb <- makeTxDbFromGRanges(gff)
 txdb$user_genome <- "hg19"
 
 output <- get_genomic_feature_coordinates(txdb,
-  featureName = "cds", featureSource = "gencode",
-  export = FALSE, longest = TRUE, protein_coding = TRUE
+    featureName = "cds", featureSource = "gencode",
+    export = FALSE, longest = TRUE, protein_coding = TRUE
 )
 
 }

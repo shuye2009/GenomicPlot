@@ -17,20 +17,22 @@ check_constraints(gr, genome, queryRle = NULL)
 a GRanges object
 }
 \description{
-Make sure the coordinates of GRanges are within the boundaries of chromosomes, and trim anything that goes beyond. Also, remove entries whose seqname is not in the seqname of a query GRanges.
+Make sure the coordinates of GRanges are within the boundaries 
+of chromosomes, and trim anything that goes beyond. Also, remove entries 
+whose seqname is not in the seqname of a query GRanges.
 }
 \examples{
-subject <- GRanges("chr19", 
-  IRanges(rep(c(10, 15), 2), width=c(1, 20, 400, 2e+8)), 
-  strand=c("+", "+", "-", "-")
+subject <- GRanges("chr19",
+    IRanges(rep(c(10, 15), 2), width = c(1, 20, 400, 2e+8)),
+    strand = c("+", "+", "-", "-")
 )
 
 g <- check_constraints(gr = subject, genome = "hg19")
 identical(g, subject)
 
-subject1 <- GRanges("chr19", 
-  IRanges(rep(c(10, 15), 2), width=c(1, 20, 400, 28)), 
-  strand=c("+", "+", "-", "-")
+subject1 <- GRanges("chr19",
+    IRanges(rep(c(10, 15), 2), width = c(1, 20, 400, 28)),
+    strand = c("+", "+", "-", "-")
 )
 
 g1 <- check_constraints(gr = subject1, genome = "hg19")

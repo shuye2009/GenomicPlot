@@ -9,7 +9,7 @@ draw_locus_profile(
   xc = "Position",
   yc = "Intensity",
   cn = "Query",
-  sn = "Reference",
+  sn = NULL,
   Xlab = "Center",
   Ylab = "Signal Intensity",
   shade = FALSE,
@@ -23,17 +23,21 @@ draw_locus_profile(
 
 \item{yc}{a string denoting column name for numeric data to be plotted}
 
-\item{cn}{a string denoting column name for sample grouping, like 'Query' or 'Reference'}
+\item{cn}{a string denoting column name for sample grouping, like 'Query' or 
+'Reference'}
 
-\item{sn}{a string denoting column name for the subject of sample grouping, if 'cn' is 'Query', then 'sn' will be 'Reference'}
+\item{sn}{a string denoting column name for the subject of sample grouping, 
+if 'cn' is 'Query', then 'sn' will be 'Reference'}
 
 \item{Xlab}{a string for x-axis label}
 
 \item{Ylab}{a string for y-axis label}
 
-\item{shade}{logical indicating whether to place a shaded rectangle around the loci bounded by hl}
+\item{shade}{logical indicating whether to place a shaded rectangle 
+around the loci bounded by hl}
 
-\item{hl}{a vector of two integers defining upstream and downstream boundaries of the rectangle}
+\item{hl}{a vector of two integers defining upstream and downstream 
+boundaries of the rectangle}
 }
 \value{
 a ggplot object
@@ -42,7 +46,7 @@ a ggplot object
 Plot lines with standard error as the error band
 }
 \note{
-used by \code{plot_locus}, \code{plot_locus_with_random}
+used by \code{\link{plot_locus}}, \code{\link{plot_locus_with_random}}
 }
 \examples{
 library(dplyr)
@@ -52,11 +56,11 @@ Position <- rep(seq(-50, 49), 4)
 Intensity <- rlnorm(400)
 se <- runif(400)
 df <- data.frame(Intensity, se, Position, Query, Reference) \%>\%
-  mutate(lower = Intensity - se, upper = Intensity + se) \%>\%
-  mutate(Group = paste(Query, Reference, sep = ":"))
+    mutate(lower = Intensity - se, upper = Intensity + se) \%>\%
+    mutate(Group = paste(Query, Reference, sep = ":"))
 
 p <- draw_locus_profile(df, cn = "Group", shade = TRUE, hl = c(-10, 20))
-p 
+p
 
 }
 \author{

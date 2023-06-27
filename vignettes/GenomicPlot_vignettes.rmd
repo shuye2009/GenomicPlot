@@ -59,7 +59,8 @@ The lengths of each part of the genes are prorated based on the median length of
 suppressPackageStartupMessages(library(GenomicPlot, quietly = TRUE))
 gtffile <- system.file("extdata", "gencode.v19.annotation_chr19.gtf", 
                        package = "GenomicPlot")
-gff <- suppressMessages(RCAS::importGtf(saveObjectAsRds = TRUE, 
+gff <- suppressMessages(RCAS::importGtf(saveObjectAsRds = TRUE,
+                                        readFromRds = FALSE,
                                         filePath = gtffile))
 txdb <- suppressWarnings(makeTxDbFromGRanges(gff))
 txdb$user_genome <- "hg19"

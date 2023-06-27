@@ -9,31 +9,41 @@ handle_wig(inputFile, importParams, verbose = FALSE)
 \arguments{
 \item{inputFile}{a string denoting path to the input file}
 
-\item{importParams}{a list of parameters, refer to \code{handle_input} for details}
+\item{importParams}{a list of parameters, refer to \code{\link{handle_input}} 
+for details}
 
 \item{verbose}{logical, whether to output additional information}
 }
 \value{
-a list object with four elements, 'query' is a list GRanges objects or RleList objects, 'size' is the library size, 'type' is the input file type, 'weight' is the name of the metadata column to be used as weight for coverage calculation
+a list object with four elements, 'query' is a list GRanges objects 
+or RleList objects, 'size' is the library size, 'type' is the input file 
+type, 'weight' is the name of the metadata column to be used as weight for 
+coverage calculation
 }
 \description{
-This is a function for read NGS coverage data in wig format, store the input data in a list of GRanges objects or RleList objects. The input wig file can be stranded or non-stranded. Library size is calculate as the sum of all coverage.
+This is a function for read NGS coverage data in wig format, 
+store the input data in a list of GRanges objects or RleList objects. 
+The input wig file can be stranded or non-stranded. Library size is calculate 
+as the sum of all coverage.
 }
 \details{
-For stranded files, forward and reverse strands are stored in separate files, with '+' or 'p' in the forward strand file name and '-' or 'm' in the reverse strand file name.
+For stranded files, forward and reverse strands are stored in 
+separate files, with '+' or 'p' in the forward strand file name and '-' or 
+'m' in the reverse strand file name.
 }
 \examples{
 
-queryFiles <- system.file("extdata", "test_wig_chr19_+.wig", 
-   package = "GenomicPlot")
+queryFiles <- system.file("extdata", "test_wig_chr19_+.wig",
+    package = "GenomicPlot"
+)
 names(queryFiles) <- "test_wig"
 
 wigimportParams <- setImportParams(
-  offset = 0, fix_width = 0, fix_point = "start", norm = FALSE,
-  useScore = FALSE, outRle = TRUE, useSizeFactor = FALSE, genome = "hg19"
+    offset = 0, fix_width = 0, fix_point = "start", norm = FALSE,
+    useScore = FALSE, outRle = TRUE, useSizeFactor = FALSE, genome = "hg19"
 )
 
-out <- handle_wig(queryFiles, wigimportParams, verbose = TRUE) 
+out <- handle_wig(queryFiles, wigimportParams, verbose = TRUE)
 
 }
 \author{

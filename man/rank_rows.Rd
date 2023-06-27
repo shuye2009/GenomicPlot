@@ -15,13 +15,15 @@ rank_rows(fullmatrix, ranking = "Hierarchical")
 a numeric matrix
 }
 \description{
-The rows of a input numeric matrix is ordered based row sum, row maximum, or hierarchical clustering of the rows with euclidean distance and centroid linkage. This a helper function for drawing matrix heatmaps.
+The rows of a input numeric matrix is ordered based row sum, 
+row maximum, or hierarchical clustering of the rows with euclidean distance 
+and centroid linkage. This a helper function for drawing matrix heatmaps.
 }
 \examples{
 
 fullMatrix <- matrix(rnorm(100), ncol = 10)
 for (i in 5:8) {
-  fullMatrix[i, 4:7] <- runif(4) + i
+    fullMatrix[i, 4:7] <- runif(4) + i
 }
 apply(fullMatrix, 1, sum)
 ranked <- rank_rows(fullMatrix, ranking = "Sum")
