@@ -9,7 +9,8 @@ draw_region_name(featureNames, scaled_bins, xmax)
 \arguments{
 \item{featureNames}{a string vector giving names of sub-regions}
 
-\item{scaled_bins}{a vector on integers denoting the length of each sub-region}
+\item{scaled_bins}{a vector of integers denoting the lengths of each 
+sub-region}
 
 \item{xmax}{an integer denoting the right most boundary}
 }
@@ -20,7 +21,7 @@ a ggplot object
 Plot sub-region labels under the landmark
 }
 \note{
-used by \code{plot_3parts_metagene}, \code{plot_5parts_metagene}, \code{plot_region}
+used by \code{\link{plot_5parts_metagene}}, \code{\link{plot_region}}
 }
 \examples{
 fn <- c("5'UTR", "CDS", "3'UTR")

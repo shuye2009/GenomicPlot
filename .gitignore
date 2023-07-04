@@ -4,4 +4,6 @@
 .Ruserdata
 /doc/
 /Meta/
-
+/vignettes/GenomicPlot_vignettes.R 
+/vignettes/GenomicPlot_vignettes.html
+GenomicPlot_gh.Rproj

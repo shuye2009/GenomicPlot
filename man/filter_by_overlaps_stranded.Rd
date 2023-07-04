@@ -13,25 +13,27 @@ filter_by_overlaps_stranded(query, subject, maxgap = -1L, minoverlap = 0L)
 
 \item{maxgap}{an integer denoting the distance that define overlap}
 
-\item{minoverlap}{The minimum amount of overlap between intervals as a single integer greater than 0.
+\item{minoverlap}{The minimum amount of overlap between intervals as a single
+ integer greater than 0.
 If you modify this argument, maxgap must be held fixed.}
 }
 \value{
 a GRanges object
 }
 \description{
-This function reports all query GRanges that have overlaps in subject GRanges. Strand information is used to define overlap.
+This function reports all query GRanges that have overlaps in 
+subject GRanges. Strand information is used to define overlap.
 }
 \examples{
 
-query <- GRanges("chr19", 
-  IRanges(rep(c(10, 15), 2), width=c(1, 20, 40, 50)), 
-  strand=c("+", "+", "-", "-")
+query <- GRanges("chr19",
+    IRanges(rep(c(10, 15), 2), width = c(1, 20, 40, 50)),
+    strand = c("+", "+", "-", "-")
 )
 
-subject <- GRanges("chr19", 
-  IRanges(rep(c(13, 150), 2), width=c(10, 14, 20, 28)), 
-  strand=c("+", "-", "-", "+")
+subject <- GRanges("chr19",
+    IRanges(rep(c(13, 150), 2), width = c(10, 14, 20, 28)),
+    strand = c("+", "-", "-", "+")
 )
 
 res <- filter_by_overlaps_stranded(query, subject)

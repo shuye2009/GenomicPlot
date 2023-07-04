@@ -7,42 +7,53 @@
 plot_named_list(params)
 }
 \arguments{
-\item{params}{a list produced by as.list(environment()), with names being the arguments and values being the runtime values when the function is called,}
+\item{params}{a list produced by as.list(environment()), with names being the 
+arguments and values being the runtime values when the function is called.}
 }
 \value{
 a ggplot object
 }
 \description{
-This is a helper function for displaying function arguments for a plotting function. If the runtime value of the argument is a small object, its values is displayed, otherwise, only the name of the value of the argument is displayed.
+This is a helper function for displaying function arguments for 
+a plotting function. If the runtime value of the argument is a small object, 
+its values is displayed, otherwise, only the name of the value of the 
+argument is displayed.
 }
 \examples{
-gtffile <- system.file("extdata", "gencode.v19.annotation_chr19.gtf", package = "GenomicPlot")
-gff <- RCAS::importGtf(saveObjectAsRds = TRUE, filePath = gtffile)
+gtffile <- system.file("extdata", "gencode.v19.annotation_chr19.gtf",
+    package = "GenomicPlot"
+)
+gff <- suppressMessages(RCAS::importGtf(saveObjectAsRds = TRUE, 
+    filePath = gtffile))
 txdb <- makeTxDbFromGRanges(gff)
+txdb$user_genome <- "hg19"
 
-queryfiles <- system.file("extdata", "treat_chr19.bam", package = "GenomicPlot")
+queryfiles <- system.file("extdata", "treat_chr19.bam",
+    package = "GenomicPlot"
+)
 names(queryfiles) <- "query"
 
-inputfiles <- system.file("extdata", "input_chr19.bam", package = "GenomicPlot")
+inputfiles <- system.file("extdata", "input_chr19.bam",
+    package = "GenomicPlot"
+)
 names(inputfiles) <- "input"
 
 gfeatures <- prepare_5parts_genomic_features(txdb,
-  meta = TRUE, nbins = 100, fiveP = -1000,
-  threeP = 1000, longest = TRUE, verbose = FALSE
+    meta = TRUE, nbins = 100, fiveP = -1000,
+    threeP = 1000, longest = TRUE, verbose = FALSE
 )
 
-bamimportParams <- list(
-  offset = -1, fix_width = 0, fix_point = "start", norm = TRUE,
-  useScore = FALSE, outRle = TRUE, useSizeFactor = FALSE, genome = "hg19"
+bamimportParams <- setImportParams(
+    offset = -1, fix_width = 0, fix_point = "start", norm = TRUE,
+    useScore = FALSE, outRle = TRUE, useSizeFactor = FALSE, genome = "hg19"
 )
 
 alist <- list(
-  "txdb" = txdb, "treat" = queryfiles, "control" = inputfiles, 
-  "feature" = gfeatures, "param" = bamimportParams
+    "txdb" = txdb, "treat" = queryfiles, "control" = inputfiles,
+    "feature" = gfeatures, "param" = bamimportParams
 )
 
 GenomicPlot:::plot_named_list(alist)
-
 
 }
 \author{

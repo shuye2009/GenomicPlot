@@ -21,31 +21,36 @@ draw_quantile_plot(
 
 \item{Ylab}{a string for y-axis label}
 
-\item{fc}{a string denoting column name for sub-grouping based on an additional factor}
+\item{fc}{a string denoting column name for sub-grouping based on an 
+additional factor}
 }
 \value{
 a ggplot object
 }
 \description{
-Plot quantiles as y-axis, and values as x-axis. Same as geom_ecdf, but allows sub-grouping by a second factor.
+Plot quantiles as y-axis, and values as x-axis. Same as 
+`geom_ecdf`, but allows sub-grouping by a second factor.
 }
 \note{
-used by \code{plot_reference_locus}, \code{plot_reference_locus_with_random}
+used by \code{\link{plot_locus}}, \code{\link{plot_locus_with_random}}
 }
 \examples{
 stat_df <- data.frame(
-  Feature = rep(c("A", "B"), c(20, 30)),
-  Intensity = c(rnorm(20, 2, 5), rnorm(30, 3, 5)),
-  Height = c(rnorm(20, 5, 5), rnorm(30, 1, 5))
+    Feature = rep(c("A", "B"), c(20, 30)),
+    Intensity = c(rnorm(20, 2, 5), rnorm(30, 3, 5)),
+    Height = c(rnorm(20, 5, 5), rnorm(30, 1, 5))
 )
 stat_df_long <- tidyr::pivot_longer(stat_df,
-  cols = c(Intensity, Height), names_to = "type",
-  values_to = "value"
+    cols = c(Intensity, Height), names_to = "type",
+    values_to = "value"
 )
 
 print(draw_quantile_plot(stat_df, xc = "Feature", yc = "Intensity"))
 print(draw_quantile_plot(stat_df, xc = "Feature", yc = "Height"))
-print(draw_quantile_plot(stat_df_long, xc = "Feature", yc = "value", fc = "type", Ylab = "value"))
+print(draw_quantile_plot(stat_df_long,
+    xc = "Feature", yc = "value",
+    fc = "type", Ylab = "value"
+))
 
 }
 \author{

@@ -15,11 +15,14 @@ plot_overlap_genes(
 \arguments{
 \item{fileList, }{a named list of tab-delimited files}
 
-\item{columnList}{a vector of integers denoting the columns that have gene names in the list of files}
+\item{columnList}{a vector of integers denoting the columns that have gene 
+names in the list of files}
 
-\item{pairOnly, }{logical, indicating whether only pair-wise overlap is desirable}
+\item{pairOnly, }{logical, indicating whether only pair-wise overlap is 
+desirable}
 
-\item{hw}{a vector of two elements specifying the height and width of the output figures}
+\item{hw}{a vector of two elements specifying the height and width of the 
+output figures}
 
 \item{outPrefix, }{a string for plot file name}
 }
@@ -27,7 +30,27 @@ plot_overlap_genes(
 a list of vectors of gene names
 }
 \description{
-This function takes a list of (at most 4) tab-delimited file names, and produce a Venn diagram
+This function takes a list of (at most 4) tab-delimited file 
+names, and produce a Venn diagram
+}
+\examples{
+testfile1 <- system.file("extdata", "test_file1.txt",
+    package = "GenomicPlot"
+)
+testfile2 <- system.file("extdata", "test_file2.txt",
+    package = "GenomicPlot"
+)
+testfile3 <- system.file("extdata", "test_file3.txt",
+    package = "GenomicPlot"
+)
+testfile4 <- system.file("extdata", "test_file4.txt",
+    package = "GenomicPlot"
+)
+testfiles <- c(testfile1, testfile2, testfile3, testfile4)
+names(testfiles) <- c("test1", "test2", "test3", "test4")
+
+plot_overlap_genes(testfiles, c(3, 2, 1, 1), pairOnly = FALSE)
+
 }
 \author{
 Shuye Pu

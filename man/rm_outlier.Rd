@@ -7,17 +7,26 @@
 rm_outlier(fullmatrix, verbose = FALSE, multiplier = 1000)
 }
 \arguments{
-\item{fullmatrix}{a numeric matrix, with bins in columns and genomic windows in rows}
+\item{fullmatrix}{a numeric matrix, with bins in columns and genomic windows 
+in rows}
 
-\item{verbose}{logical, whether to output the outlier information to a log file}
+\item{verbose}{logical, whether to output the outlier information to the 
+console}
 
-\item{multiplier}{a numeric value to multiple the 'mad', default 1000, maybe adjusted based on data}
+\item{multiplier}{a numeric value to multiple the 'mad', default 1000, maybe 
+adjusted based on data}
 }
 \value{
 a numeric matrix
 }
 \description{
-This is a helper function for dealing with excessively high values using Hampel filter. If outliers are detected, replace the outliers with the up bound = median(rowmax) + multiplier*mad(rowmax). This function is experimental. For data with normal distribution, the multiplier is usually set at 3. As the read counts data distribution is highly skewed, it is difficult to define a boundary for outliers, try the multiplier values between 10 to 1000.
+This is a helper function for dealing with excessively high 
+values using Hampel filter. If outliers are detected, replace the outliers 
+with the up bound = median(rowmax) + multiplier*mad(rowmax). This function 
+is experimental. For data with normal distribution, the multiplier is 
+usually set at 3. As the read counts data distribution is highly skewed, it 
+is difficult to define a boundary for outliers, try the multiplier values 
+between 10 to 1000.
 }
 \examples{
 fullmatrix <- matrix(rnorm(100), ncol = 10)

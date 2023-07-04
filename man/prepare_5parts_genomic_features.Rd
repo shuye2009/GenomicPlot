@@ -18,7 +18,8 @@ prepare_5parts_genomic_features(
 \arguments{
 \item{txdb}{a TxDb object defined in the GenomicFeatures package}
 
-\item{meta}{logical, indicating whether a metagene (intron excluded) or gene (intron included) plot should be produced}
+\item{meta}{logical, indicating whether a metagene (intron excluded) or gene 
+(intron included) plot should be produced}
 
 \item{nbins}{an integer defines the total number of bins}
 
@@ -26,26 +27,33 @@ prepare_5parts_genomic_features(
 
 \item{threeP}{extension out of the 3' boundary of gene}
 
-\item{longest}{logical, indicating whether the output should be limited to the longest transcript of each gene}
+\item{longest}{logical, indicating whether the output should be limited to 
+the longest transcript of each gene}
 
 \item{verbose}{logical, whether to output additional information}
 
-\item{subsetTx}{a vector of transcript names (eg. ENST00000587541.1) for subsetting the genome}
+\item{subsetTx}{a vector of transcript names (eg. ENST00000587541.1) for 
+subsetting the genome}
 }
 \value{
-a named list with the elements c("windowRs", "nbins", "scaled_bins", "fiveP", "threeP", "meta", "longest")
+a named list with the elements c("windowRs", "nbins", "scaled_bins", 
+ "fiveP", "threeP", "meta", "longest")
 }
 \description{
-This is a helper function for 'plot_5parts_metagene', used to speed up plotting of multiple data sets with the same configuration.
+This is a helper function for 'plot_5parts_metagene', used to 
+speed up plotting of multiple data sets with the same configuration.
 }
 \examples{
-gtffile <- system.file("extdata", "gencode.v19.annotation_chr19.gtf", package = "GenomicPlot")
+gtffile <- system.file("extdata", "gencode.v19.annotation_chr19.gtf",
+    package = "GenomicPlot"
+)
 gff <- RCAS::importGtf(saveObjectAsRds = TRUE, filePath = gtffile)
 txdb <- makeTxDbFromGRanges(gff)
+txdb$user_genome <- "hg19"
 
 gf <- prepare_5parts_genomic_features(txdb,
-  meta = TRUE, nbins = 100, fiveP = -1000, threeP = 1000,
-  longest = TRUE
+    meta = TRUE, nbins = 100, fiveP = -0, threeP = 0,
+    longest = TRUE
 )
 
 }

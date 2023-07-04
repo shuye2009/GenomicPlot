@@ -1,58 +1,59 @@
 library(GenomicPlot)
-library(magick)
 library(testthat)
 
 Sys.setenv("R_TESTS" = "")
 
-pdf_to_png <- function(op) {
-  img <- image_read_pdf(paste0(op, ".pdf"))
-  for (i in seq_along(img)) {
-    image_write(img[i], path = paste0(op, "_", i, ".pdf"), format = "pdf", quality = 50)
-  }
-}
-
 outdir <- "./test_output"
 setwd(outdir)
 
-gtffile <- system.file("extdata", "gencode.v19.annotation_chr19.gtf", package = "GenomicPlot")
-gff <- RCAS::importGtf(readFromRds = TRUE, filePath = gtffile)
+gtffile <- system.file("extdata", "gencode.v19.annotation_chr19.gtf", 
+                       package = "GenomicPlot")
+gff <- RCAS::importGtf(saveObjectAsRds = TRUE, filePath = gtffile)
 txdb <- makeTxDbFromGRanges(gff)
+txdb$user_genome <- "hg19"
 
 bedQueryFiles <- c(
-  system.file("extdata", "test_chip_peak_chr19.narrowPeak", package = "GenomicPlot"),
+  system.file("extdata", "test_chip_peak_chr19.narrowPeak", 
+              package = "GenomicPlot"),
   system.file("extdata", "test_chip_peak_chr19.bed", package = "GenomicPlot"),
   system.file("extdata", "test_clip_peak_chr19.bed", package = "GenomicPlot")
 )
 names(bedQueryFiles) <- c("NarrowPeak", "SummitPeak", "iCLIPPeak")
 
-bedimportParams <- list(
+bedimportParams <- setImportParams(
   offset = 0, fix_width = 100, fix_point = "center", norm = FALSE,
   useScore = FALSE, outRle = TRUE, useSizeFactor = FALSE, genome = "hg19"
 )
 
-bamQueryFiles <- system.file("extdata", "treat_chr19.bam", package = "GenomicPlot")
+bamQueryFiles <- system.file("extdata", "treat_chr19.bam", 
+                             package = "GenomicPlot")
 names(bamQueryFiles) <- "clip_bam"
-bamInputFiles <- system.file("extdata", "input_chr19.bam", package = "GenomicPlot")
+bamInputFiles <- system.file("extdata", "input_chr19.bam", 
+                             package = "GenomicPlot")
 names(bamInputFiles) <- "clip_input"
 
-bamimportParams <- list(
+bamimportParams <- setImportParams(
   offset = -1, fix_width = 0, fix_point = "start", norm = TRUE,
   useScore = FALSE, outRle = TRUE, useSizeFactor = FALSE, genome = "hg19"
 )
 
-chipQureyFiles <- system.file("extdata", "chip_treat_chr19.bam", package = "GenomicPlot")
+chipQureyFiles <- system.file("extdata", "chip_treat_chr19.bam",
+                              package = "GenomicPlot")
 names(chipQureyFiles) <- "chip_bam"
-chipInputFiles <- system.file("extdata", "chip_input_chr19.bam", package = "GenomicPlot")
+chipInputFiles <- system.file("extdata", "chip_input_chr19.bam",
+                              package = "GenomicPlot")
 names(chipInputFiles) <- "chip_input"
 
-chipimportParams <- list(
+chipimportParams <- setImportParams(
   offset = 0, fix_width = 150, fix_point = "start", norm = TRUE,
   useScore = FALSE, outRle = TRUE, useSizeFactor = FALSE, genome = "hg19"
 )
 
 
 test_that("testing plot_5parts_metagene", {
-  gf <- prepare_5parts_genomic_features(txdb, meta = TRUE, nbins = 100, fiveP = -2000, threeP = 1000, longest = TRUE)
+  gf <- prepare_5parts_genomic_features(txdb, meta = TRUE, nbins = 100, 
+                                        fiveP = -2000, threeP = 1000, 
+                                        longest = TRUE)
   op <- "test_plot_5parts_metagene1"
   plot_5parts_metagene(
     queryFiles = bedQueryFiles,
@@ -70,7 +71,7 @@ test_that("testing plot_5parts_metagene", {
     heatRange = NULL,
     nc = 2
   )
- # pdf_to_png(op)
+
 
   op <- "test_plot_5parts_metagene2"
   plot_5parts_metagene(
@@ -88,31 +89,7 @@ test_that("testing plot_5parts_metagene", {
     rmOutlier = 0,
     nc = 2
   )
-  #pdf_to_png(op)
-})
-
-test_that("testing plot_3parts_metagene", {
-  gf_gene <- prepare_3parts_genomic_features(txdb,
-    meta = FALSE, nbins = 100, fiveP = -3000, threeP = 2000,
-    longest = TRUE
-  )
-  op <- "test_plot_3parts_metagene"
-  plot_3parts_metagene(
-    queryFiles = chipQureyFiles,
-    gFeatures = gf_gene,
-    inputFiles = chipInputFiles,
-    scale = FALSE,
-    verbose = FALSE,
-    transform = "log2",
-    smooth = TRUE,
-    stranded = TRUE,
-    outPrefix = op,
-    importParams = chipimportParams,
-    heatmap = TRUE,
-    rmOutlier = 0,
-    nc = 2
-  )
-  #pdf_to_png(op)
+  
 })
 
 test_that("testing plot_locus", {
@@ -139,7 +116,7 @@ test_that("testing plot_locus", {
     rmOutlier = 0,
     nc = 2
   )
-  #pdf_to_png(op)
+  
   
   op <- "test_plot_locus2"
   plot_locus(
@@ -164,7 +141,7 @@ test_that("testing plot_locus", {
     heatmap = TRUE,
     nc = 2
   )
- # pdf_to_png(op)
+
 })
 test_that("testing plot_peak_annotation", {
   op <- "test_plot_peak_annotation1"
@@ -178,7 +155,7 @@ test_that("testing plot_peak_annotation", {
     outPrefix = op,
     verbose = FALSE
   )
-  #pdf_to_png(op)
+  
 
   op <- "test_plot_peak_annotation2"
   plot_peak_annotation(
@@ -191,7 +168,7 @@ test_that("testing plot_peak_annotation", {
     outPrefix = op,
     verbose = FALSE
   )
-  #pdf_to_png(op)
+  
 })
 
 test_that("testing plot_region", {
@@ -215,7 +192,7 @@ test_that("testing plot_region", {
     rmOutlier = 0,
     nc = 2
   )
-  #pdf_to_png(op)
+  
 })
 
 test_that("testing plot_start_end", {
@@ -237,7 +214,7 @@ test_that("testing plot_start_end", {
     outPrefix = op,
     nc = 2
   )
-  #pdf_to_png(op)
+  
 })
 
 test_that("testing plot_start_end_with_random", {
@@ -259,44 +236,13 @@ test_that("testing plot_start_end_with_random", {
     outPrefix = op,
     nc = 2
   )
-  #pdf_to_png(op)
+  
 })
 
-if(0){
-test_that("testing plot_locus_with_random", {
-  op <- "test_plot_locus_with_random"
-  plot_locus_with_random(
-    queryFiles = bamQueryFiles,
-    centerFiles = bedQueryFiles[3],
-    txdb,
-    ext = c(-500, 500),
-    hl = c(-100, 100),
-    shade = TRUE,
-    importParams = bamimportParams,
-    binSize = 10,
-    refPoint = "center",
-    Xlab = "Center",
-    smooth = TRUE,
-    inputFiles = bamInputFiles,
-    stranded = TRUE,
-    scale = FALSE,
-    outPrefix = op,
-    verbose = FALSE,
-    transform = "log2",
-    rmOutlier = 0,
-    n_random = 1,
-    statsMethod = "wilcox.test",
-    nc = 2
-  )
-  #pdf_to_png(op)
-})
-}
 # remove files not used by README.md and GenomicPlot_vignettes.rmd
 
 pdfs <- list.files(pattern = "*.pdf")
 used_pdfs <- c("test_plot_5parts_metagene1.pdf",
-               "test_plot_5parts_metagene2.pdf",
-               "test_plot_region.pdf",
                "test_plot_locus2.pdf",
                "test_plot_peak_annotation1.pdf"
               )

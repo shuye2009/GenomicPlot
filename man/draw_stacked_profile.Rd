@@ -19,7 +19,8 @@ draw_stacked_profile(
 )
 }
 \arguments{
-\item{plot_df}{a dataframe with column names c(xc, yc, cn, "Interval", "lower", "upper")}
+\item{plot_df}{a dataframe with column names c(xc, yc, cn, "Interval", 
+"lower", "upper")}
 
 \item{xc}{a string denoting column name for values on x-axis}
 
@@ -27,9 +28,11 @@ draw_stacked_profile(
 
 \item{cn}{a string denoting column name for grouping}
 
-\item{ext}{a vector of 4 integers denoting upstream and downstream extension around start and end}
+\item{ext}{a vector of 4 integers denoting upstream and downstream extension 
+around start and end}
 
-\item{hl}{a vector of 4 integers defining upstream and downstream boundaries of the rectangle for start and end}
+\item{hl}{a vector of 4 integers defining upstream and downstream boundaries 
+of the rectangle for start and end}
 
 \item{atitle}{a string for the title of the plot}
 
@@ -37,18 +40,22 @@ draw_stacked_profile(
 
 \item{Ylab}{a string for y-axis label}
 
-\item{shade}{logical, indicating whether to place a shaded rectangle around the point of interest}
+\item{shade}{logical, indicating whether to place a shaded rectangle around 
+the point of interest}
 
-\item{stack}{logical, indicating whether to plot the number of valid (non-zero) data points in each bin}
+\item{stack}{logical, indicating whether to plot the number of valid 
+(non-zero) data points in each bin}
 }
 \value{
 a ggplot object
 }
 \description{
-Plot lines with standard error as the error band, also plots number of regions having non-zero signals
+Plot lines with standard error as the error band, also plots 
+number of regions having non-zero signals
 }
 \note{
-used by \code{plot_start_end}, \code{plot_start_end_with_random}
+used by \code{\link{plot_start_end}}, 
+ \code{\link{plot_start_end_with_random}}
 }
 \author{
 Shuye Pu

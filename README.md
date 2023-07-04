@@ -1,17 +1,10 @@
----
-title:
-  README
-output:
-  html_document: default
-  pdf_document: default
----
 
 # GenomicPlot
 
 <!-- badges: start -->
 <!-- badges: end -->
 
-The goal of GenomicPlot is to create an efficient visualization tool for next generation sequencing (NGS) data with rich functionality and flexibility. GenomicPlot enables plotting of NGS data in various formats (bam, bed, wig and bigwig); both coverage and enrichment over input can be computed and displayed with respect to genomic features (such as UTR, CDS, enhancer), and user defined genomic loci or regions. Statistical tests on signal intensity within user defined regions of interest can be performed and presented as box plots or pie charts. Parallel processing is enabled to speed up computation on multi-core platforms. In addition to genomic plots which is suitable for displaying of coverage of genomic DNA (such as ChIP-seq data), metagenomic (without introns) plots can also be made for RNA-seq or CLIP-seq data as well. For peak annotation, peaks targeting exonic and intronic regions of genomic features (5'UTR, CDS, 3'UTR) are counted separately.
+The goal of GenomicPlot is to provide an efficient visualization tool for next generation sequencing (NGS) data with rich functionality and flexibility. GenomicPlot enables plotting of NGS data in various formats (bam, bed, wig and bigwig); both coverage and enrichment over input can be computed and displayed with respect to genomic features (such as UTR, CDS, enhancer), and user defined genomic loci or regions. Statistical tests on signal intensity within user defined regions of interest can be performed and presented as box plots or pie charts. Parallel processing is enabled to speed up computation on multi-core platforms. In addition to genomic plots which is suitable for displaying of coverage of genomic DNA (such as ChIP-seq data), metagenomic (without introns) plots can also be made for RNA-seq or CLIP-seq data as well. For peak annotation, peaks targeting exonic and intronic regions of genomic features (5'UTR, CDS, 3'UTR) are counted separately.
 
 ## Installation
 
@@ -19,18 +12,26 @@ The following packages are prerequisites:
 
 GenomicRanges (>= 1.46.1), GenomicFeatures, Rsamtools, ggplot2 (>= 3.3.5), tidyr, rtracklayer (>= 1.54.0), plyranges (>= 1.14.0), dplyr (>= 1.0.8), cowplot (>= 1.1.1), VennDiagram, ggplotify, GenomeInfoDb, IRanges, ComplexHeatmap, RCAS (>= 1.20.0), scales (>= 1.2.0), GenomicAlignments (>= 1.30.0), edgeR, forcats, circlize, viridis, ggsignif (>= 0.6.3), ggsci (>= 2.9), genomation (>= 1.26.0), ggpubr
 
-You can install the development version of GenomicPlot from [GitHub](https://github.com/shuye2009/GenomicPlot) with:
+You can install the development version of GenomicPlot from Bioconductor:
 
 ``` r
-# install.packages("remotes")
+if (!require("BiocManager", quietly = TRUE))
+    install.packages("BiocManager")
+BiocManager::install("GenomicPlot", version = "devel")
+```
+or from [GitHub](https://github.com/shuye2009/GenomicPlot) with:
+
+``` r
+if (!require("remotes", quietly = TRUE))
+   install.packages("remotes")
 remotes::install_github("shuye2009/GenomicPlot", build_manual = TRUE, build_vignettes = TRUE)
 ```
-Or download the source package from the latest release on [GitHub](https://github.com/shuye2009/GenomicPlot) and run in R:
+or download the source package from the latest release on [GitHub](https://github.com/shuye2009/GenomicPlot) and run in R:
 
 ``` r
 install.packages("path-to-source-package/GenomicPlot_x.x.x.tar.gz", repos = NULL)
 ```
-where "path-to-source-package" is the absolute path to the file "GenomicPlot_x.x.x.tar.gz", substitute 'x' with the version number of your downloaded package
+where "path-to-source-package" is the absolute path to the file "GenomicPlot_x.x.x.tar.gz", substitute 'x' with the version number of your downloaded package.
 
 ## Examples
 
@@ -40,18 +41,24 @@ The following is a basic example which shows you how to visualize ChIP-seq peaks
 
 library(GenomicPlot)
 
-gtffile <- system.file("extdata", "gencode.v19.annotation_chr19.gtf", package = "GenomicPlot")
+gtffile <- system.file("extdata", "gencode.v19.annotation_chr19.gtf", 
+package = "GenomicPlot")
 gff <- RCAS::importGtf(saveObjectAsRds = TRUE, filePath = gtffile)
 txdb <- makeTxDbFromGRanges(gff)
+txdb$user_genome <- "hg19"
 
-gf <- prepare_5parts_genomic_features(txdb, meta = TRUE, nbins = 100, fiveP = -2000, threeP = 1000, longest = TRUE)
+gf <- prepare_5parts_genomic_features(txdb, meta = TRUE, nbins = 100, 
+fiveP = -2000, threeP = 1000, longest = TRUE)
 
-queryfiles <- c(system.file("extdata", "test_chip_peak_chr19.narrowPeak", package = "GenomicPlot"),
-                system.file("extdata", "test_chip_peak_chr19.bed", package = "GenomicPlot"),
-                system.file("extdata", "test_clip_peak_chr19.bed", package = "GenomicPlot"))
+queryfiles <- c(system.file("extdata", "test_chip_peak_chr19.narrowPeak",
+                package = "GenomicPlot"),
+                system.file("extdata", "test_chip_peak_chr19.bed", 
+                package = "GenomicPlot"),
+                system.file("extdata", "test_clip_peak_chr19.bed", 
+                package = "GenomicPlot"))
 names(queryfiles) <- c("NarrowPeak", "SummitPeak", "iCLIPPeak")
 
-bedimportParams <- list(
+bedimportParams <- setImportParams(
   offset = 0, fix_width = 100, fix_point = "center", norm = FALSE,
   useScore = FALSE, outRle = TRUE, useSizeFactor = FALSE, genome = "hg19"
 )
@@ -94,9 +101,10 @@ inputfiles <- c(
 names(inputfiles) <- c("chip_input")
 op <- "test_plot_locus2"
 
-chipimportParams <- list(
-  offset = 0, fix_width = 150, fix_point = "start", norm = TRUE,
-  useScore = FALSE, outRle = TRUE, useSizeFactor = FALSE, genome = "hg19"
+chipimportParams <- setImportParams(
+  offset = 0, fix_width = 150, fix_point = "start", norm = TRUE, 
+  saveRds = FALSE, useScore = FALSE, outRle = TRUE, useSizeFactor = FALSE, 
+  genome = "hg19"
 )
 
 plot_locus(queryFiles = queryfiles, 

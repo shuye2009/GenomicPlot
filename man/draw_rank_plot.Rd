@@ -19,20 +19,28 @@ draw_rank_plot(stat_df, xc = "Feature", yc = "Intensity", Ylab = yc)
 a ggplot object
 }
 \description{
-Plot cumulative sum over rank as line plot, both cumulative sum and rank are scaled between 0 and 1. This is the same as the fingerprint plot of the deepTools.
+Plot cumulative sum over rank as line plot, both cumulative sum 
+and rank are scaled between 0 and 1. This is the same as the fingerprint plot 
+of the deepTools.
 }
 \examples{
 stat_df <- data.frame(
-  Feature = rep(c("A", "B"), c(20, 30)),
-  Intensity = c(rlnorm(20, 5, 5), rlnorm(30, 1, 5))
+    Feature = rep(c("A", "B"), c(20, 30)),
+    Intensity = c(rlnorm(20, 5, 5), rlnorm(30, 1, 5))
 )
 stat_df1 <- data.frame(
-  Feature = rep(c("A", "B"), c(20, 30)),
-  Height = c(rnorm(20, 5, 5), rnorm(30, 1, 5))
+    Feature = rep(c("A", "B"), c(20, 30)),
+    Height = c(rnorm(20, 5, 5), rnorm(30, 1, 5))
 )
 
-print(draw_rank_plot(stat_df, xc = "Feature", yc = "Intensity", Ylab = "Intensity"))
-print(draw_rank_plot(stat_df1, xc = "Feature", yc = "Height", Ylab = "Height"))
+print(draw_rank_plot(stat_df,
+    xc = "Feature", yc = "Intensity",
+    Ylab = "Intensity"
+))
+print(draw_rank_plot(stat_df1,
+    xc = "Feature", yc = "Height",
+    Ylab = "Height"
+))
 
 }
 \author{

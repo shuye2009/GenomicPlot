@@ -9,7 +9,8 @@ inspect_matrix(fullmatrix, verbose = FALSE)
 \arguments{
 \item{fullmatrix}{a numeric matrix}
 
-\item{verbose}{logical, indicating whether to print out the stats in the console}
+\item{verbose}{logical, indicating whether to print out the stats in the 
+console}
 }
 \value{
 a numerical matrix summarizing the unusual values
@@ -20,14 +21,17 @@ Check the matrix for NA, NaN, INF, -INF and 0 values
 \examples{
 fullMatrix <- matrix(rnorm(100), ncol = 10)
 for (i in 5:6) {
-  fullMatrix[i, 4:7] <- NaN
-  fullMatrix[i+1, 4:7] <- NA
-  fullMatrix[i+2, 4:7] <- -Inf
-  fullMatrix[i-1, 4:7] <- 0
-  fullMatrix[i-2, 1:3] <- Inf
+    fullMatrix[i, 4:7] <- NaN
+    fullMatrix[i + 1, 4:7] <- NA
+    fullMatrix[i + 2, 4:7] <- -Inf
+    fullMatrix[i - 1, 4:7] <- 0
+    fullMatrix[i - 2, 1:3] <- Inf
 }
 
 GenomicPlot:::inspect_matrix(fullMatrix, verbose = TRUE)
 
+}
+\author{
+Shuye Pu
 }
 \keyword{internal}
