@@ -88,7 +88,7 @@ plot_peak_annotation <- function(peakFile,
 
     gff <- RCAS::importGtf(saveObjectAsRds = TRUE, filePath = gtfFile)
     txdb <- makeTxDbFromGRanges(gff)
-    if (is.na(txdb$user_genome)) txdb$user_genome <- importParams$genome
+    if (any(is.na(txdb$user_genome))) txdb$user_genome <- importParams$genome
 
     if (simple) {
         ## the 5'UTR and 3'UTR are not annotted
