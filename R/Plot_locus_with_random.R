@@ -47,7 +47,8 @@
 #'  (data used for plotting or statistical test results)
 #' @param hw a vector of two elements specifying the height and width of the 
 #'  output figures
-#' @param nc integer, number of cores for parallel processing
+#' @param nc integer, number of cores for parallel processing 
+#' @param detailed logical, indicating whether to plot each parts of gene.
 #'
 #' @return a dataframe containing the data used for plotting
 #' @author Shuye Pu
@@ -75,6 +76,7 @@ plot_locus_with_random <- function(queryFiles,
                                    rmOutlier = 0,
                                    n_random = 1,
                                    hw = c(8, 8),
+                                   detailed = FALSE,
                                    statsMethod = "wilcox.test",
                                    nc = 2) {
     stopifnot(is.numeric(c(ext, hl, binSize, nc, hw, rmOutlier)))
@@ -131,24 +133,27 @@ plot_locus_with_random <- function(queryFiles,
     rb <- ext[2] # broad
     rn <- hl[2] # narrow
 
-    ## get protein-coding genes features
-
-    if (verbose) message("Collecting protein_coding gene features...\n")
-    exons <- get_genomic_feature_coordinates(txdb, "exon", longest = TRUE)
-    utr5 <- get_genomic_feature_coordinates(txdb, "utr5", longest = TRUE)
-    utr3 <- get_genomic_feature_coordinates(txdb, "utr3", longest = TRUE)
-    cds <- get_genomic_feature_coordinates(txdb, "cds", longest = TRUE)
-    gene <- get_genomic_feature_coordinates(txdb, "gene", longest = TRUE)
-
-
-    region_list <- list(
-        "Transcript" = exons$GRanges,
-        "5'UTR" = utr5$GRanges,
-        "CDS" = cds$GRanges,
-        "3'UTR" = utr3$GRanges,
-        "Gene" = gene$GRanges,
-        "unrestricted" = NULL
-    )
+    if (detailed) {
+        
+        ## get protein-coding genes features
+        
+        if (verbose) message("Collecting protein_coding gene features...\n")
+        exons <- get_genomic_feature_coordinates(txdb, "exon", longest = TRUE)
+        utr5 <- get_genomic_feature_coordinates(txdb, "utr5", longest = TRUE)
+        utr3 <- get_genomic_feature_coordinates(txdb, "utr3", longest = TRUE)
+        cds <- get_genomic_feature_coordinates(txdb, "cds", longest = TRUE)
+        gene <- get_genomic_feature_coordinates(txdb, "gene", longest = TRUE)
+        region_list <- list(
+            "Transcript" = exons$GRanges,
+            "5'UTR" = utr5$GRanges,
+            "CDS" = cds$GRanges,
+            "3'UTR" = utr3$GRanges,
+            "Gene" = gene$GRanges,
+            "unrestricted" = NULL
+        )
+    } else {
+        region_list <- list("unrestricted" = NULL)
+    }
 
     if (verbose) {
         message("Region length: ", 
@@ -156,10 +161,7 @@ plot_locus_with_random <- function(queryFiles,
         message("Computing coverage for Sample...\n")
     }
     sml <- list() # scoreMatrix_list
-    quantile_list <- list()
     smlr <- list() # scoreMatrix_list_random
-    quantile_list_random <- list()
-
 
     bedparam <- importParams
     bedparam$CLIP_reads <- FALSE
@@ -174,21 +176,25 @@ plot_locus_with_random <- function(queryFiles,
 
     for (queryLabel in queryLabels) {
         myInput <- queryInputs[[queryLabel]]
-        libsize <- myInput$size
+        libSize <- myInput$size
         queryRegions <- myInput$query
         fileType <- myInput$type
         weight_col <- myInput$weight
 
         if (verbose) {
-            message("Query label: ", queryLabel, "\n")
-            message("Library size: ", libsize, "\n")
+            message("Query label: ", queryLabel)
+            message("Library size: ", libSize, "\n")
         }
 
         for (centerLabel in centerLabels) {
-            if (verbose) message("Center label: ", centerLabel, "\n")
+            
             centerInput <- centerInputs[[centerLabel]]
-
+            centerSize <- centerInput$size
             windowRegionsALL <- centerInput$query
+            if (verbose) {
+                message("Center label: ", centerLabel)
+                message("Center size: ", centerSize, "\n")
+            }
 
             for (regionName in names(region_list)) {
                 if (verbose) message("Processing genomic region: ", regionName)
@@ -231,10 +237,10 @@ plot_locus_with_random <- function(queryFiles,
                 sml[[queryLabel]][[centerLabel]][[regionName]] <- 
                     fullMatrix
 
-
                 ## create randomized centers, repeat n_random times
-
-                windowRs <- lapply(seq(1, n_random), function(i) {
+                windowRs <- list()
+                for (i in seq(1, n_random)) {
+                    if (verbose) message("Creating random centers ... ", i)
                     random_points <- sample(
                         ext[1]:ext[2], length(windowRegions), replace = TRUE)
                     rwindowRegions <- shift(
@@ -246,15 +252,20 @@ plot_locus_with_random <- function(queryFiles,
                     windowR <- as(split(windowR, 
                                         f = factor(seq_along(windowR))), 
                                   "GRangesList")
-                    windowR
-                })
+                    windowRs[[i]] <- windowR
+                }
 
-                random_matricies <- lapply(windowRs, function(x) {
-                    parallel_scoreMatrixBin(queryRegions, x, bin_num, bin_op, 
-                                            weight_col, stranded, nc = nc)
-                })
+                random_matricies <- list()
+                for (i in seq_along(windowRs)) {
+                    if (verbose) message("Computing for random centers ... ", i)
+                    mat <- parallel_scoreMatrixBin(queryRegions, windowRs[[i]], 
+                                                   bin_num, bin_op, weight_col,
+                                                   stranded, nc = nc)
+                    random_matricies[[i]] <- mat
+                }
 
                 ## unify the dimensions of random_matrices
+                if (verbose) message("Averaging random matricies ...\n")
                 dims <- vapply(random_matricies, dim, numeric(2))
                 minrows <- min(dims[1, ])
                 random_matricies <- lapply(random_matricies, function(x)

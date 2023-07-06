@@ -26,6 +26,7 @@ plot_locus_with_random(
   rmOutlier = 0,
   n_random = 1,
   hw = c(8, 8),
+  detailed = FALSE,
   statsMethod = "wilcox.test",
   nc = 2
 )
@@ -88,6 +89,8 @@ performed}
 
 \item{hw}{a vector of two elements specifying the height and width of the 
 output figures}
+
+\item{detailed}{logical, indicating whether to plot each parts of gene.}
 
 \item{statsMethod}{a string in c("wilcox.test", "t.test"), for pair-wise 
 groups comparisons}
