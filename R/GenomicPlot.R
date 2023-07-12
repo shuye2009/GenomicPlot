@@ -145,6 +145,10 @@ plot_overlap_bed <- function(bedList,
         pdf(paste0(outPrefix, ".pdf"), width = hw[2], height = hw[1])
     }
 
+    functionName <- as.character(match.call()[[1]])
+    params <- plot_named_list(as.list(environment()))
+    force(params)
+    
     if (is.null(importParams)) {
         importParams <- setImportParams(outRle = FALSE)
     } else {
@@ -220,6 +224,7 @@ plot_overlap_bed <- function(bedList,
         }
     }
     if (!is.null(outPrefix)) {
+        print(params)
         on.exit(dev.off(), add = TRUE)
     }
 

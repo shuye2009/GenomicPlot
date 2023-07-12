@@ -1,4 +1,8 @@
+# CHANGES IN VERSION 0.99.13
 
+## BUG FIXES
+   Fixed a bug in plot_peak_annotation, such that txdb$user_genome is treated as a vector of strings rather than a single string
+   
 # CHANGES IN VERSION 0.99.12
 
 ## NEW FEATURES
