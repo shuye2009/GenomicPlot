@@ -969,7 +969,7 @@ draw_combo_plot <- function(stat_df,
                             stats = "wilcox.test",
                             fc = xc,
                             Ylim = NULL,
-                            title = "Title",
+                            title = "",
                             nf = 1) {
     stopifnot(c(xc, yc, fc) %in% colnames(stat_df))
     bbf <- draw_boxplot_by_factor(stat_df, xc = xc, yc = yc, comp = comp, 
