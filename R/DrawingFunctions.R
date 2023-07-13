@@ -932,6 +932,7 @@ draw_rank_plot <- function(stat_df,
 #' @param Xlab a string for x-axis label
 #' @param Ylab a string for y-axis label
 #' @param Ylim a numeric vector of two elements, defining custom limits of y-axis
+#' @param title a string for plot title 
 #' @param nf a integer normalizing factor for correct count of observations when 
 #'  the data table has two factors, such as those produced by pivot_longer, 
 #'  equals to the number of factors
@@ -968,6 +969,7 @@ draw_combo_plot <- function(stat_df,
                             stats = "wilcox.test",
                             fc = xc,
                             Ylim = NULL,
+                            title = "Title",
                             nf = 1) {
     stopifnot(c(xc, yc, fc) %in% colnames(stat_df))
     bbf <- draw_boxplot_by_factor(stat_df, xc = xc, yc = yc, comp = comp, 
@@ -983,6 +985,9 @@ draw_combo_plot <- function(stat_df,
 
     combo <- cowplot::plot_grid(bbf, bwo, q, msb, nrow = 2, axis = "b", 
                                 rel_widths = c(1, 1), rel_heights = c(1, 1))
+    title <- ggdraw() + draw_label(title)
+    combo <- plot_grid(title, combo, ncol=1, rel_heights=c(0.1, 1))
+    
 
     return(combo)
 }

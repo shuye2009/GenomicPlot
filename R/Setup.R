@@ -23,7 +23,7 @@
 #' @importFrom ggplotify as.grob
 #' @importFrom ggsci pal_npg scale_color_npg scale_fill_npg
 #' @importFrom ggsignif geom_signif
-#' @importFrom cowplot plot_grid
+#' @importFrom cowplot plot_grid ggdraw draw_label
 #' @importFrom edgeR calcNormFactors
 #' @importFrom genomation ScoreMatrixBin annotateWithFeatures
 #' @importFrom BiocGenerics strand strand<- score score<- append start start<- 

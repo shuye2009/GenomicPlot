@@ -359,7 +359,7 @@ rm_outlier <- function(fullmatrix, verbose = FALSE, multiplier = 1000) {
 #' @examples
 #' stat_df <- data.frame(
 #'     Feature = rep(c("A", "B"), c(20, 30)),
-#'     Intensity = c(rnorm(20, 2), rnorm(30, 3))
+#'     Intensity = c(rnorm(20, mean = 2, sd = 1), rnorm(30, mean = 3, sd = 1))
 #' )
 #'
 #' out <- aov_TukeyHSD(stat_df, xc = "Feature")

@@ -14,6 +14,7 @@ draw_combo_plot(
   stats = "wilcox.test",
   fc = xc,
   Ylim = NULL,
+  title = "Title",
   nf = 1
 )
 }
@@ -38,6 +39,8 @@ wilcox.test}
 additional factor}
 
 \item{Ylim}{a numeric vector of two elements, defining custom limits of y-axis}
+
+\item{title}{a string for plot title}
 
 \item{nf}{a integer normalizing factor for correct count of observations when 
 the data table has two factors, such as those produced by pivot_longer, 
