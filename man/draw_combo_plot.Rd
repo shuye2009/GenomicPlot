@@ -14,7 +14,7 @@ draw_combo_plot(
   stats = "wilcox.test",
   fc = xc,
   Ylim = NULL,
-  title = "Title",
+  title = "",
   nf = 1
 )
 }
