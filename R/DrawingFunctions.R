@@ -1324,9 +1324,6 @@ overlap_triple <- function(atriple, overlap_fun) {
     overlap13 <- length(Reduce(overlap_fun, atriple[c(1, 3)]))
     overlap23 <- length(Reduce(overlap_fun, atriple[c(2, 3)]))
     overlap123 <- length(Reduce(overlap_fun, atriple))
-    if (overlap123 > min(c(overlap12, overlap13, overlap23))) {
-      overlap123 <- min(c(overlap12, overlap13, overlap23))
-    }
 
     venn.plot <- draw.triple.venn(sizes[1], sizes[2], sizes[3], overlap12, 
                                   overlap23, overlap13, overlap123,
@@ -1407,22 +1404,7 @@ overlap_quad <- function(aquad, overlap_fun) {
     overlap134 <- length(Reduce(overlap_fun, aquad[c(1, 3, 4)]))
     overlap234 <- length(Reduce(overlap_fun, aquad[c(2, 3, 4)]))
     overlap1234 <- length(Reduce(overlap_fun, aquad))
-    if (overlap123 > min(c(overlap12, overlap13, overlap23))) {
-      overlap123 <- min(c(overlap12, overlap13, overlap23))
-    }
-    if (overlap124 > min(c(overlap12, overlap14, overlap24))) {
-      overlap124 <- min(c(overlap12, overlap14, overlap24))
-    }
-    if (overlap134 > min(c(overlap13, overlap14, overlap34))) {
-      overlap134 <- min(c(overlap13, overlap14, overlap34))
-    }
-    if (overlap234 > min(c(overlap23, overlap24, overlap34))) {
-      overlap234 <- min(c(overlap23, overlap24, overlap34))
-    }
-    if (overlap1234 > min(c(overlap123, overlap134, overlap124, overlap234))) {
-      overlap1234 <- min(c(overlap123, overlap134, overlap124, overlap234))
-    }
-
+    
     venn.plot <- draw.quad.venn(sizes[1], sizes[2], sizes[3], sizes[4], 
                                 overlap12, overlap13, overlap14, overlap23, 
                                 overlap24, overlap34, overlap123, overlap124,
