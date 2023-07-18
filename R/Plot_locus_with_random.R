@@ -210,7 +210,7 @@ plot_locus_with_random <- function(queryFiles,
                         if (verbose) message("The center file is Unstranded\n")
                     } else {
                         windowRegions <- filter_by_overlaps_stranded(
-                            windowRegionsALL, region)
+                            windowRegionsALL, region, ignore.order = FALSE)
                         if (verbose) message("The center file is stranded\n")
                     }
                 }

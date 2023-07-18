@@ -391,7 +391,8 @@ prepare_3parts_genomic_features <- function(txdb,
 #' @title Demarcate genes into promoter, 5'UTR, CDS, 3'UTR and TTS features
 #
 #' @description This is a helper function for 'plot_5parts_metagene', used to 
-#' speed up plotting of multiple data sets with the same configuration.
+#' speed up plotting of multiple data sets with the same configuration. Only 
+#' protein-coding genes are considered.
 #'
 #' @param txdb a TxDb object defined in the GenomicFeatures package
 #' @param meta logical, indicating whether a metagene (intron excluded) or gene 
@@ -934,10 +935,14 @@ check_constraints <- function(gr, genome, queryRle = NULL) {
 #' @param query a GRanges object
 #' @param subject a GRanges object
 #' @param maxgap an integer denoting the distance that define overlap
-#' @param minoverlap The minimum amount of overlap between intervals as a single
-#'  integer greater than 0.
-#' If you modify this argument, maxgap must be held fixed.
-#'
+#' @param minoverlap The minimum amount of overlap between intervals as a 
+#' single integer greater than 0. If you modify this argument, maxgap must be 
+#' held fixed.
+#' @param ignore.order logical, indicating whether the order of query and 
+#' subject can be switched, default = TRUE. Overlaps in query and subject often
+#' have different sizes. This parameter will make the function use whichever is
+#' smaller to avoid errors when plotting Venn diagrams.
+#' 
 #' @return a GRanges object
 #' @author Shuye Pu
 #'
@@ -959,7 +964,8 @@ check_constraints <- function(gr, genome, queryRle = NULL) {
 #' @export filter_by_overlaps_stranded
 
 filter_by_overlaps_stranded <- function(query, subject, maxgap = -1L,
-                                        minoverlap = 0L) {
+                                        minoverlap = 0L, ignore.order = TRUE) 
+    {
     plus_query <- query[strand(query) == "+"]
     minus_query <- query[strand(query) == "-"]
     plus_subject <- subject[strand(subject) == "+"]
@@ -972,10 +978,23 @@ filter_by_overlaps_stranded <- function(query, subject, maxgap = -1L,
 
     overlaps <- c(overlap_plus, overlap_minus)
 
-    if (length(overlaps) > min(length(query), length(subject))) {
-        message("Size of overlap is greater than 
-                min(sizeOfQuery, sizeOfSubject)!\n")
+    if (ignore.order) {
+        overlap_plus_r <- filter_by_overlaps(plus_subject, plus_query, 
+                                           maxgap = maxgap, 
+                                           minoverlap = minoverlap)
+        overlap_minus_r <- filter_by_overlaps(minus_subject, minus_query, 
+                                            maxgap = maxgap, 
+                                            minoverlap = minoverlap)
+        
+        overlaps_r <- c(overlap_plus_r, overlap_minus_r)
+        
+        if(length(overlaps_r) < length(overlaps)){
+            overlaps <- overlaps_r
+            message("The overlaps is from the Subject instead of the Query!\n")
+        }
+        
     }
+    
     invisible(overlaps)
 }
 
@@ -984,6 +1003,14 @@ filter_by_overlaps_stranded <- function(query, subject, maxgap = -1L,
 #' GRanges in subject. Strand information is used to define overlap.
 #' @param query a GRanges object
 #' @param subject a GRanges object
+#' @param maxgap an integer denoting the distance that define overlap
+#' @param minoverlap The minimum amount of overlap between intervals as a 
+#' single integer greater than 0. If you modify this argument, maxgap must be 
+#' held fixed.
+#' @param ignore.order logical, indicating whether the order of query and 
+#' subject can be switched, default = TRUE. This parameter is used to avoid 
+#' the situation that the size of overlaps is bigger than the size of subject, 
+#' which will produce an error when plotting Venn diagrams.
 #'
 #' @return a GRanges object
 #' @author Shuye Pu
@@ -1004,12 +1031,66 @@ filter_by_overlaps_stranded <- function(query, subject, maxgap = -1L,
 #'
 #' @export filter_by_nonoverlaps_stranded
 #'
-filter_by_nonoverlaps_stranded <- function(query, subject) {
-    overlaps <- filter_by_overlaps_stranded(query, subject, maxgap = -1L)
-    if (length(overlaps) > min(length(query), length(subject))) {
-        message("Size of overlap is greater than 
-                min(sizeOfQuery, sizeOfSubject!\n")
-    }
+filter_by_nonoverlaps_stranded <- function(query, subject,  maxgap = -1L,
+                                           minoverlap = 0L, 
+                                           ignore.order = TRUE) {
+    overlaps <- filter_by_overlaps_stranded(query, subject, maxgap = maxgap,
+                                            minoverlap = minoverlap, 
+                                            ignore.order = ignore.order)
+    
     nonoverlaps <- GenomicRanges::setdiff(query, overlaps)
     invisible(nonoverlaps)
 }
+
+#' @title Filter GRanges by overlaps in a nonstranded way
+#' @description This function reports all query GRanges that have overlaps in 
+#' subject GRanges. Strand information is not required.
+#' @param query a GRanges object
+#' @param subject a GRanges object
+#' @param maxgap an integer denoting the distance that define overlap
+#' @param minoverlap The minimum amount of overlap between intervals as a 
+#' single integer greater than 0. If you modify this argument, maxgap must be 
+#' held fixed.
+#' @param ignore.order logical, indicating whether the order of query and 
+#' subject can be switched, default = TRUE. This parameter is used to avoid 
+#' the situation that the size of overlaps is bigger than the size of subject, 
+#' which will produce an error when plotting Venn diagrams.
+#' 
+#' @return a GRanges object
+#' @author Shuye Pu
+#'
+#' @examples
+#'
+#' query <- GRanges("chr19",
+#'     IRanges(rep(c(10, 15), 2), width = c(1, 20, 40, 50)),
+#'     strand = c("+", "+", "-", "-")
+#' )
+#'
+#' subject <- GRanges("chr19",
+#'     IRanges(rep(c(13, 150), 2), width = c(10, 14, 20, 28)),
+#'     strand = c("+", "-", "-", "+")
+#' )
+#'
+#' res <- filter_by_overlaps_nonstranded(query, subject, ignore.order = TRUE)
+#' res
+#'
+#' @export filter_by_overlaps_nonstranded
+
+filter_by_overlaps_nonstranded <- function(query, subject, maxgap = -1L,
+                                        minoverlap = 0L, ignore.order = TRUE) 
+{
+    overlaps <- filter_by_overlaps(query, subject, maxgap = maxgap, 
+                                   minoverlap = minoverlap)
+    
+    if (ignore.order) {
+        overlaps_r <- filter_by_overlaps(subject, query, maxgap = maxgap, 
+                                           minoverlap = minoverlap)
+        if(length(overlaps_r) < length(overlaps)){
+            overlaps <- overlaps_r
+            message("The overlaps is from the Subject instead of the Query!\n")
+        }
+    }
+
+    invisible(overlaps)
+}
+

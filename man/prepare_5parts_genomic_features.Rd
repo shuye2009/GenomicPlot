@@ -41,7 +41,8 @@ a named list with the elements c("windowRs", "nbins", "scaled_bins",
 }
 \description{
 This is a helper function for 'plot_5parts_metagene', used to 
-speed up plotting of multiple data sets with the same configuration.
+speed up plotting of multiple data sets with the same configuration. Only 
+protein-coding genes are considered.
 }
 \examples{
 gtffile <- system.file("extdata", "gencode.v19.annotation_chr19.gtf",

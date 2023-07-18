@@ -168,15 +168,15 @@ plot_overlap_bed <- function(bedList,
         for (j in seq_along(grList)) {
             if (stranded) {
                 counts[i, j] <- length(filter_by_overlaps_stranded(grList[[i]], 
-                                                                   grList[[j]]))
+                  grList[[j]], ignore.order = FALSE))
             } else {
-                counts[i, j] <- length(filter_by_overlaps(grList[[i]], 
-                                                          grList[[j]]))
+                counts[i, j] <- length(plyranges::filter_by_overlaps(grList[[i]], 
+                                                                grList[[j]]))
             }
         }
     }
     rownames(counts) <- colnames(counts) <- names(bedList)
-    counts_long <- pivot_longer(as.data.frame(counts), 
+    counts_long <- tidyr::pivot_longer(as.data.frame(counts), 
                                 cols = seq_len(ncol(counts)), 
                                 names_to = "X", values_to = "count") %>%
         mutate(Y = rep(rownames(counts), each = ncol(counts)))
@@ -211,14 +211,14 @@ plot_overlap_bed <- function(bedList,
             }
         }
     } else {
-        lapply(pairs, overlap_pair, filter_by_overlaps)
+        lapply(pairs, overlap_pair, filter_by_overlaps_nonstranded)
         if (!pairOnly) {
             if (length(grList) > 2) {
                 triples <- combn(grList, 3, simplify = FALSE)
-                lapply(triples, overlap_triple, filter_by_overlaps)
+                lapply(triples, overlap_triple, filter_by_overlaps_nonstranded)
                 if (length(grList) > 3) {
                     quads <- combn(grList, 4, simplify = FALSE)
-                    lapply(quads, overlap_quad, filter_by_overlaps)
+                    lapply(quads, overlap_quad, filter_by_overlaps_nonstranded)
                 }
             }
         }
