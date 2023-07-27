@@ -4,18 +4,15 @@
 #' @description The data files in the extdata directory contain data for next 
 #' generation sequencing read alignments, MACS2 peaks and gene annotation, which 
 #' are used to test the package and generate plots in the package vignettes. 
-#' Except for the gtf file, all other files are derived from experimental data 
-#' produced in-house at the \href{https://thedonnellycentre.utoronto.ca/faculty/jack-greenblatt}{Greenblatt Lab, University of Toronto, Canada}. 
 #'     To meet the package file size limit, all data are restricted to 
 #' chr19:58000-507000 of the human genome version hg19. Details for each file 
 #' are as follows.
 #' @details
 #' \itemize{
-#'  \item "gencode.v19.annotation_chr19.gtf" is an excerpt of the gene 
-#'      annotation file downloaded from 
-#'      \url{https://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_19/gencode.v19.annotation.gtf.gz}. 
-#'      "gencode.v19.annotation_chr19.gtf.granges.rds" is a GRanges object as a 
-#'      result of importing the gtf file.
+#'  \item "gencode.v19.annotation_chr19.gtf" is an excerpt of a gene 
+#'      annotation file by limiting to chr19:58000-507000 of the human genome.
+#'  \item "gencode.v19.annotation_chr19.gtf.granges.rds" is a GRanges object 
+#'      produced by importing the above gtf file using RCAS::importGtf.
 #'  \item "chip_treat_chr19.bam(.bai)" and "chip_input_chr19.bam(.bai)" are 
 #'      paired-end read alignment data from ChIPseq experiments.
 #'  \item "treat_chr19.bam(.bai)" and "input_chr19.bam(.bai)" are single-end 
@@ -32,6 +29,11 @@
 #'      "test_file4.txt" are tab-delimited text files,  each contains various 
 #'      human gene names in different columns. 
 #' }
+#' @source The original gene annotation (gtf) file is downloaded from 
+#'      \url{https://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_19/gencode.v19.annotation.gtf.gz}
+#'      Except for the gtf file, all other files are derived from experimental 
+#'      data produced in-house at the \href{https://thedonnellycentre.utoronto.ca/faculty/jack-greenblatt}{Greenblatt Lab, University of Toronto, Canada}.  
+#' @return Various files used as inputs to run examples and tests
 #' @aliases test_file1.txt test_file2.txt test_file3.txt test_file4.txt 
 #'     gencode.v19.annotation_chr19.gtf chip_treat_chr19.bam treat_chr19.bam
 #'     chip_input_chr19.bam input_chr19.bam test_wig_chr19_+.wig 
@@ -48,8 +50,8 @@ NULL
 #' @title Toy data for examples and testing of the `GenomicPlot` package
 #' @description A tiny TxDb object holding genomic feature coordinates of 72 
 #' transcripts in hg19.
-#' @format 
-#' SQLlite database  
+#' @return 
+#' A SQLlite database  
 #' @source
 #' The data is produced by running the following code:
 #' \describe{
@@ -79,9 +81,10 @@ NULL
 #' 
 #' @title Toy data for examples and testing of the `GenomicPlot` package
 #' @description  Genomic  coordinates of 72 transcripts in hg19 for genomic 
-#' features promoter, 5'UTR, CDS, 3'UTR, TTS. 
+#' features promoter, 5'UTR, CDS, 3'UTR, TTS, as well as user inputs for
+#' processing these features.
 #' See \code{\link{prepare_5parts_genomic_features}} for details.
-#' @format 
+#' @return 
 #' A named list with the following elements:
 #' \describe{
 #'  \item{windowRs}{a list of 5 GrangesList objects for the 5 genomic features}
@@ -111,10 +114,11 @@ NULL
 
 #' 
 #' @title Toy data for examples and testing of the `GenomicPlot` package
-#' @description  Metagenomic coordinates of 72 
-#' transcripts in hg19 for genomic features promoter, 5'UTR, CDS, 3'UTR, TTS. 
+#' @description  Metagenomic coordinates of 72 transcripts in hg19 for genomic 
+#' features promoter, 5'UTR, CDS, 3'UTR, TTS, as well as user inputs for
+#' processing these features. 
 #' See \code{\link{prepare_5parts_genomic_features}} for details.
-#' @format 
+#' @return 
 #' A named list with the following elements:
 #' \describe{
 #'  \item{windowRs}{a list of 5 GrangesList objects for the 5 genomic features}

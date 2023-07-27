@@ -18,23 +18,29 @@
 \alias{test_chip_peak_chr19.bed}
 \alias{test_chip_peak_chr19.narrowPeak}
 \title{Toy data for examples and testing of the `GenomicPlot` package}
+\source{
+The original gene annotation (gtf) file is downloaded from 
+     \url{https://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_19/gencode.v19.annotation.gtf.gz}
+     Except for the gtf file, all other files are derived from experimental 
+     data produced in-house at the \href{https://thedonnellycentre.utoronto.ca/faculty/jack-greenblatt}{Greenblatt Lab, University of Toronto, Canada}.
+}
+\value{
+Various files used as inputs to run examples and tests
+}
 \description{
 The data files in the extdata directory contain data for next 
 generation sequencing read alignments, MACS2 peaks and gene annotation, which 
 are used to test the package and generate plots in the package vignettes. 
-Except for the gtf file, all other files are derived from experimental data 
-produced in-house at the \href{https://thedonnellycentre.utoronto.ca/faculty/jack-greenblatt}{Greenblatt Lab, University of Toronto, Canada}. 
     To meet the package file size limit, all data are restricted to 
 chr19:58000-507000 of the human genome version hg19. Details for each file 
 are as follows.
 }
 \details{
 \itemize{
- \item "gencode.v19.annotation_chr19.gtf" is an excerpt of the gene 
-     annotation file downloaded from 
-     \url{https://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_19/gencode.v19.annotation.gtf.gz}. 
-     "gencode.v19.annotation_chr19.gtf.granges.rds" is a GRanges object as a 
-     result of importing the gtf file.
+ \item "gencode.v19.annotation_chr19.gtf" is an excerpt of a gene 
+     annotation file by limiting to chr19:58000-507000 of the human genome.
+ \item "gencode.v19.annotation_chr19.gtf.granges.rds" is a GRanges object 
+     produced by importing the above gtf file using RCAS::importGtf.
  \item "chip_treat_chr19.bam(.bai)" and "chip_input_chr19.bam(.bai)" are 
      paired-end read alignment data from ChIPseq experiments.
  \item "treat_chr19.bam(.bai)" and "input_chr19.bam(.bai)" are single-end 

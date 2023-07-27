@@ -4,18 +4,6 @@
 \name{gf5_meta}
 \alias{gf5_meta}
 \title{Toy data for examples and testing of the `GenomicPlot` package}
-\format{
-A named list with the following elements:
-\describe{
- \item{windowRs}{a list of 5 GrangesList objects for the 5 genomic features}
- \item{nbins}{a positive integer}
- \item{scaled_bins}{a vector of 5 integers}
- \item{fiveP}{a negative integer}
- \item{threeP}{a positive integer}
- \item{meta}{logical}
- \item{longest}{logical}
-}
-}
 \source{
 The data is produced by running the following code:
 \describe{
@@ -27,9 +15,22 @@ gf5_meta <- GenomicPlot::prepare_5parts_genomic_features(txdb, meta = TRUE,
     nbins = 100, fiveP = -2000, threeP = 1000, longest = TRUE)
 }
 }
+\value{
+A named list with the following elements:
+\describe{
+ \item{windowRs}{a list of 5 GrangesList objects for the 5 genomic features}
+ \item{nbins}{a positive integer}
+ \item{scaled_bins}{a vector of 5 integers}
+ \item{fiveP}{a negative integer}
+ \item{threeP}{a positive integer}
+ \item{meta}{logical}
+ \item{longest}{logical}
+}
+}
 \description{
-Metagenomic coordinates of 72 
-transcripts in hg19 for genomic features promoter, 5'UTR, CDS, 3'UTR, TTS. 
+Metagenomic coordinates of 72 transcripts in hg19 for genomic 
+features promoter, 5'UTR, CDS, 3'UTR, TTS, as well as user inputs for
+processing these features. 
 See \code{\link{prepare_5parts_genomic_features}} for details.
 }
 \author{

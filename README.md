@@ -77,7 +77,7 @@ plot_5parts_metagene(queryFiles = queryfiles,
                      nc = 4)
                      
 ```
-![Fig. 1 Peak distribution along the length of genes](./longtests/test_output/test_plot_5parts_metagene1.pdf)
+![Fig. 1 Peak distribution along the length of genes](./tests/test_plot_5parts_metagene1.png)
 
 The following example shows you how to visualize distance between iCLIP_peaks/ChIP-seq narrowPeaks and ChIP-seq summit Peaks.
 
@@ -125,7 +125,7 @@ plot_locus(queryFiles = queryfiles,
                      nc = 4)
                      
 ```
-![Fig. 2 Coverage around the center of peaks](./longtests/test_output/test_plot_locus2.pdf)
+![Fig. 2 Coverage around the center of peaks](./tests/test_plot_locus2.png)
 
 The following example shows you how to annotate ChIP-seq peaks. The annotation statistics is shown in "test_plot_peak_annotation.png". The detailed annotation is in the table "summitPeak_targeted_annotated_gene.tab".
 
@@ -148,6 +148,6 @@ plot_peak_annotation(peakFile = centerfile,
                      verbose = TRUE)
 
 ```
-![Fig. 3 Distribution of peaks](./longtests/test_output/test_plot_peak_annotation1.pdf)
+![Fig. 3 Distribution of ChIPseq summit peaks](./tests/test_plot_peak_annotation1.png)
 
 

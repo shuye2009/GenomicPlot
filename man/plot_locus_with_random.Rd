@@ -109,6 +109,49 @@ random loci. The loci are further divided into sub-groups that are
 overlapping with c("5'UTR", "CDS", "3'UTR"), "unrestricted" means all loci 
 regardless of overlapping.
 }
+\examples{
+
+txdb <- AnnotationDbi::loadDb(system.file("extdata", "txdb.sql", 
+  package = "GenomicPlot"))
+
+bamQueryFiles <- system.file("extdata", "treat_chr19.bam", 
+                             package = "GenomicPlot")
+names(bamQueryFiles) <- "clip_bam"
+bamInputFiles <- system.file("extdata", "input_chr19.bam", 
+                             package = "GenomicPlot")
+names(bamInputFiles) <- "clip_input"
+
+bamImportParams <- setImportParams(
+  offset = -1, fix_width = 0, fix_point = "start", norm = TRUE,
+  useScore = FALSE, outRle = TRUE, useSizeFactor = FALSE, genome = "hg19"
+)
+plot_locus_with_random(
+    queryFiles = bamQueryFiles,
+    centerFiles = bedQueryFiles[3],
+    txdb = txdb,
+    ext = c(-200, 200),
+    hl = c(-50, 50),
+    shade = TRUE,
+    importParams = bamImportParams,
+    verbose = FALSE,
+    smooth = TRUE,
+    transform = NA,
+    binSize = 10,
+    refPoint = "center",
+    Xlab = "Center",
+    Ylab = "Coverage/base/peak",
+    inputFiles = bamInputFiles,
+    stranded = TRUE,
+    scale = FALSE,
+    outPrefix = NULL,
+    rmOutlier = 0,
+    n_random = 1,
+    hw = c(8, 8),
+    detailed = FALSE,
+    statsMethod = "wilcox.test",
+    nc = 2)
+
+}
 \author{
 Shuye Pu
 }

@@ -94,16 +94,53 @@ output figures}
 \item{Ylab}{a string for y-axis label}
 }
 \value{
-a list of two objects, the first is a GRanges object, the second is a 
- GRangesList object
+a list of two objects, the first is a GRanges object, the second is 
+a GRangesList object
 }
 \description{
 Plot reads or peak Coverage/base/gene of samples given in the 
-query files around stat, end and center of genomic features or custom feature 
+query files around start, end and center of genomic features or custom feature 
 given in a .bed file. The upstream and downstream windows can be given 
 separately. If Input files are provided, ratio over Input is computed and 
 displayed as well. A random feature can be generated to serve as a background
 for contrasting.
+}
+\examples{
+
+txdb <- AnnotationDbi::loadDb(system.file("extdata", "txdb.sql", 
+  package = "GenomicPlot"))
+
+bamQueryFiles <- system.file("extdata", "treat_chr19.bam", 
+                             package = "GenomicPlot")
+names(bamQueryFiles) <- "clip_bam"
+bamInputFiles <- system.file("extdata", "input_chr19.bam", 
+                             package = "GenomicPlot")
+names(bamInputFiles) <- "clip_input"
+
+bamImportParams <- setImportParams(
+  offset = -1, fix_width = 0, fix_point = "start", norm = TRUE,
+  useScore = FALSE, outRle = TRUE, useSizeFactor = FALSE, genome = "hg19"
+)
+
+plot_start_end_with_random(
+  queryFiles = bamQueryFiles,
+  inputFiles = bamInputFiles,
+  txdb = txdb,
+  centerFile = "intron",
+  binSize = 10,
+  importParams = bamImportParams,
+  ext = c(-200, 300, -200, 300),
+  hl = c(-100, 100, -100, 100),
+  insert = 100,
+  stranded = TRUE,
+  scale = FALSE,
+  smooth = TRUE,
+  transform = "log2",
+  outPrefix = NULL,
+  randomize = TRUE,
+  nc = 2
+)
+
 }
 \author{
 Shuye Pu

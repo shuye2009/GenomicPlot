@@ -4,9 +4,6 @@
 \name{txdb.sql}
 \alias{txdb.sql}
 \title{Toy data for examples and testing of the `GenomicPlot` package}
-\format{
-SQLlite database
-}
 \source{
 The data is produced by running the following code:
 \describe{
@@ -26,6 +23,9 @@ txdb <- GenomicFeatures::makeTxDbFromGRanges(gff, metadata = md)
 \describe{
 AnnotationDbi::saveDb(txdb, "./inst/extdata/txdb.sql")
 }
+}
+\value{
+A SQLlite database
 }
 \description{
 A tiny TxDb object holding genomic feature coordinates of 72 

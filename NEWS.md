@@ -1,3 +1,13 @@
+# CHANGES IN VERSION 0.99.15
+
+## NEW FEATURES
+   None
+## SIGNIFICANT CHANGES
+   - Provide link to all external and internal data in manual
+   - Add examples to all plot functions
+## BUG FIXES
+   None
+
 # CHANGES IN VERSION 0.99.14
 
 ## NEW FEATURES

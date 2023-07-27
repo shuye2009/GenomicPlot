@@ -2,9 +2,8 @@
 
 gtffile <- system.file("extdata", "gencode.v19.annotation_chr19.gtf", 
 package = "GenomicPlot")
-gff <- suppressMessages(RCAS::importGtf(saveObjectAsRds = TRUE,
-                                        readFromRds = FALSE,
-                                        filePath = gtffile))
+gff <- RCAS::importGtf(saveObjectAsRds = TRUE, readFromRds = FALSE, 
+                       filePath = gtffile)
 md <- data.frame(name = "Genome", value = "hg19")
 txdb <- GenomicFeatures::makeTxDbFromGRanges(gff, metadata = md)
 
