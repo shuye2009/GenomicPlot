@@ -5,8 +5,8 @@
 \alias{GenomicPlot}
 \title{GenomicPlot-package}
 \description{
-An R package for efficient and flexible visualization of NGS 
-coverage profiles
+An R package for efficient and flexible visualization of 
+genome-wide NGS coverage profiles
 }
 \details{
 The goal of `GenomicPlot` is to provide an efficient visualization
@@ -17,7 +17,8 @@ computed and displayed with respect to genomic features (such as UTR, CDS,
 enhancer), and user defined genomic loci or regions. Statistical tests on 
 signal intensity within user defined regions of interest can be performed 
 and presented as box plots or pie charts. Parallel processing is enabled to 
-speed up computation on multi-core platforms. Main functions are as follows:
+speed up computation on multi-core platforms. 
+Main functions are as follows:
 \itemize{
  \item   \code{\link{plot_5parts_metagene}} generates genomic (with introns) 
      or metagenomic (without introns) plots around gene body and its upstream 

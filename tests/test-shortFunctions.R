@@ -3,24 +3,57 @@ library(testthat)
 
 Sys.setenv("R_TESTS" = "")
 
-test_that("testing parallel_scoreMatrixBin", {
-   bedQueryFiles <- c(
-     system.file("extdata", "test_chip_peak_chr19.narrowPeak", 
-                 package = "GenomicPlot"),
-     system.file("extdata", "test_chip_peak_chr19.bed", 
-                 package = "GenomicPlot"),
-     system.file("extdata", "test_clip_peak_chr19.bed", package = "GenomicPlot")
-   )
-   names(bedQueryFiles) <- c("NarrowPeak", "SummitPeak", "iCLIPPeak")
-   
-   bedimportParams <- setImportParams(
-      offset = 0, fix_width = 100, fix_point = "center", norm = FALSE,
-      useScore = FALSE, outRle = FALSE, useSizeFactor = FALSE, genome = "hg19"
-   )
-   
+data(gf5_meta)
+data(gf5_genomic)
+
+gtffile <- system.file("extdata", "gencode.v19.annotation_chr19.gtf", 
+                       package = "GenomicPlot")
+txdb <- AnnotationDbi::loadDb(system.file("extdata", "txdb.sql", 
+                                          package = "GenomicPlot"))
+
+bedQueryFiles <- c(
+   system.file("extdata", "test_chip_peak_chr19.narrowPeak", 
+               package = "GenomicPlot"),
+   system.file("extdata", "test_chip_peak_chr19.bed", package = "GenomicPlot"),
+   system.file("extdata", "test_clip_peak_chr19.bed", package = "GenomicPlot")
+)
+names(bedQueryFiles) <- c("NarrowPeak", "SummitPeak", "iCLIPPeak")
+
+bedImportParams <- setImportParams(
+   offset = 0, fix_width = 100, fix_point = "center", norm = FALSE,
+   useScore = FALSE, outRle = TRUE, useSizeFactor = FALSE, genome = "hg19"
+)
+
+bamQueryFiles <- system.file("extdata", "treat_chr19.bam", 
+                             package = "GenomicPlot")
+names(bamQueryFiles) <- "clip_bam"
+bamInputFiles <- system.file("extdata", "input_chr19.bam", 
+                             package = "GenomicPlot")
+names(bamInputFiles) <- "clip_input"
+
+bamImportParams <- setImportParams(
+   offset = -1, fix_width = 0, fix_point = "start", norm = TRUE,
+   useScore = FALSE, outRle = TRUE, useSizeFactor = FALSE, genome = "hg19"
+)
+
+chipQueryFiles <- system.file("extdata", "chip_treat_chr19.bam",
+                              package = "GenomicPlot")
+names(chipQueryFiles) <- "chip_bam"
+chipInputFiles <- system.file("extdata", "chip_input_chr19.bam",
+                              package = "GenomicPlot")
+names(chipInputFiles) <- "chip_input"
+
+chipImportParams <- setImportParams(
+   offset = 0, fix_width = 150, fix_point = "start", norm = TRUE,
+   useScore = FALSE, outRle = TRUE, useSizeFactor = FALSE, genome = "hg19"
+)
+
+
+test_that("testing parallel_countOverlaps", {
+   importParams <- setImportParams(fix_width = 100, outRle = FALSE)
    out_list <- handle_input(
       inputFiles = bedQueryFiles,
-      importParams = bedimportParams, verbose = TRUE, nc = 2
+      importParams = importParams, verbose = FALSE, nc = 2
    )
    
    seqi <- GenomeInfoDb::Seqinfo(genome = "hg19") 
@@ -33,29 +66,13 @@ test_that("testing parallel_scoreMatrixBin", {
 })
 
 test_that("testing parallel_scoreMatrixBin", {
-   queryFiles <- system.file("extdata", "chip_treat_chr19.bam", 
-                             package = "GenomicPlot")
-   names(queryFiles) <- "query"
    
-   chipimportParams <- setImportParams(
-     offset = 0, fix_width = 150, fix_point = "start", norm = TRUE,
-     useScore = FALSE, outRle = TRUE, useSizeFactor = FALSE, genome = "hg19"
-   )
-   
-   queryRegion <- handle_input(queryFiles, chipimportParams, 
+   queryRegion <- handle_input(chipQueryFiles, chipImportParams, 
                                verbose = TRUE)[[1]]$query
    
-   windowFiles <- system.file("extdata", "test_chip_peak_chr19.narrowPeak", 
-     package = "GenomicPlot"
-   )
-   names(windowFiles) <- "narrowPeak"
+   importParams <- setImportParams(outRle = FALSE)
    
-   importParams <- setImportParams(
-     offset = 0, fix_width = 0, fix_point = "start", norm = FALSE,
-     useScore = FALSE, outRle = FALSE, useSizeFactor = FALSE, genome = "hg19"
-   )
-   
-   windowRegion <- handle_bed(windowFiles, importParams, verbose = TRUE)$query
+   windowRegion <- handle_bed(bedQueryFiles[1], importParams, verbose = TRUE)$query
    
    out <- parallel_scoreMatrixBin(
      queryRegions = queryRegion,
@@ -74,44 +91,20 @@ test_that("testing start and stop of cluster", {
 })
 
 test_that("testing handle_bed", {
-   queryFiles <- system.file("extdata", "test_chip_peak_chr19.narrowPeak", 
-      package = "GenomicPlot")
-   names(queryFiles) <- "narrowPeak"
-   
-   bedimportParams <- setImportParams(
-     offset = 0, fix_width = 100, fix_point = "center", norm = FALSE,
-     useScore = FALSE, outRle = TRUE, useSizeFactor = FALSE, genome = "hg19"
-   )
-   
-   out <- handle_bed(queryFiles, bedimportParams, verbose = TRUE)
+   out <- handle_bed(bedQueryFiles[1], bedImportParams, verbose = TRUE)
 })
 
 test_that("testing effective_size", {
-   queryFiles <- system.file("extdata", "chip_treat_chr19.bam", 
-    package = "GenomicPlot")
-   names(queryFiles) <- "query"
-   
-   inputFiles <- system.file("extdata", "chip_input_chr19.bam", 
-    package = "GenomicPlot")
-   names(inputFiles) <- "input"
-   
-   chipImportParams <- setImportParams(
-   offset = 0, fix_width = 150, fix_point = "start", norm = TRUE,
-   useScore = FALSE, outRle = FALSE, useSizeFactor = FALSE, genome = "hg19"
-   )
-   
+   importParams <- setImportParams(outRle = FALSE)
    out_list <- handle_input(
-     inputFiles = c(queryFiles, inputFiles),
-     importParams = chipImportParams, verbose = TRUE, nc = 2
+     inputFiles = c(chipQueryFiles, chipInputFiles),
+     importParams = importParams, verbose = TRUE, nc = 2
    )
    
    out <- effective_size(out_list, outRle = TRUE)
 })
 
 test_that("testing handle_input", {
-   queryFiles1 <- system.file("extdata", "treat_chr19.bam", 
-      package = "GenomicPlot")
-   names(queryFiles1) <- "query"
    
    queryFiles2 <- system.file("extdata", "test_wig_chr19_+.wig", 
       package = "GenomicPlot")
@@ -121,12 +114,9 @@ test_that("testing handle_input", {
       package = "GenomicPlot")
    names(queryFiles3) <- "test_bw" 
    
-   importParams <- setImportParams(
-     offset = 0, fix_width = 0, fix_point = "start", norm = FALSE,
-     useScore = FALSE, outRle = TRUE, useSizeFactor = FALSE, genome = "hg19"
-   )
+   importParams <- setImportParams()
     
-   out <- handle_input(c(queryFiles1, queryFiles2, queryFiles3), 
+   out <- handle_input(c(bamQueryFiles, queryFiles2, queryFiles3), 
       importParams, verbose = TRUE)
 })
 
@@ -263,9 +253,7 @@ test_that("testing overlap_triple", {
    )
    
    p <- overlap_triple(list(subject1 = subject1, subject2 = subject2,
-                            query = query),
-     filter_by_overlaps_stranded
-   )
+                            query = query), filter_by_overlaps_stranded)
 })
 test_that("testing overlap_pair", {
    test_list <- list(A = c(1, 2, 3, 4, 5), B = c(4, 5, 7))
@@ -418,72 +406,28 @@ test_that("testing draw_matrix_heatmap", {
 })
 
 test_that("testing plot_bam_correlation", {
-   bamQueryFiles <- c(
-      system.file("extdata", "chip_input_chr19.bam", package = "GenomicPlot"),
-      system.file("extdata", "chip_treat_chr19.bam", package = "GenomicPlot")
-    )
-    names(bamQueryFiles) <- c("chip_input", "chip_treat")
-    
-    bamImportParams <- setImportParams(
-       offset = 0, fix_width = 150, fix_point = "start", norm = FALSE,
-       useScore = FALSE, outRle = FALSE, useSizeFactor = FALSE, genome = "hg19"
-    )
+ 
+    importParams <- setImportParams(fix_width = 150, outRle = FALSE)
    
     plot_bam_correlation(
-      bamFiles = bamQueryFiles, binSize = 100000, outPrefix = NULL,
-      importParams = bamImportParams, nc = 2, verbose = FALSE
+      bamFiles = c(chipQueryFiles, chipInputFiles), binSize = 100000, 
+      outPrefix = NULL, importParams = importParams, nc = 2, verbose = FALSE
     )
 })
  
 test_that("testing plot_overlap_bed", {
-  queryFiles <- c(
-    system.file("extdata", "test_chip_peak_chr19.narrowPeak",
-                package = "GenomicPlot"),
-    system.file("extdata", "test_chip_peak_chr19.bed", package = "GenomicPlot"),
-    system.file("extdata", "test_clip_peak_chr19.bed", package = "GenomicPlot")
-  )
-  names(queryFiles) <- c("narrowPeak", "summitPeak", "clipPeak")
- 
-  bedimportParams <- setImportParams(
-    offset = 0, fix_width = 100, fix_point = "center", norm = FALSE,
-    useScore = FALSE, outRle = FALSE, useSizeFactor = FALSE, genome = "hg19"
-  )
- 
-  plot_overlap_bed(
-    bedList = queryFiles, importParams = bedimportParams, pairOnly = FALSE,
+   importParams <- setImportParams(fix_width = 100, outRle = FALSE)
+   plot_overlap_bed(
+    bedList = bedQueryFiles, importParams = importParams, pairOnly = FALSE,
     stranded = FALSE, outPrefix = NULL
-  )
+   )
 })
 
 test_that("testing plot_argument_list", {
    
-    gtffile <- system.file("extdata", "gencode.v19.annotation_chr19.gtf",
-                           package = "GenomicPlot")
-    gff <- RCAS::importGtf(saveObjectAsRds = TRUE, filePath = gtffile)
-    txdb <- makeTxDbFromGRanges(gff)
-    txdb$user_genome <- "hg19"
-   
-    queryfiles <- system.file("extdata", "treat_chr19.bam",
-                              package = "GenomicPlot")
-    names(queryfiles) <- "query"
-   
-    inputfiles <- system.file("extdata", "input_chr19.bam", 
-                              package = "GenomicPlot")
-    names(inputfiles) <- "input"
-   
-    gfeatures <- prepare_5parts_genomic_features(txdb,
-      meta = TRUE, nbins = 100, fiveP = -1000,
-      threeP = 1000, longest = TRUE, verbose = FALSE
-    )
-   
-    bamimportParams <- setImportParams(
-      offset = -1, fix_width = 0, fix_point = "start", norm = TRUE,
-      useScore = FALSE, outRle = TRUE, useSizeFactor = FALSE, genome = "hg19"
-    )
-   
     alist <- list(
-      "txdb" = txdb, "treat" = queryfiles, "control" = inputfiles, 
-      "feature" = gfeatures, "param" = bamimportParams
+      "txdb" = txdb, "treat" = bamQueryFiles, "control" = bamInputFiles, 
+      "feature" = gf5_meta, "param" = bamImportParams
     )
     
     p <- GenomicPlot:::plot_named_list(alist)
@@ -491,20 +435,8 @@ test_that("testing plot_argument_list", {
 
 
 test_that("testing plot_peak_annotation", {
-   gtfFile <- system.file("extdata", "gencode.v19.annotation_chr19.gtf", 
-                          package = "GenomicPlot")
-   
-   centerFile <- system.file("extdata", "test_chip_peak_chr19.bed", 
-                             package = "GenomicPlot")
-   names(centerFile) <- c("summitPeak")
-   
-   bedimportParams <- setImportParams(
-      offset = 0, fix_width = 100, fix_point = "center", norm = FALSE,
-      useScore = FALSE, outRle = FALSE, useSizeFactor = FALSE, genome = "hg19"
-   )
-   
    plot_peak_annotation(
-      peakFile = centerFile, gtfFile = gtfFile, importParams = bedimportParams,
+      peakFile = bedQueryFiles[2], gtfFile = gtffile, importParams = bedImportParams,
       fiveP = -2000, dsTSS = 200, threeP = 2000, simple = FALSE
    )  
 })
@@ -525,5 +457,90 @@ test_that("testing plot_overlap_genes", {
    plot_overlap_genes(testfiles, c(3,2,1,1), pairOnly = FALSE)
 })
 
+test_that("testing plot_5parts_metagene", {
+   plot_5parts_metagene(
+      queryFiles = bedQueryFiles,
+      gFeatures_list = list("metagene" = gf5_meta),
+      inputFiles = NULL,
+      importParams = bedImportParams,
+      verbose = FALSE,
+      smooth = TRUE,
+      scale = FALSE,
+      stranded = TRUE,
+      outPrefix = NULL,
+      transform = NA,
+      heatmap = TRUE,
+      rmOutlier = 0,
+      heatRange = NULL,
+      nc = 2
+   )
+})
 
+test_that("testing plot_locus", {
+   plot_locus(
+      queryFiles = bedQueryFiles[c(1, 3)],
+      centerFiles = bedQueryFiles[2],
+      ext = c(-500, 500),
+      hl = c(-100, 100),
+      inputFiles = NULL,
+      importParams = bedImportParams,
+      shade = TRUE,
+      binSize = 10,
+      refPoint = "center",
+      Xlab = "Summit",
+      verbose = FALSE,
+      smooth = TRUE,
+      scale = FALSE,
+      stranded = TRUE,
+      outPrefix = NULL,
+      transform = NA,
+      heatmap = TRUE,
+      heatRange = NULL,
+      rmOutlier = 0,
+      Ylab = "Coverage/base/peak",
+      nc = 2
+   )
+})
  
+test_that("testing plot_region", {
+   plot_region(
+      queryFiles = chipQueryFiles,
+      centerFiles = bedQueryFiles[1],
+      inputFiles = chipInputFiles,
+      nbins = 100,
+      heatmap = TRUE,
+      scale = FALSE,
+      regionName = "narrowPeak",
+      importParams = chipImportParams,
+      verbose = FALSE,
+      fiveP = -200,
+      threeP = 200,
+      smooth = TRUE,
+      transform = "log2",
+      stranded = TRUE,
+      Ylab = "Coverage/base/peak",
+      outPrefix = NULL,
+      rmOutlier = 0,
+      nc = 2
+   )
+})
+
+test_that("testing plot_start_end", {
+   plot_start_end(
+      queryFiles = bamQueryFiles,
+      inputFiles = bamInputFiles,
+      txdb = txdb,
+      centerFiles = "intron",
+      binSize = 10,
+      importParams = bamImportParams,
+      ext = c(-100, 100, -100, 100),
+      hl = c(-50, 50, -50, 50),
+      insert = 100,
+      stranded = TRUE,
+      scale = FALSE,
+      smooth = TRUE,
+      transform = "log2",
+      outPrefix = NULL,
+      nc = 2
+   )
+})

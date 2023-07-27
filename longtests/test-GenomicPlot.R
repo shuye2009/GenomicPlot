@@ -8,9 +8,8 @@ setwd(outdir)
 
 gtffile <- system.file("extdata", "gencode.v19.annotation_chr19.gtf", 
                        package = "GenomicPlot")
-gff <- RCAS::importGtf(saveObjectAsRds = TRUE, filePath = gtffile)
-txdb <- makeTxDbFromGRanges(gff)
-txdb$user_genome <- "hg19"
+txdb <- AnnotationDbi::loadDb(system.file("extdata", "txdb.sql", 
+                                          package = "GenomicPlot"))
 
 bedQueryFiles <- c(
   system.file("extdata", "test_chip_peak_chr19.narrowPeak", 
@@ -37,9 +36,9 @@ bamimportParams <- setImportParams(
   useScore = FALSE, outRle = TRUE, useSizeFactor = FALSE, genome = "hg19"
 )
 
-chipQureyFiles <- system.file("extdata", "chip_treat_chr19.bam",
+chipQueryFiles <- system.file("extdata", "chip_treat_chr19.bam",
                               package = "GenomicPlot")
-names(chipQureyFiles) <- "chip_bam"
+names(chipQueryFiles) <- "chip_bam"
 chipInputFiles <- system.file("extdata", "chip_input_chr19.bam",
                               package = "GenomicPlot")
 names(chipInputFiles) <- "chip_input"
@@ -51,13 +50,11 @@ chipimportParams <- setImportParams(
 
 
 test_that("testing plot_5parts_metagene", {
-  gf <- prepare_5parts_genomic_features(txdb, meta = TRUE, nbins = 100, 
-                                        fiveP = -2000, threeP = 1000, 
-                                        longest = TRUE)
+  data("gf5_meta")
   op <- "test_plot_5parts_metagene1"
   plot_5parts_metagene(
     queryFiles = bedQueryFiles,
-    gFeatures_list = list("metagene" = gf),
+    gFeatures_list = list("metagene" = gf5_meta),
     inputFiles = NULL,
     importParams = bedimportParams,
     verbose = FALSE,
@@ -76,7 +73,7 @@ test_that("testing plot_5parts_metagene", {
   op <- "test_plot_5parts_metagene2"
   plot_5parts_metagene(
     queryFiles = bamQueryFiles,
-    gFeatures_list = list("metagene" = gf),
+    gFeatures_list = list("metagene" = gf5_meta),
     inputFiles = bamInputFiles,
     scale = FALSE,
     verbose = FALSE,
@@ -120,7 +117,7 @@ test_that("testing plot_locus", {
   
   op <- "test_plot_locus2"
   plot_locus(
-    queryFiles = chipQureyFiles,
+    queryFiles = chipQueryFiles,
     centerFiles = bedQueryFiles[2:3],
     ext = c(-500, 500),
     hl = c(-100, 100),
@@ -174,7 +171,7 @@ test_that("testing plot_peak_annotation", {
 test_that("testing plot_region", {
   op <- "test_plot_region"
   plot_region(
-    queryFiles = chipQureyFiles,
+    queryFiles = chipQueryFiles,
     centerFiles = bedQueryFiles[1],
     inputFiles = chipInputFiles,
     nbins = 100,
@@ -188,6 +185,7 @@ test_that("testing plot_region", {
     smooth = TRUE,
     transform = "log2",
     stranded = TRUE,
+    Ylab = "Coverage/base/peak",
     outPrefix = op,
     rmOutlier = 0,
     nc = 2

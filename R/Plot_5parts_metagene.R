@@ -40,6 +40,37 @@
 #' @return a dataframe containing the data used for plotting
 #' @author Shuye Pu
 #'
+#' @examples
+#' 
+#' data(gf5_meta)
+#' queryfiles <- system.file("extdata", "treat_chr19.bam", 
+#'                           package = "GenomicPlot")
+#' names(queryfiles) <- "clip_bam"
+#' inputfiles <- system.file("extdata", "input_chr19.bam", 
+#'                           package = "GenomicPlot")
+#' names(inputfiles) <- "clip_input"
+#' 
+#' bamimportParams <- setImportParams(
+#'     offset = -1, fix_width = 0, fix_point = "start", norm = TRUE,
+#'     useScore = FALSE, outRle = TRUE, useSizeFactor = FALSE, genome = "hg19"
+#' )
+#' 
+#' plot_5parts_metagene(
+#'     queryFiles = queryfiles,
+#'     gFeatures_list = list("metagene" = gf5_meta),
+#'     inputFiles = inputfiles,
+#'     scale = FALSE,
+#'     verbose = FALSE,
+#'     transform = NA,
+#'     smooth = TRUE,
+#'     stranded = TRUE,
+#'     outPrefix = NULL,
+#'     importParams = bamimportParams,
+#'     heatmap = TRUE,
+#'     rmOutlier = 0,
+#'     nc = 2
+#' )
+#' 
 #' @export plot_5parts_metagene
 #'
 

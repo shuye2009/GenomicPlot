@@ -56,6 +56,49 @@
 #' @return a list of two dataframes containing the data used for plotting and 
 #'  for statistical testing
 #' @author Shuye Pu
+#' 
+#' @examples
+#' centerfiles <- c(
+#' system.file("extdata", "test_clip_peak_chr19.bed", package = "GenomicPlot"),
+#' system.file("extdata", "test_chip_peak_chr19.bed", package = "GenomicPlot"))
+#' 
+#' names(centerfiles) <- c("iCLIPPeak", "SummitPeak")
+#' queryfiles <- c(
+#'     system.file("extdata", "chip_treat_chr19.bam", package = "GenomicPlot"))
+#' 
+#' names(queryfiles) <- c("chip_bam")
+#' inputfiles <- c(
+#'     system.file("extdata", "chip_input_chr19.bam", package = "GenomicPlot"))
+#' names(inputfiles) <- c("chip_input")
+#' 
+#' chipimportParams <- setImportParams(
+#'     offset = 0, fix_width = 150, fix_point = "start", norm = TRUE,
+#'     useScore = FALSE, outRle = TRUE, useSizeFactor = FALSE, genome = "hg19"
+#' )
+#' plot_locus(
+#'   queryFiles = queryfiles,
+#'   centerFiles = centerfiles,
+#'   ext = c(-500, 500),
+#'   hl = c(-100, 100),
+#'   shade = TRUE,
+#'   smooth = TRUE,
+#'   importParams = chipimportParams,
+#'   binSize = 10,
+#'   refPoint = "center",
+#'   Xlab = "Center",
+#'   inputFiles = inputfiles,
+#'   stranded = TRUE,
+#'   scale = FALSE,
+#'   outPrefix = NULL,
+#'   verbose = FALSE,
+#'   transform = NA,
+#'   rmOutlier = 0,
+#'   Ylab = "Coverage/base/peak",
+#'   statsMethod = "wilcox.test",
+#'   heatmap = TRUE,
+#'   nc = 2
+#' )
+#' 
 #'
 #' @export plot_locus
 
@@ -393,11 +436,11 @@ plot_locus <- function(queryFiles,
             }
         }
     }
-
+    
     ## plot query profile and heatmap side by side
-
+    
     rowp <- plot_grid(plotlist = plot_list, nrow = 1, align = "h", axis = "b")
-
+    
     if (heatmap) {
         qheatmap_list <- heatmap_list[names(plot_list)]
         groblist <- lapply(qheatmap_list, function(x)
@@ -409,7 +452,6 @@ plot_locus <- function(queryFiles,
     } else {
         print(rowp)
     }
-
 
     if (!is.null(inputFiles)) {
         plot_list <- list()

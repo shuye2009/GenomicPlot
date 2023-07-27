@@ -28,12 +28,8 @@ respectively, the TTS ranges from the 3' end of the gene to threeP
 downstream, or the start of a downstream gene, whichever is closer.
 }
 \examples{
-gtffile <- system.file("extdata", "gencode.v19.annotation_chr19.gtf",
-    package = "GenomicPlot"
-)
-gff <- RCAS::importGtf(saveObjectAsRds = TRUE, filePath = gtffile)
-txdb <- makeTxDbFromGRanges(gff)
-txdb$user_genome <- "hg19"
+txdb <- AnnotationDbi::loadDb(system.file("extdata", "txdb.sql", 
+    package = "GenomicPlot"))
 
 f <- get_txdb_features(txdb, dsTSS = 100, fiveP = -100, threeP = 100)
 

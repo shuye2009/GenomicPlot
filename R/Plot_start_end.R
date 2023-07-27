@@ -49,7 +49,40 @@
 #' @return a list of two objects, the first is a GRanges object, the second is 
 #'  a GRangesList object
 #' @author Shuye Pu
+#' 
+#' @examples
 #'
+#' txdb <- AnnotationDbi::loadDb(system.file("extdata", "txdb.sql", 
+#'     package = "GenomicPlot"))
+#' bamQueryFiles <- system.file("extdata", "treat_chr19.bam", 
+#'     package = "GenomicPlot")
+#' names(bamQueryFiles) <- "clip_bam"
+#' bamInputFiles <- system.file("extdata", "input_chr19.bam", 
+#'                              package = "GenomicPlot")
+#' names(bamInputFiles) <- "clip_input"
+#' 
+#' bamimportParams <- setImportParams(
+#'     offset = -1, fix_width = 0, fix_point = "start", norm = TRUE,
+#'     useScore = FALSE, outRle = TRUE, useSizeFactor = FALSE, genome = "hg19"
+#' )
+#' 
+#' plot_start_end(
+#'     queryFiles = bamQueryFiles,
+#'     inputFiles = bamInputFiles,
+#'     txdb = txdb,
+#'     centerFiles = "intron",
+#'     binSize = 10,
+#'     importParams = bamimportParams,
+#'     ext = c(-500, 200, -200, 500),
+#'     hl = c(-100, 100, -100, 100),
+#'     insert = 100,
+#'     stranded = TRUE,
+#'     scale = FALSE,
+#'     smooth = TRUE,
+#'     transform = "log2",
+#'     outPrefix = NULL,
+#'     nc = 2
+#' )
 #' @export plot_start_end
 #'
 

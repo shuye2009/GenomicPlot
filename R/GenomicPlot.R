@@ -1,7 +1,7 @@
 
 #' @title GenomicPlot-package
-#' @description An R package for efficient and flexible visualization of NGS 
-#' coverage profiles
+#' @description An R package for efficient and flexible visualization of 
+#' genome-wide NGS coverage profiles
 #' 
 #' @details The goal of `GenomicPlot` is to provide an efficient visualization
 #' tool for next generation sequencing (NGS) data with rich functionality and
@@ -11,7 +11,8 @@
 #' enhancer), and user defined genomic loci or regions. Statistical tests on 
 #' signal intensity within user defined regions of interest can be performed 
 #' and presented as box plots or pie charts. Parallel processing is enabled to 
-#' speed up computation on multi-core platforms. Main functions are as follows:
+#' speed up computation on multi-core platforms. 
+#' Main functions are as follows:
 #' \itemize{
 #'  \item   \code{\link{plot_5parts_metagene}} generates genomic (with introns) 
 #'      or metagenomic (without introns) plots around gene body and its upstream 
@@ -43,47 +44,6 @@
 #'
 #' @docType package
 #' @name GenomicPlot
-NULL
-
-#' 
-#' @title Toy data for examples and testing
-#' @description The data files in the extdata directory contain data for next 
-#' generation sequencing read alignments, MACS2 peaks and gene annotation, which 
-#' are used to test the package and generate plots in the package vignettes. 
-#' Except for the gtf file, all other files are derived from experimental data 
-#' produced in-house. To meet the package file size limit, all data are 
-#' restricted to chr19:58000-507000 of the human genome version hg19. Details 
-#' for each file are as follows.
-#' @details
-#' \itemize{
-#'  \item "gencode.v19.annotation_chr19.gtf" is an excerpt of the gene 
-#'      annotation file downloaded from 
-#'      \url{https://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_19/gencode.v19.annotation.gtf.gz}. 
-#'      "gencode.v19.annotation_chr19.gtf.granges.rds" is a GRanges object as a 
-#'      result of importing the gtf file.
-#'  \item "chip_treat_chr19.bam(.bai)" and "chip_input_chr19.bam(.bai)" are 
-#'      paired-end read alignment data from ChIPseq experiments.
-#'  \item "treat_chr19.bam(.bai)" and "input_chr19.bam(.bai)" are single-end 
-#'      read alignment data from iCLIP experiments.
-#'  \item "test_wig_chr19_+(-).wig", "test_wig_chr19_+(-).bw" are iCLIP 
-#'      alignment data in WIG and BIGWIG format, respectively; '+' and '-' 
-#'      represent forward and reverse strand, respectively. 
-#'  \item "test_clip_peak_chr19.bed" contains strand-specific iCLIP peak in BED 
-#'      format. 
-#'  \item "test_chip_peak_chr19.bed" and "test_chip_peak_chr19.narrowPeak" 
-#'      contain ChIPseq peaks generated with MACS2, in summit peak and narrow 
-#'      peak format, respectively. 
-#'  \item "test_file1.txt", "test_file2.txt", "test_file3.txt" and 
-#'      "test_file4.txt" are tab-delimited text files,  each contains various 
-#'      human gene names in different columns. 
-#' }
-#' @returns These files will be read by handle_input function, which will 
-#'      produce GRanges object or RleList object, depending on import parameters
-#' @author Shuye Pu
-#' @docType data
-#' @name extdata
-#' @keywords datasets
-#' 
 NULL
 
 
@@ -163,18 +123,15 @@ plot_overlap_bed <- function(bedList,
 
     # get all pair-wise overlap counts into a matrix, display as a heatmap
 
-    counts <- matrix(rep(0L, length(grList)^2), nrow = length(grList))
-    for (i in seq_along(grList)) {
-        for (j in seq_along(grList)) {
-            if (stranded) {
-                counts[i, j] <- length(filter_by_overlaps_stranded(grList[[i]], 
-                  grList[[j]], ignore.order = FALSE))
-            } else {
-                counts[i, j] <- length(plyranges::filter_by_overlaps(grList[[i]], 
-                                                                grList[[j]]))
-            }
-        }
-    }
+    fil <- ifelse(stranded, 
+                  filter_by_overlaps_stranded,
+                  filter_by_overlaps_nonstranded)
+    
+    counts <- vapply(grList, function(i) 
+        vapply(grList, function(j)
+            length(fil(i, j, ignore.order = FALSE)), integer(1)), 
+        integer(length(grList))) |> t()
+    
     rownames(counts) <- colnames(counts) <- names(bedList)
     counts_long <- tidyr::pivot_longer(as.data.frame(counts), 
                                 cols = seq_len(ncol(counts)), 
@@ -198,37 +155,23 @@ plot_overlap_bed <- function(bedList,
         )
     print(g)
     grid.newpage()
-    if (stranded) {
-        lapply(pairs, overlap_pair, filter_by_overlaps_stranded)
-        if (!pairOnly) {
-            if (length(grList) > 2) {
-                triples <- combn(grList, 3, simplify = FALSE)
-                lapply(triples, overlap_triple, filter_by_overlaps_stranded)
-                if (length(grList) > 3) {
-                    quads <- combn(grList, 4, simplify = FALSE)
-                    lapply(quads, overlap_quad, filter_by_overlaps_stranded)
-                }
-            }
-        }
-    } else {
-        lapply(pairs, overlap_pair, filter_by_overlaps_nonstranded)
-        if (!pairOnly) {
-            if (length(grList) > 2) {
-                triples <- combn(grList, 3, simplify = FALSE)
-                lapply(triples, overlap_triple, filter_by_overlaps_nonstranded)
-                if (length(grList) > 3) {
-                    quads <- combn(grList, 4, simplify = FALSE)
-                    lapply(quads, overlap_quad, filter_by_overlaps_nonstranded)
-                }
+  
+    lapply(pairs, overlap_pair, fil)
+    if (!pairOnly) {
+        if (length(grList) > 2) {
+            triples <- combn(grList, 3, simplify = FALSE)
+            lapply(triples, overlap_triple, fil)
+            if (length(grList) > 3) {
+                quads <- combn(grList, 4, simplify = FALSE)
+                lapply(quads, overlap_quad, fil)
             }
         }
     }
+    
     if (!is.null(outPrefix)) {
         print(params)
         on.exit(dev.off(), add = TRUE)
     }
-
-    return(g)
 }
 
 #' @title Plot Venn diagrams depicting overlap of gene lists
@@ -273,6 +216,11 @@ plot_overlap_genes <- function(fileList,
                                outPrefix = NULL) {
     stopifnot(all(file.exists(fileList)))
     stopifnot(is.numeric(columnList))
+    
+    functionName <- as.character(match.call()[[1]])
+    params <- plot_named_list(as.list(environment()))
+    force(params)
+    
     geneList <- mapply(x = fileList, y = columnList, function(x, y) {
         df <- read.delim(x, header = TRUE, sep = "\t")
         genes <- unique(df[, y])
@@ -297,7 +245,10 @@ plot_overlap_genes <- function(fileList,
         }
     }
 
-    if (!is.null(outPrefix)) on.exit(dev.off(), add = TRUE)
+    if (!is.null(outPrefix)) {
+        print(params)
+        on.exit(dev.off(), add = TRUE)
+    }
 
     invisible(geneList)
 }
@@ -315,14 +266,12 @@ plot_overlap_genes <- function(fileList,
 #'
 #' @author Shuye Pu
 #'
-#' @examples
-#' gtffile <- system.file("extdata", "gencode.v19.annotation_chr19.gtf",
-#'     package = "GenomicPlot"
-#' )
-#' gff <- suppressMessages(RCAS::importGtf(saveObjectAsRds = TRUE, 
-#'     filePath = gtffile))
-#' txdb <- makeTxDbFromGRanges(gff)
-#' txdb$user_genome <- "hg19"
+#' @examples 
+#' 
+#' data(gf5_genomic)
+#' 
+#' txdb <- AnnotationDbi::loadDb(system.file("extdata", "txdb.sql", 
+#'     package = "GenomicPlot"))
 #'
 #' queryfiles <- system.file("extdata", "treat_chr19.bam",
 #'     package = "GenomicPlot"
@@ -334,11 +283,6 @@ plot_overlap_genes <- function(fileList,
 #' )
 #' names(inputfiles) <- "input"
 #'
-#' gfeatures <- prepare_5parts_genomic_features(txdb,
-#'     meta = TRUE, nbins = 100, fiveP = -1000,
-#'     threeP = 1000, longest = TRUE, verbose = FALSE
-#' )
-#'
 #' bamimportParams <- setImportParams(
 #'     offset = -1, fix_width = 0, fix_point = "start", norm = TRUE,
 #'     useScore = FALSE, outRle = TRUE, useSizeFactor = FALSE, genome = "hg19"
@@ -346,7 +290,7 @@ plot_overlap_genes <- function(fileList,
 #'
 #' alist <- list(
 #'     "txdb" = txdb, "treat" = queryfiles, "control" = inputfiles,
-#'     "feature" = gfeatures, "param" = bamimportParams
+#'     "feature" = gf5_genomic, "param" = bamimportParams
 #' )
 #'
 #' GenomicPlot:::plot_named_list(alist)

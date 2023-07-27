@@ -26,7 +26,7 @@ held fixed.}
 \item{ignore.order}{logical, indicating whether the order of query and 
 subject can be switched, default = TRUE. Overlaps in query and subject often
 have different sizes. This parameter will make the function use whichever is
-smaller to avoid errors when plotting Venn diagrams.}
+smaller to avoid errors when making Venn diagrams.}
 }
 \value{
 a GRanges object
@@ -49,6 +49,8 @@ subject <- GRanges("chr19",
 
 res <- filter_by_overlaps_stranded(query, subject)
 res
+resf <- filter_by_overlaps_stranded(query, subject, ignore.order = FALSE)
+resf
 
 }
 \author{

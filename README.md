@@ -41,14 +41,10 @@ The following is a basic example which shows you how to visualize ChIP-seq peaks
 
 library(GenomicPlot)
 
-gtffile <- system.file("extdata", "gencode.v19.annotation_chr19.gtf", 
-package = "GenomicPlot")
-gff <- RCAS::importGtf(saveObjectAsRds = TRUE, filePath = gtffile)
-txdb <- makeTxDbFromGRanges(gff)
-txdb$user_genome <- "hg19"
+txdb <- AnnotationDbi::loadDb(system.file("extdata", "txdb.sql", 
+    package = "GenomicPlot"))
 
-gf <- prepare_5parts_genomic_features(txdb, meta = TRUE, nbins = 100, 
-fiveP = -2000, threeP = 1000, longest = TRUE)
+data(gf5_meta)
 
 queryfiles <- c(system.file("extdata", "test_chip_peak_chr19.narrowPeak",
                 package = "GenomicPlot"),
@@ -66,7 +62,7 @@ bedimportParams <- setImportParams(
 op <- "test_plot_5parts_metagene1"
 
 plot_5parts_metagene(queryFiles = queryfiles, 
-                     gFeatures = list(metaF = gf), 
+                     gFeatures = list(metaF = gf6_meta), 
                      inputFiles = NULL, 
                      importParams = bedimportParams,
                      verbose = FALSE, 

@@ -128,9 +128,8 @@ parallel_scoreMatrixBin <- function(queryRegions,
                                     weight_col,
                                     stranded,
                                     nc = 2) {
-    bin_num <- as.integer(bin_num)
-    nc <- as.integer(nc)
-    stopifnot(is.integer(c(bin_num, nc)))
+    
+    stopifnot(is.numeric(c(bin_num, nc)))
     call_scoreMatrixBin <- function(windowR) {
         ScoreMatrixBin(target = queryRegions, windows = windowR, 
                        bin.num = bin_num, bin.op = bin_op, 
@@ -145,7 +144,9 @@ parallel_scoreMatrixBin <- function(queryRegions,
     clusterExport(cl, varlist = c("queryRegions", "bin_num", "bin_op", 
                                   "weight_col", "stranded"), 
                   envir = environment())
-    smc <- parLapply(cl, wRs, call_scoreMatrixBin)
+    smc <- parLapply(cl, wRs, ScoreMatrixBin, target = queryRegions, 
+                     bin.num = bin_num, bin.op = bin_op, 
+                     weight.col = weight_col, strand.aware = stranded)
     stop_parallel(cl)
     sm <- lapply(smc, function(x) {
         y <- as(x, "matrix")

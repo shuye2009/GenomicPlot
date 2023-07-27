@@ -1,12 +1,9 @@
 # managing namespace
 
 #' @import methods
+utils::globalVariables(
 #' @import ggplot2
-#' @import Rsamtools
-#' @import GenomicFeatures
-#' @import parallel
-#' @import graphics
-#' @import utils
+#' @importFrom Rsamtools testPairedEndBam idxstatsBam scanBamFlag ScanBamParam
 #' @importFrom parallel detectCores clusterExport parLapply makeCluster 
 #' @importFrom parallel stopCluster clusterApply
 #' @importFrom dplyr bind_cols bind_rows mutate filter arrange %>% group_by 
@@ -47,9 +44,27 @@
 #' @importFrom graphics abline hist pairs panel.smooth par points rect strwidth 
 #' @importFrom graphics text boxplot
 #' @importFrom utils combn head read.delim read.delim2 read.table tail 
-#' @importFrom utils type.convert write.table
+#' @importFrom utils type.convert write.table data object.size
 #' @importFrom stats TukeyHSD aggregate aov approx prcomp heatmap biplot
 #' @importFrom stats as.formula cor density dist ecdf hclust
 #' @importFrom stats ks.test mad median na.omit qqplot quantile
 #' @importFrom stats reorder sd smooth.spline wilcox.test t.test
+)
+
+utils::globalVariables(names = as.character(expression(CDS, Count, Exon, Feature, 
+                                     Fraction, Groups, Intensity, Interval, 
+                                     Intron, Location, N_Intensity, PC1, PC2, 
+                                     Promoter, Query, Rank, Sample, Samples, 
+                                     Transcript, X, Y, chr, chrPeak, 
+                                     chrfeature, correlation, csum, cumCount, 
+                                     endPeak, endfeature, feature, 
+                                     feature_name, fid, gene_id, gene_name, 
+                                     idPeak, k, len, lower, lower_limit, 
+                                     mean_Intensity, name, norm_count, 
+                                     norm_csum, norm_percent, norm_pos, pos, 
+                                     queryIndex, runValue, scorePeak, 
+                                     sd_Intensity, se, startPeak, startfeature,
+                                     strandPeak, strandfeature, transcript_id, 
+                                     tx_name, upper, upper_limit, value, 
+                                     widthfeature, x, x2, y)))
 NULL

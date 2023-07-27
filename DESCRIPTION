@@ -21,18 +21,18 @@ LazyData: FALSE
 Collate: 
     "DrawingFunctions.R" "GenomicPlot.R" "HandleDataMatrix.R" "HandleFeatures.R" 
     "Parallel.R" "ReadData.R" "Setup.R" "Plot_5parts_metagene.R" "Plot_start_end.R" 
-    "Plot_start_end_with_random.R" "Plot_region.R" "Plot_locus.R"
+    "Plot_start_end_with_random.R" "Plot_region.R" "Plot_locus.R" "data.R"
     "Plot_locus_with_random.R" "Plot_peak_annotation.R" "Plot_bam_correlation.R"
-Depends: R (>= 4.3.0), GenomicRanges (>= 1.46.1), GenomicFeatures, ggplot2 (>= 3.3.5), 
-    BiocGenerics, dplyr, grid
+Depends: R (>= 4.3.0), GenomicRanges (>= 1.46.1)
 Imports: methods, Rsamtools, parallel, tidyr, rtracklayer (>= 1.54.0),
    plyranges (>= 1.14.0), cowplot (>= 1.1.1), VennDiagram, ggplotify, GenomeInfoDb, 
    IRanges, ComplexHeatmap, RCAS (>= 1.20.0), scales (>= 1.2.0), GenomicAlignments 
    (>= 1.30.0), edgeR, circlize, viridis, ggsignif (>= 0.6.3), ggsci (>= 2.9), 
-   genomation (>= 1.26.0), ggpubr, grDevices, graphics, stats, utils
-Suggests: knitr, rmarkdown, AnnotationHub, AnnotationDbi, R.utils, 
+   genomation (>= 1.26.0), ggpubr, grDevices, graphics, stats, utils, GenomicFeatures, 
+   ggplot2 (>= 3.3.5), BiocGenerics, dplyr, grid
+Suggests: knitr, rmarkdown, AnnotationHub, AnnotationDbi, R.utils, Biobase,
    BSgenome.Hsapiens.UCSC.hg19, BiocFileCache, TxDb.Hsapiens.UCSC.hg19.knownGene 
-   (>= 3.2.2), BiocStyle, testthat, magick
+   (>= 3.2.2), BiocStyle, testthat
 biocViews: AlternativeSplicing, ChIPSeq, Coverage, GeneExpression, RNASeq, Sequencing, 
    Software, Transcription, Visualization, Annotation
 RoxygenNote: 7.2.3

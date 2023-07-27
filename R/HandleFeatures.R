@@ -19,12 +19,8 @@
 #'
 #' @examples
 #'
-#' gtffile <- system.file("extdata", "gencode.v19.annotation_chr19.gtf",
-#'     package = "GenomicPlot"
-#' )
-#' gff <- RCAS::importGtf(saveObjectAsRds = TRUE, filePath = gtffile)
-#' txdb <- makeTxDbFromGRanges(gff)
-#' txdb$user_genome <- "hg19"
+#' txdb <- AnnotationDbi::loadDb(system.file("extdata", "txdb.sql", 
+#'     package = "GenomicPlot"))
 #' longestTx <- extract_longest_tx(txdb)
 #'
 #' @export extract_longest_tx
@@ -119,12 +115,8 @@ extract_longest_tx <- function(txdb) {
 #'
 #' @examples
 #'
-#' gtffile <- system.file("extdata", "gencode.v19.annotation_chr19.gtf",
-#'     package = "GenomicPlot"
-#' )
-#' gff <- RCAS::importGtf(saveObjectAsRds = TRUE, filePath = gtffile)
-#' txdb <- makeTxDbFromGRanges(gff)
-#' txdb$user_genome <- "hg19"
+#' txdb <- AnnotationDbi::loadDb(system.file("extdata", "txdb.sql", 
+#'     package = "GenomicPlot"))
 #'
 #' output <- get_genomic_feature_coordinates(txdb,
 #'     featureName = "cds", featureSource = "gencode",
@@ -294,12 +286,8 @@ get_genomic_feature_coordinates <- function(txdb,
 #' @author Shuye Pu
 #'
 #' @examples
-#' gtffile <- system.file("extdata", "gencode.v19.annotation_chr19.gtf",
-#'     package = "GenomicPlot"
-#' )
-#' gff <- RCAS::importGtf(saveObjectAsRds = TRUE, filePath = gtffile)
-#' txdb <- makeTxDbFromGRanges(gff)
-#' txdb$user_genome <- "hg19"
+#' txdb <- AnnotationDbi::loadDb(system.file("extdata", "txdb.sql", 
+#'     package = "GenomicPlot"))
 #'
 #' gf <- prepare_3parts_genomic_features(txdb,
 #'     meta = FALSE, nbins = 100, fiveP = -1000, threeP = 1000,
@@ -411,12 +399,8 @@ prepare_3parts_genomic_features <- function(txdb,
 #' @author Shuye Pu
 #'
 #' @examples
-#' gtffile <- system.file("extdata", "gencode.v19.annotation_chr19.gtf",
-#'     package = "GenomicPlot"
-#' )
-#' gff <- RCAS::importGtf(saveObjectAsRds = TRUE, filePath = gtffile)
-#' txdb <- makeTxDbFromGRanges(gff)
-#' txdb$user_genome <- "hg19"
+#' txdb <- AnnotationDbi::loadDb(system.file("extdata", "txdb.sql", 
+#'     package = "GenomicPlot"))
 #'
 #' gf <- prepare_5parts_genomic_features(txdb,
 #'     meta = TRUE, nbins = 100, fiveP = -0, threeP = 0,
@@ -491,6 +475,9 @@ prepare_5parts_genomic_features <- function(txdb,
         len <- vapply(as.list(width(grls[[x]])), sum, numeric(1)) 
         ## len is named vector, where names are the tx_ids
         y <- names(len)[which(len >= scaled_bins[x])]
+        ## since 'check_constraints' may eliminate some promoter or TTS
+        ## make sure the transcript is common to all features
+        y <- y[y %in% intersect(names(promoter), names(TTS))]
     })
 
     names(selected_tx) <- names(grls)
@@ -542,12 +529,8 @@ prepare_5parts_genomic_features <- function(txdb,
 #' @author Shuye Pu
 #'
 #' @examples
-#' gtffile <- system.file("extdata", "gencode.v19.annotation_chr19.gtf",
-#'     package = "GenomicPlot"
-#' )
-#' gff <- RCAS::importGtf(saveObjectAsRds = TRUE, filePath = gtffile)
-#' txdb <- makeTxDbFromGRanges(gff)
-#' txdb$user_genome <- "hg19"
+#' txdb <- AnnotationDbi::loadDb(system.file("extdata", "txdb.sql", 
+#'     package = "GenomicPlot"))
 #'
 #' f <- get_txdb_features(txdb, dsTSS = 100, fiveP = -100, threeP = 100)
 #'
@@ -673,12 +656,8 @@ get_txdb_features <- function(txdb,
 #'
 #' @examples
 #'
-#' gtffile <- system.file("extdata", "gencode.v19.annotation_chr19.gtf",
-#'     package = "GenomicPlot"
-#' )
-#' gff <- RCAS::importGtf(saveObjectAsRds = TRUE, filePath = gtffile)
-#' txdb <- makeTxDbFromGRanges(gff)
-#' txdb$user_genome <- "hg19"
+#' txdb <- AnnotationDbi::loadDb(system.file("extdata", "txdb.sql", 
+#'     package = "GenomicPlot"))
 #' f <- get_txdb_features(txdb, dsTSS = 100, fiveP = 0, threeP = 1000)
 #'
 #' p <- RCAS::importBed(system.file("extdata", "test_chip_peak_chr19.bed",
@@ -918,10 +897,11 @@ check_constraints <- function(gr, genome, queryRle = NULL) {
         start(gr)[start(gr) < 1] <- 1
     }
     too_long <- end(gr) > len[as.vector(seqnames(gr))]
+    
     if (any(too_long)) {
         end(gr)[too_long] <- len[as.vector(seqnames(gr))][too_long]
     }
-
+    
     if (!is.null(queryRle)) {
         gr <- gr[as.vector(seqnames(gr)) %in% names(queryRle)]
     }
@@ -941,7 +921,7 @@ check_constraints <- function(gr, genome, queryRle = NULL) {
 #' @param ignore.order logical, indicating whether the order of query and 
 #' subject can be switched, default = TRUE. Overlaps in query and subject often
 #' have different sizes. This parameter will make the function use whichever is
-#' smaller to avoid errors when plotting Venn diagrams.
+#' smaller to avoid errors when making Venn diagrams.
 #' 
 #' @return a GRanges object
 #' @author Shuye Pu
@@ -960,6 +940,8 @@ check_constraints <- function(gr, genome, queryRle = NULL) {
 #'
 #' res <- filter_by_overlaps_stranded(query, subject)
 #' res
+#' resf <- filter_by_overlaps_stranded(query, subject, ignore.order = FALSE)
+#' resf
 #'
 #' @export filter_by_overlaps_stranded
 

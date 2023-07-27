@@ -160,10 +160,10 @@ plot_peak_annotation <- function(peakFile,
         if (verbose) print(df)
 
         ap1 <- ggplot(df, aes(x = "", y = percent, fill = feature)) +
-            geom_col(color = "white") +
+            geom_col(color = "white") +  
             scale_y_continuous(breaks = df2$pos, labels = df2$labels) +
             guides(fill = guide_legend(nrow = 2)) +
-            scale_fill_viridis(discrete = TRUE) +
+            scale_fill_manual(values = viridis(n = nrow(df))) +
             coord_polar(theta = "y") +
             ggtitle("Absolute count") +
             theme(
@@ -177,11 +177,11 @@ plot_peak_annotation <- function(peakFile,
 
         ap2 <- ggplot(df, aes(x = "", y = norm_percent, fill = feature)) +
             geom_col(color = "white") +
-            coord_polar(theta = "y") +
             scale_y_continuous(breaks = df2$norm_pos, 
                                labels = df2$norm_labels) +
             guides(fill = guide_legend(nrow = 2)) +
-            scale_fill_viridis(discrete = TRUE) +
+            scale_fill_manual(values = viridis(n = nrow(df))) +
+            coord_polar(theta = "y") +
             ggtitle("Length-normalized count") +
             theme(
                 axis.ticks = element_blank(),
@@ -344,12 +344,13 @@ plot_peak_annotation <- function(peakFile,
             )
         if (verbose) print(dfa2)
 
+        fil <- viridis(n = nrow(dfa))
         apa1 <- ggplot(dfa, aes(x = "", y = percent, fill = feature)) +
-            geom_col(color = "white") +
+            geom_col(color = "white" ) +
             coord_polar(theta = "y") +
             scale_y_continuous(breaks = dfa2$pos, labels = dfa2$labels) +
             guides(fill = guide_legend(nrow = 2)) +
-            scale_fill_viridis(discrete = TRUE) +
+            scale_fill_manual(values = fil) +
             theme(
                 axis.ticks = element_blank(),
                 axis.title = element_blank(),
@@ -364,7 +365,7 @@ plot_peak_annotation <- function(peakFile,
             scale_y_continuous(breaks = dfa2$norm_pos, 
                                labels = dfa2$norm_labels) +
             guides(fill = guide_legend(nrow = 2)) +
-            scale_fill_viridis(discrete = TRUE) +
+            scale_fill_manual(values = fil) +
             theme(
                 axis.ticks = element_blank(),
                 axis.title = element_blank(),
@@ -401,7 +402,7 @@ plot_peak_annotation <- function(peakFile,
             geom_col(color = "white") +
             scale_y_continuous(breaks = dfb2$pos, labels = dfb2$labels) +
             guides(fill = guide_legend(nrow = 2)) +
-            scale_fill_viridis(discrete = TRUE) +
+            scale_fill_manual(values = fil[1:nrow(dfb)]) +
             coord_polar(theta = "y") +
             theme(
                 axis.ticks = element_blank(),
@@ -417,7 +418,7 @@ plot_peak_annotation <- function(peakFile,
             scale_y_continuous(breaks = dfb2$norm_pos, 
                                labels = dfb2$norm_labels) +
             guides(fill = guide_legend(nrow = 2)) +
-            scale_fill_viridis(discrete = TRUE) +
+            scale_fill_manual(values = fil[1:nrow(dfb)]) +
             coord_polar(theta = "y") +
             theme(
                 axis.ticks = element_blank(),

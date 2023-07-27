@@ -103,6 +103,43 @@ query files inside regions defined in the centerFiles. The upstream and
 downstream flanking windows can be given separately. If Input files are 
 provided, ratio over Input is computed and displayed as well.
 }
+\examples{
+centerfiles <- system.file("extdata", "test_chip_peak_chr19.narrowPeak", 
+package = "GenomicPlot")
+names(centerfiles) <- c("NarrowPeak")
+queryfiles <- c(
+  system.file("extdata", "chip_treat_chr19.bam", package = "GenomicPlot"))
+names(queryfiles) <- c("chip_bam")
+inputfiles <- c(
+  system.file("extdata", "chip_input_chr19.bam", package = "GenomicPlot"))
+names(inputfiles) <- c("chip_input")
+
+chipimportParams <- setImportParams(
+  offset = 0, fix_width = 150, fix_point = "start", norm = TRUE,
+  useScore = FALSE, outRle = TRUE, useSizeFactor = FALSE, genome = "hg19")
+
+plot_region(
+  queryFiles = queryfiles,
+  centerFiles = centerfiles,
+  inputFiles = inputfiles,
+  nbins = 100,
+  heatmap = TRUE,
+  scale = FALSE,
+  regionName = "narrowPeak",
+  importParams = chipimportParams,
+  verbose = FALSE,
+  fiveP = -500,
+  threeP = 500,
+  smooth = TRUE,
+  transform = NA,
+  stranded = TRUE,
+  outPrefix = NULL,
+  Ylab = "Coverage/base/peak",
+  rmOutlier = 0,
+  nc = 2
+)
+
+}
 \author{
 Shuye Pu
 }

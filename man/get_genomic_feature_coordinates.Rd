@@ -57,12 +57,8 @@ ranges and names. The bed file is in bed6 format.
 }
 \examples{
 
-gtffile <- system.file("extdata", "gencode.v19.annotation_chr19.gtf",
-    package = "GenomicPlot"
-)
-gff <- RCAS::importGtf(saveObjectAsRds = TRUE, filePath = gtffile)
-txdb <- makeTxDbFromGRanges(gff)
-txdb$user_genome <- "hg19"
+txdb <- AnnotationDbi::loadDb(system.file("extdata", "txdb.sql", 
+    package = "GenomicPlot"))
 
 output <- get_genomic_feature_coordinates(txdb,
     featureName = "cds", featureSource = "gencode",

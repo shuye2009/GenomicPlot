@@ -49,12 +49,8 @@ speed up plotting of multiple data sets with the same configuration. Use
 featureName='transcript' and meta=FALSE and longest=TRUE for genes.
 }
 \examples{
-gtffile <- system.file("extdata", "gencode.v19.annotation_chr19.gtf",
-    package = "GenomicPlot"
-)
-gff <- RCAS::importGtf(saveObjectAsRds = TRUE, filePath = gtffile)
-txdb <- makeTxDbFromGRanges(gff)
-txdb$user_genome <- "hg19"
+txdb <- AnnotationDbi::loadDb(system.file("extdata", "txdb.sql", 
+    package = "GenomicPlot"))
 
 gf <- prepare_3parts_genomic_features(txdb,
     meta = FALSE, nbins = 100, fiveP = -1000, threeP = 1000,

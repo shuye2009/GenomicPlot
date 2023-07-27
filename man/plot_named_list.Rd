@@ -20,13 +20,11 @@ its values is displayed, otherwise, only the name of the value of the
 argument is displayed.
 }
 \examples{
-gtffile <- system.file("extdata", "gencode.v19.annotation_chr19.gtf",
-    package = "GenomicPlot"
-)
-gff <- suppressMessages(RCAS::importGtf(saveObjectAsRds = TRUE, 
-    filePath = gtffile))
-txdb <- makeTxDbFromGRanges(gff)
-txdb$user_genome <- "hg19"
+
+data(gf5_genomic)
+
+txdb <- AnnotationDbi::loadDb(system.file("extdata", "txdb.sql", 
+    package = "GenomicPlot"))
 
 queryfiles <- system.file("extdata", "treat_chr19.bam",
     package = "GenomicPlot"
@@ -38,11 +36,6 @@ inputfiles <- system.file("extdata", "input_chr19.bam",
 )
 names(inputfiles) <- "input"
 
-gfeatures <- prepare_5parts_genomic_features(txdb,
-    meta = TRUE, nbins = 100, fiveP = -1000,
-    threeP = 1000, longest = TRUE, verbose = FALSE
-)
-
 bamimportParams <- setImportParams(
     offset = -1, fix_width = 0, fix_point = "start", norm = TRUE,
     useScore = FALSE, outRle = TRUE, useSizeFactor = FALSE, genome = "hg19"
@@ -50,7 +43,7 @@ bamimportParams <- setImportParams(
 
 alist <- list(
     "txdb" = txdb, "treat" = queryfiles, "control" = inputfiles,
-    "feature" = gfeatures, "param" = bamimportParams
+    "feature" = gf5_genomic, "param" = bamimportParams
 )
 
 GenomicPlot:::plot_named_list(alist)

@@ -1,5 +1,18 @@
+# CHANGES IN VERSION 0.99.14
+
+## NEW FEATURES
+   None
+## SIGNIFICANT CHANGES
+   - Make txdb available in /inst/data to avoid repetitive generation of it in examples
+   - Store gf5_meta and gf5_genomic in /data so that they can be loaded by calling data()
+   - Create /R/data.R for data documentations
+## BUG FIXES
+   None
+
 # CHANGES IN VERSION 0.99.13
 
+## NEW FEATURES
+   None
 ## SIGNIFICANT CHANGES
    - Add 'title' to draw_combo_plot function arguments.
 ## BUG FIXES

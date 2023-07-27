@@ -33,7 +33,7 @@ rank_rows <- function(fullmatrix,
         invisible(data.matrix(fullmatrix))
     } else if (ranking == "Max") {
         fullmatrix <- arrange(as.data.frame(fullmatrix), 
-                              desc(rowMax(fullmatrix)))
+                              desc(Biobase::rowMax(fullmatrix)))
         invisible(data.matrix(fullmatrix))
     } else {
         clust <- hclust(dist(fullmatrix, method = "euclidean"), 

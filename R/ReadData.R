@@ -385,12 +385,20 @@ handle_bed <- function(inputFile,
     colnames(beddata) <- standard_col[seq_len(min(6, ncol(beddata)))]
     queryRegions <- makeGRangesFromDataFrame(beddata, keep.extra.columns = TRUE, 
                                              starts.in.df.are.0based = TRUE)
-    names(queryRegions) <- beddata$name
-    if (sum(duplicated(names(queryRegions))) > 0) { 
-        ## if the names are not unique, force them to be unique
-        names(queryRegions) <- paste(names(queryRegions), 
-                                     seq_along(names(queryRegions)), sep = "_")
+    if("name" %in% colnames(beddata)) {
+        if (sum(duplicated(beddata$name)) > 0) { 
+            ## if the names are not unique, force them to be unique
+            message("bed interval names are modified as they are not unique!")
+            names(queryRegions) <- paste(beddata$name, 
+                                         seq_along(beddata$name), sep = "_")
+        }else{
+            names(queryRegions) <- beddata$name 
+        }
+    }else{
+        names(queryRegions) <- paste("peak", seq_along(beddata[,1]), sep = "_")
     }
+    
+    
     if (ncol(beddata) < 6) strand(queryRegions) <- "*"
 
     if (importParams$fix_width > 0) {
@@ -425,9 +433,6 @@ handle_bed <- function(inputFile,
     seqinfo(queryRegions) <- seqInfo
 
     libsize <- sum(queryRegions$score, na.rm = TRUE)
-
-    if ("name" %in% colnames(mcols(queryRegions))) 
-        names(queryRegions) <- queryRegions$name
 
     if (importParams$outRle) {
         queryRegions <- coverage(queryRegions, weight = weight_col)
