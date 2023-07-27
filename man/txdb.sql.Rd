@@ -5,24 +5,14 @@
 \alias{txdb.sql}
 \title{Toy data for examples and testing of the `GenomicPlot` package}
 \source{
-The data is produced by running the following code:
-\describe{
+The data is produced by running the following code: \cr
 gtffile <- system.file("extdata", "gencode.v19.annotation_chr19.gtf", 
-package = "GenomicPlot")
-}
-\describe{
+package = "GenomicPlot") \cr
 gff <- RCAS::importGtf(saveObjectAsRds = TRUE, readFromRds = FALSE, 
-    filePath = gtffile)
-}
-\describe{
-md <- data.frame(name = "Genome", value = "hg19")
-}
-\describe{
-txdb <- GenomicFeatures::makeTxDbFromGRanges(gff, metadata = md)
-}
-\describe{
+    filePath = gtffile) \cr
+md <- data.frame(name = "Genome", value = "hg19") \cr
+txdb <- GenomicFeatures::makeTxDbFromGRanges(gff, metadata = md) \cr
 AnnotationDbi::saveDb(txdb, "./inst/extdata/txdb.sql")
-}
 }
 \value{
 A SQLlite database

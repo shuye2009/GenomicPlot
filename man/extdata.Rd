@@ -20,7 +20,7 @@
 \title{Toy data for examples and testing of the `GenomicPlot` package}
 \source{
 The original gene annotation (gtf) file is downloaded from 
-     \url{https://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_19/gencode.v19.annotation.gtf.gz}
+     \href{https://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_19/gencode.v19.annotation.gtf.gz}{https://www.gencodegenes.org/human/}. \cr
      Except for the gtf file, all other files are derived from experimental 
      data produced in-house at the \href{https://thedonnellycentre.utoronto.ca/faculty/jack-greenblatt}{Greenblatt Lab, University of Toronto, Canada}.
 }
