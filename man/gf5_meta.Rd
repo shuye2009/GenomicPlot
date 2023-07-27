@@ -5,7 +5,11 @@
 \alias{gf5_meta}
 \title{Toy data for examples and testing of the `GenomicPlot` package}
 \source{
-
+The data is produced by running the following code: \cr
+txdb <- AnnotationDbi::loadDb(system.file("extdata", "txdb.sql", 
+    package = "GenomicPlot")) \cr
+gf5_meta <- GenomicPlot::prepare_5parts_genomic_features(txdb, meta = TRUE, 
+    nbins = 100, fiveP = -2000, threeP = 1000, longest = TRUE)
 }
 \value{
 A named list with the following elements:

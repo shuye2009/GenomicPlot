@@ -113,7 +113,6 @@ NULL
 #'     package = "GenomicPlot")) \cr
 #' gf5_meta <- GenomicPlot::prepare_5parts_genomic_features(txdb, meta = TRUE, 
 #'     nbins = 100, fiveP = -2000, threeP = 1000, longest = TRUE)
-#' }
 #' 
 #' @return 
 #' A named list with the following elements:
