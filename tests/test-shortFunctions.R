@@ -303,3 +303,35 @@ test_that("testing draw_matrix_heatmap", {
    p <- draw_matrix_heatmap(fullMatrix, dataName = "test", labels_col,
                             levels_col)
 })
+
+test_that("testing draw_stacked_profile", {
+   Reference <- rep(rep(c("Ref1", "Ref2"), each = 100), 2)
+   Query <- rep(c("Query1", "Query2"), each = 200)
+   Position <- rep(seq(-50, 49), 4)
+   Intensity <- rlnorm(400)
+   se <- runif(400)
+   start_df <- data.frame(Intensity, se, Position, Query, Reference) %>%
+       mutate(lower = Intensity - se, upper = Intensity + se) %>%
+       mutate(Group = paste(Query, Reference, sep = ":")) %>%
+       mutate(Location = rep("Start", 400)) %>%
+       mutate(Interval = sample.int(1000, 400))
+   Intensity <- rlnorm(400, meanlog = 1.5)
+   se <- runif(400)
+   center_df <- data.frame(Intensity, se, Position, Query, Reference) %>%
+       mutate(lower = Intensity - se, upper = Intensity + se) %>%
+       mutate(Group = paste(Query, Reference, sep = ":")) %>%
+       mutate(Location = rep("Center", 400)) %>%
+       mutate(Interval = sample.int(600, 400))
+   Intensity <- rlnorm(400, meanlog = 2)
+   se <- runif(400)
+   end_df <- data.frame(Intensity, se, Position, Query, Reference) %>%
+       mutate(lower = Intensity - se, upper = Intensity + se) %>%
+       mutate(Group = paste(Query, Reference, sep = ":")) %>%
+       mutate(Location = rep("End", 400)) %>%
+       mutate(Interval = sample.int(2000, 400))
+       
+   df <- rbind(start_df, center_df, end_df)
+   p <- draw_stacked_profile(df, cn = "Group", shade = TRUE, 
+       ext = c(-50, 50, -50, 50),
+       hl = c(-20, 20, -25, 25), insert = 100)
+})

@@ -80,12 +80,13 @@
 #'   centerFile = "intron",
 #'   binSize = 10,
 #'   importParams = bamImportParams,
-#'   ext = c(-200, 300, -200, 300),
-#'   hl = c(-100, 100, -100, 100),
+#'   ext = c(-100, 100, -100, 100),
+#'   hl = c(-20, 20, -20, 20),
 #'   insert = 100,
 #'   stranded = TRUE,
 #'   scale = FALSE,
 #'   smooth = TRUE,
+#'   verbose = TRUE,
 #'   transform = "log2",
 #'   outPrefix = NULL,
 #'   randomize = TRUE,
@@ -192,24 +193,33 @@ plot_start_end_with_random <- function(queryFiles,
     if (verbose) message("Number of features: ", featureName, " ", 
                          length(feature), "\n")
 
-    fs <- trim(promoters(resize(feature, width = 1, fix = "start"), 
-                         upstream = -ext[1], downstream = ext[2]))
-    fe <- trim(promoters(resize(feature, width = 1, fix = "end"), 
-                         upstream = -ext[3], downstream = ext[4]))
-    fc <- trim(promoters(resize(feature, width = 1, fix = "center"), 
+    fs <- check_constraints(promoters(resize(feature, width = 1, fix = "start"), 
+                         upstream = -ext[1], downstream = ext[2]), 
+                         importParams$genome)
+    fe <- check_constraints(promoters(resize(feature, width = 1, fix = "end"), 
+                         upstream = -ext[3], downstream = ext[4]), 
+                         importParams$genome)
+    fc <- check_constraints(promoters(resize(feature, width = 1, fix = "center"), 
                          upstream = round(insert / 2), 
-                         downstream = round(insert / 2)))
+                         downstream = round(insert / 2)), 
+                         importParams$genome)
 
     if (randomize) {
         random_points <- sample(ext[1]:ext[4], length(feature), replace = TRUE)
         rfeature <- shift(feature, shift = random_points, use.names = TRUE)
-        rfs <- trim(promoters(resize(rfeature, width = 1, fix = "start"), 
-                              upstream = -ext[1], downstream = ext[2]))
-        rfe <- trim(promoters(resize(rfeature, width = 1, fix = "end"), 
-                              upstream = -ext[3], downstream = ext[4]))
-        rfc <- trim(promoters(resize(rfeature, width = 1, fix = "center"), 
+        rfs <- check_constraints(promoters(resize(
+                              rfeature, width = 1, fix = "start"), 
+                              upstream = -ext[1], downstream = ext[2]), 
+                              importParams$genome)
+        rfe <- check_constraints(promoters(resize(
+                              rfeature, width = 1, fix = "end"), 
+                              upstream = -ext[3], downstream = ext[4]), 
+                              importParams$genome)
+        rfc <- check_constraints(promoters(resize(
+                              rfeature, width = 1, fix = "center"), 
                               upstream = round(insert / 2), 
-                              downstream = round(insert / 2)))
+                              downstream = round(insert / 2)), 
+                              importParams$genome)
     }
 
     ext[2] <- ext[2] - (ext[2] - ext[1]) %% binSize 
@@ -458,10 +468,6 @@ plot_start_end_with_random <- function(queryFiles,
                 if (verbose) message("Ratio label: ", ratiolabel, "\n")
 
                 fullMatrix <- ratioMatrix_list[[ratiolabel]][[locus]]
-                fullMatrix <- process_scoreMatrix(fullMatrix, scale = FALSE,
-                                                  rmOutlier, 
-                                                  transform = transform, 
-                                                  verbose = verbose)
 
                 colm <- apply(fullMatrix, 2, mean)
                 colsd <- apply(fullMatrix, 2, sd)
@@ -491,10 +497,6 @@ plot_start_end_with_random <- function(queryFiles,
 
                 if (randomize) {
                     rfullMatrix <- rmlr[[ratiolabel]][[locus]]
-                    rfullMatrix <- process_scoreMatrix(rfullMatrix, 
-                                                       scale = FALSE, rmOutlier,
-                                                       transform = transform,
-                                                       verbose = verbose)
 
                     rcolm <- apply(rfullMatrix, 2, mean)
                     rcolsd <- apply(rfullMatrix, 2, sd)

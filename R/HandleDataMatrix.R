@@ -75,12 +75,13 @@ inspect_matrix <- function(fullmatrix,
     n_NA <- sum(is.na(fullmatrix))
     n_NaN <- sum(is.nan(fullmatrix))
     n_zero <- sum(fullmatrix == 0.0, na.rm = TRUE)
+    n_negative <- sum(fullmatrix < 0, na.rm = TRUE)
 
-    n_invalid <- c(n_infinite, n_NA, n_NaN, n_zero)
+    n_invalid <- c(n_infinite, n_NA, n_NaN, n_zero, n_negative)
     fraction_invalid <- n_invalid / size
 
     stat_df <- data.frame(n_invalid, fraction_invalid)
-    rownames(stat_df) <- c("infinite", "NA", "NaN", "zero")
+    rownames(stat_df) <- c("infinite", "NA", "NaN", "zero", "negative")
 
     if (verbose) print(stat_df)
 
@@ -200,6 +201,7 @@ process_scoreMatrix <- function(fullmatrix,
     stopifnot(is.numeric(rmOutlier))
     stopifnot(is.logical(scale))
     stopifnot(transform %in% c("log", "log2", "log10", NA))
+    
     inspect_matrix(fullmatrix, verbose = verbose)
 
     fullmatrix[is.infinite(fullmatrix)] <- 0
@@ -215,7 +217,9 @@ process_scoreMatrix <- function(fullmatrix,
     }
 
     if (!is.na(transform)) {
+       
         fullmatrix <- impute_hm(fullmatrix, verbose) 
+        
         ## impute to avoid taking log of zero, also to avoid distortion by 
         ## adding pseudocount 1 when the vast majority of values of the matrix 
         ## are less than 1, like in the case of a ratio matrix
