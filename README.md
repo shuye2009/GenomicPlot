@@ -124,7 +124,8 @@ plot_locus(queryFiles = queryfiles,
                      nc = 4)
                      
 ```
-![Fig. 2 Coverage around the center of peaks](./tests/test_plot_locus2.png)
+![Fig. 2A Coverage around the center of peaks](./tests/test_plot_locus2.png)
+![Fig. 2B Statistical tests of the coverage](./tests/test_plot_locus1.png)
 
 The following example shows you how to annotate ChIP-seq peaks. The annotation statistics is shown in "test_plot_peak_annotation.png". The detailed annotation is in the table "summitPeak_targeted_annotated_gene.tab", if verbose = TRUE.
 

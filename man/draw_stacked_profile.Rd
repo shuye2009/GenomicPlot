@@ -59,7 +59,7 @@ used by \code{\link{plot_start_end}},
  \code{\link{plot_start_end_with_random}}
 }
 \examples{
-
+library(dplyr)
 Reference <- rep(rep(c("Ref1", "Ref2"), each = 100), 2)
 Query <- rep(c("Query1", "Query2"), each = 200)
 Position <- rep(seq(-50, 49), 4)
