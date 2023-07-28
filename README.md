@@ -112,7 +112,6 @@ plot_locus(queryFiles = queryfiles,
                      shade = TRUE, 
                      binSize = 10, 
                      refPoint = "center", 
-                     Xlab = "Summit",
                      verbose = FALSE, 
                      smooth = TRUE, 
                      scale = FALSE, 
@@ -127,7 +126,7 @@ plot_locus(queryFiles = queryfiles,
 ```
 ![Fig. 2 Coverage around the center of peaks](./tests/test_plot_locus2.png)
 
-The following example shows you how to annotate ChIP-seq peaks. The annotation statistics is shown in "test_plot_peak_annotation.png". The detailed annotation is in the table "summitPeak_targeted_annotated_gene.tab".
+The following example shows you how to annotate ChIP-seq peaks. The annotation statistics is shown in "test_plot_peak_annotation.png". The detailed annotation is in the table "summitPeak_targeted_annotated_gene.tab", if verbose = TRUE.
 
 ``` r
 gtffile <- system.file("extdata", "gencode.v19.annotation_chr19.gtf", 
@@ -137,7 +136,7 @@ centerfile <- system.file("extdata", "test_chip_peak_chr19.bed",
                           package = "GenomicPlot")
 names(centerfile) <- c("SummitPeak")
 
-op <- "test_plot_peak_annotation1"
+op <- "test_plot_peak_annotation"
 
 plot_peak_annotation(peakFile = centerfile, 
                      gtfFile = gtffile, 

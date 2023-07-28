@@ -57,6 +57,13 @@
 #'
 #' txdb <- AnnotationDbi::loadDb(system.file("extdata", "txdb.sql", 
 #'   package = "GenomicPlot"))
+#' bedQueryFiles <- c(
+#' system.file("extdata", "test_chip_peak_chr19.narrowPeak", 
+#'             package = "GenomicPlot"),
+#' system.file("extdata", "test_chip_peak_chr19.bed", package = "GenomicPlot"),
+#' system.file("extdata", "test_clip_peak_chr19.bed", package = "GenomicPlot")
+#' )
+#' names(bedQueryFiles) <- c("NarrowPeak", "SummitPeak", "iCLIPPeak")
 #' 
 #' bamQueryFiles <- system.file("extdata", "treat_chr19.bam", 
 #'                              package = "GenomicPlot")
