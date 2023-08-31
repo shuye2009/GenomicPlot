@@ -644,7 +644,9 @@ get_txdb_features <- function(txdb,
 #
 #' @description Annotate each peak with genomic features based on overlap, and 
 #' produce summary statistics for distribution of peaks in features of 
-#' protein-coding genes.
+#' protein-coding genes. If a peak overlap multiple features, a feature is 
+#' assigned to the peak in the following order of precedence: "5'UTR", 
+#' "3'UTR", "CDS", "Intron", "Promoter", "TTS".
 #'
 #' @param peak a GRanges object defining query ranges
 #' @param features a GRangesList object representing genomic features
@@ -672,7 +674,7 @@ get_targeted_genes <- function(peak,
                                features,
                                stranded = TRUE) {
     precedence <- function(terms) {
-        scope <- c("5'UTR", "CDS", "3'UTR", "Intron", "Promoter", "TTS")
+        scope <- c("5'UTR", "3'UTR", "CDS", "Intron", "Promoter", "TTS")
         rank <- seq(6)
         names(rank) <- scope
         pre <- names(rank[rank == min(rank[terms])])

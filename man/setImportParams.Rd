@@ -21,8 +21,9 @@ setImportParams(
 -1 position at the 5'end of the reads, which corresponds to the cross link 
 site in iCLIP.}
 
-\item{fix_width}{an integer defining how long the reads should be extended 
-to, ignored when offset is not 0.}
+\item{fix_width}{an integer, for bam file, defines how long the reads should 
+be extended from the start position, ignored when offset is not 0; for bed 
+files, defines the width of each interval centering on the `fix_point`.}
 
 \item{fix_point}{a string in c("start", "end", "center") denoting the anchor 
 point for extension, ignored when offset is not 0.}

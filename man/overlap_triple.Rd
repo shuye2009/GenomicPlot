@@ -4,7 +4,7 @@
 \alias{overlap_triple}
 \title{Plot three-sets Venn diagram}
 \usage{
-overlap_triple(atriple, overlap_fun)
+overlap_triple(atriple, overlap_fun, title = NULL)
 }
 \arguments{
 \item{atriple}{a list of three vectors}
@@ -13,6 +13,8 @@ overlap_triple(atriple, overlap_fun)
 on the type of object in the vectors. For GRanges, use 
 \code{\link{filter_by_overlaps_stranded}} or 
 \code{\link{filter_by_nonoverlaps_stranded}}, for gene names, use intersect.}
+
+\item{title}{main title of the figure}
 }
 \value{
 a VennDiagram object
@@ -26,7 +28,7 @@ an error.
 \examples{
 
 test_list <- list(A = c(1, 2, 3, 4, 5), B = c(4, 5, 7), C = c(1, 3))
-overlap_triple(test_list, intersect)
+overlap_triple(test_list, intersect, title = "test")
 
 ## GRanges overlap
 query <- GRanges("chr19",

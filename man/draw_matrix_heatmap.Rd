@@ -27,7 +27,7 @@ order of labels_col}
 \item{ranking}{method for ranking the rows of the input matrix, options are 
 c("Sum", "Max", "Hierarchical", "None")}
 
-\item{ranges}{a numeric vector with two elements, defining custom range for 
+\item{ranges}{a numeric vector with three elements, defining custom range for 
 color ramp, default=NULL, i.e. the range is defined automatically based on 
 the range of fullMatrix}
 
@@ -48,7 +48,8 @@ labels_col <- as.character(seq_len(100))
 levels_col <- c("start", "center", "end")
 names(labels_col) <- rep(levels_col, c(15, 60, 25))
 
-draw_matrix_heatmap(fullMatrix, dataName = "test", labels_col, levels_col)
+draw_matrix_heatmap(fullMatrix, dataName = "test", labels_col, levels_col,
+  ranges = c(-2, 0, 20))
 
 }
 \author{

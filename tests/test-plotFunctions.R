@@ -188,12 +188,36 @@ test_that("testing plot_5parts_metagene", {
 
 test_that("testing plot_locus", {
    plot_locus(
-      queryFiles = bedQueryFiles[c(1, 3)],
+      queryFiles = bedQueryFiles[c(1,3)],
       centerFiles = bedQueryFiles[2],
       ext = c(-500, 500),
       hl = c(-100, 100),
       inputFiles = NULL,
       importParams = bedImportParams,
+      shade = TRUE,
+      binSize = 10,
+      refPoint = "center",
+      Xlab = "Summit",
+      verbose = FALSE,
+      smooth = TRUE,
+      scale = FALSE,
+      stranded = TRUE,
+      outPrefix = NULL,
+      transform = NA,
+      heatmap = TRUE,
+      heatRange = NULL,
+      rmOutlier = 0,
+      Ylab = "Coverage/base/peak",
+      nc = 2
+   )
+   
+   plot_locus(
+      queryFiles = chipQueryFiles,
+      centerFiles = bedQueryFiles[2],
+      ext = c(-500, 500),
+      hl = c(-100, 100),
+      inputFiles = chipInputFiles,
+      importParams = chipImportParams,
       shade = TRUE,
       binSize = 10,
       refPoint = "center",

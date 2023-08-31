@@ -4,7 +4,7 @@
 \alias{overlap_quad}
 \title{Plot four-sets Venn diagram}
 \usage{
-overlap_quad(aquad, overlap_fun)
+overlap_quad(aquad, overlap_fun, title = NULL)
 }
 \arguments{
 \item{aquad}{a list of four vectors}
@@ -13,6 +13,8 @@ overlap_quad(aquad, overlap_fun)
 on the type of object in the vectors. For GRanges, use 
 \code{\link{filter_by_overlaps_stranded}} or 
 \code{\link{filter_by_nonoverlaps_stranded}}, for gene names, use intersect.}
+
+\item{title}{main title of the figure}
 }
 \value{
 a VennDiagram object

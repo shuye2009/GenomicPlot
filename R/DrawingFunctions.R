@@ -8,7 +8,7 @@
 #'  order of labels_col
 #' @param ranking method for ranking the rows of the input matrix, options are 
 #'  c("Sum", "Max", "Hierarchical", "None")
-#' @param ranges a numeric vector with two elements, defining custom range for 
+#' @param ranges a numeric vector with three elements, defining custom range for 
 #'  color ramp, default=NULL, i.e. the range is defined automatically based on 
 #'  the range of fullMatrix
 #' @param verbose logical, whether to output the input matrix for inspection
@@ -26,7 +26,8 @@
 #' levels_col <- c("start", "center", "end")
 #' names(labels_col) <- rep(levels_col, c(15, 60, 25))
 #'
-#' draw_matrix_heatmap(fullMatrix, dataName = "test", labels_col, levels_col)
+#' draw_matrix_heatmap(fullMatrix, dataName = "test", labels_col, levels_col,
+#'   ranges = c(-2, 0, 20))
 #'
 #' @export draw_matrix_heatmap
 #'
@@ -70,22 +71,22 @@ draw_matrix_heatmap <- function(fullMatrix,
     )
    
     if (verbose) {
-        message("quantile(fullMatrix, c(seq(0.9, 1, 0.005)), na.rm=TRUE)\n")
-        message(paste(quantile(fullMatrix, c(seq(0.9, 1, 0.005)), na.rm = TRUE), 
+        message("quantile(fullMatrix, c(seq(0.9, 1, 0.05)), na.rm=TRUE)\n")
+        message(paste(quantile(fullMatrix, c(seq(0.9, 1, 0.05)), na.rm = TRUE), 
                       collapse = " "), "\n")
     }
     if (is.null(ranges)) {
-        ranges <- quantile(fullMatrix, c(0.025, 0.975), na.rm = TRUE)
+        ranges <- quantile(fullMatrix, c(0.025, 0.5, 0.975), na.rm = TRUE)
         if (ranges[1] == ranges[2]) {
             message("97.5% of values are not unique, heatmap may not show 
                     signals effectively\n")
-            ranges <- quantile(fullMatrix, c(0, 1), na.rm = TRUE) 
+            ranges <- quantile(fullMatrix, c(0, 0.5, 1), na.rm = TRUE) 
         }
     }
 
     h <- Heatmap(fullMatrix,
         name = "Value",
-        col = colorRamp2(ranges, viridis(2)),
+        col = colorRamp2(ranges, viridis(3)),
         bottom_annotation = ha,
         heatmap_legend_param = list(legend_direction = "vertical"),
         show_row_names = FALSE,
@@ -1264,13 +1265,14 @@ draw_stacked_profile <- function(plot_df,
 #'  on the type of object in the vectors. For GRanges, use 
 #'  \code{\link{filter_by_overlaps_stranded}} or 
 #'  \code{\link{filter_by_nonoverlaps_stranded}}, for gene names, use intersect.
+#' @param title main title of the figure
 #'
 #' @return a VennDiagram object
 #' @author Shuye Pu
 #'
 #' @examples
 #' test_list <- list(A = c(1, 2, 3, 4, 5), B = c(4, 5, 7))
-#' overlap_pair(test_list, intersect)
+#' overlap_pair(test_list, intersect, title = "test")
 #'
 #' ## GRanges overlap
 #' query <- GRanges("chr19",
@@ -1290,7 +1292,7 @@ draw_stacked_profile <- function(plot_df,
 #'
 #' @export overlap_pair
 
-overlap_pair <- function(apair, overlap_fun) {
+overlap_pair <- function(apair, overlap_fun, title = NULL) {
     sizes <- vapply(apair, length, numeric(1))
     overlap <- length(Reduce(overlap_fun, apair))
     jaccard <- round(overlap / (sum(sizes) - overlap), digits = 5)
@@ -1301,11 +1303,12 @@ overlap_pair <- function(apair, overlap_fun) {
     )
 
     grid.draw(venn.plot)
-    grid.text(paste("Jaccard:", jaccard), unit(0.2, "npc"), unit(0.9, "npc"), 
+    grid.text(paste("Jaccard:", jaccard), unit(0.8, "npc"), unit(0.025, "npc"), 
               draw = TRUE)
+    grid.text(title, unit(0.25, "npc"), unit(0.975, "npc"), draw = TRUE)
     grid.newpage()
 
-    return(venn.plot)
+    invisible(venn.plot)
 }
 
 #' @title Plot three-sets Venn diagram
@@ -1319,13 +1322,14 @@ overlap_pair <- function(apair, overlap_fun) {
 #'  on the type of object in the vectors. For GRanges, use 
 #'  \code{\link{filter_by_overlaps_stranded}} or 
 #'  \code{\link{filter_by_nonoverlaps_stranded}}, for gene names, use intersect.
+#' @param title main title of the figure
 #' @return a VennDiagram object
 #' @author Shuye Pu
 #'
 #' @examples
 #'
 #' test_list <- list(A = c(1, 2, 3, 4, 5), B = c(4, 5, 7), C = c(1, 3))
-#' overlap_triple(test_list, intersect)
+#' overlap_triple(test_list, intersect, title = "test")
 #'
 #' ## GRanges overlap
 #' query <- GRanges("chr19",
@@ -1350,7 +1354,7 @@ overlap_pair <- function(apair, overlap_fun) {
 #'
 #' @export overlap_triple
 
-overlap_triple <- function(atriple, overlap_fun) {
+overlap_triple <- function(atriple, overlap_fun, title = NULL) {
     ## sort the gr by decreasing size to avoid n13 < n123
     sizes <- sort(vapply(atriple, length, numeric(1)), decreasing = TRUE)
     atriple <- atriple[names(sizes)] 
@@ -1370,9 +1374,10 @@ overlap_triple <- function(atriple, overlap_fun) {
     )
 
     grid.draw(venn.plot)
+    grid.text(title, unit(0.25, "npc"), unit(0.975, "npc"), draw = TRUE)
     grid.newpage()
 
-    return(venn.plot)
+    invisible(venn.plot)
 }
 
 #' @title Plot four-sets Venn diagram
@@ -1386,6 +1391,7 @@ overlap_triple <- function(atriple, overlap_fun) {
 #'  on the type of object in the vectors. For GRanges, use 
 #'  \code{\link{filter_by_overlaps_stranded}} or 
 #'  \code{\link{filter_by_nonoverlaps_stranded}}, for gene names, use intersect. 
+#' @param title main title of the figure
 #'  
 #' @return a VennDiagram object
 #' @author Shuye Pu
@@ -1423,7 +1429,7 @@ overlap_triple <- function(atriple, overlap_fun) {
 #'
 #' @export overlap_quad
 #'
-overlap_quad <- function(aquad, overlap_fun) {
+overlap_quad <- function(aquad, overlap_fun, title = NULL) {
     ## sort the gr by decreasing size to avoid n13 < n123
     sizes <- sort(vapply(aquad, length, numeric(1)), decreasing = TRUE)
     aquad <- aquad[names(sizes)] 
@@ -1453,6 +1459,7 @@ overlap_quad <- function(aquad, overlap_fun) {
     )
 
     grid.draw(venn.plot)
+    grid.text(title, unit(0.25, "npc"), unit(0.975, "npc"), draw = TRUE)
     grid.newpage()
-    return(venn.plot)
+    invisible(venn.plot)
 }

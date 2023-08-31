@@ -21,7 +21,9 @@ a list object
 \description{
 Annotate each peak with genomic features based on overlap, and 
 produce summary statistics for distribution of peaks in features of 
-protein-coding genes.
+protein-coding genes. If a peak overlap multiple features, a feature is 
+assigned to the peak in the following order of precedence: "5'UTR", 
+"3'UTR", "CDS", "Intron", "Promoter", "TTS".
 }
 \note{
 used in \code{plot_peak_annotation}

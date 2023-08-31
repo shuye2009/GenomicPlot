@@ -6,8 +6,9 @@
 #' @param offset an integer, -1 indicating the bam reads should be shrunk to the 
 #'  -1 position at the 5'end of the reads, which corresponds to the cross link 
 #'  site in iCLIP.
-#' @param fix_width an integer defining how long the reads should be extended 
-#'  to, ignored when offset is not 0.
+#' @param fix_width an integer, for bam file, defines how long the reads should 
+#' be extended from the start position, ignored when offset is not 0; for bed 
+#' files, defines the width of each interval centering on the `fix_point`. 
 #' @param fix_point a string in c("start", "end", "center") denoting the anchor 
 #'  point for extension, ignored when offset is not 0.
 #' @param useScore logical, indicating whether the 'score' column of the bed 
@@ -403,9 +404,15 @@ handle_bed <- function(inputFile,
 
     if (importParams$fix_width > 0) {
         queryRegions <- resize(queryRegions,
-            width = importParams$fix_width,
+            width = 1,
             fix = rep(importParams$fix_point, length(queryRegions)), 
             ignore.strand = FALSE
+        )
+        queryRegions <- flank(queryRegions,
+                               width = as.integer(importParams$fix_width/2),
+                               start = TRUE,
+                               both = TRUE,
+                               ignore.strand = FALSE
         )
     }
     weight_col <- "score"
@@ -508,9 +515,10 @@ handle_bam <- function(inputFile, importParams = NULL, verbose = FALSE) {
     if (importParams$offset != 0) {
         ##for iCLIP, use offset = -1 to get the 5'-end -1 position of the reads, 
         ##which is the crosslink sites for iCLIP reads
-        queryRegions <- resize(granges(ga), 
-                               width = width(granges(ga)) - importParams$offset, 
-                               fix = "end", ignore.strand = FALSE)
+        queryRegions <- flank(granges(ga), 
+                               width = -1 * importParams$offset, 
+                               start = TRUE, both = FALSE, 
+                               ignore.strand = FALSE)
         queryRegions <- resize(queryRegions, width = 1, fix = "start", 
                                ignore.strand = FALSE)
         score(queryRegions) <- 1
