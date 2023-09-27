@@ -10,7 +10,7 @@
 #'  c("Sum", "Max", "Hierarchical", "None")
 #' @param ranges a numeric vector with three elements, defining custom range for 
 #'  color ramp, default=NULL, i.e. the range is defined automatically based on 
-#'  the range of fullMatrix
+#'  the c(minimun, median, maximum) of fullMatrix
 #' @param verbose logical, whether to output the input matrix for inspection
 #'
 #' @return a grob object
