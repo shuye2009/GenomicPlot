@@ -631,7 +631,7 @@ handle_bw <- function(inputFile, importParams, verbose = FALSE) {
     GenomeInfoDb::seqinfo(queryRegions) <- seqInfo
 
     libsize <- as.integer(sum(score(queryRegions) * width(queryRegions), 
-                              na.rm = TRUE))
+                              na.rm = TRUE)/100) # assuming read length is 100
 
     if (importParams$outRle) {
         queryRegions <- coverage(queryRegions, weight = weight_col)
