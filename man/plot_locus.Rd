@@ -93,8 +93,9 @@ indicating no transformation of data matrix}
 \item{statsMethod}{a string in c("wilcox.test", "t.test"), for pair-wise 
 group comparisons}
 
-\item{heatRange}{a numerical vector of two elements, defining range for 
-heatmap color ramp generation}
+\item{heatRange}{a numeric vector with three elements, defining custom range for 
+color ramp, default=NULL, i.e. the range is defined automatically based on 
+the c(minimun, median, maximum) of a data matrix}
 
 \item{hw}{a vector of two elements specifying the height and width of the 
 output figures}

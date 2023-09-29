@@ -55,8 +55,9 @@ be considered}
 \item{heatmap}{logical, indicating whether a heatmap of the score matrix 
 should be generated}
 
-\item{heatRange}{a numerical vector of two elements, defining range for 
-heatmap color ramp generation}
+\item{heatRange}{a numeric vector with three elements, defining custom range for 
+color ramp, default=NULL, i.e. the range is defined automatically based on 
+the c(minimun, median, maximum) of a data matrix}
 
 \item{rmOutlier}{a numeric value serving as a multiplier of the MAD in Hampel 
 filter for outliers identification, 0 indicating not removing outliers. 

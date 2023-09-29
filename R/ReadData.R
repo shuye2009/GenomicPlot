@@ -179,24 +179,30 @@ handle_input <- function(inputFiles,
         return(out)
     }
 
+    bed_suffix <- paste(
+        paste0("\\.", c("bed", "BED", "Bed", "narrowPeak", "broadPeak"), "$"), 
+        collapse = "|")
+    bigwig_suffix <- paste(
+        paste0("\\.", c("bw", "bigwig", "Bigwig", "bigWig", "BigWig", "BIGWIG",
+                        "BW"), "$"), collapse = "|")
     outlist <- lapply(names(inputFiles), function(aname) {
         inputFile <- inputFiles[aname]
-        if (grepl("\\.bed|BED|Bed|narrowPeak|broadPeak$", inputFile)) {
+        if (grepl(bed_suffix, inputFile)) {
             fileType <- "bed"
             if (verbose) message("Reading ", fileType, "file: ", inputFile)
             out <- inputFUN(handle_bed, inputFile = inputFile, importParams, 
                             verbose)
-        } else if (grepl("\\.bam|BAM|Bam$", inputFile)) {
+        } else if (grepl("\\.bam$|\\.BAM$|\\.Bam$", inputFile)) {
             fileType <- "bam"
             if (verbose) message("Reading ", fileType, "file: ", inputFile)
             out <- inputFUN(handle_bam, inputFile = inputFile, importParams, 
                             verbose)
-        } else if (grepl("\\.wig|WIG|Wig$", inputFile)) {
+        } else if (grepl("\\.wig$|\\.WIG$|\\.Wig$", inputFile)) {
             fileType <- "wig"
             if (verbose) message("Reading ", fileType, "file: ", inputFile)
             out <- inputFUN(handle_wig, inputFile = inputFile, importParams, 
                             verbose)
-        } else if (grepl("\\.bw|bigwig|bigWig|BigWig|BW|BIGWIG$", inputFile)) {
+        } else if (grepl(bigwig_suffix, inputFile)) {
             fileType <- "bw"
             if (verbose) message("Reading ", fileType, "file: ", inputFile)
             out <- inputFUN(handle_bw, inputFile = inputFile, importParams, 
@@ -511,7 +517,7 @@ handle_bam <- function(inputFile, importParams = NULL, verbose = FALSE) {
     if (verbose) message("\nBam file ", inputFile, " is loaded\n")
 
     ga <- readGAlignments(inputFile, use.names = TRUE, param = param)
-    libsize <- sum(idxstatsBam(inputFile)$mapped)
+    libsize <- sum(idxstatsBam(inputFile)$mapped, na.rm = TRUE)
     if (importParams$offset != 0) {
         ##for iCLIP, use offset = -1 to get the 5'-end -1 position of the reads, 
         ##which is the crosslink sites for iCLIP reads
@@ -624,7 +630,8 @@ handle_bw <- function(inputFile, importParams, verbose = FALSE) {
     GenomeInfoDb::seqlevels(queryRegions) <- GenomeInfoDb::seqlevels(seqInfo)
     GenomeInfoDb::seqinfo(queryRegions) <- seqInfo
 
-    libsize <- as.integer(sum(score(queryRegions) * width(queryRegions)))
+    libsize <- as.integer(sum(score(queryRegions) * width(queryRegions), 
+                              na.rm = TRUE))
 
     if (importParams$outRle) {
         queryRegions <- coverage(queryRegions, weight = weight_col)
@@ -685,13 +692,13 @@ handle_wig <- function(inputFile,
     stranded <- ifelse(!is.null(neg_file), TRUE, FALSE)
 
     seqinfo <- Seqinfo(genome = importParams$genome)
-    wigToBigWig(inputFile, seqinfo)
+    wigToBigWig(inputFile, seqinfo, clip = TRUE)
 
     if (stranded) {
-        wigToBigWig(neg_file, seqinfo)
+        wigToBigWig(neg_file, seqinfo, clip = TRUE)
     }
 
-    bwfile <- gsub("\\.wig", "\\.bw", inputFile)
+    bwfile <- gsub("\\.wig$|\\.WIG$|\\.Wig$", "\\.bw", inputFile)
 
     out <- handle_bw(bwfile, importParams, verbose)
 

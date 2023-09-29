@@ -81,8 +81,9 @@ indicating no transformation of data matrix}
 filter for outliers identification, 0 indicating not removing outliers. For 
 Gaussian distribution, use 3, adjust based on data distribution}
 
-\item{heatRange}{a numerical vector of two elements, defining range for 
-heatmap color ramp generation}
+\item{heatRange}{a numeric vector with three elements, defining custom range for 
+color ramp, default=NULL, i.e. the range is defined automatically based on 
+the c(minimun, median, maximum) of a data matrix}
 
 \item{Ylab}{a string for y-axis label}
 
