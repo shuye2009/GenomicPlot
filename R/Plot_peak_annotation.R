@@ -22,8 +22,9 @@
 #'  output figures
 #' @param nc number of cores for parallel processing
 #'
-#' @return a list of two dataframes, 'annotation' is the annotation per peak, 
-#'  'stat' is the summary stats for pie chart
+#' @return a list of three dataframes, 'annotation' is the annotation per peak, 
+#'  'stat' is the summary stats for pie chart, 'simplified' is the summary 
+#'  stats excluding intron
 #' @author Shuye Pu
 #' @examples
 #'
