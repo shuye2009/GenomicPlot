@@ -22,9 +22,10 @@
 #'  output figures
 #' @param nc number of cores for parallel processing
 #'
-#' @return a list of three dataframes, 'annotation' is the annotation per peak, 
-#'  'stat' is the summary stats for pie chart, 'simplified' is the summary 
-#'  stats excluding intron
+#' @return a list of three dataframes, 'annotation' is the annotation of peaks
+#'  into gene types, 'stat' is the summary stats for pie chart, 'simplified' is
+#'  the summary stats excluding intron
+#'  
 #' @author Shuye Pu
 #' @examples
 #'

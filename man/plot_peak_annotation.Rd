@@ -49,8 +49,9 @@ output figures}
 \item{nc}{number of cores for parallel processing}
 }
 \value{
-a list of two dataframes, 'annotation' is the annotation per peak, 
- 'stat' is the summary stats for pie chart
+a list of three dataframes, 'annotation' is the annotation of peaks
+ into gene types, 'stat' is the summary stats for pie chart, 'simplified' is
+ the summary stats excluding intron
 }
 \description{
 Produce a table of transcripts targeted by peaks, and generate 
