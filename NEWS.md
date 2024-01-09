@@ -1,3 +1,9 @@
+# CHANGES IN VERSION 1.1.1
+   Removed some suggests in DESCRIPTION to reduce installation time and size
+   
+# CHANGES IN VERSION 1.0.0
+   Officially released on Bioconductor
+
 # CHANGES IN VERSION 0.99.15
 
 ## NEW FEATURES
