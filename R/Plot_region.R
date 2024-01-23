@@ -304,7 +304,7 @@ plot_region <- function(queryFiles,
     ## x-axis points for vlines that demarcate the genomic features
     names(vx) <- featureNames
 
-    if (heatmap) heatmap_list <- list()
+    heatmap_list <- list()
     Ylab <- ifelse(!is.na(transform) && is.null(inputFiles), 
                    paste0(transform, " (", Ylab, ")"), Ylab)
 
@@ -496,22 +496,7 @@ plot_region <- function(queryFiles,
         }
     }
 
-
-    ## plot individual sample lines with error band
-
-    rowp <- plot_grid(plotlist = plot_list, nrow = 1, align = "h")
-    # print(rowp)
-
-    if (heatmap) {
-        groblist <- lapply(heatmap_list, function(x)
-           grid.grabExpr(draw(x, heatmap_legend_side = "left")))
-        heatp <- plot_grid(plotlist = groblist, nrow = 1, align = "h")
-        composite <- plot_grid(rowp, heatp, ncol = 1, rel_heights = c(1, 1))
-        print(composite)
-    } else {
-        print(rowp)
-    }
-
+    draw_stacked_plot(plot_list, heatmap_list)
 
     if (!is.null(inputFiles)) {
         Ylab <- ifelse(is.na(transform), "Ratio-over-Input", 
@@ -557,7 +542,7 @@ plot_region <- function(queryFiles,
 
         mplot_df <- list()
         stat_df <- list()
-        if (heatmap) heatmap_list <- list()
+        heatmap_list <- list()
         if (verbose) message("Plotting coverage profiles...\n")
         for (ratiolabel in ratiolabels) {
             if (verbose) message("Ratio label: ", ratiolabel, "\n")
@@ -714,20 +699,7 @@ plot_region <- function(queryFiles,
         }
 
 
-        ## plot individual sample lines with error band
-
-        rowp <- plot_grid(plotlist = plot_list, nrow = 1, align = "h")
-        # print(rowp)
-
-        if (heatmap) {
-            groblist <- lapply(heatmap_list, function(x)
-               grid.grabExpr(draw(x, heatmap_legend_side = "left")))
-            heatp <- plot_grid(plotlist = groblist, nrow = 1, align = "h")
-            composite <- plot_grid(rowp, heatp, ncol = 1, rel_widths = c(2, 3))
-            print(composite)
-        } else {
-            print(rowp)
-        }
+        draw_stacked_plot(plot_list, heatmap_list)
     }
 
     if (!is.null(outPrefix)) {

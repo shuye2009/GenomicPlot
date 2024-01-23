@@ -391,6 +391,41 @@ draw_locus_profile <- function(plot_df,
     return(p)
 }
 
+
+#' @title draw stacked plot
+#' @description Plot profile on top of heatmap, and align feature labels.
+#' @param plot_list a list of profile plots
+#' @param heatmap_list a list of heatmaps
+#' 
+#' @return NULL
+#' @note used by \code{\link{plot_locus}}, \code{\link{plot_5parts_metagene}},
+#'    \code{\link{plot_region}}
+#' @author Shuye Pu
+#' 
+#' @export draw_stacked_plot
+#' 
+draw_stacked_plot <- function(plot_list, heatmap_list){
+  if (length(heatmap_list) > 0) {
+    groblist <- lapply(heatmap_list, function(x) 
+      grid.grabExpr(draw(x, heatmap_legend_side = "bottom")))
+    names(groblist) <- names(heatmap_list)
+  }else{
+    groblist <- NULL
+  }
+  
+  for(i in seq_along(plot_list)){
+    if(!is.null(groblist)){
+      composite <- ggdraw() +
+        draw_plot(plot_list[[i]], 0, 0.5, 1, 0.5) +
+        draw_plot(groblist[[i]], 0.138, 0, 0.81, 0.5)
+      print(composite)
+    }else{
+      print(plot_list[[i]])
+    }
+  }
+  return(NULL)
+}
+
 #' @title Plot boxplot with two factors
 #' @description Plot violin plot with boxplot components for data with one or 
 #' two factors, p-value significance levels are displayed, "***" = 0.001, 

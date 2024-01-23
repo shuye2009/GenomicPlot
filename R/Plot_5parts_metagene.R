@@ -371,34 +371,14 @@ plot_5parts_metagene <- function(queryFiles,
             plot_list[[paste(queryLabel, aFeature, sep = ":")]] <- outp
         }
     }
-    #rowp <- plot_grid(plotlist = plot_list, nrow = 1, align = "h", axis = "tb")
-    
-    if (heatmap) {
-        groblist <- lapply(heatmap_list, function(x)
-            grid.grabExpr(draw(x, heatmap_legend_side = "bottom")))
-        names(groblist) <- names(heatmap_list)
-        #heatp <- plot_grid(plotlist = groblist, nrow = 1, align = "h")
-        #composite <- plot_grid(rowp, heatp, ncol = 1, align = "v")
-        #print(composite)
-    } 
-    
-    for(i in seq_along(plot_list)){
-        if(heatmap){
-            composite <- ggdraw() +
-                draw_plot(plot_list[[i]], 0, 0.5, 1, 0.5) +
-                draw_plot(groblist[[i]], 0.138, 0, 0.81, 0.5)
-            print(composite)
-        }else{
-            print(plot_list[[i]])
-        }
-    }
+    draw_stacked_plot(plot_list, heatmap_list)
 
     ## plot multi-sample lines with error band
     if (length(queryLabels) * length(gFeatures_list) > 1) {
         p <- draw_region_profile(plot_df = mplot_dfs, cn = "Query", vx = vx, 
                                  Ylab = Ylab)
         outp <- plot_grid(p, pp, ppp, ncol = 1, align = "v", axis = "lr", 
-                          rel_heights = c(20, 1, 2))
+                          rel_heights = c(20, 1, 2.5))
         print(outp)
     }
 
@@ -420,35 +400,15 @@ plot_5parts_metagene <- function(queryFiles,
                 plot_list[[paste(ratiolabel, aFeature, sep = ":")]] <- outp
             }
         }
-        #rowp <- plot_grid(plotlist = plot_list, nrow = 1, align = "h", 
-                          #axis = "tb")
-
-        if (heatmap) {
-            groblist <- lapply(heatmap_list_ratio, function(x) 
-                grid.grabExpr(draw(x, heatmap_legend_side = "bottom")))
-            names(groblist) <- names(heatmap_list_ratio)
-            #heatp <- plot_grid(plotlist = groblist, nrow = 1, align = "v")
-            #composite <- plot_grid(rowp, heatp, ncol = 1)
-            #print(composite)
-        } 
         
-        for(i in seq_along(plot_list)){
-            if(heatmap){
-                composite <- ggdraw() +
-                    draw_plot(plot_list[[i]], 0, 0.5, 1, 0.5) +
-                    draw_plot(groblist[[i]], 0.138, 0, 0.81, 0.5)
-                print(composite)
-            }else{
-                print(plot_list[[i]])
-            }
-        }
+        draw_stacked_plot(plot_list, heatmap_list_ratio)
 
         ## plot multi-sample lines with error band
         if (length(ratiolabels) * length(gFeatures_list) > 1) {
             p <- draw_region_profile(plot_df = mplot_dfs_ratio, cn = "Query",
                                      vx = vx, Ylab = Ylabr)
             outp <- plot_grid(p, pp, ppp, ncol = 1, align = "v", axis = "lr", 
-                              rel_heights = c(20, 1, 2))
+                              rel_heights = c(20, 1, 2.5))
             print(outp)
         }
     }

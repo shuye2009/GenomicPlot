@@ -1,3 +1,5 @@
+# CHANGES IN VERSION 1.1.3
+   Increase font size for axis labels, align profile with heatmap
 # CHANGES IN VERSION 1.1.1
    Removed some suggests in DESCRIPTION to reduce installation time and size
    
