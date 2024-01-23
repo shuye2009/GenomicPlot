@@ -128,7 +128,7 @@ plot_region(
   scale = FALSE,
   regionName = "narrowPeak",
   importParams = chipimportParams,
-  verbose = FALSE,
+  verbose = TRUE,
   fiveP = -500,
   threeP = 500,
   smooth = TRUE,

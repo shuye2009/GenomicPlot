@@ -82,7 +82,7 @@ draw_matrix_heatmap <- function(fullMatrix,
                     signals effectively\n")
           # use quantile of non-zero values
             ranges <- c(min(fullMatrix), quantile(fullMatrix[fullMatrix != 0], 
-                                                  c(0.5, 0.75), na.rm = TRUE)) 
+                                                  c(0.5, 0.95), na.rm = TRUE)) 
         }
     }
 
@@ -417,7 +417,7 @@ draw_stacked_plot <- function(plot_list, heatmap_list){
     if(!is.null(groblist)){
       composite <- ggdraw() +
         draw_plot(plot_list[[i]], 0, 0.5, 1, 0.5) +
-        draw_plot(groblist[[i]], 0.138, 0, 0.81, 0.5)
+        draw_plot(groblist[[i]], 0.16, 0, 0.8, 0.5, halign = 0.7)
       print(composite)
     }else{
       print(plot_list[[i]])

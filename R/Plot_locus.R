@@ -76,6 +76,7 @@
 #'     offset = 0, fix_width = 150, fix_point = "start", norm = TRUE,
 #'     useScore = FALSE, outRle = TRUE, useSizeFactor = FALSE, genome = "hg19"
 #' )
+#' 
 #' plot_locus(
 #'   queryFiles = queryfiles,
 #'   centerFiles = centerfiles,
