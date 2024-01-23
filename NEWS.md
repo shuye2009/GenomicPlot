@@ -1,5 +1,7 @@
-# CHANGES IN VERSION 1.0.1
+# CHANGES IN VERSION 1.0.3
    Removed some suggests in DESCRIPTION to reduce installation time and size
+## BUG FIXES
+   Fixed misalignment between profiles and heatmaps
    
 # CHANGES IN VERSION 1.0.0
    Officially released on Bioconductor
