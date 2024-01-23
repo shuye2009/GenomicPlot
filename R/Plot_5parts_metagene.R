@@ -89,7 +89,7 @@ plot_5parts_metagene <- function(queryFiles,
                                  heatRange = NULL,
                                  rmOutlier = 0,
                                  Ylab = "Coverage/base/gene",
-                                 hw = c(8, 8),
+                                 hw = c(10, 10),
                                  nc = 2) {
     stopifnot(is.numeric(c(nc, hw, rmOutlier)))
     stopifnot(transform %in% c("log", "log2", "log10", NA))
@@ -248,10 +248,12 @@ plot_5parts_metagene <- function(queryFiles,
 
                 if (heatmap) {
                     dataname <- paste(Ylab, queryLabel, aFeature, sep = ":")
+                    rgs <- NULL
+                    if(is.null(inputFiles)) rgs <- heatRange
                     heatmap_list[[dataname]] <- draw_matrix_heatmap(
                         featureMatrix, dataName = dataname, 
                         labels_col = collabel, levels_col = featureNames,
-                        ranges = heatRange, verbose = verbose)
+                        ranges = rgs, verbose = verbose)
                 }
                 plot_df <- data.frame("Intensity" = colm, "sd" = colsd,
                                       "se" = colse, "Position" = collabel, 
@@ -358,27 +360,37 @@ plot_5parts_metagene <- function(queryFiles,
     
     ## plot individual sample lines with error band
     plot_list <- list()
-    for (queryLabel in queryLabels) {
-        for (aFeature in names(gFeatures_list)) {
+    for (aFeature in names(gFeatures_list)) {
+        for (queryLabel in queryLabels) {
             aplot_df <- mplot_dfs %>%
                 filter(Query == paste(queryLabel, aFeature, sep = ":"))
             p <- draw_region_profile(plot_df = aplot_df, cn = "Query",
                                      vx = vx, Ylab = Ylab)
             outp <- plot_grid(p, pp, ppp, ncol = 1, align = "v", axis = "lr",
-                              rel_heights = c(25, 1, 2))
+                              rel_heights = c(20, 1, 2.5))
             plot_list[[paste(queryLabel, aFeature, sep = ":")]] <- outp
         }
     }
-    rowp <- plot_grid(plotlist = plot_list, nrow = 1, align = "h", axis = "tb")
-    # print(rowp)
+    #rowp <- plot_grid(plotlist = plot_list, nrow = 1, align = "h", axis = "tb")
+    
     if (heatmap) {
         groblist <- lapply(heatmap_list, function(x)
-            grid.grabExpr(draw(x, heatmap_legend_side = "left")))
-        heatp <- plot_grid(plotlist = groblist, nrow = 1, align = "h")
-        composite <- plot_grid(rowp, heatp, ncol = 1, align = "v")
-        print(composite)
-    } else {
-        print(rowp)
+            grid.grabExpr(draw(x, heatmap_legend_side = "bottom")))
+        names(groblist) <- names(heatmap_list)
+        #heatp <- plot_grid(plotlist = groblist, nrow = 1, align = "h")
+        #composite <- plot_grid(rowp, heatp, ncol = 1, align = "v")
+        #print(composite)
+    } 
+    
+    for(i in seq_along(plot_list)){
+        if(heatmap){
+            composite <- ggdraw() +
+                draw_plot(plot_list[[i]], 0, 0.5, 1, 0.5) +
+                draw_plot(groblist[[i]], 0.138, 0, 0.81, 0.5)
+            print(composite)
+        }else{
+            print(plot_list[[i]])
+        }
     }
 
     ## plot multi-sample lines with error band
@@ -386,7 +398,7 @@ plot_5parts_metagene <- function(queryFiles,
         p <- draw_region_profile(plot_df = mplot_dfs, cn = "Query", vx = vx, 
                                  Ylab = Ylab)
         outp <- plot_grid(p, pp, ppp, ncol = 1, align = "v", axis = "lr", 
-                          rel_heights = c(25, 1, 2))
+                          rel_heights = c(20, 1, 2))
         print(outp)
     }
 
@@ -397,29 +409,38 @@ plot_5parts_metagene <- function(queryFiles,
         
         ## plot individual sample lines with error band
         plot_list <- list()
-        for (ratiolabel in ratiolabels) {
-            for (aFeature in names(gFeatures_list)) {
+        for (aFeature in names(gFeatures_list)) {
+            for (ratiolabel in ratiolabels) {
                 aplot_df <- mplot_dfs_ratio %>%
                     filter(Query == paste(ratiolabel, aFeature, sep = ":"))
                 p <- draw_region_profile(plot_df = aplot_df, cn = "Query",
                                          vx = vx, Ylab = Ylabr)
                 outp <- plot_grid(p, pp, ppp, ncol = 1, align = "v", 
-                                  axis = "lr", rel_heights = c(25, 1, 2))
+                                  axis = "lr", rel_heights = c(20, 1, 2.5))
                 plot_list[[paste(ratiolabel, aFeature, sep = ":")]] <- outp
             }
         }
-        rowp <- plot_grid(plotlist = plot_list, nrow = 1, align = "h", 
-                          axis = "tb")
-        # print(rowp)
+        #rowp <- plot_grid(plotlist = plot_list, nrow = 1, align = "h", 
+                          #axis = "tb")
 
         if (heatmap) {
             groblist <- lapply(heatmap_list_ratio, function(x) 
-                grid.grabExpr(draw(x, heatmap_legend_side = "left")))
-            heatp <- plot_grid(plotlist = groblist, nrow = 1, align = "v")
-            composite <- plot_grid(rowp, heatp, ncol = 1)
-            print(composite)
-        } else {
-            print(rowp)
+                grid.grabExpr(draw(x, heatmap_legend_side = "bottom")))
+            names(groblist) <- names(heatmap_list_ratio)
+            #heatp <- plot_grid(plotlist = groblist, nrow = 1, align = "v")
+            #composite <- plot_grid(rowp, heatp, ncol = 1)
+            #print(composite)
+        } 
+        
+        for(i in seq_along(plot_list)){
+            if(heatmap){
+                composite <- ggdraw() +
+                    draw_plot(plot_list[[i]], 0, 0.5, 1, 0.5) +
+                    draw_plot(groblist[[i]], 0.138, 0, 0.81, 0.5)
+                print(composite)
+            }else{
+                print(plot_list[[i]])
+            }
         }
 
         ## plot multi-sample lines with error band
@@ -427,7 +448,7 @@ plot_5parts_metagene <- function(queryFiles,
             p <- draw_region_profile(plot_df = mplot_dfs_ratio, cn = "Query",
                                      vx = vx, Ylab = Ylabr)
             outp <- plot_grid(p, pp, ppp, ncol = 1, align = "v", axis = "lr", 
-                              rel_heights = c(25, 1, 2))
+                              rel_heights = c(20, 1, 2))
             print(outp)
         }
     }

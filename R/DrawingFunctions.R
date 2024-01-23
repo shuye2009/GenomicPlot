@@ -76,11 +76,13 @@ draw_matrix_heatmap <- function(fullMatrix,
                       collapse = " "), "\n")
     }
     if (is.null(ranges)) {
-        ranges <- quantile(fullMatrix, c(0.025, 0.5, 0.975), na.rm = TRUE)
-        if (ranges[1] == ranges[2]) {
-            message("97.5% of values are not unique, heatmap may not show 
+        ranges <- quantile(fullMatrix, c(0.25, 0.5, 0.75), na.rm = TRUE)
+        if (ranges[1] == ranges[3]) {
+            message("75% of values are not unique, heatmap may not show 
                     signals effectively\n")
-            ranges <- quantile(fullMatrix, c(0, 0.5, 1), na.rm = TRUE) 
+          # use quantile of non-zero values
+            ranges <- c(min(fullMatrix), quantile(fullMatrix[fullMatrix != 0], 
+                                                  c(0.5, 0.75), na.rm = TRUE)) 
         }
     }
 
@@ -88,7 +90,8 @@ draw_matrix_heatmap <- function(fullMatrix,
         name = "Value",
         col = colorRamp2(ranges, viridis(3)),
         bottom_annotation = ha,
-        heatmap_legend_param = list(legend_direction = "vertical"),
+        heatmap_legend_param = list(legend_direction = "horizontal",
+                                    title_position = "leftcenter"),
         show_row_names = FALSE,
         show_column_names = FALSE,
         show_row_dend = FALSE,
@@ -97,7 +100,7 @@ draw_matrix_heatmap <- function(fullMatrix,
         column_split = features,
         column_gap = unit(0, "mm"),
         column_title = "%s",
-        column_title_gp = gpar(fontsize = 10, fontface = "plain"),
+        column_title_gp = gpar(fontsize = 16, fontface = "plain"),
         column_title_side = "bottom"
     )
 
@@ -130,9 +133,12 @@ draw_matrix_heatmap <- function(fullMatrix,
 
 draw_region_landmark <- function(featureNames, vx, xmax) {
     nfeatures <- length(featureNames)
+    cols <- ggsci::pal_npg()(nfeatures)
+    names(cols) <- featureNames
+    
     if (nfeatures == 5) {
         values <- data.frame(fid = featureNames, 
-                             value = c(1.75, 1.5, 1.25, 1.5, 1.75))
+                             value = cols)
         positions <- data.frame(
             fid = rep(featureNames, each = 4),
             x = c(vx[2], vx[1], vx[1], vx[2], vx[3], vx[2], vx[2], vx[3], vx[4], 
@@ -142,7 +148,7 @@ draw_region_landmark <- function(featureNames, vx, xmax) {
                   4.5, 3, 3, 4, 4) - 2
         )
     } else if (nfeatures == 3) {
-        values <- data.frame(fid = featureNames, value = c(1.25, 1.75, 1.25))
+        values <- data.frame(fid = factor(featureNames), value = cols)
         positions <- data.frame(
             fid = rep(featureNames, each = 4),
             x = c(vx[2], vx[1], vx[1], vx[2], vx[3], vx[2], vx[2], vx[3], xmax, 
@@ -157,7 +163,8 @@ draw_region_landmark <- function(featureNames, vx, xmax) {
     datapoly <- merge(values, positions, by = c("fid"))
 
     pp <- ggplot(datapoly, aes(x = x, y = y)) +
-        geom_polygon(aes(fill = value, group = fid)) +
+        geom_polygon(aes(group = fid, fill = fid)) +
+        scale_fill_manual(values = cols) +
         theme(
             axis.line = element_blank(),
             axis.text.x = element_blank(),
@@ -215,7 +222,7 @@ draw_region_name <- function(featureNames,
         y <- 0
     )
     ppp <- ggplot(annot, aes(x = x, y = y, label = fn)) +
-        geom_text(size = 3, check_overlap = TRUE) +
+        geom_text(size = 16/.pt, check_overlap = TRUE) +
         coord_cartesian(xlim = c(1, xmax)) +
         theme(
             axis.line = element_blank(),
@@ -297,6 +304,8 @@ draw_region_profile <- function(plot_df,
             axis.title.x = element_blank(),
             axis.ticks.x = element_blank(),
             axis.text.x = element_blank(),
+            axis.title.y = element_text(face="bold", size=18),
+            axis.text.y = element_text(size=16),
             plot.margin = unit(c(1, 1, 0, 1), "lines")
         ) 
     if(!is.null(sn))
@@ -368,8 +377,8 @@ draw_locus_profile <- function(plot_df,
         theme(
             legend.position = "top",
             legend.title = element_blank(),
-            axis.text = element_text(face = "plain", size = 14),
-            axis.title = element_text(face = "bold", size = 16)
+            axis.text = element_text(face = "plain", size = 16),
+            axis.title = element_text(face = "bold", size = 18)
         ) 
     
     if(!is.null(sn))

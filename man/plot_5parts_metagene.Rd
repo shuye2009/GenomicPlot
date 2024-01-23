@@ -19,7 +19,7 @@ plot_5parts_metagene(
   heatRange = NULL,
   rmOutlier = 0,
   Ylab = "Coverage/base/gene",
-  hw = c(8, 8),
+  hw = c(10, 10),
   nc = 2
 )
 }

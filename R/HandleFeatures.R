@@ -771,6 +771,7 @@ get_targeted_genes <- function(peak,
 #' names in a file or in a character vector.
 #'
 #' @param gtfFile path to a GTF file
+#' @param genome version of genome, like "hg19"
 #' @param geneList path to a tab-delimited text file with one gene name on each 
 #'  line, or a character vector of gene names
 #' @param geneCol the position of the column that containing gene names in the 
@@ -791,6 +792,7 @@ get_targeted_genes <- function(peak,
 #' @export make_subTxDb_from_GTF
 
 make_subTxDb_from_GTF <- function(gtfFile,
+                                  genome = "hg19",
                                   geneList,
                                   geneCol = 1) {
     gff <- RCAS::importGtf(saveObjectAsRds = TRUE, filePath = gtfFile)
@@ -807,8 +809,8 @@ make_subTxDb_from_GTF <- function(gtfFile,
     maploss <- length(geneList) - length(subgff)
     message("In make_subTxDb_from_GTF, number of gene symbols failed to map: ", 
             maploss, "\n")
-
-    TxDb <- makeTxDbFromGRanges(subgff)
+    
+    TxDb <- makeTxDbFromGRanges(subgff, metadata = data.frame("genome", genome))
 
     return(TxDb)
 }
