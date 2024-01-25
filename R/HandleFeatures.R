@@ -810,7 +810,8 @@ make_subTxDb_from_GTF <- function(gtfFile,
     message("In make_subTxDb_from_GTF, number of gene symbols failed to map: ", 
             maploss, "\n")
     
-    TxDb <- makeTxDbFromGRanges(subgff, metadata = data.frame("genome", genome))
+    TxDb <- makeTxDbFromGRanges(subgff, metadata = data.frame(name = "genome", 
+                                                              value = genome))
 
     return(TxDb)
 }

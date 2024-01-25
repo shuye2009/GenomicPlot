@@ -11,6 +11,9 @@ draw_stacked_plot(plot_list, heatmap_list)
 
 \item{heatmap_list}{a list of heatmaps}
 }
+\value{
+a null value
+}
 \description{
 Plot profile on top of heatmap, and align feature labels.
 }

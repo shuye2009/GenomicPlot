@@ -393,17 +393,19 @@ draw_locus_profile <- function(plot_df,
 
 
 #' @title draw stacked plot
-#' @description Plot profile on top of heatmap, and align feature labels.
+#' @description Plot profile on top of heatmap, and align feature labels. 
+#' 
 #' @param plot_list a list of profile plots
 #' @param heatmap_list a list of heatmaps
 #' 
-#' @return NULL
+#' @return a null value
 #' @note used by \code{\link{plot_locus}}, \code{\link{plot_5parts_metagene}},
 #'    \code{\link{plot_region}}
 #' @author Shuye Pu
 #' 
 #' @export draw_stacked_plot
-#' 
+#'
+ 
 draw_stacked_plot <- function(plot_list, heatmap_list){
   if (length(heatmap_list) > 0) {
     groblist <- lapply(heatmap_list, function(x) 
@@ -1407,6 +1409,11 @@ overlap_triple <- function(atriple, overlap_fun, title = NULL) {
     overlap13 <- length(Reduce(overlap_fun, atriple[c(1, 3)]))
     overlap23 <- length(Reduce(overlap_fun, atriple[c(2, 3)]))
     overlap123 <- length(Reduce(overlap_fun, atriple))
+    
+    # check consistency if bed overlaps produce inconsistent values 
+    if(overlap123 > min(overlap12, overlap13, overlap23)){
+      overlap123 <- min(overlap12, overlap13, overlap23)
+    }
 
     venn.plot <- draw.triple.venn(sizes[1], sizes[2], sizes[3], overlap12, 
                                   overlap23, overlap13, overlap123,
@@ -1489,6 +1496,24 @@ overlap_quad <- function(aquad, overlap_fun, title = NULL) {
     overlap134 <- length(Reduce(overlap_fun, aquad[c(1, 3, 4)]))
     overlap234 <- length(Reduce(overlap_fun, aquad[c(2, 3, 4)]))
     overlap1234 <- length(Reduce(overlap_fun, aquad))
+    
+    # check consistency if bed overlaps produce inconsistent values 
+    if(overlap123 > min(overlap12, overlap13, overlap23)){
+      overlap123 <- min(overlap12, overlap13, overlap23)
+    }
+    if(overlap124 > min(overlap12, overlap14, overlap24)){
+      overlap124 <- min(overlap12, overlap14, overlap24)
+    }
+    if(overlap134 > min(overlap13, overlap14, overlap34)){
+      overlap134 <- min(overlap13, overlap14, overlap34)
+    }
+    if(overlap234 > min(overlap23, overlap24, overlap34)){
+      overlap234 <- min(overlap23, overlap24, overlap34)
+    }
+    
+    if(overlap1234 > min(overlap123, overlap124, overlap134, overlap234)){
+      overlap1234 <- min(overlap123, overlap124, overlap134, overlap234)
+    }
     
     venn.plot <- draw.quad.venn(sizes[1], sizes[2], sizes[3], sizes[4], 
                                 overlap12, overlap13, overlap14, overlap23, 
