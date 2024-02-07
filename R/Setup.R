@@ -37,7 +37,7 @@ utils::globalVariables(
 #' @importFrom GenomicFeatures threeUTRsByTranscript fiveUTRsByTranscript
 #' @importFrom GenomicFeatures cdsBy genes transcripts makeTxDbFromGRanges
 #' @importFrom ComplexHeatmap HeatmapAnnotation Heatmap draw pheatmap
-#' @importFrom circlize colorRamp2
+#' @importFrom circlize colorRamp2 read.chromInfo
 #' @importFrom viridis viridis scale_fill_viridis
 #' @importFrom VennDiagram draw.pairwise.venn draw.triple.venn draw.quad.venn
 #' @importFrom grDevices dev.list dev.off pdf

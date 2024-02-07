@@ -895,7 +895,10 @@ gene2tx <- function(gtfFile,
 #'
 check_constraints <- function(gr, genome, queryRle = NULL) {
     stopifnot(is.character(genome))
-    seqInfo <- Seqinfo(genome = genome)
+    chromInfo <- circlize::read.chromInfo(species = genome)$df
+    seqInfo <- Seqinfo(seqnames = chromInfo$chr, seqlengths = chromInfo$end,
+                       isCircular = rep(FALSE, nrow(chromInfo)), 
+                       genome = genome)
     len <- seqlengths(seqInfo)
 
     if (any(start(gr) < 1)) {

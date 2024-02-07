@@ -48,6 +48,8 @@ setImportParams <- function(
     stopifnot(fix_point %in% c("start", "center", "end"))
     stopifnot(is.logical(c(norm, useScore, outRle, useSizeFactor, saveRds)))
     stopifnot(is.character(genome))
+    if(genome == "GRCh37") genome <- "hg19"
+    if(genome == "GRCh38") genome <- "hg38"
     return(list(
         offset = offset, fix_width = fix_width, fix_point = fix_point,
         norm = norm, useScore = useScore, outRle = outRle,
@@ -428,7 +430,10 @@ handle_bed <- function(inputFile,
     }
 
     ## make input comply with GenomeInfoDb
-    seqInfo <- Seqinfo(genome = importParams$genome)
+    chromInfo <- circlize::read.chromInfo(species = importParams$genome)$df
+    seqInfo <- Seqinfo(seqnames = chromInfo$chr, seqlengths = chromInfo$end,
+                       isCircular = rep(FALSE, nrow(chromInfo)), 
+                       genome = importParams$genome)
     seqInfo <- keepStandardChromosomes(seqInfo)
 
     if (c("chr1") %in% as.vector(seqnames(queryRegions)) 
@@ -538,8 +543,11 @@ handle_bam <- function(inputFile, importParams = NULL, verbose = FALSE) {
     }
     weight_col <- "score"
 
-    ## make input comply with GenomeInfoDb
-    seqInfo <- Seqinfo(genome = importParams$genome)
+    ## make input comply with GenomeInfoDb, use cached chromInfo to avoid
+    ## dependency on UCSC web service
+    chromInfo <- circlize::read.chromInfo(species = importParams$genome)$df
+    seqInfo <- Seqinfo(seqnames = chromInfo$chr, seqlengths = chromInfo$end,
+        isCircular = rep(FALSE, nrow(chromInfo)), genome = importParams$genome)
     seqInfo <- keepStandardChromosomes(seqInfo)
     queryRegions <- queryRegions[as.vector(seqnames(queryRegions)) 
                                  %in% seqnames(seqInfo)]
@@ -623,7 +631,10 @@ handle_bw <- function(inputFile, importParams, verbose = FALSE) {
     }
 
     ## make input comply with GenomeInfoDb
-    seqInfo <- Seqinfo(genome = importParams$genome)
+    chromInfo <- circlize::read.chromInfo(species = importParams$genome)$df
+    seqInfo <- Seqinfo(seqnames = chromInfo$chr, seqlengths = chromInfo$end,
+                       isCircular = rep(FALSE, nrow(chromInfo)), 
+                       genome = importParams$genome)
     seqInfo <- keepStandardChromosomes(seqInfo)
     queryRegions <- queryRegions[as.vector(seqnames(queryRegions)) 
                                  %in% seqnames(seqInfo)]

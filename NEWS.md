@@ -1,3 +1,5 @@
+# CHANGES IN VERSION 1.1.4
+   Change chromosome size information source from UCSC web service to cached data in the 'circlize' package, to avoid internet connection issues and web service issues.
 # CHANGES IN VERSION 1.1.3
    Increase font size for axis labels, align profile with heatmap
 # CHANGES IN VERSION 1.1.1
