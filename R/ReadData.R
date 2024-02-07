@@ -1,27 +1,27 @@
 #' @title set parameters for \code{handle_input} function
 #'
-#' @description This function save as a template for setting up import 
-#' parameters for reading NGS data, it provides default values for each 
+#' @description This function save as a template for setting up import
+#' parameters for reading NGS data, it provides default values for each
 #' parameter.
-#' @param offset an integer, -1 indicating the bam reads should be shrunk to the 
-#'  -1 position at the 5'end of the reads, which corresponds to the cross link 
+#' @param offset an integer, -1 indicating the bam reads should be shrunk to the
+#'  -1 position at the 5'end of the reads, which corresponds to the cross link
 #'  site in iCLIP.
-#' @param fix_width an integer, for bam file, defines how long the reads should 
-#' be extended from the start position, ignored when offset is not 0; for bed 
-#' files, defines the width of each interval centering on the `fix_point`. 
-#' @param fix_point a string in c("start", "end", "center") denoting the anchor 
+#' @param fix_width an integer, for bam file, defines how long the reads should
+#' be extended from the start position, ignored when offset is not 0; for bed
+#' files, defines the width of each interval centering on the `fix_point`.
+#' @param fix_point a string in c("start", "end", "center") denoting the anchor
 #'  point for extension, ignored when offset is not 0.
-#' @param useScore logical, indicating whether the 'score' column of the bed 
+#' @param useScore logical, indicating whether the 'score' column of the bed
 #'  file should be used in calculation of coverage.
-#' @param outRle logical, indicating whether the output should be RleList 
+#' @param outRle logical, indicating whether the output should be RleList
 #'  objects or GRanges objects.
-#' @param norm logical, indicating whether the output RleList should be 
+#' @param norm logical, indicating whether the output RleList should be
 #'  normalized to RPM using library sizes.
 #' @param genome a string denoting the genome name and version.
-#' @param useSizeFactor logical, indicating whether the library size should be 
-#'  adjusted with a size factor, using the 'calcNormFactors' function in the 
+#' @param useSizeFactor logical, indicating whether the library size should be
+#'  adjusted with a size factor, using the 'calcNormFactors' function in the
 #'  edgeR package, only applicable to ChIPseq data.
-#' @param saveRds logical, indicating whether the results of handle_input should 
+#' @param saveRds logical, indicating whether the results of handle_input should
 #'  be saved for fast reloading
 #'
 #' @return a list of nine elements
@@ -60,27 +60,27 @@ setImportParams <- function(
 
 #' @title Handle import of NGS data with various formats
 #'
-#' @description This is a wrapper function for read NGS data in different file 
-#' formats, store the input data in a list of GRanges objects or RleList 
-#' objects. File names end in bed|bam|bw|bigwig|bigWig|BigWig|BW|BIGWIG are 
+#' @description This is a wrapper function for read NGS data in different file
+#' formats, store the input data in a list of GRanges objects or RleList
+#' objects. File names end in bed|bam|bw|bigwig|bigWig|BigWig|BW|BIGWIG are
 #' recognized, and a named list of files with mixed formats are allowed.
 #'
 #' @param inputFiles a vector of strings denoting file names
-#' @param importParams a list with the 9 elements: list(offset, fix_width, 
-#'  fix_point, useScore, outRle, norm, genome, useSizeFactor). Details are 
+#' @param importParams a list with the 9 elements: list(offset, fix_width,
+#'  fix_point, useScore, outRle, norm, genome, useSizeFactor). Details are
 #'  described in the documentation of \code{\link{setImportParams}} function
 #' @param nc integer, number of cores for parallel processing
 #' @param verbose logical, whether to output additional information
 #'
-#' @details when 'useScore' is TRUE, the score column of the bed file will be 
-#' used in the metadata column 'score' of the GRanges object, or the 'Values' 
-#' field of the RleList object. Otherwise the value 1 will be used instead. When 
-#' the intended use of the input bed is a reference feature, both 'useScore' and 
+#' @details when 'useScore' is TRUE, the score column of the bed file will be
+#' used in the metadata column 'score' of the GRanges object, or the 'Values'
+#' field of the RleList object. Otherwise the value 1 will be used instead. When
+#' the intended use of the input bed is a reference feature, both 'useScore' and
 #' 'outRle' should be set to FALSE.
 #'
-#' @return a list object with four elements, 'query' is a list GRanges objects 
-#' or RleList objects, 'size' is the library size, 'type' is the input file 
-#' type, 'weight' is the name of the metadata column to be used as weight for 
+#' @return a list object with four elements, 'query' is a list GRanges objects
+#' or RleList objects, 'size' is the library size, 'type' is the input file
+#' type, 'weight' is the name of the metadata column to be used as weight for
 #' coverage calculation
 #'
 #' @author Shuye Pu
@@ -135,14 +135,14 @@ handle_input <- function(inputFiles,
                          verbose = FALSE,
                          nc = 2) {
     stopifnot(all(file.exists(inputFiles)))
-    if (is.null(names(inputFiles)) || any(names(inputFiles) == "")) 
+    if (is.null(names(inputFiles)) || any(names(inputFiles) == ""))
         stop("Each file must have a name attribute!")
     if (is.null(importParams)) importParams <- setImportParams()
 
     original_outRle <- importParams$outRle
     if (importParams$useSizeFactor && length(inputFiles) > 1) {
-        importParams$outRle <- FALSE 
-        ## effective_size only take granges_list which produce more accurate 
+        importParams$outRle <- FALSE
+        ## effective_size only take granges_list which produce more accurate
         ## normFactor than RleList
     }
 
@@ -155,26 +155,26 @@ handle_input <- function(inputFiles,
                 out <- temp$Rle
                 if (verbose) message("Cached .rds file is used\n")
             } else {
-                if (!file.exists(inputFile)) stop("file does not exist, 
+                if (!file.exists(inputFile)) stop("file does not exist,
                                        please check your file name and path!")
                 out <- funName(inputFile = inputFile, importParams, verbose)
-                if (importParams$saveRds && file.access(dirName, 
+                if (importParams$saveRds && file.access(dirName,
                                                         mode = 2)[1] == 0) {
-                    saveRDS(list(param = importParams, Rle = out), 
+                    saveRDS(list(param = importParams, Rle = out),
                             file.path(dirName, paste0(fileName, ".rds")))
-                    if (verbose) message("Cached .rds file is modified using 
+                    if (verbose) message("Cached .rds file is modified using
                                          new input parameters\n")
                 }
             }
         } else {
-            if (!file.exists(inputFile)) stop("file does not exist, 
+            if (!file.exists(inputFile)) stop("file does not exist,
                                      please check your file name and path!")
             out <- funName(inputFile = inputFile, importParams, verbose)
-            if (importParams$saveRds && file.access(dirName, 
+            if (importParams$saveRds && file.access(dirName,
                                                     mode = 2)[1] == 0) {
-                saveRDS(list(param = importParams, Rle = out), 
+                saveRDS(list(param = importParams, Rle = out),
                         file.path(dirName, paste0(fileName, ".rds")))
-                if (verbose) message("Input data is cached as .rds file for 
+                if (verbose) message("Input data is cached as .rds file for
                                      fast reloading\n")
             }
         }
@@ -182,7 +182,7 @@ handle_input <- function(inputFiles,
     }
 
     bed_suffix <- paste(
-        paste0("\\.", c("bed", "BED", "Bed", "narrowPeak", "broadPeak"), "$"), 
+        paste0("\\.", c("bed", "BED", "Bed", "narrowPeak", "broadPeak"), "$"),
         collapse = "|")
     bigwig_suffix <- paste(
         paste0("\\.", c("bw", "bigwig", "Bigwig", "bigWig", "BigWig", "BIGWIG",
@@ -192,25 +192,25 @@ handle_input <- function(inputFiles,
         if (grepl(bed_suffix, inputFile)) {
             fileType <- "bed"
             if (verbose) message("Reading ", fileType, "file: ", inputFile)
-            out <- inputFUN(handle_bed, inputFile = inputFile, importParams, 
+            out <- inputFUN(handle_bed, inputFile = inputFile, importParams,
                             verbose)
         } else if (grepl("\\.bam$|\\.BAM$|\\.Bam$", inputFile)) {
             fileType <- "bam"
             if (verbose) message("Reading ", fileType, "file: ", inputFile)
-            out <- inputFUN(handle_bam, inputFile = inputFile, importParams, 
+            out <- inputFUN(handle_bam, inputFile = inputFile, importParams,
                             verbose)
         } else if (grepl("\\.wig$|\\.WIG$|\\.Wig$", inputFile)) {
             fileType <- "wig"
             if (verbose) message("Reading ", fileType, "file: ", inputFile)
-            out <- inputFUN(handle_wig, inputFile = inputFile, importParams, 
+            out <- inputFUN(handle_wig, inputFile = inputFile, importParams,
                             verbose)
         } else if (grepl(bigwig_suffix, inputFile)) {
             fileType <- "bw"
             if (verbose) message("Reading ", fileType, "file: ", inputFile)
-            out <- inputFUN(handle_bw, inputFile = inputFile, importParams, 
+            out <- inputFUN(handle_bw, inputFile = inputFile, importParams,
                             verbose)
         } else {
-            stop("The format of file is not supported, please convert it to one 
+            stop("The format of file is not supported, please convert it to one
                  of the following format: bed, bam, wig, bigwig")
         }
 
@@ -222,8 +222,8 @@ handle_input <- function(inputFiles,
 
     ## modify library size
     if (importParams$useSizeFactor && (length(inputFiles) > 1)) {
-        outlist <- effective_size(outlist = outlist, 
-                                  outRle = importParams$outRle, 
+        outlist <- effective_size(outlist = outlist,
+                                  outRle = importParams$outRle,
                                   genome = importParams$genome, nc = nc)
     }
 
@@ -244,20 +244,20 @@ handle_input <- function(inputFiles,
 
 #' @title Normalize sample library size to effective size
 #'
-#' @description This is a helper function for handle_input. 
-#' edgeR::calcNormFactors function is used to estimate normalizing factors, 
+#' @description This is a helper function for handle_input.
+#' edgeR::calcNormFactors function is used to estimate normalizing factors,
 #' which is used to multiply library sizes.
 #'
-#' @param outlist a list of list objects with four elements, 'query' is a 
-#'  GRanges object, 'size' is the library size, 'type' is the input file type, 
+#' @param outlist a list of list objects with four elements, 'query' is a
+#'  GRanges object, 'size' is the library size, 'type' is the input file type,
 #'  'weight' is the name of the metadata column
-#' @param outRle logical, indicating whether the 'query' element of the output 
+#' @param outRle logical, indicating whether the 'query' element of the output
 #'  should be an RleList object or a GRanges object
 #' @param genome a string denoting the genome name and version
 #' @param nc integer, number of cores for parallel processing
 #' @param verbose logical, whether to output additional information
 #'
-#' @return a list of list objects with four elements ('query', 'size', 'type', 
+#' @return a list of list objects with four elements ('query', 'size', 'type',
 #'  'weight'), with the 'size' element modified.
 #'
 #' @author Shuye Pu
@@ -294,12 +294,15 @@ effective_size <- function(outlist,
                            verbose = FALSE) {
     if (verbose) message("Estimating size factor\n")
 
-    seqi <- Seqinfo(genome = genome)
+    chromInfo <- circlize::read.chromInfo(species = genome)$df
+    seqi <- Seqinfo(seqnames = chromInfo$chr, seqlengths = chromInfo$end,
+                    isCircular = rep(FALSE, nrow(chromInfo)),
+                    genome = genome)
 
     grange_list <- lapply(outlist, function(x) x$query)
 
     tilewidth <- 100000
-    tileBins <- tileGenome(seqi, tilewidth = tilewidth, 
+    tileBins <- tileGenome(seqi, tilewidth = tilewidth,
                            cut.last.tile.in.chrom = TRUE)
 
     score_list <- parallel_countOverlaps(grange_list, tileBins, nc = nc)
@@ -341,17 +344,17 @@ effective_size <- function(outlist,
 
 #' @title Handle files in bed|narrowPeak|broadPeak format
 #'
-#' @description This is a function for read peaks data in bed format, store the 
+#' @description This is a function for read peaks data in bed format, store the
 #' input data in a list of GRanges objects or RleList objects.
 #'
 #' @param inputFile a string denoting path to the input file
-#' @param importParams a list of parameters, refer to \code{\link{handle_input}} 
+#' @param importParams a list of parameters, refer to \code{\link{handle_input}}
 #'  for details
 #' @param verbose logical, whether to output additional information
 #'
-#' @return a list object with four elements, 'query' is a list GRanges objects 
-#' or RleList objects, 'size' is the library size, 'type' is the input file 
-#' type, 'weight' is the name of the metadata column to be used as weight for 
+#' @return a list object with four elements, 'query' is a list GRanges objects
+#' or RleList objects, 'size' is the library size, 'type' is the input file
+#' type, 'weight' is the name of the metadata column to be used as weight for
 #' coverage calculation
 #'
 #' @author Shuye Pu
@@ -382,38 +385,38 @@ handle_bed <- function(inputFile,
 
     nco <- ncol(beddata)
     if (nco > 6 && verbose) {
-        message("The input file ", inputFile, " have more than 6 columns, 
+        message("The input file ", inputFile, " have more than 6 columns,
                 only the first 6 columns will be used!\n")
     } else if (nco < 6 && verbose) {
         message("The input file ", inputFile, " have less than 6 columns!\n")
     }
 
-    beddata <- type.convert(beddata[, seq_len(min(6, nco))], as.is = TRUE) 
+    beddata <- type.convert(beddata[, seq_len(min(6, nco))], as.is = TRUE)
     ## ignore extra columns, which cause problem in import.bed()
     standard_col <- c("chr", "start", "end", "name", "score", "strand")
     colnames(beddata) <- standard_col[seq_len(min(6, ncol(beddata)))]
-    queryRegions <- makeGRangesFromDataFrame(beddata, keep.extra.columns = TRUE, 
+    queryRegions <- makeGRangesFromDataFrame(beddata, keep.extra.columns = TRUE,
                                              starts.in.df.are.0based = TRUE)
     if("name" %in% colnames(beddata)) {
-        if (sum(duplicated(beddata$name)) > 0) { 
+        if (sum(duplicated(beddata$name)) > 0) {
             ## if the names are not unique, force them to be unique
             message("bed interval names are modified as they are not unique!")
-            names(queryRegions) <- paste(beddata$name, 
+            names(queryRegions) <- paste(beddata$name,
                                          seq_along(beddata$name), sep = "_")
         }else{
-            names(queryRegions) <- beddata$name 
+            names(queryRegions) <- beddata$name
         }
     }else{
         names(queryRegions) <- paste("peak", seq_along(beddata[,1]), sep = "_")
     }
-    
-    
+
+
     if (ncol(beddata) < 6) strand(queryRegions) <- "*"
 
     if (importParams$fix_width > 0) {
         queryRegions <- resize(queryRegions,
             width = 1,
-            fix = rep(importParams$fix_point, length(queryRegions)), 
+            fix = rep(importParams$fix_point, length(queryRegions)),
             ignore.strand = FALSE
         )
         queryRegions <- flank(queryRegions,
@@ -432,20 +435,20 @@ handle_bed <- function(inputFile,
     ## make input comply with GenomeInfoDb
     chromInfo <- circlize::read.chromInfo(species = importParams$genome)$df
     seqInfo <- Seqinfo(seqnames = chromInfo$chr, seqlengths = chromInfo$end,
-                       isCircular = rep(FALSE, nrow(chromInfo)), 
+                       isCircular = rep(FALSE, nrow(chromInfo)),
                        genome = importParams$genome)
     seqInfo <- keepStandardChromosomes(seqInfo)
 
-    if (c("chr1") %in% as.vector(seqnames(queryRegions)) 
+    if (c("chr1") %in% as.vector(seqnames(queryRegions))
         && seqnames(seqInfo)[1] == "1") {
         seqnames(seqInfo) <- paste0("chr", seqnames(seqInfo))
         seqnames(seqInfo)[25] <- "chrM"
-    } else if (c("1") %in% as.vector(seqnames(queryRegions)) 
+    } else if (c("1") %in% as.vector(seqnames(queryRegions))
                && seqnames(seqInfo)[1] == "chr1") {
         seqnames(seqInfo) <- gsub("chr", "", seqnames(seqInfo))
         seqnames(seqInfo)[25] <- "MT"
     }
-    queryRegions <- queryRegions[as.vector(seqnames(queryRegions)) 
+    queryRegions <- queryRegions[as.vector(seqnames(queryRegions))
                                  %in% seqnames(seqInfo)]
     seqlevels(queryRegions) <- seqlevels(seqInfo)
     seqinfo(queryRegions) <- seqInfo
@@ -457,28 +460,28 @@ handle_bed <- function(inputFile,
         seqinfo(queryRegions) <- seqInfo
     }
 
-    invisible(list("query" = queryRegions, "size" = libsize, "type" = "bed", 
+    invisible(list("query" = queryRegions, "size" = libsize, "type" = "bed",
                    "weight" = weight_col))
 }
 
 #' @title Handle files in bam format
 #'
-#' @description This is a function for read NGS reads data in bam format, store 
-#' the input data in a list of GRanges objects or RleList objects. For 
-#' paired-end reads, only take the second read in a pair, assuming which is the 
+#' @description This is a function for read NGS reads data in bam format, store
+#' the input data in a list of GRanges objects or RleList objects. For
+#' paired-end reads, only take the second read in a pair, assuming which is the
 #' sense read for strand-specific RNAseq.
 #'
 #' @param inputFile a string denoting path to the input file
-#' @param importParams a list of parameters, refer to \code{\link{handle_input}} 
+#' @param importParams a list of parameters, refer to \code{\link{handle_input}}
 #'  for details
 #' @param verbose logical, whether to output additional information
 #'
-#' @details The reads are filtered using mapq score >= 10 by default, only 
+#' @details The reads are filtered using mapq score >= 10 by default, only
 #'  mapped reads are counted towards library size.
 #'
-#' @return a list object with four elements, 'query' is a list GRanges objects 
-#' or RleList objects, 'size' is the library size, 'type' is the input file 
-#' type, weight' is the name of the metadata column to be used as weight for 
+#' @return a list object with four elements, 'query' is a list GRanges objects
+#' or RleList objects, 'size' is the library size, 'type' is the input file
+#' type, weight' is the name of the metadata column to be used as weight for
 #' coverage calculation
 #'
 #' @author Shuye Pu
@@ -502,17 +505,17 @@ handle_bed <- function(inputFile,
 #' @export handle_bam
 #'
 handle_bam <- function(inputFile, importParams = NULL, verbose = FALSE) {
-    
+
     stopifnot(file.exists(inputFile))
     if (is.null(names(inputFile)) || names(inputFile) == "")
         stop("Each file must have a name attribute!")
-    
+
     paired.end <- testPairedEndBam(inputFile)
     if (paired.end) {
-        flag <- scanBamFlag(isPaired = TRUE, isProperPair = TRUE, 
-                            isUnmappedQuery = FALSE, hasUnmappedMate = FALSE, 
-                            isSecondMateRead = TRUE) 
-        ## assume the second read in a pair is the sense read for 
+        flag <- scanBamFlag(isPaired = TRUE, isProperPair = TRUE,
+                            isUnmappedQuery = FALSE, hasUnmappedMate = FALSE,
+                            isSecondMateRead = TRUE)
+        ## assume the second read in a pair is the sense read for
         ## strand-specific RNAseq
         param <- ScanBamParam(mapqFilter = 10, flag = flag)
         if (verbose) message("Paired end bam file detected!\n")
@@ -524,17 +527,17 @@ handle_bam <- function(inputFile, importParams = NULL, verbose = FALSE) {
     ga <- readGAlignments(inputFile, use.names = TRUE, param = param)
     libsize <- sum(idxstatsBam(inputFile)$mapped, na.rm = TRUE)
     if (importParams$offset != 0) {
-        ##for iCLIP, use offset = -1 to get the 5'-end -1 position of the reads, 
+        ##for iCLIP, use offset = -1 to get the 5'-end -1 position of the reads,
         ##which is the crosslink sites for iCLIP reads
-        queryRegions <- flank(granges(ga), 
-                               width = -1 * importParams$offset, 
-                               start = TRUE, both = FALSE, 
+        queryRegions <- flank(granges(ga),
+                               width = -1 * importParams$offset,
+                               start = TRUE, both = FALSE,
                                ignore.strand = FALSE)
-        queryRegions <- resize(queryRegions, width = 1, fix = "start", 
+        queryRegions <- resize(queryRegions, width = 1, fix = "start",
                                ignore.strand = FALSE)
         score(queryRegions) <- 1
     } else if (importParams$fix_width > 0) {
-        queryRegions <- resize(granges(ga), width = importParams$fix_width, 
+        queryRegions <- resize(granges(ga), width = importParams$fix_width,
                                fix = "start", ignore.strand = FALSE)
         score(queryRegions) <- 1
     } else {
@@ -549,7 +552,7 @@ handle_bam <- function(inputFile, importParams = NULL, verbose = FALSE) {
     seqInfo <- Seqinfo(seqnames = chromInfo$chr, seqlengths = chromInfo$end,
         isCircular = rep(FALSE, nrow(chromInfo)), genome = importParams$genome)
     seqInfo <- keepStandardChromosomes(seqInfo)
-    queryRegions <- queryRegions[as.vector(seqnames(queryRegions)) 
+    queryRegions <- queryRegions[as.vector(seqnames(queryRegions))
                                  %in% seqnames(seqInfo)]
     seqlevels(queryRegions) <- seqlevels(seqInfo)
     seqinfo(queryRegions) <- seqInfo
@@ -560,30 +563,30 @@ handle_bam <- function(inputFile, importParams = NULL, verbose = FALSE) {
         seqinfo(queryRegions) <- seqInfo
     }
 
-    invisible(list("query" = queryRegions, "size" = libsize, "type" = "bam", 
+    invisible(list("query" = queryRegions, "size" = libsize, "type" = "bam",
                    "weight" = weight_col))
 }
 
 
 #' @title Handle files in bw|bigwig|bigWig|BigWig|BW|BIGWIG format
 #'
-#' @description This is a function for read NGS coverage data in bigwig format, 
-#' store the input data in a list of GRanges objects or RleList objects. The 
-#' input bw file can be stranded or non-stranded. Library size is calculate as 
+#' @description This is a function for read NGS coverage data in bigwig format,
+#' store the input data in a list of GRanges objects or RleList objects. The
+#' input bw file can be stranded or non-stranded. Library size is calculate as
 #' the sum of all coverage.
 #'
 #' @param inputFile a string denoting path to the input file
-#' @param importParams a list of parameters, refer to \code{\link{handle_input}} 
+#' @param importParams a list of parameters, refer to \code{\link{handle_input}}
 #'  for details
 #' @param verbose logical, whether to output additional information
 #'
-#' @details For stranded files, forward and reverse strands are stored in 
-#' separate files, with '+' or 'p' in the forward strand file name and '-' or 
+#' @details For stranded files, forward and reverse strands are stored in
+#' separate files, with '+' or 'p' in the forward strand file name and '-' or
 #' 'm' in the reverse strand  file name.
 #'
-#' @return a list object with four elements, 'query' is a list GRanges objects 
-#' or RleList objects, 'size' is the estimated library size, 'type' is the 
-#' input file type, weight' is the name of the metadata column to be used as 
+#' @return a list object with four elements, 'query' is a list GRanges objects
+#' or RleList objects, 'size' is the estimated library size, 'type' is the
+#' input file type, weight' is the name of the metadata column to be used as
 #' weight for coverage calculation
 #'
 #' @author Shuye Pu
@@ -608,7 +611,7 @@ handle_bw <- function(inputFile, importParams, verbose = FALSE) {
     stopifnot(file.exists(inputFile))
     if (is.null(names(inputFile)) || names(inputFile) == "")
         stop("Each file must have a name attribute!")
-    
+
     weight_col <- "score"
     libsize <- NULL
 
@@ -633,15 +636,15 @@ handle_bw <- function(inputFile, importParams, verbose = FALSE) {
     ## make input comply with GenomeInfoDb
     chromInfo <- circlize::read.chromInfo(species = importParams$genome)$df
     seqInfo <- Seqinfo(seqnames = chromInfo$chr, seqlengths = chromInfo$end,
-                       isCircular = rep(FALSE, nrow(chromInfo)), 
+                       isCircular = rep(FALSE, nrow(chromInfo)),
                        genome = importParams$genome)
     seqInfo <- keepStandardChromosomes(seqInfo)
-    queryRegions <- queryRegions[as.vector(seqnames(queryRegions)) 
+    queryRegions <- queryRegions[as.vector(seqnames(queryRegions))
                                  %in% seqnames(seqInfo)]
     GenomeInfoDb::seqlevels(queryRegions) <- GenomeInfoDb::seqlevels(seqInfo)
     GenomeInfoDb::seqinfo(queryRegions) <- seqInfo
 
-    libsize <- sum(score(queryRegions) * width(queryRegions), 
+    libsize <- sum(score(queryRegions) * width(queryRegions),
                               na.rm = TRUE)/100 # assuming read length is 100
 
     if (importParams$outRle) {
@@ -649,29 +652,29 @@ handle_bw <- function(inputFile, importParams, verbose = FALSE) {
         GenomeInfoDb::seqinfo(queryRegions) <- seqInfo
     }
 
-    invisible(list("query" = queryRegions, "size" = libsize, "type" = "bw", 
+    invisible(list("query" = queryRegions, "size" = libsize, "type" = "bw",
                    "weight" = weight_col))
 }
 
 #' @title Handle files in wig format
 #'
-#' @description This is a function for read NGS coverage data in wig format, 
-#' store the input data in a list of GRanges objects or RleList objects. 
-#' The input wig file can be stranded or non-stranded. Library size is calculate 
+#' @description This is a function for read NGS coverage data in wig format,
+#' store the input data in a list of GRanges objects or RleList objects.
+#' The input wig file can be stranded or non-stranded. Library size is calculate
 #' as the sum of all coverage.
 #'
 #' @param inputFile a string denoting path to the input file
-#' @param importParams a list of parameters, refer to \code{\link{handle_input}} 
+#' @param importParams a list of parameters, refer to \code{\link{handle_input}}
 #'  for details
 #' @param verbose logical, whether to output additional information
 #'
-#' @details For stranded files, forward and reverse strands are stored in 
-#' separate files, with '+' or 'p' in the forward strand file name and '-' or 
+#' @details For stranded files, forward and reverse strands are stored in
+#' separate files, with '+' or 'p' in the forward strand file name and '-' or
 #' 'm' in the reverse strand file name.
 #'
-#' @return a list object with four elements, 'query' is a list GRanges objects 
-#' or RleList objects, 'size' is the library size, 'type' is the input file 
-#' type, 'weight' is the name of the metadata column to be used as weight for 
+#' @return a list object with four elements, 'query' is a list GRanges objects
+#' or RleList objects, 'size' is the library size, 'type' is the input file
+#' type, 'weight' is the name of the metadata column to be used as weight for
 #' coverage calculation
 #'
 #' @author Shuye Pu
@@ -698,11 +701,14 @@ handle_wig <- function(inputFile,
     stopifnot(file.exists(inputFile))
     if (is.null(names(inputFile)) || names(inputFile) == "")
         stop("Each file must have a name attribute!")
-    
+
     neg_file <- find_mate(inputFile, verbose)
     stranded <- ifelse(!is.null(neg_file), TRUE, FALSE)
 
-    seqinfo <- Seqinfo(genome = importParams$genome)
+    chromInfo <- circlize::read.chromInfo(species = importParams$genome)$df
+    seqinfo <- Seqinfo(seqnames = chromInfo$chr, seqlengths = chromInfo$end,
+                       isCircular = rep(FALSE, nrow(chromInfo)),
+                       genome = importParams$genome)
     wigToBigWig(inputFile, seqinfo, clip = TRUE)
 
     if (stranded) {
@@ -718,9 +724,9 @@ handle_wig <- function(inputFile,
 
 
 #' @title Find wig/bw file for the negative strand
-#' @description Find the file name of the negative strand, if a .wig/bw file for 
-#' positive strand if provided, by looking for file names with one character 
-#' difference. If no negative strand file is found, assume the input .wig/bw 
+#' @description Find the file name of the negative strand, if a .wig/bw file for
+#' positive strand if provided, by looking for file names with one character
+#' difference. If no negative strand file is found, assume the input .wig/bw
 #' file is non-stranded
 #'
 #' @param inputFile path to a .wig/bw file, presumably for positive strand
@@ -756,7 +762,7 @@ find_mate <- function(inputFile,
         if (length(fch_v) == length(och_v) && sum(fch_v != och_v) == 1) {
             mate <- file.path(dirName, afile)
             diff <- base::setdiff(och_v, fch_v)
-            if (verbose) message("Mate found:\n", inputFile, "\n", mate, "\n", 
+            if (verbose) message("Mate found:\n", inputFile, "\n", mate, "\n",
                                  diff, "\n")
         }
     }

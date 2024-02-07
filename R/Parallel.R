@@ -2,7 +2,7 @@
 #'
 #' @description Creating a virtual cluster for parallel processing
 #'
-#' @param nc a positive integer greater than 1, denoting number of cores 
+#' @param nc a positive integer greater than 1, denoting number of cores
 #' requested
 #' @param verbose logical, whether to output additional information
 #'
@@ -56,26 +56,26 @@ stop_parallel <- function(cl) {
     }
 }
 
-#' @title Parallel execution of scoreMatrixBin on a huge target windows object 
+#' @title Parallel execution of scoreMatrixBin on a huge target windows object
 #' split into chunks
 #'
-#' @description Function for parallel computation of scoreMatrixBin. The 
-#' 'windows' parameter of the scoreMatrixBin method is split into nc chunks, 
+#' @description Function for parallel computation of scoreMatrixBin. The
+#' 'windows' parameter of the scoreMatrixBin method is split into nc chunks,
 #' and scoreMatrixBin is called on each chunk simultaneously to speed up the
 #'  computation.
 #'
 #' @param windowRs a single GRangesList object.
-#' @param queryRegions a RleList object or Granges object providing input for 
+#' @param queryRegions a RleList object or Granges object providing input for
 #'  the 'target' parameter of the scoreMatrixBin method.
 #' @param bin_num number of bins the windows should be divided into
-#' @param bin_op operation on the signals in a bin, a string in c("mean", "max", 
+#' @param bin_op operation on the signals in a bin, a string in c("mean", "max",
 #'  "min", "median", "sum") is accepted.
-#' @param weight_col if the queryRegions is a GRanges object, a numeric column 
+#' @param weight_col if the queryRegions is a GRanges object, a numeric column
 #'  in meta data part can be used as weights.
-#' @param stranded logical, indicating if the strand of the windows should be 
+#' @param stranded logical, indicating if the strand of the windows should be
 #'  considered to determine upstream and downstream.
-#' @param nc an integer denoting the number of cores requested, 2 is the default 
-#'  number that is allowed by CRAN but 5 gives best trade-off between speed and 
+#' @param nc an integer denoting the number of cores requested, 2 is the default
+#'  number that is allowed by CRAN but 5 gives best trade-off between speed and
 #'  space.
 #'
 #' @return a numeric matrix
@@ -128,24 +128,24 @@ parallel_scoreMatrixBin <- function(queryRegions,
                                     weight_col,
                                     stranded,
                                     nc = 2) {
-    
+
     stopifnot(is.numeric(c(bin_num, nc)))
     call_scoreMatrixBin <- function(windowR) {
-        ScoreMatrixBin(target = queryRegions, windows = windowR, 
-                       bin.num = bin_num, bin.op = bin_op, 
+        ScoreMatrixBin(target = queryRegions, windows = windowR,
+                       bin.num = bin_num, bin.op = bin_op,
                        weight.col = weight_col, strand.aware = stranded)
     }
 
     cl <- start_parallel(nc)
     wRs <- split(windowRs, factor(cut(seq_along(windowRs), breaks = nc)))
 
-    clusterExport(cl, varlist = c("ScoreMatrixBin", "seqinfo", "mcols"), 
+    clusterExport(cl, varlist = c("ScoreMatrixBin", "seqinfo", "mcols"),
                   envir = environment())
-    clusterExport(cl, varlist = c("queryRegions", "bin_num", "bin_op", 
-                                  "weight_col", "stranded"), 
+    clusterExport(cl, varlist = c("queryRegions", "bin_num", "bin_op",
+                                  "weight_col", "stranded"),
                   envir = environment())
-    smc <- parLapply(cl, wRs, ScoreMatrixBin, target = queryRegions, 
-                     bin.num = bin_num, bin.op = bin_op, 
+    smc <- parLapply(cl, wRs, ScoreMatrixBin, target = queryRegions,
+                     bin.num = bin_num, bin.op = bin_op,
                      weight.col = weight_col, strand.aware = stranded)
     stop_parallel(cl)
     sm <- lapply(smc, function(x) {
@@ -160,7 +160,7 @@ parallel_scoreMatrixBin <- function(queryRegions,
 
 #' @title Parallel execution of countOverlaps
 #'
-#' @description Function for parallel computation of countOverlaps function in 
+#' @description Function for parallel computation of countOverlaps function in
 #' the GenomicRanges package
 #'
 #' @param grange_list a list of GRanges objects.
@@ -176,9 +176,9 @@ parallel_scoreMatrixBin <- function(queryRegions,
 #'     system.file("extdata", "test_chip_peak_chr19.narrowPeak",
 #'         package = "GenomicPlot"
 #'     ),
-#'     system.file("extdata", "test_chip_peak_chr19.bed", 
+#'     system.file("extdata", "test_chip_peak_chr19.bed",
 #'         package = "GenomicPlot"),
-#'     system.file("extdata", "test_clip_peak_chr19.bed", 
+#'     system.file("extdata", "test_clip_peak_chr19.bed",
 #'         package = "GenomicPlot")
 #' )
 #' names(bedQueryFiles) <- c("NarrowPeak", "SummitPeak", "iCLIPPeak")
@@ -193,7 +193,10 @@ parallel_scoreMatrixBin <- function(queryRegions,
 #'     importParams = bedimportParams, verbose = TRUE, nc = 2
 #' )
 #'
-#' seqi <- GenomeInfoDb::Seqinfo(genome = "hg19")
+#' chromInfo <- circlize::read.chromInfo(species = "hg19")$df
+#' seqi <- Seqinfo(seqnames = chromInfo$chr, seqlengths = chromInfo$end,
+#'                isCircular = rep(FALSE, nrow(chromInfo)),
+#'                genome = "hg19")
 #' grange_list <- lapply(out_list, function(x) x$query)
 #' tilewidth <- 100000
 #' tileBins <- tileGenome(seqi,

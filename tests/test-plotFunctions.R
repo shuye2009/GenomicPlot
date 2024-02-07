@@ -6,13 +6,13 @@ Sys.setenv("R_TESTS" = "")
 data(gf5_meta)
 data(gf5_genomic)
 
-gtffile <- system.file("extdata", "gencode.v19.annotation_chr19.gtf", 
+gtffile <- system.file("extdata", "gencode.v19.annotation_chr19.gtf",
                        package = "GenomicPlot")
-txdb <- AnnotationDbi::loadDb(system.file("extdata", "txdb.sql", 
+txdb <- AnnotationDbi::loadDb(system.file("extdata", "txdb.sql",
                                           package = "GenomicPlot"))
 
 bedQueryFiles <- c(
-   system.file("extdata", "test_chip_peak_chr19.narrowPeak", 
+   system.file("extdata", "test_chip_peak_chr19.narrowPeak",
                package = "GenomicPlot"),
    system.file("extdata", "test_chip_peak_chr19.bed", package = "GenomicPlot"),
    system.file("extdata", "test_clip_peak_chr19.bed", package = "GenomicPlot")
@@ -24,10 +24,10 @@ bedImportParams <- setImportParams(
    useScore = FALSE, outRle = TRUE, useSizeFactor = FALSE, genome = "hg19"
 )
 
-bamQueryFiles <- system.file("extdata", "treat_chr19.bam", 
+bamQueryFiles <- system.file("extdata", "treat_chr19.bam",
                              package = "GenomicPlot")
 names(bamQueryFiles) <- "clip_bam"
-bamInputFiles <- system.file("extdata", "input_chr19.bam", 
+bamInputFiles <- system.file("extdata", "input_chr19.bam",
                              package = "GenomicPlot")
 names(bamInputFiles) <- "clip_input"
 
@@ -55,29 +55,32 @@ test_that("testing parallel_countOverlaps", {
       inputFiles = bedQueryFiles,
       importParams = importParams, verbose = FALSE, nc = 2
    )
-   
-   seqi <- GenomeInfoDb::Seqinfo(genome = "hg19") 
-   grange_list <- lapply(out_list, function(x) x$query) 
-   tilewidth <- 100000 
-   tileBins <- tileGenome(seqi, tilewidth = tilewidth, 
+
+   chromInfo <- circlize::read.chromInfo(species = "hg19")$df
+   seqi <- Seqinfo(seqnames = chromInfo$chr, seqlengths = chromInfo$end,
+                   isCircular = rep(FALSE, nrow(chromInfo)),
+                   genome = "hg19")
+   grange_list <- lapply(out_list, function(x) x$query)
+   tilewidth <- 100000
+   tileBins <- tileGenome(seqi, tilewidth = tilewidth,
                           cut.last.tile.in.chrom = TRUE)
-   
+
    score_list1 <- parallel_countOverlaps(grange_list, tileBins, nc = 2)
 })
 
 test_that("testing parallel_scoreMatrixBin", {
-   
-   queryRegion <- handle_input(chipQueryFiles, chipImportParams, 
+
+   queryRegion <- handle_input(chipQueryFiles, chipImportParams,
                                verbose = TRUE)[[1]]$query
-   
+
    importParams <- setImportParams(outRle = FALSE)
-   
+
    windowRegion <- handle_bed(bedQueryFiles[1], importParams, verbose = TRUE)$query
-   
+
    out <- parallel_scoreMatrixBin(
       queryRegions = queryRegion,
-      windowRs = windowRegion, 
-      bin_num = 50, 
+      windowRs = windowRegion,
+      bin_num = 50,
       bin_op = "mean",
       weight_col = "score",
       stranded = TRUE,
@@ -95,32 +98,32 @@ test_that("testing effective_size", {
       inputFiles = c(chipQueryFiles, chipInputFiles),
       importParams = importParams, verbose = TRUE, nc = 2
    )
-   
+
    out <- effective_size(out_list, outRle = TRUE)
 })
 
 test_that("testing handle_input", {
-   
-   queryFiles2 <- system.file("extdata", "test_wig_chr19_+.wig", 
+
+   queryFiles2 <- system.file("extdata", "test_wig_chr19_+.wig",
                               package = "GenomicPlot")
    names(queryFiles2) <- "test_wig"
-   
-   queryFiles3 <- system.file("extdata", "test_wig_chr19_+.bw", 
+
+   queryFiles3 <- system.file("extdata", "test_wig_chr19_+.bw",
                               package = "GenomicPlot")
-   names(queryFiles3) <- "test_bw" 
-   
+   names(queryFiles3) <- "test_bw"
+
    importParams <- setImportParams()
-   
-   out <- handle_input(c(bamQueryFiles, queryFiles2, queryFiles3), 
+
+   out <- handle_input(c(bamQueryFiles, queryFiles2, queryFiles3),
                        importParams, verbose = TRUE)
 })
 
 test_that("testing plot_bam_correlation", {
-   
+
    importParams <- setImportParams(fix_width = 150, outRle = FALSE)
-   
+
    plot_bam_correlation(
-      bamFiles = c(chipQueryFiles, chipInputFiles), binSize = 100000, 
+      bamFiles = c(chipQueryFiles, chipInputFiles), binSize = 100000,
       outPrefix = NULL, importParams = importParams, nc = 2, verbose = FALSE
    )
 })
@@ -134,12 +137,12 @@ test_that("testing plot_overlap_bed", {
 })
 
 test_that("testing plot_argument_list", {
-   
+
    alist <- list(
-      "txdb" = txdb, "treat" = bamQueryFiles, "control" = bamInputFiles, 
+      "txdb" = txdb, "treat" = bamQueryFiles, "control" = bamInputFiles,
       "feature" = gf5_meta, "param" = bamImportParams
    )
-   
+
    p <- GenomicPlot:::plot_named_list(alist)
 })
 
@@ -148,22 +151,22 @@ test_that("testing plot_peak_annotation", {
    plot_peak_annotation(
       peakFile = bedQueryFiles[2], gtfFile = gtffile, importParams = bedImportParams,
       fiveP = -2000, dsTSS = 200, threeP = 2000, simple = FALSE
-   )  
+   )
 })
 
 
 test_that("testing plot_overlap_genes", {
-   testfile1 <- system.file("extdata", "test_file1.txt",  
+   testfile1 <- system.file("extdata", "test_file1.txt",
                             package = "GenomicPlot")
-   testfile2 <- system.file("extdata", "test_file2.txt",  
+   testfile2 <- system.file("extdata", "test_file2.txt",
                             package = "GenomicPlot")
-   testfile3 <- system.file("extdata", "test_file3.txt",  
+   testfile3 <- system.file("extdata", "test_file3.txt",
                             package = "GenomicPlot")
-   testfile4 <- system.file("extdata", "test_file4.txt",  
+   testfile4 <- system.file("extdata", "test_file4.txt",
                             package = "GenomicPlot")
    testfiles <- c(testfile1, testfile2, testfile3, testfile4)
-   names(testfiles) <- c("test1", "test2", "test3", "test4") 
-   
+   names(testfiles) <- c("test1", "test2", "test3", "test4")
+
    plot_overlap_genes(testfiles, c(3,2,1,1), pairOnly = FALSE)
 })
 
@@ -210,7 +213,7 @@ test_that("testing plot_locus", {
       Ylab = "Coverage/base/peak",
       nc = 2
    )
-   
+
    plot_locus(
       queryFiles = chipQueryFiles,
       centerFiles = bedQueryFiles[2],
@@ -280,7 +283,7 @@ test_that("testing plot_start_end", {
 })
 
 test_that("testing plot_start_end_with_random", {
-   
+
    plot_start_end_with_random(
       queryFiles = bamQueryFiles,
       inputFiles = bamInputFiles,

@@ -19,7 +19,7 @@ parallel_countOverlaps(grange_list, tileBins, nc = 2, switch = FALSE)
 a list of numeric vectors
 }
 \description{
-Function for parallel computation of countOverlaps function in 
+Function for parallel computation of countOverlaps function in
 the GenomicRanges package
 }
 \examples{
@@ -27,9 +27,9 @@ bedQueryFiles <- c(
     system.file("extdata", "test_chip_peak_chr19.narrowPeak",
         package = "GenomicPlot"
     ),
-    system.file("extdata", "test_chip_peak_chr19.bed", 
+    system.file("extdata", "test_chip_peak_chr19.bed",
         package = "GenomicPlot"),
-    system.file("extdata", "test_clip_peak_chr19.bed", 
+    system.file("extdata", "test_clip_peak_chr19.bed",
         package = "GenomicPlot")
 )
 names(bedQueryFiles) <- c("NarrowPeak", "SummitPeak", "iCLIPPeak")
@@ -44,7 +44,10 @@ out_list <- handle_input(
     importParams = bedimportParams, verbose = TRUE, nc = 2
 )
 
-seqi <- GenomeInfoDb::Seqinfo(genome = "hg19")
+chromInfo <- circlize::read.chromInfo(species = "hg19")$df
+seqi <- Seqinfo(seqnames = chromInfo$chr, seqlengths = chromInfo$end,
+               isCircular = rep(FALSE, nrow(chromInfo)),
+               genome = "hg19")
 grange_list <- lapply(out_list, function(x) x$query)
 tilewidth <- 100000
 tileBins <- tileGenome(seqi,

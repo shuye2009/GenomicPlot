@@ -15,9 +15,9 @@ find_mate(inputFile, verbose = FALSE)
 path to the negative .wig/bw file or NULL
 }
 \description{
-Find the file name of the negative strand, if a .wig/bw file for 
-positive strand if provided, by looking for file names with one character 
-difference. If no negative strand file is found, assume the input .wig/bw 
+Find the file name of the negative strand, if a .wig/bw file for
+positive strand if provided, by looking for file names with one character
+difference. If no negative strand file is found, assume the input .wig/bw
 file is non-stranded
 }
 \examples{

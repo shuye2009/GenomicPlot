@@ -7,7 +7,7 @@
 start_parallel(nc = 2, verbose = FALSE)
 }
 \arguments{
-\item{nc}{a positive integer greater than 1, denoting number of cores 
+\item{nc}{a positive integer greater than 1, denoting number of cores
 requested}
 
 \item{verbose}{logical, whether to output additional information}

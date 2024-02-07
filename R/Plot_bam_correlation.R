@@ -69,8 +69,11 @@ plot_bam_correlation <- function(bamFiles,
     if (verbose) message("Computing bam correlation...\n")
     outlist <- handle_input(inputFiles = bamFiles, importParams, nc = nc)
 
-    seqi <- Seqinfo(genome = importParams$genome)
-
+    chromInfo <- circlize::read.chromInfo(species = importParams$genome)$df
+    seqi <- Seqinfo(seqnames = chromInfo$chr, seqlengths = chromInfo$end,
+                    isCircular = rep(FALSE, nrow(chromInfo)), 
+                    genome = importParams$genome)
+    
     tileBins <- tileGenome(seqi, tilewidth = binSize, 
                            cut.last.tile.in.chrom = TRUE)
 

@@ -9,25 +9,25 @@ handle_bam(inputFile, importParams = NULL, verbose = FALSE)
 \arguments{
 \item{inputFile}{a string denoting path to the input file}
 
-\item{importParams}{a list of parameters, refer to \code{\link{handle_input}} 
+\item{importParams}{a list of parameters, refer to \code{\link{handle_input}}
 for details}
 
 \item{verbose}{logical, whether to output additional information}
 }
 \value{
-a list object with four elements, 'query' is a list GRanges objects 
-or RleList objects, 'size' is the library size, 'type' is the input file 
-type, weight' is the name of the metadata column to be used as weight for 
+a list object with four elements, 'query' is a list GRanges objects
+or RleList objects, 'size' is the library size, 'type' is the input file
+type, weight' is the name of the metadata column to be used as weight for
 coverage calculation
 }
 \description{
-This is a function for read NGS reads data in bam format, store 
-the input data in a list of GRanges objects or RleList objects. For 
-paired-end reads, only take the second read in a pair, assuming which is the 
+This is a function for read NGS reads data in bam format, store
+the input data in a list of GRanges objects or RleList objects. For
+paired-end reads, only take the second read in a pair, assuming which is the
 sense read for strand-specific RNAseq.
 }
 \details{
-The reads are filtered using mapq score >= 10 by default, only 
+The reads are filtered using mapq score >= 10 by default, only
  mapped reads are counted towards library size.
 }
 \examples{
