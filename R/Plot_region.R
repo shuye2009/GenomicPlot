@@ -304,7 +304,7 @@ plot_region <- function(queryFiles,
     ## x-axis points for vlines that demarcate the genomic features
     names(vx) <- featureNames
 
-    if (heatmap) heatmap_list <- list()
+    heatmap_list <- list()
     Ylab <- ifelse(!is.na(transform) && is.null(inputFiles), 
                    paste0(transform, " (", Ylab, ")"), Ylab)
 
@@ -413,7 +413,7 @@ plot_region <- function(queryFiles,
     pp <- draw_region_landmark(featureNames, vx, xmax)
     ppp <- draw_region_name(featureNames, scaled_bins, xmax)
     marker <- plot_grid(pp, ppp, ncol = 1, align = "v", axis = "lr",
-                        rel_heights = c(1, 2))
+                        rel_heights = c(1, 3))
 
     for (i in seq_along(queryLabels)) {
         for (beds in combn(queryLabels, i, simplify = FALSE)) {
@@ -434,7 +434,7 @@ plot_region <- function(queryFiles,
                     p <- draw_region_profile(plot_df = aplot_df, cn = "Group", 
                                              vx = vx, Ylab = Ylab)
                     outp <- plot_grid(p, marker, ncol = 1, align = "v", 
-                                      axis = "lr", rel_heights = c(10, 1))
+                                      axis = "lr", rel_heights = c(10, 2))
 
                     astat_df <- mstat_df %>%
                         filter(Query %in% beds & Reference %in% centers)
@@ -454,7 +454,7 @@ plot_region <- function(queryFiles,
                                                      Ylab = Ylab)
                             outp <- plot_grid(p, marker, ncol = 1, align = "v",
                                               axis = "lr",
-                                              rel_heights = c(10, 1))
+                                              rel_heights = c(10, 2))
 
                             comp <- combn(seq_along(
                                centers), 2, simplify = FALSE)
@@ -471,7 +471,7 @@ plot_region <- function(queryFiles,
                                                      vx = vx, Ylab = Ylab)
                             outp <- plot_grid(p, marker, ncol = 1, align = "v",
                                               axis = "lr",
-                                              rel_heights = c(10, 1))
+                                              rel_heights = c(10, 2))
                             comp <- combn(seq_along(beds), 2, simplify = FALSE)
 
                             combo <- draw_combo_plot(stat_df = astat_df, 
@@ -496,22 +496,7 @@ plot_region <- function(queryFiles,
         }
     }
 
-
-    ## plot individual sample lines with error band
-
-    rowp <- plot_grid(plotlist = plot_list, nrow = 1, align = "h")
-    # print(rowp)
-
-    if (heatmap) {
-        groblist <- lapply(heatmap_list, function(x)
-           grid.grabExpr(draw(x, heatmap_legend_side = "left")))
-        heatp <- plot_grid(plotlist = groblist, nrow = 1, align = "h")
-        composite <- plot_grid(rowp, heatp, ncol = 1, rel_heights = c(1, 1))
-        print(composite)
-    } else {
-        print(rowp)
-    }
-
+    draw_stacked_plot(plot_list, heatmap_list)
 
     if (!is.null(inputFiles)) {
         Ylab <- ifelse(is.na(transform), "Ratio-over-Input", 
@@ -557,7 +542,7 @@ plot_region <- function(queryFiles,
 
         mplot_df <- list()
         stat_df <- list()
-        if (heatmap) heatmap_list <- list()
+        heatmap_list <- list()
         if (verbose) message("Plotting coverage profiles...\n")
         for (ratiolabel in ratiolabels) {
             if (verbose) message("Ratio label: ", ratiolabel, "\n")
@@ -650,7 +635,7 @@ plot_region <- function(queryFiles,
                                                  cn = "Group", vx = vx, 
                                                  Ylab = Ylab)
                         outp <- plot_grid(p, marker, ncol = 1, align = "v",
-                                          axis = "lr", rel_heights = c(10, 1))
+                                          axis = "lr", rel_heights = c(10, 2))
 
                         astat_df <- mstat_df %>%
                             filter(Query %in% beds & Reference %in% centers)
@@ -670,7 +655,7 @@ plot_region <- function(queryFiles,
                                                          Ylab = Ylab)
                                 outp <- plot_grid(p, marker, ncol = 1, 
                                                   align = "v", axis = "lr", 
-                                                  rel_heights = c(10, 1))
+                                                  rel_heights = c(10, 2))
 
                                 comp <- combn(
                                    seq_along(centers), 2, simplify = FALSE)
@@ -687,7 +672,7 @@ plot_region <- function(queryFiles,
                                                          vx = vx, Ylab = Ylab)
                                 outp <- plot_grid(p, marker, ncol = 1, 
                                                   align = "v", axis = "lr",
-                                                  rel_heights = c(10, 1))
+                                                  rel_heights = c(10, 2))
 
                                 comp <- combn(
                                    seq_along(beds), 2, simplify = FALSE)
@@ -714,20 +699,7 @@ plot_region <- function(queryFiles,
         }
 
 
-        ## plot individual sample lines with error band
-
-        rowp <- plot_grid(plotlist = plot_list, nrow = 1, align = "h")
-        # print(rowp)
-
-        if (heatmap) {
-            groblist <- lapply(heatmap_list, function(x)
-               grid.grabExpr(draw(x, heatmap_legend_side = "left")))
-            heatp <- plot_grid(plotlist = groblist, nrow = 1, align = "h")
-            composite <- plot_grid(rowp, heatp, ncol = 1, rel_widths = c(2, 3))
-            print(composite)
-        } else {
-            print(rowp)
-        }
+        draw_stacked_plot(plot_list, heatmap_list)
     }
 
     if (!is.null(outPrefix)) {

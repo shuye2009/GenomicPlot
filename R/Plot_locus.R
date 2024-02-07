@@ -76,6 +76,7 @@
 #'     offset = 0, fix_width = 150, fix_point = "start", norm = TRUE,
 #'     useScore = FALSE, outRle = TRUE, useSizeFactor = FALSE, genome = "hg19"
 #' )
+#' 
 #' plot_locus(
 #'   queryFiles = queryfiles,
 #'   centerFiles = centerfiles,
@@ -288,7 +289,7 @@ plot_locus <- function(queryFiles,
 
     plot_df <- list() # per position, averaged over gene
     stat_df <- list() # per gene, averaged over position
-    if (heatmap) heatmap_list <- list()
+    heatmap_list <- list()
     Ylab <- ifelse(!is.na(transform) && is.null(inputFiles), 
                    paste0(transform, " (", Ylab, ")"), Ylab)
 
@@ -438,22 +439,8 @@ plot_locus <- function(queryFiles,
         }
     }
     
-    ## plot query profile and heatmap side by side
+    draw_stacked_plot(plot_list, heatmap_list[names(plot_list)])
     
-    rowp <- plot_grid(plotlist = plot_list, nrow = 1, align = "h", axis = "b")
-    
-    if (heatmap) {
-        qheatmap_list <- heatmap_list[names(plot_list)]
-        groblist <- lapply(qheatmap_list, function(x)
-            grid.grabExpr(draw(x, heatmap_legend_side = "left")))
-        heatp <- plot_grid(plotlist = groblist, nrow = 1, align = "h")
-        composite <- plot_grid(rowp, heatp, ncol = 1, align = "v", axis = "l", 
-                               rel_heights = c(1, 1))
-        print(composite)
-    } else {
-        print(rowp)
-    }
-
     if (!is.null(inputFiles)) {
         plot_list <- list()
         for (i in seq_along(inputLabels)) {
@@ -533,21 +520,7 @@ plot_locus <- function(queryFiles,
         }
 
 
-        ## plot input profile and heatmap side by side
-        rowp <- plot_grid(plotlist = plot_list, nrow = 1, align = "h", 
-                          axis = "b")
-        # print(rowp)
-        if (heatmap) {
-            iheatmap_list <- heatmap_list[names(plot_list)]
-            groblist <- lapply(iheatmap_list, function(x) 
-                grid.grabExpr(draw(x, heatmap_legend_side = "left")))
-            heatp <- plot_grid(plotlist = groblist, nrow = 1, align = "h")
-            composite <- plot_grid(rowp, heatp, ncol = 1, align = "v",
-                                   axis = "l", rel_widths = c(1, 1))
-            print(composite)
-        } else {
-            print(rowp)
-        }
+        draw_stacked_plot(plot_list, heatmap_list[names(plot_list)])
 
 
         if (verbose) message("Computing Ratio over input...\n")
@@ -575,7 +548,7 @@ plot_locus <- function(queryFiles,
 
         plot_df <- list()
         stat_df <- list()
-        if (heatmap) heatmap_list <- list()
+        heatmap_list <- list()
         ## plot multiple bed files on each center
         if (verbose) message("Collecting ratio data...\n") 
 
@@ -726,23 +699,7 @@ plot_locus <- function(queryFiles,
             }
         }
 
-        ## plot ratio profile and heatmap side by side
-        if (heatmap) {
-            rheatmap_list <- heatmap_list[names(plot_list)]
-            groblist <- lapply(rheatmap_list, function(x) 
-                grid.grabExpr(draw(x, heatmap_legend_side = "left")))
-            heatp <- plot_grid(plotlist = groblist, nrow = 1, align = "h")
-        }
-        rowp <- plot_grid(plotlist = plot_list, nrow = 1, align = "h", 
-                          axis = "b")
-       
-        if (heatmap) {
-            composite <- plot_grid(rowp, heatp, ncol = 1, align = "v", 
-                                   axis = "l", rel_widths = c(1, 1))
-            print(composite)
-        } else {
-            print(rowp)
-        }
+        draw_stacked_plot(plot_list, heatmap_list[names(plot_list)])
     }
 
     if (!is.null(outPrefix)) {
