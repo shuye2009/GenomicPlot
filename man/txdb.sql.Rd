@@ -6,19 +6,16 @@
 \title{Toy data for examples and testing of the `GenomicPlot` package}
 \source{
 The data is produced by running the following code: \cr
-gtffile <- system.file("extdata", "gencode.v19.annotation_chr19.gtf", 
+gtffile <- system.file("extdata", "gencode.v19.annotation_chr19.gtf",
 package = "GenomicPlot") \cr
-gff <- RCAS::importGtf(saveObjectAsRds = TRUE, readFromRds = FALSE, 
-    filePath = gtffile) \cr
-md <- data.frame(name = "Genome", value = "hg19") \cr
-txdb <- GenomicFeatures::makeTxDbFromGRanges(gff, metadata = md) \cr
+txdb <- custom_TxDb_from_GTF(gtffile, genome = "hg19") \cr
 AnnotationDbi::saveDb(txdb, "./inst/extdata/txdb.sql")
 }
 \value{
 A SQLlite database
 }
 \description{
-A tiny TxDb object holding genomic feature coordinates of 72 
+A tiny TxDb object holding genomic feature coordinates of 72
 transcripts in hg19.
 }
 \author{

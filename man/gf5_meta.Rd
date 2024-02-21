@@ -6,9 +6,9 @@
 \title{Toy data for examples and testing of the `GenomicPlot` package}
 \source{
 The data is produced by running the following code: \cr
-txdb <- AnnotationDbi::loadDb(system.file("extdata", "txdb.sql", 
+txdb <- AnnotationDbi::loadDb(system.file("extdata", "txdb.sql",
     package = "GenomicPlot")) \cr
-gf5_meta <- GenomicPlot::prepare_5parts_genomic_features(txdb, meta = TRUE, 
+gf5_meta <- GenomicPlot::prepare_5parts_genomic_features(txdb, meta = TRUE,
     nbins = 100, fiveP = -2000, threeP = 1000, longest = TRUE)
 }
 \value{
@@ -24,9 +24,9 @@ A named list with the following elements:
 }
 }
 \description{
-Metagenomic coordinates of 72 transcripts in hg19 for genomic 
+Metagenomic coordinates of 72 transcripts in hg19 for genomic
 features promoter, 5'UTR, CDS, 3'UTR, TTS, as well as user inputs for
-processing these features. 
+processing these features.
 See \code{\link{prepare_5parts_genomic_features}} for details.
 }
 \author{
