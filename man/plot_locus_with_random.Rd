@@ -32,29 +32,29 @@ plot_locus_with_random(
 )
 }
 \arguments{
-\item{queryFiles}{a vector of sample file names. The file should be in .bam, 
+\item{queryFiles}{a vector of sample file names. The file should be in .bam,
 .bed, .wig or .bw format, mixture of formats is allowed}
 
-\item{centerFiles}{a vector of reference file names. The file should be .bed 
+\item{centerFiles}{a vector of reference file names. The file should be .bed
 format only}
 
 \item{txdb}{a TxDb object defined in the `GenomicFeatures` package}
 
-\item{ext}{a vector of two integers defining upstream and downstream 
+\item{ext}{a vector of two integers defining upstream and downstream
 boundaries of the plot window, flanking the reference locus}
 
-\item{hl}{a vector of two integers defining upstream and downstream 
+\item{hl}{a vector of two integers defining upstream and downstream
 boundaries of the highlight window, flanking the reference locus}
 
-\item{shade}{logical indicating whether to place a shaded rectangle around 
+\item{shade}{logical indicating whether to place a shaded rectangle around
 the point of interest}
 
 \item{importParams}{a list of parameters for \code{\link{handle_input}}}
 
-\item{verbose}{logical, indicating whether to output additional information 
+\item{verbose}{logical, indicating whether to output additional information
 (data used for plotting or statistical test results)}
 
-\item{smooth}{logical, indicating whether the line should smoothed with a 
+\item{smooth}{logical, indicating whether the line should smoothed with a
 spline smoothing algorithm}
 
 \item{transform}{a string in c("log", "log2", "log10"), default = NA i
@@ -68,31 +68,31 @@ ndicating no transformation of data matrix}
 
 \item{Ylab}{a string for y-axis label}
 
-\item{inputFiles}{a vector of input sample file names. The file should be in 
+\item{inputFiles}{a vector of input sample file names. The file should be in
 .bam, .bed, .wig or .bw format, mixture of formats is allowed}
 
-\item{stranded}{logical, indicating whether the strand of the feature should 
+\item{stranded}{logical, indicating whether the strand of the feature should
 be considered}
 
-\item{scale}{logical, indicating whether the score matrix should be scaled to 
+\item{scale}{logical, indicating whether the score matrix should be scaled to
 the range 0:1, so that samples with different baseline can be compared}
 
-\item{outPrefix}{a string specifying output file prefix for plots 
+\item{outPrefix}{a string specifying output file prefix for plots
 (outPrefix.pdf)}
 
-\item{rmOutlier}{a numeric value serving as a multiplier of the MAD in Hampel 
-filter for outliers identification, 0 indicating not removing outliers. 
+\item{rmOutlier}{a numeric value serving as a multiplier of the MAD in Hampel
+filter for outliers identification, 0 indicating not removing outliers.
 For Gaussian distribution, use 3, adjust based on data distribution}
 
-\item{n_random}{an integer denotes the number of randomization should be 
+\item{n_random}{an integer denotes the number of randomization should be
 performed}
 
-\item{hw}{a vector of two elements specifying the height and width of the 
+\item{hw}{a vector of two elements specifying the height and width of the
 output figures}
 
 \item{detailed}{logical, indicating whether to plot each parts of gene.}
 
-\item{statsMethod}{a string in c("wilcox.test", "t.test"), for pair-wise 
+\item{statsMethod}{a string in c("wilcox.test", "t.test"), for pair-wise
 groups comparisons}
 
 \item{nc}{integer, number of cores for parallel processing}
@@ -101,30 +101,33 @@ groups comparisons}
 a dataframe containing the data used for plotting
 }
 \description{
-Plot reads or peak Coverage/base/gene of samples given in the 
-query files around reference locus defined in the centerFiles. The upstream 
-and downstream windows flanking loci can be given separately, a smaller 
-window can be defined to allow statistical comparisons between reference and 
-random loci. The loci are further divided into sub-groups that are 
-overlapping with c("5'UTR", "CDS", "3'UTR"), "unrestricted" means all loci 
+Plot reads or peak Coverage/base/gene of samples given in the
+query files around reference locus defined in the centerFiles. The upstream
+and downstream windows flanking loci can be given separately, a smaller
+window can be defined to allow statistical comparisons between reference and
+random loci. The loci are further divided into sub-groups that are
+overlapping with c("5'UTR", "CDS", "3'UTR"), "unrestricted" means all loci
 regardless of overlapping.
 }
 \examples{
 
-txdb <- AnnotationDbi::loadDb(system.file("extdata", "txdb.sql", 
-  package = "GenomicPlot"))
+gtfFile <- system.file("extdata", "gencode.v19.annotation_chr19.gtf",
+    package = "GenomicPlot"
+)
+
+txdb <- custom_TxDb_from_GTF(gtfFile, genome = "hg19")
 bedQueryFiles <- c(
-system.file("extdata", "test_chip_peak_chr19.narrowPeak", 
+system.file("extdata", "test_chip_peak_chr19.narrowPeak",
             package = "GenomicPlot"),
 system.file("extdata", "test_chip_peak_chr19.bed", package = "GenomicPlot"),
 system.file("extdata", "test_clip_peak_chr19.bed", package = "GenomicPlot")
 )
 names(bedQueryFiles) <- c("NarrowPeak", "SummitPeak", "iCLIPPeak")
 
-bamQueryFiles <- system.file("extdata", "treat_chr19.bam", 
+bamQueryFiles <- system.file("extdata", "treat_chr19.bam",
                              package = "GenomicPlot")
 names(bamQueryFiles) <- "clip_bam"
-bamInputFiles <- system.file("extdata", "input_chr19.bam", 
+bamInputFiles <- system.file("extdata", "input_chr19.bam",
                              package = "GenomicPlot")
 names(bamInputFiles) <- "clip_input"
 

@@ -1,46 +1,46 @@
 
 #' @title GenomicPlot-package
-#' @description An R package for efficient and flexible visualization of 
+#' @description An R package for efficient and flexible visualization of
 #' genome-wide NGS coverage profiles
-#' 
+#'
 #' @details The goal of `GenomicPlot` is to provide an efficient visualization
 #' tool for next generation sequencing (NGS) data with rich functionality and
-#' flexibility. `GenomicPlot` enables plotting of NGS data in various formats 
+#' flexibility. `GenomicPlot` enables plotting of NGS data in various formats
 #' (bam, bed, wig and bigwig); both coverage and enrichment over input can be
-#' computed and displayed with respect to genomic features (such as UTR, CDS, 
-#' enhancer), and user defined genomic loci or regions. Statistical tests on 
-#' signal intensity within user defined regions of interest can be performed 
-#' and presented as box plots or pie charts. Parallel processing is enabled to 
-#' speed up computation on multi-core platforms. 
+#' computed and displayed with respect to genomic features (such as UTR, CDS,
+#' enhancer), and user defined genomic loci or regions. Statistical tests on
+#' signal intensity within user defined regions of interest can be performed
+#' and presented as box plots or pie charts. Parallel processing is enabled to
+#' speed up computation on multi-core platforms.
 #' Main functions are as follows:
 #' \itemize{
-#'  \item   \code{\link{plot_5parts_metagene}} generates genomic (with introns) 
-#'      or metagenomic (without introns) plots around gene body and its upstream 
-#'      and downstream regions, the gene body can be further segmented into 
+#'  \item   \code{\link{plot_5parts_metagene}} generates genomic (with introns)
+#'      or metagenomic (without introns) plots around gene body and its upstream
+#'      and downstream regions, the gene body can be further segmented into
 #'      5'UTR, CDS and 3'UTR.
-#'  \item   \code{\link{plot_start_end}} plots genomic profiles around the start 
-#'      and end of genomic features (like exons or introns), or user defined 
-#'      genomic regions. A center region with user defined width can be plotted 
+#'  \item   \code{\link{plot_start_end}} plots genomic profiles around the start
+#'      and end of genomic features (like exons or introns), or user defined
+#'      genomic regions. A center region with user defined width can be plotted
 #'      simultaneously.
-#'  \item   \code{\link{plot_locus}} plots distance between sample peaks and 
-#'      genomic features, or distance from one set of peaks to another set of 
-#'      peaks. 
-#'  \item   \code{\link{plot_region}} plots signal profiles within and around 
+#'  \item   \code{\link{plot_locus}} plots distance between sample peaks and
+#'      genomic features, or distance from one set of peaks to another set of
+#'      peaks.
+#'  \item   \code{\link{plot_region}} plots signal profiles within and around
 #'      genomic features, or user defined genomic regions.
-#'  \item   \code{\link{plot_peak_annotation}} plots peak annotation statistics 
-#'      (distribution in different type of genes, and in different parts of 
+#'  \item   \code{\link{plot_peak_annotation}} plots peak annotation statistics
+#'      (distribution in different type of genes, and in different parts of
 #'      genes).
 #'  \item   \code{\link{plot_overlap_bed}} plots peak overlaps as Venn diagrams.
-#'  \item   Random features can be generated and plotted to serve as contrast to 
-#'      real features in \code{plot_locus_with_random} and 
+#'  \item   Random features can be generated and plotted to serve as contrast to
+#'      real features in \code{plot_locus_with_random} and
 #'      \code{\link{plot_start_end_with_random}}.
 #'  \item   All profile line plots have error bands.
-#'  \item   Statistical analysis results on user defined regions of interest are 
-#'      plotted along with the profile plots in \code{\link{plot_region}}, 
-#'      \code{\link{plot_locus}} and \code{\link{plot_locus_with_random}}. 
+#'  \item   Statistical analysis results on user defined regions of interest are
+#'      plotted along with the profile plots in \code{\link{plot_region}},
+#'      \code{\link{plot_locus}} and \code{\link{plot_locus_with_random}}.
 #' }
-#' 
-#' @author Shuye Pu 
+#'
+#' @author Shuye Pu
 #'
 #' @docType package
 #' @name GenomicPlot
@@ -48,17 +48,17 @@ NULL
 
 
 #' @title Plot Venn diagrams depicting overlap of genomic regions
-#' @description This function takes a list of up to 4 bed file names, and 
+#' @description This function takes a list of up to 4 bed file names, and
 #' produce a Venn diagram
 #' @param bedList a named list of bed files, with list length = 2, 3 or 4
 #' @param outPrefix a string for plot file name
 #' @param importParams a list of parameters for \code{handle_input}
-#' @param stranded logical, indicating whether the feature is stranded. For 
+#' @param stranded logical, indicating whether the feature is stranded. For
 #'  nonstranded feature, only "*" is accepted as strand
-#' @param pairOnly logical, indicating whether only pair-wise overlap is 
+#' @param pairOnly logical, indicating whether only pair-wise overlap is
 #'  desirable
 #' @param verbose logical, indicating whether to output additional information
-#' @param hw a vector of two elements specifying the height and width of the 
+#' @param hw a vector of two elements specifying the height and width of the
 #'  output figures
 #'
 #' @return a ggplot object
@@ -108,7 +108,7 @@ plot_overlap_bed <- function(bedList,
     functionName <- as.character(match.call()[[1]])
     params <- plot_named_list(as.list(environment()))
     force(params)
-    
+
     if (is.null(importParams)) {
         importParams <- setImportParams(outRle = FALSE)
     } else {
@@ -123,18 +123,18 @@ plot_overlap_bed <- function(bedList,
 
     # get all pair-wise overlap counts into a matrix, display as a heatmap
 
-    fil <- ifelse(stranded, 
+    fil <- ifelse(stranded,
                   filter_by_overlaps_stranded,
                   filter_by_overlaps_nonstranded)
-    
-    counts <- vapply(grList, function(i) 
+
+    counts <- vapply(grList, function(i)
         vapply(grList, function(j)
-            length(fil(i, j, ignore.order = FALSE)), integer(1)), 
+            length(fil(i, j, ignore.order = FALSE)), integer(1)),
         integer(length(grList))) |> t()
-    
+
     rownames(counts) <- colnames(counts) <- names(bedList)
-    counts_long <- tidyr::pivot_longer(as.data.frame(counts), 
-                                cols = seq_len(ncol(counts)), 
+    counts_long <- tidyr::pivot_longer(as.data.frame(counts),
+                                cols = seq_len(ncol(counts)),
                                 names_to = "X", values_to = "count") %>%
         mutate(Y = rep(rownames(counts), each = ncol(counts)))
 
@@ -155,7 +155,7 @@ plot_overlap_bed <- function(bedList,
         )
     print(g)
     grid.newpage()
-  
+
     lapply(pairs, overlap_pair, fil)
     if (!pairOnly) {
         if (length(grList) > 2) {
@@ -167,7 +167,7 @@ plot_overlap_bed <- function(bedList,
             }
         }
     }
-    
+
     if (!is.null(outPrefix)) {
         print(params)
         on.exit(dev.off(), add = TRUE)
@@ -175,15 +175,15 @@ plot_overlap_bed <- function(bedList,
 }
 
 #' @title Plot Venn diagrams depicting overlap of gene lists
-#' @description This function takes a list of (at most 4) tab-delimited file 
+#' @description This function takes a list of (at most 4) tab-delimited file
 #' names, and produce a Venn diagram
 #' @param fileList, a named list of tab-delimited files
-#' @param columnList a vector of integers denoting the columns that have gene 
+#' @param columnList a vector of integers denoting the columns that have gene
 #'  names in the list of files
 #' @param outPrefix, a string for plot file name
-#' @param pairOnly, logical, indicating whether only pair-wise overlap is 
+#' @param pairOnly, logical, indicating whether only pair-wise overlap is
 #'  desirable
-#' @param hw a vector of two elements specifying the height and width of the 
+#' @param hw a vector of two elements specifying the height and width of the
 #'  output figures
 #'
 #' @return a list of vectors of gene names
@@ -216,11 +216,11 @@ plot_overlap_genes <- function(fileList,
                                outPrefix = NULL) {
     stopifnot(all(file.exists(fileList)))
     stopifnot(is.numeric(columnList))
-    
+
     functionName <- as.character(match.call()[[1]])
     params <- plot_named_list(as.list(environment()))
     force(params)
-    
+
     geneList <- mapply(x = fileList, y = columnList, function(x, y) {
         df <- read.delim(x, header = TRUE, sep = "\t")
         genes <- unique(df[, y])
@@ -254,24 +254,27 @@ plot_overlap_genes <- function(fileList,
 }
 
 #' @title plot a named list as a figure
-#' @description This is a helper function for displaying function arguments for 
-#' a plotting function. If the runtime value of the argument is a small object, 
-#' its values is displayed, otherwise, only the name of the value of the 
+#' @description This is a helper function for displaying function arguments for
+#' a plotting function. If the runtime value of the argument is a small object,
+#' its values is displayed, otherwise, only the name of the value of the
 #' argument is displayed.
 #'
-#' @param params a list produced by as.list(environment()), with names being the 
+#' @param params a list produced by as.list(environment()), with names being the
 #'  arguments and values being the runtime values when the function is called.
 #'
 #' @return a ggplot object
 #'
 #' @author Shuye Pu
 #'
-#' @examples 
-#' 
+#' @examples
+#'
 #' data(gf5_genomic)
-#' 
-#' txdb <- AnnotationDbi::loadDb(system.file("extdata", "txdb.sql", 
-#'     package = "GenomicPlot"))
+#'
+#' gtfFile <- system.file("extdata", "gencode.v19.annotation_chr19.gtf",
+#'     package = "GenomicPlot"
+#' )
+#'
+#' txdb <- custom_TxDb_from_GTF(gtfFile, genome = "hg19")
 #'
 #' queryfiles <- system.file("extdata", "treat_chr19.bam",
 #'     package = "GenomicPlot"

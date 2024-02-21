@@ -18,7 +18,7 @@ prepare_5parts_genomic_features(
 \arguments{
 \item{txdb}{a TxDb object defined in the GenomicFeatures package}
 
-\item{meta}{logical, indicating whether a metagene (intron excluded) or gene 
+\item{meta}{logical, indicating whether a metagene (intron excluded) or gene
 (intron included) plot should be produced}
 
 \item{nbins}{an integer defines the total number of bins}
@@ -27,26 +27,29 @@ prepare_5parts_genomic_features(
 
 \item{threeP}{extension out of the 3' boundary of gene}
 
-\item{longest}{logical, indicating whether the output should be limited to 
+\item{longest}{logical, indicating whether the output should be limited to
 the longest transcript of each gene}
 
 \item{verbose}{logical, whether to output additional information}
 
-\item{subsetTx}{a vector of transcript names (eg. ENST00000587541.1) for 
+\item{subsetTx}{a vector of transcript names (eg. ENST00000587541.1) for
 subsetting the genome}
 }
 \value{
-a named list with the elements c("windowRs", "nbins", "scaled_bins", 
+a named list with the elements c("windowRs", "nbins", "scaled_bins",
  "fiveP", "threeP", "meta", "longest")
 }
 \description{
-This is a helper function for 'plot_5parts_metagene', used to 
-speed up plotting of multiple data sets with the same configuration. Only 
+This is a helper function for 'plot_5parts_metagene', used to
+speed up plotting of multiple data sets with the same configuration. Only
 protein-coding genes are considered.
 }
 \examples{
-txdb <- AnnotationDbi::loadDb(system.file("extdata", "txdb.sql", 
-    package = "GenomicPlot"))
+gtfFile <- system.file("extdata", "gencode.v19.annotation_chr19.gtf",
+    package = "GenomicPlot"
+)
+
+txdb <- custom_TxDb_from_GTF(gtfFile, genome = "hg19")
 
 gf <- prepare_5parts_genomic_features(txdb,
     meta = TRUE, nbins = 100, fiveP = -0, threeP = 0,

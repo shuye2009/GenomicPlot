@@ -10,25 +10,28 @@ extract_longest_tx(txdb)
 \item{txdb}{a TxDb object defined in the GenomicFeatures package}
 }
 \value{
-a dataframe of transcript information with the following columns: 
+a dataframe of transcript information with the following columns:
  "tx_id tx_name gene_id nexon tx_len cds_len utr5_len utr3_len"
 }
 \description{
-Gene level computations require selecting one transcript per 
-gene to avoid bias by genes with multiple isoforms. In ideal case, the most 
-abundant transcript (principal or canonical isoform) should be chosen. 
-However, the most abundant isoform may vary depending on tissue type or 
-physiological condition, the longest transcript is usually the principal 
-isoform, and alternatively spliced isoforms are not. This method get the 
-longest transcript for each gene. The longest transcript is defined as the 
+Gene level computations require selecting one transcript per
+gene to avoid bias by genes with multiple isoforms. In ideal case, the most
+abundant transcript (principal or canonical isoform) should be chosen.
+However, the most abundant isoform may vary depending on tissue type or
+physiological condition, the longest transcript is usually the principal
+isoform, and alternatively spliced isoforms are not. This method get the
+longest transcript for each gene. The longest transcript is defined as the
 isoform that has the longest transcript length. In case of tie, the one
-with longer CDS is selected. If the lengths of CDS tie again, the transcript 
+with longer CDS is selected. If the lengths of CDS tie again, the transcript
 with smaller id is selected arbitrarily.
 }
 \examples{
 
-txdb <- AnnotationDbi::loadDb(system.file("extdata", "txdb.sql", 
-    package = "GenomicPlot"))
+gtfFile <- system.file("extdata", "gencode.v19.annotation_chr19.gtf",
+    package = "GenomicPlot"
+)
+
+txdb <- custom_TxDb_from_GTF(gtfFile, genome = "hg19")
 longestTx <- extract_longest_tx(txdb)
 
 }

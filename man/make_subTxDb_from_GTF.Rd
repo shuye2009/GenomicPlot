@@ -11,17 +11,17 @@ make_subTxDb_from_GTF(gtfFile, genome = "hg19", geneList, geneCol = 1)
 
 \item{genome}{version of genome, like "hg19"}
 
-\item{geneList}{path to a tab-delimited text file with one gene name on each 
+\item{geneList}{path to a tab-delimited text file with one gene name on each
 line, or a character vector of gene names}
 
-\item{geneCol}{the position of the column that containing gene names in the 
+\item{geneCol}{the position of the column that containing gene names in the
 case that geneList is a file}
 }
 \value{
 a TxDb object
 }
 \description{
-Make a partial TxDb object given a GTF file and a list of gene 
+Make a partial TxDb object given a GTF file and a list of gene
 names in a file or in a character vector.
 }
 \examples{

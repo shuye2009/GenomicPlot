@@ -28,84 +28,87 @@ plot_start_end(
 )
 }
 \arguments{
-\item{queryFiles}{a vector of sample file names. The file should be in .bam, 
+\item{queryFiles}{a vector of sample file names. The file should be in .bam,
 .bed, .wig or .bw format, mixture of formats is allowed}
 
-\item{inputFiles}{a vector of input sample file names. The file should be in 
+\item{inputFiles}{a vector of input sample file names. The file should be in
 .bam, .bed, .wig or .bw format, mixture of formats is allowed}
 
-\item{centerFiles}{bed files that define the custom features, or features in 
-c("utr3", "utr5", "cds", "intron", "exon", "transcript", "gene"), multiple 
+\item{centerFiles}{bed files that define the custom features, or features in
+c("utr3", "utr5", "cds", "intron", "exon", "transcript", "gene"), multiple
 features are allowed.}
 
-\item{txdb}{a TxDb object defined in the GenomicFeatures package. Default 
+\item{txdb}{a TxDb object defined in the GenomicFeatures package. Default
 NULL, needed only when genomic features are used in the place of centerFiles.}
 
 \item{importParams}{a list of parameters for \code{\link{handle_input}}}
 
 \item{binSize}{an integer defines bin size for intensity calculation}
 
-\item{insert}{an integer specifies the length of the center regions to be 
+\item{insert}{an integer specifies the length of the center regions to be
 included, in addition to the start and end of the feature}
 
-\item{verbose}{logical, whether to output additional information (including 
+\item{verbose}{logical, whether to output additional information (including
 data used for plotting or statistical test results)}
 
-\item{ext}{a vector of four integers defining upstream and downstream 
+\item{ext}{a vector of four integers defining upstream and downstream
 boundaries of the plot window, flanking the start and end of features}
 
-\item{hl}{a vector of four integers defining upstream and downstream 
+\item{hl}{a vector of four integers defining upstream and downstream
 boundaries of the highlight window, flanking the start and end of features}
 
-\item{stranded}{logical, indicating whether the strand of the feature should 
+\item{stranded}{logical, indicating whether the strand of the feature should
 be considered}
 
-\item{scale}{logical, indicating whether the score matrix should be scaled to 
+\item{scale}{logical, indicating whether the score matrix should be scaled to
 the range 0:1, so that samples with different baseline can be compared}
 
-\item{smooth}{logical, indicating whether the line should smoothed with a 
+\item{smooth}{logical, indicating whether the line should smoothed with a
 spline smoothing algorithm}
 
-\item{rmOutlier}{a numeric value serving as a multiplier of the MAD in Hampel 
-filter for outliers identification, 0 indicating not removing outliers. For 
+\item{rmOutlier}{a numeric value serving as a multiplier of the MAD in Hampel
+filter for outliers identification, 0 indicating not removing outliers. For
 Gaussian distribution, use 3, adjust based on data distribution}
 
-\item{outPrefix}{a string specifying output file prefix for plots 
+\item{outPrefix}{a string specifying output file prefix for plots
 (outPrefix.pdf)}
 
-\item{transform}{a string in c("log", "log2", "log10"), default = NA, 
+\item{transform}{a string in c("log", "log2", "log10"), default = NA,
 indicating no transformation of data matrix}
 
-\item{shade}{logical indicating whether to place a shaded rectangle around 
+\item{shade}{logical indicating whether to place a shaded rectangle around
 the point of interest}
 
 \item{Ylab}{a string for y-axis label}
 
-\item{hw}{a vector of two elements specifying the height and width of the 
+\item{hw}{a vector of two elements specifying the height and width of the
 output figures}
 
 \item{nc}{integer, number of cores for parallel processing}
 }
 \value{
-a list of two objects, the first is a GRanges object, the second is 
+a list of two objects, the first is a GRanges object, the second is
  a GRangesList object
 }
 \description{
-Plot reads or peak Coverage/base/gene of samples given in the 
-query files around start and end of custom features. The upstream and 
-downstream windows can be given separately, within the window, a smaller 
-window can be defined to highlight region of interest. A line plot will be 
-displayed for both start and end of feature. If Input files are provided, 
+Plot reads or peak Coverage/base/gene of samples given in the
+query files around start and end of custom features. The upstream and
+downstream windows can be given separately, within the window, a smaller
+window can be defined to highlight region of interest. A line plot will be
+displayed for both start and end of feature. If Input files are provided,
 ratio over Input is computed and displayed as well.
 }
 \examples{
 
-txdb <- AnnotationDbi::loadDb(system.file("extdata", "txdb.sql", 
-    package = "GenomicPlot"))
-bamQueryFiles <- system.file("extdata", "treat_chr19.bam", 
+gtfFile <- system.file("extdata", "gencode.v19.annotation_chr19.gtf",
+    package = "GenomicPlot"
+)
+
+txdb <- custom_TxDb_from_GTF(gtfFile, genome = "hg19")
+bamQueryFiles <- system.file("extdata", "treat_chr19.bam",
     package = "GenomicPlot")
 names(bamQueryFiles) <- "clip_bam"
-bamInputFiles <- system.file("extdata", "input_chr19.bam", 
+bamInputFiles <- system.file("extdata", "input_chr19.bam",
                              package = "GenomicPlot")
 names(bamInputFiles) <- "clip_input"
 

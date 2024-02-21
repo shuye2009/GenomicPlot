@@ -2,7 +2,7 @@
 % Please edit documentation in R/HandleFeatures.R
 \name{get_targeted_genes}
 \alias{get_targeted_genes}
-\title{Get the number of peaks overlapping each feature of all protein-coding 
+\title{Get the number of peaks overlapping each feature of all protein-coding
 genes}
 \usage{
 get_targeted_genes(peak, features, stranded = TRUE)
@@ -12,17 +12,17 @@ get_targeted_genes(peak, features, stranded = TRUE)
 
 \item{features}{a GRangesList object representing genomic features}
 
-\item{stranded}{logical, indicating whether the overlap should be 
+\item{stranded}{logical, indicating whether the overlap should be
 strand-specific}
 }
 \value{
 a list object
 }
 \description{
-Annotate each peak with genomic features based on overlap, and 
-produce summary statistics for distribution of peaks in features of 
-protein-coding genes. If a peak overlap multiple features, a feature is 
-assigned to the peak in the following order of precedence: "5'UTR", 
+Annotate each peak with genomic features based on overlap, and
+produce summary statistics for distribution of peaks in features of
+protein-coding genes. If a peak overlap multiple features, a feature is
+assigned to the peak in the following order of precedence: "5'UTR",
 "3'UTR", "CDS", "Intron", "Promoter", "TTS".
 }
 \note{
@@ -30,8 +30,11 @@ used in \code{plot_peak_annotation}
 }
 \examples{
 
-txdb <- AnnotationDbi::loadDb(system.file("extdata", "txdb.sql", 
-    package = "GenomicPlot"))
+gtfFile <- system.file("extdata", "gencode.v19.annotation_chr19.gtf",
+    package = "GenomicPlot"
+)
+
+txdb <- custom_TxDb_from_GTF(gtfFile, genome = "hg19")
 f <- get_txdb_features(txdb, dsTSS = 100, fiveP = 0, threeP = 1000)
 
 p <- RCAS::importBed(system.file("extdata", "test_chip_peak_chr19.bed",

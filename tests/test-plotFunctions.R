@@ -8,8 +8,7 @@ data(gf5_genomic)
 
 gtffile <- system.file("extdata", "gencode.v19.annotation_chr19.gtf",
                        package = "GenomicPlot")
-txdb <- AnnotationDbi::loadDb(system.file("extdata", "txdb.sql",
-                                          package = "GenomicPlot"))
+txdb <- custom_TxDb_from_GTF(gtffile, genome = "hg19")
 
 bedQueryFiles <- c(
    system.file("extdata", "test_chip_peak_chr19.narrowPeak",

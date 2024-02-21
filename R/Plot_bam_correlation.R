@@ -44,9 +44,9 @@ plot_bam_correlation <- function(bamFiles,
                                  nc = 2) {
     stopifnot(is.numeric(c(binSize, nc, hw)))
     stopifnot(all(file.exists(bamFiles)))
-    if (is.null(names(bamFiles)) || any(names(bamFiles) == "")) 
+    if (is.null(names(bamFiles)) || any(names(bamFiles) == ""))
         stop("Each file must have a name attribute!")
-    
+
     functionName <- as.character(match.call()[[1]])
     params <- plot_named_list(as.list(environment()))
     force(params)
@@ -69,20 +69,17 @@ plot_bam_correlation <- function(bamFiles,
     if (verbose) message("Computing bam correlation...\n")
     outlist <- handle_input(inputFiles = bamFiles, importParams, nc = nc)
 
-    chromInfo <- circlize::read.chromInfo(species = importParams$genome)$df
-    seqi <- Seqinfo(seqnames = chromInfo$chr, seqlengths = chromInfo$end,
-                    isCircular = rep(FALSE, nrow(chromInfo)), 
-                    genome = importParams$genome)
-    
-    tileBins <- tileGenome(seqi, tilewidth = binSize, 
+    seqi <- set_seqinfo(importParams$genome)
+
+    tileBins <- tileGenome(seqi, tilewidth = binSize,
                            cut.last.tile.in.chrom = TRUE)
 
     grange_list <- lapply(outlist, function(x) x$query)
 
     score_list <- parallel_countOverlaps(grange_list, tileBins, nc = nc)
 
-    bins_df <- data.frame(chr = as.vector(seqnames(tileBins)), 
-                          start = start(tileBins), end = end(tileBins), 
+    bins_df <- data.frame(chr = as.vector(seqnames(tileBins)),
+                          start = start(tileBins), end = end(tileBins),
                           strand = strand(tileBins))
     bins <- do.call(paste, c(bins_df, sep = "_"))
 
@@ -94,7 +91,7 @@ plot_bam_correlation <- function(bamFiles,
     norm_factor <- vapply(outlist, function(x) x$size / 1e6, numeric(1))
 
     ## convert to counts per million (CPM)
-    df <- as.data.frame(t(t(count_mat) / norm_factor)) 
+    df <- as.data.frame(t(t(count_mat) / norm_factor))
     colnames(df) <- bamlabels
 
     long_df <- pivot_longer(
@@ -149,12 +146,12 @@ plot_bam_correlation <- function(bamFiles,
     ## END code from pairs example
 
     mat <- cor(log2(df + 1))
-    mat_long <- pivot_longer(as.data.frame(mat), cols = seq_len(ncol(mat)), 
+    mat_long <- pivot_longer(as.data.frame(mat), cols = seq_len(ncol(mat)),
                              names_to = "X", values_to = "correlation") %>%
         mutate(Y = rep(rownames(mat), each = ncol(mat)))
     g <- ggplot(mat_long, aes(X, Y)) +
         geom_tile(aes(fill = correlation)) +
-        geom_text(aes(label = round(correlation, digits = 2), 
+        geom_text(aes(label = round(correlation, digits = 2),
                       color = "white")) +
         scale_fill_viridis(discrete = FALSE) +
         theme_minimal() +
@@ -169,13 +166,13 @@ plot_bam_correlation <- function(bamFiles,
     # print(g)
 
     ph <- ComplexHeatmap::pheatmap(mat, col = colorRamp2(
-        range(mat), viridis(2)), display_numbers = TRUE, 
+        range(mat), viridis(2)), display_numbers = TRUE,
         heatmap_legend_param = list(title = "correlation"))
     draw(ph)
 
-    if (length(bamFiles) <= 6) 
+    if (length(bamFiles) <= 6)
         pairs(log2(df + 1), lower.panel = panel.smooth, upper.panel = panel.cor,
-              diag.panel = panel.hist, 
+              diag.panel = panel.hist,
               main = paste("log2(CPM/bin), bin size =", binSize))
 
     # PCA analysis plot

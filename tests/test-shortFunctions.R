@@ -17,8 +17,8 @@ test_that("testing inspect_matrix", {
      fullMatrix[i-1, 4:7] <- 0
      fullMatrix[i-2, 1:3] <- Inf
    }
-   
-   GenomicPlot:::inspect_matrix(fullMatrix, verbose = TRUE)  
+
+   GenomicPlot:::inspect_matrix(fullMatrix, verbose = TRUE)
 })
 
 test_that("testing impute_hm", {
@@ -26,15 +26,15 @@ test_that("testing impute_hm", {
    for (i in 5:6) {
      fullMatrix[i-1, 4:7] <- 0
    }
-   
+
    imp <- GenomicPlot:::impute_hm(fullMatrix, verbose = TRUE)
 })
 
 test_that("testing ratio_over_input", {
    IP <- matrix(rlnorm(100), ncol = 10)
    Input <- matrix(runif(100), ncol = 10)
-   
-   ratio <- GenomicPlot:::ratio_over_input(IP, Input, verbose = TRUE)  
+
+   ratio <- GenomicPlot:::ratio_over_input(IP, Input, verbose = TRUE)
 })
 
 test_that("testing gr2df", {
@@ -52,7 +52,7 @@ test_that("testing aov_TukeyHSD", {
      Feature = rep(c("A", "B"), c(20, 30)),
      Intensity = c(rnorm(20, 2), rnorm(30, 3))
    )
-   
+
    out <- aov_TukeyHSD(stat_df, xc="Feature")
 })
 
@@ -75,12 +75,12 @@ test_that("testing process_scoreMatrix", {
      fullMatrix[i-2, 1:3] <- Inf
    }
    fullMatrix[9, 4:7] <- runif(4) + 90
-   
+
    wo <- process_scoreMatrix(fullMatrix, rmOutlier = 3, verbose = TRUE)
-   tf <- process_scoreMatrix(fullMatrix, 
+   tf <- process_scoreMatrix(fullMatrix,
      rmOutlier = 0, transform = "log2", verbose = TRUE
    )
-   scaled <- process_scoreMatrix(fullMatrix, scale = TRUE, verbose = TRUE) 
+   scaled <- process_scoreMatrix(fullMatrix, scale = TRUE, verbose = TRUE)
 })
 
 test_that("testing rank_rows", {
@@ -89,60 +89,60 @@ test_that("testing rank_rows", {
      fullMatrix[i, 4:7] <- runif(4) + i
    }
    apply(fullMatrix, 1, sum)
-   ranked <- rank_rows(fullMatrix, ranking = "Sum")   
+   ranked <- rank_rows(fullMatrix, ranking = "Sum")
 })
 
 test_that("testing overlap_quad", {
    test_list <- list(A = c(1, 2, 3, 4, 5), B = c(4, 5, 7), C = c(1, 3), D = 6)
    overlap_quad(test_list, intersect)
-   
+
    ## GRanges overlap
-   query1 <- GRanges("chr19", 
-     IRanges(rep(c(10, 15), 2), width=c(1, 20, 40, 50)), 
+   query1 <- GRanges("chr19",
+     IRanges(rep(c(10, 15), 2), width=c(1, 20, 40, 50)),
      strand=c("+", "+", "-", "-")
    )
-   
-   query2 <- GRanges("chr19", 
-     IRanges(rep(c(1, 15), 2), width=c(1, 20, 40, 50)), 
+
+   query2 <- GRanges("chr19",
+     IRanges(rep(c(1, 15), 2), width=c(1, 20, 40, 50)),
      strand=c("+", "+", "-", "-")
    )
-   
-   subject1 <- GRanges("chr19", 
-     IRanges(rep(c(13, 150), 2), width=c(10, 14, 20, 28)), 
+
+   subject1 <- GRanges("chr19",
+     IRanges(rep(c(13, 150), 2), width=c(10, 14, 20, 28)),
      strand=c("+", "-", "-", "+")
    )
-   
-   subject2 <- GRanges("chr19", 
-     IRanges(rep(c(13, 50), 2), width=c(10, 14, 20, 21)), 
+
+   subject2 <- GRanges("chr19",
+     IRanges(rep(c(13, 50), 2), width=c(10, 14, 20, 21)),
      strand=c("+", "-", "-", "+")
    )
-   
+
    p <- overlap_quad(list(subject1 = subject1, subject2 = subject2,
                           query1 = query1,
      query2 = query2), filter_by_overlaps_stranded
-   )  
+   )
 })
 
 test_that("testing overlap_triple", {
    test_list <- list(A = c(1, 2, 3, 4, 5), B = c(4, 5, 7), C = c(1, 3))
    overlap_triple(test_list, intersect)
-   
+
    ## GRanges overlap
-   query <- GRanges("chr19", 
-     IRanges(rep(c(10, 15), 2), width=c(1, 20, 40, 50)), 
+   query <- GRanges("chr19",
+     IRanges(rep(c(10, 15), 2), width=c(1, 20, 40, 50)),
      strand=c("+", "+", "-", "-")
    )
-   
-   subject1 <- GRanges("chr19", 
-     IRanges(rep(c(13, 150), 2), width=c(10, 14, 20, 28)), 
+
+   subject1 <- GRanges("chr19",
+     IRanges(rep(c(13, 150), 2), width=c(10, 14, 20, 28)),
      strand=c("+", "-", "-", "+")
    )
-   
-   subject2 <- GRanges("chr19", 
-     IRanges(rep(c(13, 50), 2), width=c(10, 14, 20, 21)), 
+
+   subject2 <- GRanges("chr19",
+     IRanges(rep(c(13, 50), 2), width=c(10, 14, 20, 21)),
      strand=c("+", "-", "-", "+")
    )
-   
+
    p <- overlap_triple(list(subject1 = subject1, subject2 = subject2,
                             query = query), filter_by_overlaps_stranded)
 })
@@ -150,20 +150,20 @@ test_that("testing overlap_triple", {
 test_that("testing overlap_pair", {
    test_list <- list(A = c(1, 2, 3, 4, 5), B = c(4, 5, 7))
    overlap_pair(test_list, intersect)
-   
+
    ## GRanges overlap
-   query <- GRanges("chr19", 
-     IRanges(rep(c(10, 15), 2), width=c(1, 20, 40, 50)), 
+   query <- GRanges("chr19",
+     IRanges(rep(c(10, 15), 2), width=c(1, 20, 40, 50)),
      strand=c("+", "+", "-", "-")
    )
-   
-   subject <- GRanges("chr19", 
-     IRanges(rep(c(13, 150), 2), width=c(10, 14, 20, 28)), 
+
+   subject <- GRanges("chr19",
+     IRanges(rep(c(13, 150), 2), width=c(10, 14, 20, 28)),
      strand=c("+", "-", "-", "+")
    )
-   
-   p <- overlap_pair(list(query = query, subject = subject), 
-                     filter_by_overlaps_stranded)   
+
+   p <- overlap_pair(list(query = query, subject = subject),
+                     filter_by_overlaps_stranded)
 })
 
 test_that("testing draw_combo_plot", {
@@ -176,7 +176,7 @@ test_that("testing draw_combo_plot", {
      cols = c(Intensity, Height),
      names_to = "type", values_to = "value"
    )
-   
+
    p <- draw_combo_plot(stat_df_long,
      xc = "Feature", yc = "value", fc = "type",
      Ylab = "value", comp = list(c(1, 2), c(3, 4), c(1, 3), c(2, 4)), nf = 2
@@ -192,11 +192,11 @@ test_that("testing draw_rank_plot", {
      Feature = rep(c("A", "B"), c(20, 30)),
      Height = c(rnorm(20, 5, 5), rnorm(30, 1, 5))
    )
-   
+
    p1 <- draw_rank_plot(stat_df, xc = "Feature", yc = "Intensity",
                         Ylab = "Intensity")
-   p2 <- draw_rank_plot(stat_df1, xc = "Feature", yc = "Height", 
-                        Ylab = "Height")   
+   p2 <- draw_rank_plot(stat_df1, xc = "Feature", yc = "Height",
+                        Ylab = "Height")
 })
 
 test_that("testing draw_quantile_plot", {
@@ -209,11 +209,11 @@ test_that("testing draw_quantile_plot", {
      cols = c(Intensity, Height), names_to = "type",
      values_to = "value"
    )
-   
+
    p1 <- draw_quantile_plot(stat_df, xc = "Feature", yc = "Intensity")
    p2 <- draw_quantile_plot(stat_df, xc = "Feature", yc = "Height")
-   p3 <- draw_quantile_plot(stat_df_long, xc = "Feature", yc = "value", 
-                            fc = "type", Ylab = "value") 
+   p3 <- draw_quantile_plot(stat_df_long, xc = "Feature", yc = "value",
+                            fc = "type", Ylab = "value")
 })
 
 test_that("testing draw_mean_se_barplot", {
@@ -221,17 +221,17 @@ test_that("testing draw_mean_se_barplot", {
         Feature = rep(c("A", "B"), c(20, 30)),
         Intensity = c(rnorm(20, 2), rnorm(30, 3))
       )
-      p <- draw_mean_se_barplot(stat_df, xc = "Feature", yc = "Intensity", 
-                                Ylab = "Intensity")  
+      p <- draw_mean_se_barplot(stat_df, xc = "Feature", yc = "Intensity",
+                                Ylab = "Intensity")
 })
 
 test_that("testing draw_boxplot_wo_outlier", {
-   stat_df <- data.frame(Feature = rep(c("A", "B"), c(20, 30)), 
+   stat_df <- data.frame(Feature = rep(c("A", "B"), c(20, 30)),
                          Intensity = c(rnorm(20, 2), rnorm(30, 3)))
       p <- draw_boxplot_wo_outlier(stat_df,
         xc = "Feature", yc = "Intensity",
         Ylab = "Signal Intensity"
-      ) 
+      )
 })
 
 test_that("testing draw_boxplot_by_factor", {
@@ -243,7 +243,7 @@ test_that("testing draw_boxplot_by_factor", {
      xc = "Feature", yc = "Intensity",
      Ylab = "Signal Intensity"
    )
-      
+
 })
 
 test_that("testing draw_locus_profile", {
@@ -256,8 +256,8 @@ test_that("testing draw_locus_profile", {
    df <- data.frame(Intensity, se, Position, Query, Reference) %>%
      mutate(lower = Intensity - se, upper = Intensity + se) %>%
      mutate(Group = paste(Query, Reference, sep = ":"))
-   
-   p <- draw_locus_profile(df, cn = "Group", shade = TRUE, hl = c(-10, 20)) 
+
+   p <- draw_locus_profile(df, cn = "Group", shade = TRUE, hl = c(-10, 20))
 })
 
 test_that("testing draw_region_profile", {
@@ -271,7 +271,7 @@ test_that("testing draw_region_profile", {
      mutate(lower = Intensity - se, upper = Intensity + se) %>%
      mutate(Group = paste(Query, Reference, sep = ":"))
    vx <- c(1, 23, 70)
-   
+
    p <- draw_region_profile(df, cn = "Group", vx = vx)
 })
 
@@ -279,7 +279,7 @@ test_that("testing draw_region_name", {
    fn <- c("5'UTR", "CDS", "3'UTR")
    bins <- c(5, 15, 5)
    xmax <- 25
-   
+
    p <- draw_region_name(featureNames = fn, scaled_bins = bins, xmax = xmax)
 })
 
@@ -287,7 +287,7 @@ test_that("testing draw_region_landmark", {
    fn <- c("5'UTR", "CDS", "3'UTR")
    mark <- c(1, 5, 20)
    xmax <- 25
-   
+
    p <- draw_region_landmark(featureNames = fn, vx = mark, xmax = xmax)
 })
 
@@ -299,7 +299,7 @@ test_that("testing draw_matrix_heatmap", {
    labels_col <- as.character(seq_len(100))
    levels_col <- c("start", "center", "end")
    names(labels_col) <- rep(levels_col, c(15, 60, 25))
-   
+
    p <- draw_matrix_heatmap(fullMatrix, dataName = "test", labels_col,
                             levels_col)
 })
@@ -329,9 +329,9 @@ test_that("testing draw_stacked_profile", {
        mutate(Group = paste(Query, Reference, sep = ":")) %>%
        mutate(Location = rep("End", 400)) %>%
        mutate(Interval = sample.int(2000, 400))
-       
+
    df <- rbind(start_df, center_df, end_df)
-   p <- draw_stacked_profile(df, cn = "Group", shade = TRUE, 
+   p <- draw_stacked_profile(df, cn = "Group", shade = TRUE,
        ext = c(-50, 50, -50, 50),
        hl = c(-20, 20, -25, 25), insert = 100)
 })

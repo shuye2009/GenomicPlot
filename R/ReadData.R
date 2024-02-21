@@ -48,8 +48,8 @@ setImportParams <- function(
     stopifnot(fix_point %in% c("start", "center", "end"))
     stopifnot(is.logical(c(norm, useScore, outRle, useSizeFactor, saveRds)))
     stopifnot(is.character(genome))
-    if(genome == "GRCh37") genome <- "hg19"
-    if(genome == "GRCh38") genome <- "hg38"
+    if(grepl("GRCh37", genome)) genome <- "hg19"
+    if(grepl("GRCh38", genome)) genome <- "hg38"
     return(list(
         offset = offset, fix_width = fix_width, fix_point = fix_point,
         norm = norm, useScore = useScore, outRle = outRle,
@@ -294,10 +294,7 @@ effective_size <- function(outlist,
                            verbose = FALSE) {
     if (verbose) message("Estimating size factor\n")
 
-    chromInfo <- circlize::read.chromInfo(species = genome)$df
-    seqi <- Seqinfo(seqnames = chromInfo$chr, seqlengths = chromInfo$end,
-                    isCircular = rep(FALSE, nrow(chromInfo)),
-                    genome = genome)
+    seqi <- set_seqinfo(genome)
 
     grange_list <- lapply(outlist, function(x) x$query)
 
@@ -433,11 +430,7 @@ handle_bed <- function(inputFile,
     }
 
     ## make input comply with GenomeInfoDb
-    chromInfo <- circlize::read.chromInfo(species = importParams$genome)$df
-    seqInfo <- Seqinfo(seqnames = chromInfo$chr, seqlengths = chromInfo$end,
-                       isCircular = rep(FALSE, nrow(chromInfo)),
-                       genome = importParams$genome)
-    seqInfo <- keepStandardChromosomes(seqInfo)
+    seqInfo <- set_seqinfo(importParams$genome)
 
     if (c("chr1") %in% as.vector(seqnames(queryRegions))
         && seqnames(seqInfo)[1] == "1") {
@@ -548,10 +541,7 @@ handle_bam <- function(inputFile, importParams = NULL, verbose = FALSE) {
 
     ## make input comply with GenomeInfoDb, use cached chromInfo to avoid
     ## dependency on UCSC web service
-    chromInfo <- circlize::read.chromInfo(species = importParams$genome)$df
-    seqInfo <- Seqinfo(seqnames = chromInfo$chr, seqlengths = chromInfo$end,
-        isCircular = rep(FALSE, nrow(chromInfo)), genome = importParams$genome)
-    seqInfo <- keepStandardChromosomes(seqInfo)
+    seqInfo <- set_seqinfo(importParams$genome)
     queryRegions <- queryRegions[as.vector(seqnames(queryRegions))
                                  %in% seqnames(seqInfo)]
     seqlevels(queryRegions) <- seqlevels(seqInfo)
@@ -634,11 +624,7 @@ handle_bw <- function(inputFile, importParams, verbose = FALSE) {
     }
 
     ## make input comply with GenomeInfoDb
-    chromInfo <- circlize::read.chromInfo(species = importParams$genome)$df
-    seqInfo <- Seqinfo(seqnames = chromInfo$chr, seqlengths = chromInfo$end,
-                       isCircular = rep(FALSE, nrow(chromInfo)),
-                       genome = importParams$genome)
-    seqInfo <- keepStandardChromosomes(seqInfo)
+    seqInfo <- set_seqinfo(importParams$genome)
     queryRegions <- queryRegions[as.vector(seqnames(queryRegions))
                                  %in% seqnames(seqInfo)]
     GenomeInfoDb::seqlevels(queryRegions) <- GenomeInfoDb::seqlevels(seqInfo)
@@ -705,10 +691,7 @@ handle_wig <- function(inputFile,
     neg_file <- find_mate(inputFile, verbose)
     stranded <- ifelse(!is.null(neg_file), TRUE, FALSE)
 
-    chromInfo <- circlize::read.chromInfo(species = importParams$genome)$df
-    seqinfo <- Seqinfo(seqnames = chromInfo$chr, seqlengths = chromInfo$end,
-                       isCircular = rep(FALSE, nrow(chromInfo)),
-                       genome = importParams$genome)
+    seqinfo <- set_seqinfo(importParams$genome)
     wigToBigWig(inputFile, seqinfo, clip = TRUE)
 
     if (stranded) {

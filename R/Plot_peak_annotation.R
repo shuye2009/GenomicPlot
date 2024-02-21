@@ -1,31 +1,31 @@
 #' @title Annotate peaks with genomic features and genes
 #'
-#' @description  Produce a table of transcripts targeted by peaks, and generate 
+#' @description  Produce a table of transcripts targeted by peaks, and generate
 #' plots for target gene types, and peak distribution in genomic features
 #'
-#' @param peakFile a string denoting the peak file name, only .bed format is 
+#' @param peakFile a string denoting the peak file name, only .bed format is
 #'  allowed
 #' @param gtfFile path to a gene annotation gtf file with gene_biotype field
 #' @param importParams a list of parameters for \code{handle_input}
-#' @param fiveP extension out of the 5' boundary of genes for defining promoter: 
+#' @param fiveP extension out of the 5' boundary of genes for defining promoter:
 #'  fiveP TSS + dsTSS
-#' @param dsTSS extension downstream of TSS for defining promoter: fiveP TSS + 
+#' @param dsTSS extension downstream of TSS for defining promoter: fiveP TSS +
 #'  dsTSS
-#' @param threeP extension out of the 3' boundary of genes for defining 
+#' @param threeP extension out of the 3' boundary of genes for defining
 #'  termination region: -0 TTS + threeP
 #' @param outPrefix a string denoting output file name in pdf format
-#' @param simple logical, indicating whether 5'UTR, CDS and 3'UTR are annotated 
+#' @param simple logical, indicating whether 5'UTR, CDS and 3'UTR are annotated
 #'  in the gtfFile
-#' @param verbose, logical, to indicate whether to write the annotation results 
+#' @param verbose, logical, to indicate whether to write the annotation results
 #'  to a file
-#' @param hw a vector of two elements specifying the height and width of the 
+#' @param hw a vector of two elements specifying the height and width of the
 #'  output figures
 #' @param nc number of cores for parallel processing
 #'
 #' @return a list of three dataframes, 'annotation' is the annotation of peaks
 #'  into gene types, 'stat' is the summary stats for pie chart, 'simplified' is
 #'  the summary stats excluding intron
-#'  
+#'
 #' @author Shuye Pu
 #' @examples
 #'
@@ -63,9 +63,9 @@ plot_peak_annotation <- function(peakFile,
                                  nc = 2) {
     stopifnot(is.numeric(c(fiveP, dsTSS, threeP, nc, hw)))
     stopifnot(all(file.exists(peakFile)))
-    if (is.null(names(peakFile)) || any(names(peakFile) == "")) 
+    if (is.null(names(peakFile)) || any(names(peakFile) == ""))
         stop("Each file must have a name attribute!")
-    
+
     functionName <- as.character(match.call()[[1]])
     params <- plot_named_list(as.list(environment()))
     force(params)
@@ -88,22 +88,25 @@ plot_peak_annotation <- function(peakFile,
         pdf(paste0(outPrefix, ".pdf"), height = hw[1], width = hw[2])
     }
 
+    chromInfo <- set_seqinfo(importParams$genome)
     gff <- RCAS::importGtf(saveObjectAsRds = TRUE, filePath = gtfFile)
-    txdb <- makeTxDbFromGRanges(gff)
-    if (any(is.na(txdb$user_genome))) txdb$user_genome <- importParams$genome
+    gff <- gff[as.vector(seqnames(gff)) %in% seqlevels(chromInfo)]
+    seqlevels(gff) <- seqlevels(chromInfo)
+    seqinfo(gff) <- chromInfo
+    txdb <- GenomicFeatures::makeTxDbFromGRanges(gff)
 
     if (simple) {
         ## the 5'UTR and 3'UTR are not annotted
         exon <- get_genomic_feature_coordinates(txdb, "exon", longest = FALSE)
-        intron <- get_genomic_feature_coordinates(txdb, "intron", 
+        intron <- get_genomic_feature_coordinates(txdb, "intron",
                                                   longest = FALSE)
-        gene <- get_genomic_feature_coordinates(txdb, "gene", 
+        gene <- get_genomic_feature_coordinates(txdb, "gene",
                                                 longest = FALSE)$GRanges
 
-        promoter <- promoters(gene, upstream = -fiveP, downstream = 300, 
+        promoter <- promoters(gene, upstream = -fiveP, downstream = 300,
                               use.names = FALSE)
         names(promoter) <- NULL
-        TTS <- flank(gene, width = threeP, both = FALSE, start = FALSE, 
+        TTS <- flank(gene, width = threeP, both = FALSE, start = FALSE,
                      ignore.strand = FALSE)
         names(TTS) <- NULL
 
@@ -115,11 +118,11 @@ plot_peak_annotation <- function(peakFile,
 
 
         if (verbose) {
-            write.table (targeted_gene, 
-                paste(peakLabel, "_targeted_annotated_gene.tab", sep = ""), 
+            write.table (targeted_gene,
+                paste(peakLabel, "_targeted_annotated_gene.tab", sep = ""),
                 sep = "\t", row.names = FALSE, quote = FALSE)
-            write.table(targeted_promoter, 
-                        paste(peakLabel, "_targeted_promoter.tab", sep = ""), 
+            write.table(targeted_promoter,
+                        paste(peakLabel, "_targeted_promoter.tab", sep = ""),
                         sep = "\t", row.names = FALSE, quote = FALSE)
         }
 
@@ -136,7 +139,7 @@ plot_peak_annotation <- function(peakFile,
                                       intersect.chr = FALSE)
         if (verbose) print(annot)
         precedence_count <- annot@num.precedence
-        lengths <- vapply(features, FUN = function(x) sum(width(x)), 
+        lengths <- vapply(features, FUN = function(x) sum(width(x)),
                           FUN.VALUE = numeric(1))
 
         df <- data.frame(count = precedence_count, len = lengths) %>%
@@ -162,7 +165,7 @@ plot_peak_annotation <- function(peakFile,
         if (verbose) print(df)
 
         ap1 <- ggplot(df, aes(x = "", y = percent, fill = feature)) +
-            geom_col(color = "white") +  
+            geom_col(color = "white") +
             scale_y_continuous(breaks = df2$pos, labels = df2$labels) +
             guides(fill = guide_legend(nrow = 2)) +
             scale_fill_manual(values = viridis(n = nrow(df))) +
@@ -179,7 +182,7 @@ plot_peak_annotation <- function(peakFile,
 
         ap2 <- ggplot(df, aes(x = "", y = norm_percent, fill = feature)) +
             geom_col(color = "white") +
-            scale_y_continuous(breaks = df2$norm_pos, 
+            scale_y_continuous(breaks = df2$norm_pos,
                                labels = df2$norm_labels) +
             guides(fill = guide_legend(nrow = 2)) +
             scale_fill_manual(values = viridis(n = nrow(df))) +
@@ -213,12 +216,12 @@ plot_peak_annotation <- function(peakFile,
             geneType <- "gene_biotype"
         }
         if (is.null(geneType)) {
-            stop("The annotation gtf file must have a field 
+            stop("The annotation gtf file must have a field
                  'gene_type' or 'gene_biotype'")
         }
         gene_info_table <- gr2df(gff) %>%
             filter(type == "transcript") %>%
-            select(chr, start, end, name, strand, transcript_id, gene_id, 
+            select(chr, start, end, name, strand, transcript_id, gene_id,
                    gene_name, all_of(geneType))
 
         ## To find out the distribution of the query regions across gene types:
@@ -232,18 +235,18 @@ plot_peak_annotation <- function(peakFile,
 
         intergenic_count <- length(peak) - sum(df$count)
         if (intergenic_count < 0) intergenic_count <- 0
-        intergenic <- data.frame("feature" = "intergenic", 
+        intergenic <- data.frame("feature" = "intergenic",
                                  "count" = intergenic_count)
 
-        selected_feature <- c("protein_coding", "lincRNA", "antisense", 
+        selected_feature <- c("protein_coding", "lincRNA", "antisense",
                               "pseudogene", "snRNA", "snoRNA", "rRNA")
         selected_count <- rep(0, length(selected_feature))
-        selected <- data.frame("feature" = selected_feature, 
+        selected <- data.frame("feature" = selected_feature,
                                "count" = selected_count)
 
         for (ft in selected_feature) {
             if (ft %in% df$feature) {
-                selected[selected$feature == ft, "count"] <- 
+                selected[selected$feature == ft, "count"] <-
                     df[df$feature == ft, "count"]
             }
         }
@@ -263,7 +266,7 @@ plot_peak_annotation <- function(peakFile,
             labs(
                 x = "", y = "Percent overlap (%)",
                 title = "Annotation of peaks to all type of genes",
-                subtitle = paste0("(Total number of peaks = ", 
+                subtitle = paste0("(Total number of peaks = ",
                                   length(peak), ")")
             ) +
             theme_bw(base_size = 14) +
@@ -277,21 +280,21 @@ plot_peak_annotation <- function(peakFile,
         ## get targeted genes table
         ## utr5, utr3 and cds here do not contain introns
         features <- get_txdb_features(
-            txdb, fiveP = fiveP, dsTSS = dsTSS, threeP = threeP, nc = nc) 
+            txdb, fiveP = fiveP, dsTSS = dsTSS, threeP = threeP, nc = nc)
         dt <- get_targeted_genes(peak, features, stranded = stranded)
 
         if (verbose) write.table(
-            dt$peak_table, paste(peakLabel, "_peak_annotations.tab", sep = ""), 
+            dt$peak_table, paste(peakLabel, "_peak_annotations.tab", sep = ""),
             sep = "\t", row.names = FALSE, quote = FALSE)
 
-        dt_gene <- left_join(dt$gene_table, gene_info_table, 
+        dt_gene <- left_join(dt$gene_table, gene_info_table,
                              by = c("tx_name" = "transcript_id"))
 
         dim(dt_gene)
         head(dt_gene)
         tail(dt_gene)
 
-        ## filter based on peak type, for ChIPseq peak, only output genes 
+        ## filter based on peak type, for ChIPseq peak, only output genes
         ## targeted in promoters, for CLIPseq peaks only output genes targeted
         ##  in transcripts(5'UTR, CDS, 3'UTR, intron)
         if (fiveP < 0) {
@@ -310,10 +313,10 @@ plot_peak_annotation <- function(peakFile,
         # here utr5, utr3 and cds do not contain introns
 
         if (verbose) message("Computing annotation stats...\n")
-        lengths <- vapply(features, FUN = function(x) sum(width(x)), 
+        lengths <- vapply(features, FUN = function(x) sum(width(x)),
                           FUN.VALUE = numeric(1))
         feature_counts <- dt$feature_count
-        feature_counts <- feature_counts[!names(feature_counts) %in% c("Exon", 
+        feature_counts <- feature_counts[!names(feature_counts) %in% c("Exon",
                                                                 "Transcript")]
 
         precedence_c <- feature_counts[feature_counts > 0]
@@ -330,7 +333,7 @@ plot_peak_annotation <- function(peakFile,
             mutate(percent = round(percent * 100, digits = 1)) %>%
             mutate(norm_count = round(count * 1000 / len, digits = 3)) %>%
             mutate(norm_percent = norm_count / sum(norm_count)) %>%
-            mutate(norm_labels = scales::percent(norm_percent, 
+            mutate(norm_labels = scales::percent(norm_percent,
                                                  accuracy = 0.1)) %>%
             mutate(norm_percent = round(norm_percent * 100, digits = 1)) %>%
             mutate(feature = factor(feature, levels = featureNames))
@@ -364,7 +367,7 @@ plot_peak_annotation <- function(peakFile,
         apa2 <- ggplot(dfa, aes(x = "", y = norm_percent, fill = feature)) +
             geom_col(color = "white") +
             coord_polar(theta = "y") +
-            scale_y_continuous(breaks = dfa2$norm_pos, 
+            scale_y_continuous(breaks = dfa2$norm_pos,
                                labels = dfa2$norm_labels) +
             guides(fill = guide_legend(nrow = 2)) +
             scale_fill_manual(values = fil) +
@@ -385,7 +388,7 @@ plot_peak_annotation <- function(peakFile,
             mutate(percent = round(percent * 100, digits = 1)) %>%
             mutate(norm_count = round(count * 1000 / len, digits = 3)) %>%
             mutate(norm_percent = norm_count / sum(norm_count)) %>%
-            mutate(norm_labels = scales::percent(norm_percent, 
+            mutate(norm_labels = scales::percent(norm_percent,
                                                  accuracy = 0.1)) %>%
             mutate(norm_percent = round(norm_percent * 100, digits = 1)) %>%
             mutate(feature = factor(feature, levels = featureNames))
@@ -417,7 +420,7 @@ plot_peak_annotation <- function(peakFile,
 
         apb2 <- ggplot(dfb, aes(x = "", y = norm_percent, fill = feature)) +
             geom_col(color = "white") +
-            scale_y_continuous(breaks = dfb2$norm_pos, 
+            scale_y_continuous(breaks = dfb2$norm_pos,
                                labels = dfb2$norm_labels) +
             guides(fill = guide_legend(nrow = 2)) +
             scale_fill_manual(values = fil[1:nrow(dfb)]) +
@@ -432,7 +435,7 @@ plot_peak_annotation <- function(peakFile,
             )
 
         print(pbar)
-        print(plot_grid(apa1, apb1, nrow = 1, 
+        print(plot_grid(apa1, apb1, nrow = 1,
                         labels = "Absolute counts", label_y = 1))
         print(plot_grid(apa2, apb2, nrow = 1,
                         labels = "Length-normalized counts", label_y = 1))

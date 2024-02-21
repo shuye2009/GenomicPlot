@@ -5,45 +5,45 @@
 \alias{GenomicPlot}
 \title{GenomicPlot-package}
 \description{
-An R package for efficient and flexible visualization of 
+An R package for efficient and flexible visualization of
 genome-wide NGS coverage profiles
 }
 \details{
 The goal of `GenomicPlot` is to provide an efficient visualization
 tool for next generation sequencing (NGS) data with rich functionality and
-flexibility. `GenomicPlot` enables plotting of NGS data in various formats 
+flexibility. `GenomicPlot` enables plotting of NGS data in various formats
 (bam, bed, wig and bigwig); both coverage and enrichment over input can be
-computed and displayed with respect to genomic features (such as UTR, CDS, 
-enhancer), and user defined genomic loci or regions. Statistical tests on 
-signal intensity within user defined regions of interest can be performed 
-and presented as box plots or pie charts. Parallel processing is enabled to 
-speed up computation on multi-core platforms. 
+computed and displayed with respect to genomic features (such as UTR, CDS,
+enhancer), and user defined genomic loci or regions. Statistical tests on
+signal intensity within user defined regions of interest can be performed
+and presented as box plots or pie charts. Parallel processing is enabled to
+speed up computation on multi-core platforms.
 Main functions are as follows:
 \itemize{
- \item   \code{\link{plot_5parts_metagene}} generates genomic (with introns) 
-     or metagenomic (without introns) plots around gene body and its upstream 
-     and downstream regions, the gene body can be further segmented into 
+ \item   \code{\link{plot_5parts_metagene}} generates genomic (with introns)
+     or metagenomic (without introns) plots around gene body and its upstream
+     and downstream regions, the gene body can be further segmented into
      5'UTR, CDS and 3'UTR.
- \item   \code{\link{plot_start_end}} plots genomic profiles around the start 
-     and end of genomic features (like exons or introns), or user defined 
-     genomic regions. A center region with user defined width can be plotted 
+ \item   \code{\link{plot_start_end}} plots genomic profiles around the start
+     and end of genomic features (like exons or introns), or user defined
+     genomic regions. A center region with user defined width can be plotted
      simultaneously.
- \item   \code{\link{plot_locus}} plots distance between sample peaks and 
-     genomic features, or distance from one set of peaks to another set of 
-     peaks. 
- \item   \code{\link{plot_region}} plots signal profiles within and around 
+ \item   \code{\link{plot_locus}} plots distance between sample peaks and
+     genomic features, or distance from one set of peaks to another set of
+     peaks.
+ \item   \code{\link{plot_region}} plots signal profiles within and around
      genomic features, or user defined genomic regions.
- \item   \code{\link{plot_peak_annotation}} plots peak annotation statistics 
-     (distribution in different type of genes, and in different parts of 
+ \item   \code{\link{plot_peak_annotation}} plots peak annotation statistics
+     (distribution in different type of genes, and in different parts of
      genes).
  \item   \code{\link{plot_overlap_bed}} plots peak overlaps as Venn diagrams.
- \item   Random features can be generated and plotted to serve as contrast to 
-     real features in \code{plot_locus_with_random} and 
+ \item   Random features can be generated and plotted to serve as contrast to
+     real features in \code{plot_locus_with_random} and
      \code{\link{plot_start_end_with_random}}.
  \item   All profile line plots have error bands.
- \item   Statistical analysis results on user defined regions of interest are 
-     plotted along with the profile plots in \code{\link{plot_region}}, 
-     \code{\link{plot_locus}} and \code{\link{plot_locus_with_random}}. 
+ \item   Statistical analysis results on user defined regions of interest are
+     plotted along with the profile plots in \code{\link{plot_region}},
+     \code{\link{plot_locus}} and \code{\link{plot_locus_with_random}}.
 }
 }
 \author{

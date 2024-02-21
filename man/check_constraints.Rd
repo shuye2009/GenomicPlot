@@ -17,8 +17,8 @@ check_constraints(gr, genome, queryRle = NULL)
 a GRanges object
 }
 \description{
-Make sure the coordinates of GRanges are within the boundaries 
-of chromosomes, and trim anything that goes beyond. Also, remove entries 
+Make sure the coordinates of GRanges are within the boundaries
+of chromosomes, and trim anything that goes beyond. Also, remove entries
 whose seqname is not in the seqname of a query GRanges.
 }
 \examples{

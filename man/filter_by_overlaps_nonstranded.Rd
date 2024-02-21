@@ -19,20 +19,20 @@ filter_by_overlaps_nonstranded(
 
 \item{maxgap}{an integer denoting the distance that define overlap}
 
-\item{minoverlap}{The minimum amount of overlap between intervals as a 
-single integer greater than 0. If you modify this argument, maxgap must be 
+\item{minoverlap}{The minimum amount of overlap between intervals as a
+single integer greater than 0. If you modify this argument, maxgap must be
 held fixed.}
 
-\item{ignore.order}{logical, indicating whether the order of query and 
-subject can be switched, default = TRUE. This parameter is used to avoid 
-the situation that the size of overlaps is bigger than the size of subject, 
+\item{ignore.order}{logical, indicating whether the order of query and
+subject can be switched, default = TRUE. This parameter is used to avoid
+the situation that the size of overlaps is bigger than the size of subject,
 which will produce an error when plotting Venn diagrams.}
 }
 \value{
 a GRanges object
 }
 \description{
-This function reports all query GRanges that have overlaps in 
+This function reports all query GRanges that have overlaps in
 subject GRanges. Strand information is not required.
 }
 \examples{

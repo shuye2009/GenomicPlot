@@ -1,71 +1,74 @@
 #' @title  Plot signals around the start and the end of genomic features
 #
-#' @description   Plot reads or peak Coverage/base/gene of samples given in the 
-#' query files around start and end of custom features. The upstream and 
-#' downstream windows can be given separately, within the window, a smaller 
-#' window can be defined to highlight region of interest. A line plot will be 
-#' displayed for both start and end of feature. If Input files are provided, 
+#' @description   Plot reads or peak Coverage/base/gene of samples given in the
+#' query files around start and end of custom features. The upstream and
+#' downstream windows can be given separately, within the window, a smaller
+#' window can be defined to highlight region of interest. A line plot will be
+#' displayed for both start and end of feature. If Input files are provided,
 #' ratio over Input is computed and displayed as well.
 #'
-#' @param queryFiles a vector of sample file names. The file should be in .bam, 
+#' @param queryFiles a vector of sample file names. The file should be in .bam,
 #'  .bed, .wig or .bw format, mixture of formats is allowed
-#' @param centerFiles  bed files that define the custom features, or features in 
-#'  c("utr3", "utr5", "cds", "intron", "exon", "transcript", "gene"), multiple 
+#' @param centerFiles  bed files that define the custom features, or features in
+#'  c("utr3", "utr5", "cds", "intron", "exon", "transcript", "gene"), multiple
 #'  features are allowed.
-#' @param txdb a TxDb object defined in the GenomicFeatures package. Default 
+#' @param txdb a TxDb object defined in the GenomicFeatures package. Default
 #'  NULL, needed only when genomic features are used in the place of centerFiles.
-#' @param inputFiles a vector of input sample file names. The file should be in 
+#' @param inputFiles a vector of input sample file names. The file should be in
 #'  .bam, .bed, .wig or .bw format, mixture of formats is allowed
 #' @param importParams a list of parameters for \code{\link{handle_input}}
 #' @param binSize an integer defines bin size for intensity calculation
-#' @param ext a vector of four integers defining upstream and downstream 
+#' @param ext a vector of four integers defining upstream and downstream
 #'  boundaries of the plot window, flanking the start and end of features
-#' @param hl a vector of four integers defining upstream and downstream 
+#' @param hl a vector of four integers defining upstream and downstream
 #'  boundaries of the highlight window, flanking the start and end of features
-#' @param insert an integer specifies the length of the center regions to be 
+#' @param insert an integer specifies the length of the center regions to be
 #'  included, in addition to the start and end of the feature
-#' @param stranded logical, indicating whether the strand of the feature should 
+#' @param stranded logical, indicating whether the strand of the feature should
 #'  be considered
-#' @param scale logical, indicating whether the score matrix should be scaled to 
+#' @param scale logical, indicating whether the score matrix should be scaled to
 #'  the range 0:1, so that samples with different baseline can be compared
-#' @param smooth logical, indicating whether the line should smoothed with a 
+#' @param smooth logical, indicating whether the line should smoothed with a
 #'  spline smoothing algorithm
-#' @param rmOutlier a numeric value serving as a multiplier of the MAD in Hampel 
-#'  filter for outliers identification, 0 indicating not removing outliers. For 
+#' @param rmOutlier a numeric value serving as a multiplier of the MAD in Hampel
+#'  filter for outliers identification, 0 indicating not removing outliers. For
 #'  Gaussian distribution, use 3, adjust based on data distribution
-#' @param outPrefix a string specifying output file prefix for plots 
+#' @param outPrefix a string specifying output file prefix for plots
 #' (outPrefix.pdf)
-#' @param transform a string in c("log", "log2", "log10"), default = NA, 
+#' @param transform a string in c("log", "log2", "log10"), default = NA,
 #'  indicating no transformation of data matrix
-#' @param verbose logical, whether to output additional information (including 
+#' @param verbose logical, whether to output additional information (including
 #'  data used for plotting or statistical test results)
 #' @param Ylab a string for y-axis label
-#' @param shade logical indicating whether to place a shaded rectangle around 
+#' @param shade logical indicating whether to place a shaded rectangle around
 #'  the point of interest
-#' @param hw a vector of two elements specifying the height and width of the 
+#' @param hw a vector of two elements specifying the height and width of the
 #'  output figures
 #' @param nc integer, number of cores for parallel processing
 #'
-#' @return a list of two objects, the first is a GRanges object, the second is 
+#' @return a list of two objects, the first is a GRanges object, the second is
 #'  a GRangesList object
 #' @author Shuye Pu
-#' 
+#'
 #' @examples
 #'
-#' txdb <- AnnotationDbi::loadDb(system.file("extdata", "txdb.sql", 
-#'     package = "GenomicPlot"))
-#' bamQueryFiles <- system.file("extdata", "treat_chr19.bam", 
+#' gtfFile <- system.file("extdata", "gencode.v19.annotation_chr19.gtf",
+#'     package = "GenomicPlot"
+#' )
+#'
+#' txdb <- custom_TxDb_from_GTF(gtfFile, genome = "hg19")
+#' bamQueryFiles <- system.file("extdata", "treat_chr19.bam",
 #'     package = "GenomicPlot")
 #' names(bamQueryFiles) <- "clip_bam"
-#' bamInputFiles <- system.file("extdata", "input_chr19.bam", 
+#' bamInputFiles <- system.file("extdata", "input_chr19.bam",
 #'                              package = "GenomicPlot")
 #' names(bamInputFiles) <- "clip_input"
-#' 
+#'
 #' bamimportParams <- setImportParams(
 #'     offset = -1, fix_width = 0, fix_point = "start", norm = TRUE,
 #'     useScore = FALSE, outRle = TRUE, useSizeFactor = FALSE, genome = "hg19"
 #' )
-#' 
+#'
 #' plot_start_end(
 #'     queryFiles = bamQueryFiles,
 #'     inputFiles = bamInputFiles,
@@ -109,9 +112,9 @@ plot_start_end <- function(queryFiles,
     stopifnot(is.numeric(c(binSize, insert, ext, hl, nc, hw, rmOutlier)))
     stopifnot(transform %in% c("log", "log2", "log10", NA))
     stopifnot(all(file.exists(queryFiles)))
-    if (is.null(names(queryFiles)) || any(names(queryFiles) == "")) 
+    if (is.null(names(queryFiles)) || any(names(queryFiles) == ""))
         stop("Each file must have a name attribute!")
-    
+
     functionName <- as.character(match.call()[[1]])
     params <- plot_named_list(as.list(environment()))
     force(params)
@@ -125,24 +128,24 @@ plot_start_end <- function(queryFiles,
 
     if (is.null(inputFiles)) {
         inputLabels <- NULL
-        queryInputs <- handle_input(inputFiles = queryFiles, importParams, 
+        queryInputs <- handle_input(inputFiles = queryFiles, importParams,
                                     verbose = verbose, nc = nc)
     } else {
         inputLabels <- names(inputFiles)
         queryLabels <- names(queryFiles)
         if (length(queryFiles) == length(inputFiles)) {
-            queryInputs <- handle_input(inputFiles = c(queryFiles, inputFiles), 
-                                        importParams, verbose = verbose, 
+            queryInputs <- handle_input(inputFiles = c(queryFiles, inputFiles),
+                                        importParams, verbose = verbose,
                                         nc = nc)
         } else if (length(inputFiles) == 1) {
-            queryInputs <- handle_input(inputFiles = c(queryFiles, inputFiles), 
-                                        importParams, verbose = verbose, 
+            queryInputs <- handle_input(inputFiles = c(queryFiles, inputFiles),
+                                        importParams, verbose = verbose,
                                         nc = nc)
-            queryInputs <- queryInputs[c(queryLabels, rep(inputLabels, 
-                                                          length(queryLabels)))] 
+            queryInputs <- queryInputs[c(queryLabels, rep(inputLabels,
+                                                          length(queryLabels)))]
             ## expand the list
 
-            inputLabels <- paste0(names(inputFiles), seq_along(queryFiles)) 
+            inputLabels <- paste0(names(inputFiles), seq_along(queryFiles))
             ## make each inputLabels unique
             names(queryInputs) <- c(queryLabels, inputLabels)
         } else {
@@ -167,7 +170,7 @@ plot_start_end <- function(queryFiles,
     for (featureName in centerFiles) {
         if (featureName %in% c("utr3", "utr5", "cds", "intron", "exon",
                                "transcript", "gene")) {
-            featureGR <- get_genomic_feature_coordinates(txdb, featureName, 
+            featureGR <- get_genomic_feature_coordinates(txdb, featureName,
                                                          longest = TRUE,
                                             protein_coding = TRUE)[["GRanges"]]
             featureGR <- featureGR[width(featureGR) > minimal_width]
@@ -175,7 +178,7 @@ plot_start_end <- function(queryFiles,
             features[[featureName]] <- feature
         } else if (file.exists(featureName)) {
             names(featureName) <- names(centerFiles)[centerFiles == featureName]
-            feature <- handle_input(featureName, bedparam, verbose = verbose, 
+            feature <- handle_input(featureName, bedparam, verbose = verbose,
                                     nc = nc)
             featureGR <- feature[[1]]$query
             featureGR <- featureGR[width(featureGR) > minimal_width]
@@ -188,7 +191,7 @@ plot_start_end <- function(queryFiles,
 
     featureNames <- names(features)
 
-    ext[2] <- ext[2] - (ext[2] - ext[1]) %% binSize 
+    ext[2] <- ext[2] - (ext[2] - ext[1]) %% binSize
     ## to avoid binSize inconsistency, as the final binSize depends on bin_num
     bin_num_s <- round((ext[2] - ext[1]) / binSize)
     ext[4] <- ext[4] - (ext[4] - ext[3]) %% binSize
@@ -207,21 +210,21 @@ plot_start_end <- function(queryFiles,
 
         fs <- promoters(resize(feature, width = 1, fix = "start"),
                         upstream = -ext[1], downstream = ext[2])
-        fe <- promoters(resize(feature, width = 1, fix = "end"), 
+        fe <- promoters(resize(feature, width = 1, fix = "end"),
                         upstream = -ext[3], downstream = ext[4])
         fc <- promoters(resize(feature, width = 1, fix = "center"),
-                        upstream = round(insert / 2), 
+                        upstream = round(insert / 2),
                         downstream = round(insert / 2))
 
         mat_list <- list()
         mat_list[["Start"]] <- list("window" = fs, s = ext[1], e = ext[2],
-                                    "xmin" = hl[1], "xmax" = hl[2], 
+                                    "xmin" = hl[1], "xmax" = hl[2],
                                     "bin_num" = bin_num_s)
-        mat_list[["Center"]] <- list("window" = fc, s = -round(insert / 2), 
-                                     e = round(insert / 2), "xmin" = 0, 
+        mat_list[["Center"]] <- list("window" = fc, s = -round(insert / 2),
+                                     e = round(insert / 2), "xmin" = 0,
                                      "xmax" = 0, "bin_num" = bin_num_c)
-        mat_list[["End"]] <- list("window" = fe, s = ext[3], e = ext[4], 
-                                  "xmin" = hl[3], "xmax" = hl[4], 
+        mat_list[["End"]] <- list("window" = fe, s = ext[3], e = ext[4],
+                                  "xmin" = hl[3], "xmax" = hl[4],
                                   "bin_num" = bin_num_e)
 
         mat_lists[[featureName]] <- mat_list
@@ -231,7 +234,7 @@ plot_start_end <- function(queryFiles,
         for (locus in names(mat_list)) {
             windowR <- mat_list[[locus]]$window
             bin_num <- mat_list[[locus]]$bin_num
-            if (verbose) message("Locus: ", locus, " ", bin_num, " ", 
+            if (verbose) message("Locus: ", locus, " ", bin_num, " ",
                                  length(windowR), "\n")
             if (bin_num <= 0) next
 
@@ -243,19 +246,19 @@ plot_start_end <- function(queryFiles,
                 bin_op <- "mean"
                 weight_col <- queryInputs[[queryLabel]]$weight
 
-                fullMatrix <- parallel_scoreMatrixBin(queryRegions, windowR, 
-                                                      bin_num, bin_op, 
+                fullMatrix <- parallel_scoreMatrixBin(queryRegions, windowR,
+                                                      bin_num, bin_op,
                                                       weight_col, stranded,
                                                       nc = nc)
                 if (is.null(inputFiles)) {
-                    fullMatrix <- process_scoreMatrix(fullMatrix, scale, 
+                    fullMatrix <- process_scoreMatrix(fullMatrix, scale,
                                                       rmOutlier,
-                                                      transform = transform, 
+                                                      transform = transform,
                                                       verbose = verbose)
                 } else {
                     fullMatrix <- process_scoreMatrix(fullMatrix, scale = FALSE,
                                                       rmOutlier = rmOutlier,
-                                                      transform = NA, 
+                                                      transform = NA,
                                                       verbose = verbose)
                 }
 
@@ -289,14 +292,14 @@ plot_start_end <- function(queryFiles,
                 Xmin <- rep(xmin, ncol(fullMatrix))
                 Xmax <- rep(xmax, ncol(fullMatrix))
                 halfmin <- min(fullMatrix)
-                intervals <- apply(fullMatrix, 2, function(x) 
+                intervals <- apply(fullMatrix, 2, function(x)
                     length(x[x > halfmin]))
 
                 sub_df <- NULL
                 sub_df <- data.frame("Intensity" = colm, "sd" = colsd,
                                      "se" = colse, "Interval" = intervals,
                                      "Position" = collabel, "Query" = querybed,
-                                     "Location" = location, 
+                                     "Location" = location,
                                      "Feature" = featurename)
                 if (smooth) {
                     sub_df$Intensity <- as.vector(smooth.spline(
@@ -306,7 +309,7 @@ plot_start_end <- function(queryFiles,
                     sub_df$Interval <- as.vector(smooth.spline(
                         sub_df$Interval, df = as.integer(bin_num / 5))$y)
                 }
-                sub_df <- mutate(sub_df, lower = Intensity - se, 
+                sub_df <- mutate(sub_df, lower = Intensity - se,
                                  upper = Intensity + se)
 
                 plot_df <- rbind(plot_df, sub_df)
@@ -314,15 +317,15 @@ plot_start_end <- function(queryFiles,
         }
     }
 
-    Ylab <- ifelse(!is.na(transform) && is.null(inputFiles), 
+    Ylab <- ifelse(!is.na(transform) && is.null(inputFiles),
                    paste0(transform, " (", Ylab, ")"), Ylab)
     ## plot multi feature lines for one query
     for (query in unique(plot_df$Query)) {
         qplot_df <- plot_df %>%
             filter(Query == query)
 
-        plots <- draw_stacked_profile(plot_df = qplot_df, cn = "Feature", 
-                                      ext = ext, hl = hl, atitle = query, 
+        plots <- draw_stacked_profile(plot_df = qplot_df, cn = "Feature",
+                                      ext = ext, hl = hl, atitle = query,
                                       insert = insert, Ylab = Ylab,
                                       shade = shade)
 
@@ -333,9 +336,9 @@ plot_start_end <- function(queryFiles,
         fplot_df <- plot_df %>%
             filter(Feature == feature)
 
-        plots <- draw_stacked_profile(plot_df = fplot_df, cn = "Query", 
+        plots <- draw_stacked_profile(plot_df = fplot_df, cn = "Query",
                                       ext = ext, hl = hl, atitle = feature,
-                                      insert = insert, Ylab = Ylab, 
+                                      insert = insert, Ylab = Ylab,
                                       shade = shade)
 
         print(plots)
@@ -343,7 +346,7 @@ plot_start_end <- function(queryFiles,
 
     ## compute and plot ratio over input
     if (!is.null(inputFiles)) {
-        Ylab <- ifelse(is.na(transform), "Ratio-over-Input", 
+        Ylab <- ifelse(is.na(transform), "Ratio-over-Input",
                        paste0(transform, " (Ratio-over-Input)"))
 
         plot_df <- NULL
@@ -367,9 +370,9 @@ plot_start_end <- function(queryFiles,
                     minrow <- min(nrow(rm), nrow(im))
 
                     fullMatrix <- ratio_over_input(rm[seq_len(minrow), ],
-                                                   im[seq_len(minrow), ], 
+                                                   im[seq_len(minrow), ],
                                                    verbose)
-                    fullMatrix <- process_scoreMatrix(fullMatrix, scale, 
+                    fullMatrix <- process_scoreMatrix(fullMatrix, scale,
                                                       rmOutlier, transform,
                                                       verbose = verbose)
 
@@ -400,25 +403,25 @@ plot_start_end <- function(queryFiles,
                     levels(location) <- rev(levels(location))
                     halfmin <- min(fullMatrix)
 
-                    intervals <- apply(fullMatrix, 2, function(x) 
+                    intervals <- apply(fullMatrix, 2, function(x)
                         length(x[x > halfmin]))
 
                     sub_df <- NULL
                     sub_df <- data.frame("Intensity" = colm, "sd" = colsd,
-                                         "se" = colse, "Interval" = intervals, 
-                                         "Position" = collabel, 
-                                         "Query" = ratiobed, 
+                                         "se" = colse, "Interval" = intervals,
+                                         "Position" = collabel,
+                                         "Query" = ratiobed,
                                          "Location" = location,
                                          "Feature" = featurename)
                     if (smooth) {
                         sub_df$Intensity <- as.vector(smooth.spline(
                             sub_df$Intensity, df = as.integer(bin_num / 5))$y)
-                        sub_df$se <- as.vector(smooth.spline(sub_df$se, 
+                        sub_df$se <- as.vector(smooth.spline(sub_df$se,
                                                 df = as.integer(bin_num / 5))$y)
                         sub_df$Interval <- as.vector(smooth.spline(
                             sub_df$Interval, df = as.integer(bin_num / 5))$y)
                     }
-                    sub_df <- mutate(sub_df, lower = Intensity - se, 
+                    sub_df <- mutate(sub_df, lower = Intensity - se,
                                      upper = Intensity + se)
                     plot_df <- rbind(plot_df, sub_df)
                 }
@@ -431,7 +434,7 @@ plot_start_end <- function(queryFiles,
                 filter(Query == query)
 
             plots <- draw_stacked_profile(plot_df = qplot_df, cn = "Feature",
-                                          ext = ext, hl = hl, atitle = query, 
+                                          ext = ext, hl = hl, atitle = query,
                                           insert = insert, Ylab = Ylab,
                                           shade = shade)
 
@@ -443,8 +446,8 @@ plot_start_end <- function(queryFiles,
                 filter(Feature == feature)
 
             plots <- draw_stacked_profile(plot_df = fplot_df, cn = "Query",
-                                          ext = ext, hl = hl, atitle = feature, 
-                                          insert = insert, Ylab = Ylab, 
+                                          ext = ext, hl = hl, atitle = feature,
+                                          insert = insert, Ylab = Ylab,
                                           shade = shade)
 
             print(plots)

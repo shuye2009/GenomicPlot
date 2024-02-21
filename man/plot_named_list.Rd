@@ -7,24 +7,27 @@
 plot_named_list(params)
 }
 \arguments{
-\item{params}{a list produced by as.list(environment()), with names being the 
+\item{params}{a list produced by as.list(environment()), with names being the
 arguments and values being the runtime values when the function is called.}
 }
 \value{
 a ggplot object
 }
 \description{
-This is a helper function for displaying function arguments for 
-a plotting function. If the runtime value of the argument is a small object, 
-its values is displayed, otherwise, only the name of the value of the 
+This is a helper function for displaying function arguments for
+a plotting function. If the runtime value of the argument is a small object,
+its values is displayed, otherwise, only the name of the value of the
 argument is displayed.
 }
 \examples{
 
 data(gf5_genomic)
 
-txdb <- AnnotationDbi::loadDb(system.file("extdata", "txdb.sql", 
-    package = "GenomicPlot"))
+gtfFile <- system.file("extdata", "gencode.v19.annotation_chr19.gtf",
+    package = "GenomicPlot"
+)
+
+txdb <- custom_TxDb_from_GTF(gtfFile, genome = "hg19")
 
 queryfiles <- system.file("extdata", "treat_chr19.bam",
     package = "GenomicPlot"

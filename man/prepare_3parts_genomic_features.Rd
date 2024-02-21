@@ -19,10 +19,10 @@ prepare_3parts_genomic_features(
 \arguments{
 \item{txdb}{a TxDb object defined in the GenomicFeatures package}
 
-\item{featureName}{one of the gene feature in c("utr3", "utr5", "cds", 
+\item{featureName}{one of the gene feature in c("utr3", "utr5", "cds",
 "transcript")}
 
-\item{meta}{logical, indicating whether a metagene (intron excluded) or 
+\item{meta}{logical, indicating whether a metagene (intron excluded) or
 genomic (intron included) plot should be produced}
 
 \item{nbins}{an integer defines the total number of bins}
@@ -31,26 +31,29 @@ genomic (intron included) plot should be produced}
 
 \item{threeP}{extension out of the 3' boundary of gene}
 
-\item{longest}{logical, indicating whether the output should be limited to 
+\item{longest}{logical, indicating whether the output should be limited to
 the longest transcript of each gene}
 
-\item{protein_coding}{logical, indicating whether to limit to protein_coding 
+\item{protein_coding}{logical, indicating whether to limit to protein_coding
 genes}
 
 \item{verbose}{logical, whether to output additional information}
 }
 \value{
-a named list with the elements c("windowRs", "nbins", "scaled_bins", 
+a named list with the elements c("windowRs", "nbins", "scaled_bins",
  "fiveP", "threeP", "meta", "longest")
 }
 \description{
-This is a helper function for 'plot_3parts_metagene', used to 
-speed up plotting of multiple data sets with the same configuration. Use 
+This is a helper function for 'plot_3parts_metagene', used to
+speed up plotting of multiple data sets with the same configuration. Use
 featureName='transcript' and meta=FALSE and longest=TRUE for genes.
 }
 \examples{
-txdb <- AnnotationDbi::loadDb(system.file("extdata", "txdb.sql", 
-    package = "GenomicPlot"))
+gtfFile <- system.file("extdata", "gencode.v19.annotation_chr19.gtf",
+    package = "GenomicPlot"
+)
+
+txdb <- custom_TxDb_from_GTF(gtfFile, genome = "hg19")
 
 gf <- prepare_3parts_genomic_features(txdb,
     meta = FALSE, nbins = 100, fiveP = -1000, threeP = 1000,

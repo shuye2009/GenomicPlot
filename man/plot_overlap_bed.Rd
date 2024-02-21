@@ -21,13 +21,13 @@ plot_overlap_bed(
 
 \item{importParams}{a list of parameters for \code{handle_input}}
 
-\item{pairOnly}{logical, indicating whether only pair-wise overlap is 
+\item{pairOnly}{logical, indicating whether only pair-wise overlap is
 desirable}
 
-\item{stranded}{logical, indicating whether the feature is stranded. For 
+\item{stranded}{logical, indicating whether the feature is stranded. For
 nonstranded feature, only "*" is accepted as strand}
 
-\item{hw}{a vector of two elements specifying the height and width of the 
+\item{hw}{a vector of two elements specifying the height and width of the
 output figures}
 
 \item{verbose}{logical, indicating whether to output additional information}
@@ -36,7 +36,7 @@ output figures}
 a ggplot object
 }
 \description{
-This function takes a list of up to 4 bed file names, and 
+This function takes a list of up to 4 bed file names, and
 produce a Venn diagram
 }
 \examples{

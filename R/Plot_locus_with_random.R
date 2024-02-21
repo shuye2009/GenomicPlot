@@ -1,77 +1,80 @@
 #' @title Plot signal around custom genomic loci and random loci for comparison
 #
-#' @description Plot reads or peak Coverage/base/gene of samples given in the 
-#' query files around reference locus defined in the centerFiles. The upstream 
-#' and downstream windows flanking loci can be given separately, a smaller 
-#' window can be defined to allow statistical comparisons between reference and 
-#' random loci. The loci are further divided into sub-groups that are 
-#' overlapping with c("5'UTR", "CDS", "3'UTR"), "unrestricted" means all loci 
+#' @description Plot reads or peak Coverage/base/gene of samples given in the
+#' query files around reference locus defined in the centerFiles. The upstream
+#' and downstream windows flanking loci can be given separately, a smaller
+#' window can be defined to allow statistical comparisons between reference and
+#' random loci. The loci are further divided into sub-groups that are
+#' overlapping with c("5'UTR", "CDS", "3'UTR"), "unrestricted" means all loci
 #' regardless of overlapping.
 #'
-#' @param queryFiles a vector of sample file names. The file should be in .bam, 
+#' @param queryFiles a vector of sample file names. The file should be in .bam,
 #'  .bed, .wig or .bw format, mixture of formats is allowed
-#' @param centerFiles a vector of reference file names. The file should be .bed 
+#' @param centerFiles a vector of reference file names. The file should be .bed
 #'  format only
-#' @param inputFiles a vector of input sample file names. The file should be in 
+#' @param inputFiles a vector of input sample file names. The file should be in
 #'  .bam, .bed, .wig or .bw format, mixture of formats is allowed
 #' @param txdb a TxDb object defined in the `GenomicFeatures` package
 #' @param importParams a list of parameters for \code{\link{handle_input}}
-#' @param ext a vector of two integers defining upstream and downstream 
+#' @param ext a vector of two integers defining upstream and downstream
 #'  boundaries of the plot window, flanking the reference locus
-#' @param hl a vector of two integers defining upstream and downstream 
+#' @param hl a vector of two integers defining upstream and downstream
 #'  boundaries of the highlight window, flanking the reference locus
-#' @param stranded logical, indicating whether the strand of the feature should 
+#' @param stranded logical, indicating whether the strand of the feature should
 #'  be considered
-#' @param scale logical, indicating whether the score matrix should be scaled to 
+#' @param scale logical, indicating whether the score matrix should be scaled to
 #'  the range 0:1, so that samples with different baseline can be compared
-#' @param smooth logical, indicating whether the line should smoothed with a 
+#' @param smooth logical, indicating whether the line should smoothed with a
 #'  spline smoothing algorithm
-#' @param rmOutlier a numeric value serving as a multiplier of the MAD in Hampel 
-#'  filter for outliers identification, 0 indicating not removing outliers. 
+#' @param rmOutlier a numeric value serving as a multiplier of the MAD in Hampel
+#'  filter for outliers identification, 0 indicating not removing outliers.
 #'  For Gaussian distribution, use 3, adjust based on data distribution
-#' @param outPrefix a string specifying output file prefix for plots 
+#' @param outPrefix a string specifying output file prefix for plots
 #' (outPrefix.pdf)
 #' @param refPoint a string in c("start", "center", "end")
 #' @param Xlab a string denotes the label on x-axis
 #' @param Ylab a string for y-axis label
-#' @param shade logical indicating whether to place a shaded rectangle around 
+#' @param shade logical indicating whether to place a shaded rectangle around
 #'  the point of interest
 #' @param binSize an integer defines bin size for intensity calculation
 #' @param transform a string in c("log", "log2", "log10"), default = NA i
 #'  ndicating no transformation of data matrix
-#' @param n_random an integer denotes the number of randomization should be 
+#' @param n_random an integer denotes the number of randomization should be
 #'  performed
-#' @param statsMethod a string in c("wilcox.test", "t.test"), for pair-wise 
+#' @param statsMethod a string in c("wilcox.test", "t.test"), for pair-wise
 #'  groups comparisons
-#' @param verbose logical, indicating whether to output additional information 
+#' @param verbose logical, indicating whether to output additional information
 #'  (data used for plotting or statistical test results)
-#' @param hw a vector of two elements specifying the height and width of the 
+#' @param hw a vector of two elements specifying the height and width of the
 #'  output figures
-#' @param nc integer, number of cores for parallel processing 
+#' @param nc integer, number of cores for parallel processing
 #' @param detailed logical, indicating whether to plot each parts of gene.
 #'
 #' @return a dataframe containing the data used for plotting
 #' @author Shuye Pu
-#' 
+#'
 #' @examples
 #'
-#' txdb <- AnnotationDbi::loadDb(system.file("extdata", "txdb.sql", 
-#'   package = "GenomicPlot"))
+#' gtfFile <- system.file("extdata", "gencode.v19.annotation_chr19.gtf",
+#'     package = "GenomicPlot"
+#' )
+#'
+#' txdb <- custom_TxDb_from_GTF(gtfFile, genome = "hg19")
 #' bedQueryFiles <- c(
-#' system.file("extdata", "test_chip_peak_chr19.narrowPeak", 
+#' system.file("extdata", "test_chip_peak_chr19.narrowPeak",
 #'             package = "GenomicPlot"),
 #' system.file("extdata", "test_chip_peak_chr19.bed", package = "GenomicPlot"),
 #' system.file("extdata", "test_clip_peak_chr19.bed", package = "GenomicPlot")
 #' )
 #' names(bedQueryFiles) <- c("NarrowPeak", "SummitPeak", "iCLIPPeak")
-#' 
-#' bamQueryFiles <- system.file("extdata", "treat_chr19.bam", 
+#'
+#' bamQueryFiles <- system.file("extdata", "treat_chr19.bam",
 #'                              package = "GenomicPlot")
 #' names(bamQueryFiles) <- "clip_bam"
-#' bamInputFiles <- system.file("extdata", "input_chr19.bam", 
+#' bamInputFiles <- system.file("extdata", "input_chr19.bam",
 #'                              package = "GenomicPlot")
 #' names(bamInputFiles) <- "clip_input"
-#' 
+#'
 #' bamImportParams <- setImportParams(
 #'   offset = -1, fix_width = 0, fix_point = "start", norm = TRUE,
 #'   useScore = FALSE, outRle = TRUE, useSizeFactor = FALSE, genome = "hg19"
@@ -101,7 +104,7 @@
 #'     detailed = FALSE,
 #'     statsMethod = "wilcox.test",
 #'     nc = 2)
-#' 
+#'
 #' @export plot_locus_with_random
 
 plot_locus_with_random <- function(queryFiles,
@@ -131,9 +134,9 @@ plot_locus_with_random <- function(queryFiles,
     stopifnot(is.numeric(c(ext, hl, binSize, nc, hw, rmOutlier)))
     stopifnot(transform %in% c("log", "log2", "log10", NA))
     stopifnot(all(file.exists(queryFiles)))
-    if (is.null(names(queryFiles)) || any(names(queryFiles) == "")) 
+    if (is.null(names(queryFiles)) || any(names(queryFiles) == ""))
         stop("Each file must have a name attribute!")
-    
+
     functionName <- as.character(match.call()[[1]])
     params <- plot_named_list(as.list(environment()))
     force(params)
@@ -147,7 +150,7 @@ plot_locus_with_random <- function(queryFiles,
 
     if (is.null(inputFiles)) {
         inputLabels <- NULL
-        queryInputs <- handle_input(inputFiles = queryFiles, importParams, 
+        queryInputs <- handle_input(inputFiles = queryFiles, importParams,
                                     verbose = verbose, nc = nc)
     } else {
         inputLabels <- names(inputFiles)
@@ -158,10 +161,10 @@ plot_locus_with_random <- function(queryFiles,
                 verbose = verbose, nc = nc)
         } else if (length(inputFiles) == 1) {
             queryInputs <- handle_input(
-                inputFiles = c(queryFiles, inputFiles), importParams, 
+                inputFiles = c(queryFiles, inputFiles), importParams,
                 verbose = verbose, nc = nc)
-            queryInputs <- queryInputs[c(queryLabels, 
-                                         rep(inputLabels, length(queryLabels)))] 
+            queryInputs <- queryInputs[c(queryLabels,
+                                         rep(inputLabels, length(queryLabels)))]
 
             inputLabels <- paste0(names(inputFiles), seq_along(queryFiles))
             names(queryInputs) <- c(queryLabels, inputLabels)
@@ -173,7 +176,7 @@ plot_locus_with_random <- function(queryFiles,
     queryLabels <- names(queryInputs)
 
     ## to avoid binSize inconsistency, as the final binSize depends bin_num
-    ext[2] <- ext[2] - (ext[2] - ext[1]) %% binSize 
+    ext[2] <- ext[2] - (ext[2] - ext[1]) %% binSize
     colLabel <- seq(ext[1], (ext[2] - binSize), binSize)
     bin_num <- round((ext[2] - ext[1]) / binSize)
     bin_op <- "mean"
@@ -183,9 +186,9 @@ plot_locus_with_random <- function(queryFiles,
     rn <- hl[2] # narrow
 
     if (detailed) {
-        
+
         ## get protein-coding genes features
-        
+
         if (verbose) message("Collecting protein_coding gene features...\n")
         exons <- get_genomic_feature_coordinates(txdb, "exon", longest = TRUE)
         utr5 <- get_genomic_feature_coordinates(txdb, "utr5", longest = TRUE)
@@ -205,7 +208,7 @@ plot_locus_with_random <- function(queryFiles,
     }
 
     if (verbose) {
-        message("Region length: ", 
+        message("Region length: ",
                 paste(lapply(region_list, length), collapse = " "), "\n")
         message("Computing coverage for Sample...\n")
     }
@@ -236,7 +239,7 @@ plot_locus_with_random <- function(queryFiles,
         }
 
         for (centerLabel in centerLabels) {
-            
+
             centerInput <- centerInputs[[centerLabel]]
             centerSize <- centerInput$size
             windowRegionsALL <- centerInput$query
@@ -267,11 +270,11 @@ plot_locus_with_random <- function(queryFiles,
                 windowRs <- resize(windowRegions, width = 1, fix = refPoint)
                 windowRs <- promoters(windowRs, upstream = -ext[1],
                                       downstream = ext[2])
-                windowRs <- as(split(windowRs, f = factor(seq_along(windowRs))), 
+                windowRs <- as(split(windowRs, f = factor(seq_along(windowRs))),
                                "GRangesList")
 
                 fullMatrix <- parallel_scoreMatrixBin(
-                    queryRegions, windowRs, bin_num, bin_op, weight_col, 
+                    queryRegions, windowRs, bin_num, bin_op, weight_col,
                     stranded, nc = nc)
                 if (is.null(inputFiles)) {
                     fullMatrix <- process_scoreMatrix(
@@ -283,7 +286,7 @@ plot_locus_with_random <- function(queryFiles,
                         transform = NA, verbose = verbose)
                 }
 
-                sml[[queryLabel]][[centerLabel]][[regionName]] <- 
+                sml[[queryLabel]][[centerLabel]][[regionName]] <-
                     fullMatrix
 
                 ## create randomized centers, repeat n_random times
@@ -298,8 +301,8 @@ plot_locus_with_random <- function(queryFiles,
                     windowR <- resize(rwindowRegions, width = 1, fix = refPoint)
                     windowR <- promoters(
                         windowR, upstream = -ext[1], downstream = ext[2])
-                    windowR <- as(split(windowR, 
-                                        f = factor(seq_along(windowR))), 
+                    windowR <- as(split(windowR,
+                                        f = factor(seq_along(windowR))),
                                   "GRangesList")
                     windowRs[[i]] <- windowR
                 }
@@ -307,7 +310,7 @@ plot_locus_with_random <- function(queryFiles,
                 random_matricies <- list()
                 for (i in seq_along(windowRs)) {
                     if (verbose) message("Computing for random centers ... ", i)
-                    mat <- parallel_scoreMatrixBin(queryRegions, windowRs[[i]], 
+                    mat <- parallel_scoreMatrixBin(queryRegions, windowRs[[i]],
                                                    bin_num, bin_op, weight_col,
                                                    stranded, nc = nc)
                     random_matricies[[i]] <- mat
@@ -321,14 +324,14 @@ plot_locus_with_random <- function(queryFiles,
                     x[seq_len(minrows), ])
 
                 ## turn the list of matrices into a 3-d array
-                a3d <- array(unlist(random_matricies), 
-                             c(dim(random_matricies[[1]]), 
-                               length(random_matricies))) 
+                a3d <- array(unlist(random_matricies),
+                             c(dim(random_matricies[[1]]),
+                               length(random_matricies)))
                 ## take average of all matrices
-                fullMatrix <- apply(a3d, seq_len(2), mean) 
+                fullMatrix <- apply(a3d, seq_len(2), mean)
 
                 fullMatrix <- process_scoreMatrix(
-                    fullMatrix, scale = scale, rmOutlier = rmOutlier, 
+                    fullMatrix, scale = scale, rmOutlier = rmOutlier,
                     transform = transform, verbose = verbose)
 
                 smlr[[queryLabel]][[centerLabel]][[regionName]] <- fullMatrix
@@ -372,7 +375,7 @@ plot_locus_with_random <- function(queryFiles,
 
                     sub_df <- data.frame(colm, colsd, colse, collabel,
                                          querybed, refbed)
-                    colnames(sub_df) <- c("Intensity", "sd", "se", "Position", 
+                    colnames(sub_df) <- c("Intensity", "sd", "se", "Position",
                                           "Query", "Reference")
 
                     if (smooth) {
@@ -380,11 +383,11 @@ plot_locus_with_random <- function(queryFiles,
                             smooth.spline(sub_df$Intensity,
                                           df = as.integer(bin_num / 5))$y)
                         sub_df$se <- as.vector(
-                            smooth.spline(sub_df$se, 
+                            smooth.spline(sub_df$se,
                                           df = as.integer(bin_num / 5))$y)
                     }
 
-                    sub_df <- mutate(sub_df, lower = Intensity - se, 
+                    sub_df <- mutate(sub_df, lower = Intensity - se,
                                      upper = Intensity + se)
                     plot_df <- rbind(plot_df, sub_df)
 
@@ -498,7 +501,7 @@ plot_locus_with_random <- function(queryFiles,
                     refsize <- nrow(fullMatrix_list[[centerLabel]])
 
                     for (alabel in c(centerLabel, "Random")) {
-                        
+
                         fullMatrix <- fullMatrix_list[[alabel]]
 
                         colm <- apply(fullMatrix, 2, mean)
@@ -508,9 +511,9 @@ plot_locus_with_random <- function(queryFiles,
                         querybed <- as.factor(rep(queryLabel, length(colm)))
                         refbed <- as.factor(rep(alabel, length(colm)))
 
-                        sub_df <- data.frame(colm, colsd, colse, collabel, 
+                        sub_df <- data.frame(colm, colsd, colse, collabel,
                                              querybed, refbed)
-                        colnames(sub_df) <- c("Intensity", "sd", "se", 
+                        colnames(sub_df) <- c("Intensity", "sd", "se",
                                               "Position", "Query", "Reference")
 
                         if (smooth) {
@@ -518,7 +521,7 @@ plot_locus_with_random <- function(queryFiles,
                                 smooth.spline(sub_df$Intensity,
                                               df = as.integer(bin_num / 5))$y)
                             sub_df$se <- as.vector(
-                                smooth.spline(sub_df$se, 
+                                smooth.spline(sub_df$se,
                                               df = as.integer(bin_num / 5))$y)
                         }
 
@@ -533,9 +536,9 @@ plot_locus_with_random <- function(queryFiles,
                             submatrix <- (fullMatrix[, xmin:xmax])
                             submatrix[is.na(submatrix)] <- 0
                             Intensity <- as.numeric(rowMeans(submatrix))
-                            Query <- as.factor(rep(queryLabel, 
+                            Query <- as.factor(rep(queryLabel,
                                                    length(Intensity)))
-                            Reference <- as.factor(rep(alabel, 
+                            Reference <- as.factor(rep(alabel,
                                                        length(Intensity)))
                             subdf <- data.frame(Intensity, Query, Reference)
 
@@ -543,21 +546,21 @@ plot_locus_with_random <- function(queryFiles,
                         }
                     }
 
-                    plot_df <- plot_df %>% 
+                    plot_df <- plot_df %>%
                         mutate(Query = factor(
                             Query, levels = sort(unique(Query)))) %>%
                         mutate(Reference = factor(
                             Reference, levels = sort(unique(Reference))))
 
                     p <- draw_locus_profile(
-                        plot_df, cn = "Reference", sn = "Query", Xlab = Xlab, 
+                        plot_df, cn = "Reference", sn = "Query", Xlab = Xlab,
                         Ylab = Ylab, shade = shade, hl = hl) +
-                        ggtitle(paste("Feature:", regionName, 
+                        ggtitle(paste("Feature:", regionName,
                                       "\nReference size:", refsize,
                                       "\nSample name:", ratiolabel))
 
                     if (hl[2] > hl[1]) {
-                        stat_df <- stat_df %>% 
+                        stat_df <- stat_df %>%
                             mutate(Query = factor(
                                 Query, levels = sort(unique(Query)))) %>%
                             mutate(Reference = factor(
@@ -565,8 +568,8 @@ plot_locus_with_random <- function(queryFiles,
                         comp <- list(c(1, 2))
 
                         combo <- draw_combo_plot(
-                            stat_df = stat_df, xc = "Reference", 
-                            yc = "Intensity", comp = comp, 
+                            stat_df = stat_df, xc = "Reference",
+                            yc = "Intensity", comp = comp,
                             stats = statsMethod, Ylab = Ylab)
 
                         print(p)
