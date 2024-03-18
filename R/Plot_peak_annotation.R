@@ -93,7 +93,7 @@ plot_peak_annotation <- function(peakFile,
     gff <- gff[as.vector(seqnames(gff)) %in% seqlevels(chromInfo)]
     seqlevels(gff) <- seqlevels(chromInfo)
     seqinfo(gff) <- chromInfo
-    txdb <- GenomicFeatures::makeTxDbFromGRanges(gff)
+    txdb <- txdbmaker::makeTxDbFromGRanges(gff)
 
     if (simple) {
         ## the 5'UTR and 3'UTR are not annotted
