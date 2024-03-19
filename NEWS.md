@@ -1,4 +1,4 @@
-# CHANGES IN VERSION 1.1.7
+# CHANGES IN VERSION 1.1.6
    - Merged a pull request from Hervé Pagès <notifications@github.com>
 
 # CHANGES IN VERSION 1.1.5
