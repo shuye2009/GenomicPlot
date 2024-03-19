@@ -1,14 +1,23 @@
+# CHANGES IN VERSION 1.1.7
+   - Merged a pull request from Hervé Pagès <notifications@github.com>
+
 # CHANGES IN VERSION 1.1.5
    - Added a function to obtain chromosome info from cached data in the 'circlize' 
    package to produce a Seqinfo object, which is applied to all GRanges and TxDB 
    object
    - Added another function to generate a customized TxDb object from a genome
    annotation (GTF or GFF) file.
+   
 # CHANGES IN VERSION 1.1.4
+
    Change chromosome size information source from UCSC web service to cached data in the 'circlize' package, to avoid internet connection issues and web service issues.
+   
 # CHANGES IN VERSION 1.1.3
+
    Increase font size for axis labels, align profile with heatmap
+   
 # CHANGES IN VERSION 1.1.1
+
    Removed some suggests in DESCRIPTION to reduce installation time and size
 ## BUG FIXES
    Fixed misalignment between profiles and heatmaps
