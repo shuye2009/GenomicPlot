@@ -35,7 +35,8 @@ utils::globalVariables(
 #' @importFrom GenomicRanges mcols<- makeGRangesFromDataFrame
 #' @importFrom GenomicFeatures transcriptLengths exonsBy intronsByTranscript 
 #' @importFrom GenomicFeatures threeUTRsByTranscript fiveUTRsByTranscript
-#' @importFrom GenomicFeatures cdsBy genes transcripts makeTxDbFromGRanges
+#' @importFrom GenomicFeatures cdsBy genes transcripts
+#' @importFrom txdbmaker makeTxDbFromGRanges
 #' @importFrom ComplexHeatmap HeatmapAnnotation Heatmap draw pheatmap
 #' @importFrom circlize colorRamp2 read.chromInfo
 #' @importFrom viridis viridis scale_fill_viridis

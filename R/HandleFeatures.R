@@ -143,7 +143,7 @@ custom_TxDb_from_GTF <- function(gtfFile, genome = "hg19") {
     gff <- gff[as.vector(seqnames(gff)) %in% seqlevels(chromInfo)]
     seqlevels(gff) <- seqlevels(chromInfo)
     seqinfo(gff) <- chromInfo
-    txdb <- GenomicFeatures::makeTxDbFromGRanges(gff)
+    txdb <- txdbmaker::makeTxDbFromGRanges(gff)
 
     return(txdb)
 }
@@ -894,10 +894,11 @@ make_subTxDb_from_GTF <- function(gtfFile,
     message("In make_subTxDb_from_GTF, number of gene symbols failed to map: ",
             maploss, "\n")
 
-    TxDb <- makeTxDbFromGRanges(subgff, metadata = data.frame(name = "genome",
-                                                              value = genome))
+    txdb <- txdbmaker::makeTxDbFromGRanges(subgff,
+                                   metadata = data.frame(name = "genome",
+                                                         value = genome))
 
-    return(TxDb)
+    return(txdb)
 }
 
 #' @title Translate gene names to transcript ids using a GTF file for a subset
