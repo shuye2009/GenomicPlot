@@ -13,7 +13,9 @@ setImportParams(
   outRle = TRUE,
   useSizeFactor = FALSE,
   saveRds = FALSE,
-  genome = "hg19"
+  genome = "hg19",
+  val = 4,
+  skip = 0
 )
 }
 \arguments{
@@ -45,6 +47,12 @@ edgeR package, only applicable to ChIPseq data.}
 be saved for fast reloading}
 
 \item{genome}{a string denoting the genome name and version.}
+
+\item{val}{integer, indicating the column that will be used as score/value.
+default 4 for bedGraph.}
+
+\item{skip}{integer, indicating how many rows will be skipped before reading
+in data, default 0.}
 }
 \value{
 a list of nine elements

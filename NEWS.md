@@ -1,4 +1,7 @@
 # CHANGES IN VERSION 1.0.5
+   - Added a function to handle bedGraph format files as input data
+   
+# CHANGES IN VERSION 1.0.5
    - Added a function to obtain chromosome info from cached data in the 'circlize' 
    package to produce a Seqinfo object, which is applied to all GRanges and TxDB 
    object

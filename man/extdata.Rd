@@ -17,6 +17,7 @@
 \alias{test_clip_peak_chr19.bed}
 \alias{test_chip_peak_chr19.bed}
 \alias{test_chip_peak_chr19.narrowPeak}
+\alias{test_chr19.bedGraph}
 \title{Toy data for examples and testing of the `GenomicPlot` package}
 \source{
 The original gene annotation (gtf) file is downloaded from
@@ -52,7 +53,8 @@ are as follows.
      format.
  \item "test_chip_peak_chr19.bed" and "test_chip_peak_chr19.narrowPeak"
      contain ChIPseq peaks generated with MACS2, in summit peak and narrow
-     peak format, respectively.
+     peak format, respectively. "test_chr19.bedGraph" contains the same data
+     in bedGraph format.
  \item "test_file1.txt", "test_file2.txt", "test_file3.txt" and
      "test_file4.txt" are tab-delimited text files,  each contains various
      human gene names in different columns.

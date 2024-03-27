@@ -1,7 +1,7 @@
 Package: GenomicPlot
 Type: Package
 Title: Plot profiles of next generation sequencing data in genomic features
-Version: 1.0.5
+Version: 1.0.6
 Authors@R: person("Shuye", "Pu", email = "shuye2009@gmail.com", role = c("aut", "cre"), 
    comment = c(ORCID = "0000-0002-6664-8438"))
 Description: Visualization of next generation sequencing (NGS) data is essential 
@@ -33,7 +33,7 @@ Imports: methods, Rsamtools, parallel, tidyr, rtracklayer (>= 1.54.0),
 Suggests: knitr, rmarkdown, R.utils, Biobase, BiocStyle, testthat, AnnotationDbi
 biocViews: AlternativeSplicing, ChIPSeq, Coverage, GeneExpression, RNASeq, Sequencing, 
    Software, Transcription, Visualization, Annotation
-RoxygenNote: 7.2.3
+RoxygenNote: 7.3.1
 VignetteBuilder: knitr
 BugReports: https://github.com/shuye2009/GenomicPlot/issues
 URL: https://github.com/shuye2009/GenomicPlot

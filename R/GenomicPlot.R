@@ -42,7 +42,7 @@
 #'
 #' @author Shuye Pu
 #'
-#' @docType package
+#' _PACKAGE
 #' @name GenomicPlot
 NULL
 

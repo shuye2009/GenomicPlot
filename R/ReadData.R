@@ -495,7 +495,7 @@ handle_bed <- function(inputFile,
 #'
 #' importParams <- setImportParams(
 #'     offset = 0, fix_width = 0, fix_point = "start", norm = FALSE,
-#'     useScore = TRUE, outRle = FLASE, useSizeFactor = FALSE, genome = "hg19",
+#'     useScore = TRUE, outRle = FALSE, useSizeFactor = FALSE, genome = "hg19",
 #'     val = 4, skip = 1
 #' )
 #'
