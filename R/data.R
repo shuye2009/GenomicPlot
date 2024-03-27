@@ -1,4 +1,3 @@
-
 #'
 #' @title Toy data for examples and testing of the `GenomicPlot` package
 #' @description The data files in the extdata directory contain data for next
@@ -24,7 +23,8 @@
 #'      format.
 #'  \item "test_chip_peak_chr19.bed" and "test_chip_peak_chr19.narrowPeak"
 #'      contain ChIPseq peaks generated with MACS2, in summit peak and narrow
-#'      peak format, respectively.
+#'      peak format, respectively. "test_chr19.bedGraph" contains the same data
+#'      in bedGraph format.
 #'  \item "test_file1.txt", "test_file2.txt", "test_file3.txt" and
 #'      "test_file4.txt" are tab-delimited text files,  each contains various
 #'      human gene names in different columns.
@@ -38,13 +38,14 @@
 #'     gencode.v19.annotation_chr19.gtf chip_treat_chr19.bam treat_chr19.bam
 #'     chip_input_chr19.bam input_chr19.bam test_wig_chr19_+.wig
 #'     test_wig_chr19_+.bw test_clip_peak_chr19.bed test_chip_peak_chr19.bed
-#'     test_chip_peak_chr19.narrowPeak
+#'     test_chip_peak_chr19.narrowPeak test_chr19.bedGraph
 #' @author Shuye Pu
 #' @docType data
 #' @name extdata
 #' @keywords datasets
 #'
 NULL
+
 
 #'
 #' @title Toy data for examples and testing of the `GenomicPlot` package
