@@ -23,7 +23,10 @@
 #'  edgeR package, only applicable to ChIPseq data.
 #' @param saveRds logical, indicating whether the results of handle_input should
 #'  be saved for fast reloading
-#'
+#' @param val integer, indicating the column that will be used as score/value.
+#' default 4 for bedGraph.
+#' @param skip integer, indicating how many rows will be skipped before reading
+#' in data, default 0.
 #' @return a list of nine elements
 #'
 #' @author Shuye Pu
@@ -43,7 +46,9 @@ setImportParams <- function(
     outRle = TRUE,
     useSizeFactor = FALSE,
     saveRds = FALSE,
-    genome = "hg19") {
+    genome = "hg19",
+    val = 4,
+    skip = 0) {
     stopifnot(is.numeric(c(offset, fix_width)))
     stopifnot(fix_point %in% c("start", "center", "end"))
     stopifnot(is.logical(c(norm, useScore, outRle, useSizeFactor, saveRds)))
@@ -54,7 +59,7 @@ setImportParams <- function(
         offset = offset, fix_width = fix_width, fix_point = fix_point,
         norm = norm, useScore = useScore, outRle = outRle,
         useSizeFactor = useSizeFactor, saveRds = saveRds,
-        genome = genome
+        genome = genome, val = val, skip = skip
     ))
 }
 
@@ -184,6 +189,9 @@ handle_input <- function(inputFiles,
     bed_suffix <- paste(
         paste0("\\.", c("bed", "BED", "Bed", "narrowPeak", "broadPeak"), "$"),
         collapse = "|")
+    bedGraph_suffix <- paste(
+        paste0("\\.", c("bedGraph", "bedgraph", "BedGraph", "BEDGRAPH", "bg",
+                        "BG"), "$"), collapse = "|")
     bigwig_suffix <- paste(
         paste0("\\.", c("bw", "bigwig", "Bigwig", "bigWig", "BigWig", "BIGWIG",
                         "BW"), "$"), collapse = "|")
@@ -193,6 +201,11 @@ handle_input <- function(inputFiles,
             fileType <- "bed"
             if (verbose) message("Reading ", fileType, "file: ", inputFile)
             out <- inputFUN(handle_bed, inputFile = inputFile, importParams,
+                            verbose)
+        }else if (grepl(bedGraph_suffix, inputFile)) {
+            fileType <- "bedGraph"
+            if (verbose) message("Reading ", fileType, "file: ", inputFile)
+            out <- inputFUN(handle_bedGraph, inputFile = inputFile, importParams,
                             verbose)
         } else if (grepl("\\.bam$|\\.BAM$|\\.Bam$", inputFile)) {
             fileType <- "bam"
@@ -456,6 +469,104 @@ handle_bed <- function(inputFile,
     invisible(list("query" = queryRegions, "size" = libsize, "type" = "bed",
                    "weight" = weight_col))
 }
+
+#' @title Handle files in bedGraph format
+#'
+#' @description This is a function for read peaks data in bedGraph format,
+#' store the input data in a list of GRanges objects or RleList objects.
+#'
+#' @param inputFile a string denoting path to the input file
+#' @param importParams a list of parameters, refer to \code{\link{handle_input}}
+#'  for details
+#' @param verbose logical, whether to output additional information
+#'
+#' @return a list object with four elements, 'query' is a list GRanges objects
+#' or RleList objects, 'size' is the library size, 'type' is the input file
+#' type, 'weight' is the name of the metadata column to be used as weight for
+#' coverage calculation
+#'
+#' @author Shuye Pu
+#'
+#' @examples
+#' queryFiles <- system.file("extdata", "test_chr19.bedGraph",
+#'     package = "GenomicPlot"
+#' )
+#' names(queryFiles) <- "chipPeak"
+#'
+#' importParams <- setImportParams(
+#'     offset = 0, fix_width = 0, fix_point = "start", norm = FALSE,
+#'     useScore = TRUE, outRle = FLASE, useSizeFactor = FALSE, genome = "hg19",
+#'     val = 4, skip = 1
+#' )
+#'
+#' out <- handle_bedGraph(queryFiles, importParams, verbose = TRUE)
+#' out$query
+#'
+#' @export handle_bedGraph
+
+handle_bedGraph <- function(inputFile,
+                       importParams = NULL,
+                       verbose = FALSE) {
+    stopifnot(file.exists(inputFile))
+    if (is.null(names(inputFile)) || names(inputFile) == "")
+        stop("Each file must have a name attribute!")
+    beddata <- read.delim2(inputFile, header = FALSE, comment.char = "#",
+                           skip = importParams$skip)
+
+    nco <- ncol(beddata)
+    if (nco > 4 && verbose) {
+        message("The input file ", inputFile, " have more than 4 columns,
+                score column has to be specified!\n")
+    }
+    beddata <- type.convert(beddata[, c(1,2,3, importParams$val)], as.is = TRUE)
+    ## ignore extra columns, which cause problem in import.bed()
+    standard_col <- c("chr", "start", "end", "score")
+    colnames(beddata) <- standard_col
+    queryRegions <- makeGRangesFromDataFrame(beddata, keep.extra.columns = TRUE,
+                                             starts.in.df.are.0based = TRUE,
+                                             ignore.strand = TRUE)
+
+    names(queryRegions) <- paste("region", seq_along(beddata[,1]), sep = "_")
+
+
+    if (importParams$fix_width > 0) {
+        queryRegions <- resize(queryRegions,
+                               width = 1,
+                               fix = rep(importParams$fix_point, length(queryRegions)),
+                               ignore.strand = FALSE
+        )
+        queryRegions <- flank(queryRegions,
+                              width = as.integer(importParams$fix_width/2),
+                              start = TRUE,
+                              both = TRUE,
+                              ignore.strand = FALSE
+        )
+    }
+    weight_col <- "score"
+
+    if (!importParams$useScore) {
+        score(queryRegions) <- 1
+    }
+
+    ## make input comply with GenomeInfoDb
+    seqInfo <- set_seqinfo(importParams$genome)
+
+    queryRegions <- queryRegions[as.vector(seqnames(queryRegions))
+                                 %in% seqnames(seqInfo)]
+    seqlevels(queryRegions) <- seqlevels(seqInfo)
+    seqinfo(queryRegions) <- seqInfo
+
+    libsize <- sum(queryRegions$score, na.rm = TRUE)
+
+    if (importParams$outRle) {
+        queryRegions <- coverage(queryRegions, weight = weight_col)
+        seqinfo(queryRegions) <- seqInfo
+    }
+
+    invisible(list("query" = queryRegions, "size" = libsize, "type" = "bedGraph",
+                   "weight" = weight_col))
+}
+
 
 #' @title Handle files in bam format
 #'

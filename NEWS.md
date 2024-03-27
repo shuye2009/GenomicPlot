@@ -1,3 +1,7 @@
+# CHANGES IN VERSION 1.1.7
+## NEW FEATURES
+   - Add handle_bedGraph to enable data input of bedGraph format
+   
 # CHANGES IN VERSION 1.1.6
    - Merged a pull request from Hervé Pagès <notifications@github.com>
 
