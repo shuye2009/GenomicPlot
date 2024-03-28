@@ -4,12 +4,12 @@
 #' @param fullMatrix a numeric matrix
 #' @param dataName the nature of the numeric data
 #' @param labels_col a named vector for column annotation
-#' @param levels_col factor levels for names of labels_col, specifying the 
+#' @param levels_col factor levels for names of labels_col, specifying the
 #'  order of labels_col
-#' @param ranking method for ranking the rows of the input matrix, options are 
+#' @param ranking method for ranking the rows of the input matrix, options are
 #'  c("Sum", "Max", "Hierarchical", "None")
-#' @param ranges a numeric vector with three elements, defining custom range for 
-#'  color ramp, default=NULL, i.e. the range is defined automatically based on 
+#' @param ranges a numeric vector with three elements, defining custom range for
+#'  color ramp, default=NULL, i.e. the range is defined automatically based on
 #'  the c(minimun, median, maximum) of fullMatrix
 #' @param verbose logical, whether to output the input matrix for inspection
 #'
@@ -48,14 +48,16 @@ draw_matrix_heatmap <- function(fullMatrix,
     }
     colnames(fullMatrix) <- labels_col
 
+    showRN <- ifelse(nrow(fullMatrix) < 100, TRUE, FALSE) # show row name?
+
     fullMatrix <- rank_rows(fullMatrix, ranking)
 
     if (verbose) {
         message("Drawing heatmap\n")
-        vdataName <- gsub(":|/|,|\\.|\\s", "_", dataName, fixed = FALSE) 
+        vdataName <- gsub(":|/|,|\\.|\\s", "_", dataName, fixed = FALSE)
         ## replace characters not allowed in file names
-        write.table(fullMatrix, paste(vdataName, "_matrix.tab", sep = ""), 
-                    row.names = TRUE, col.names = TRUE, sep = "\t", 
+        write.table(fullMatrix, paste(vdataName, "_matrix.tab", sep = ""),
+                    row.names = TRUE, col.names = TRUE, sep = "\t",
                     quote = FALSE)
     }
 
@@ -69,20 +71,20 @@ draw_matrix_heatmap <- function(fullMatrix,
         df = data.frame(feature = features), col = list(feature = mycols),
         which = "column", show_legend = FALSE, annotation_label = ""
     )
-   
+
     if (verbose) {
         message("quantile(fullMatrix, c(seq(0.9, 1, 0.05)), na.rm=TRUE)\n")
-        message(paste(quantile(fullMatrix, c(seq(0.9, 1, 0.05)), na.rm = TRUE), 
+        message(paste(quantile(fullMatrix, c(seq(0.9, 1, 0.05)), na.rm = TRUE),
                       collapse = " "), "\n")
     }
     if (is.null(ranges)) {
         ranges <- quantile(fullMatrix, c(0.25, 0.5, 0.75), na.rm = TRUE)
         if (ranges[1] == ranges[3]) {
-            message("75% of values are not unique, heatmap may not show 
+            message("75% of values are not unique, heatmap may not show
                     signals effectively\n")
           # use quantile of non-zero values
-            ranges <- c(min(fullMatrix), quantile(fullMatrix[fullMatrix != 0], 
-                                                  c(0.5, 0.95), na.rm = TRUE)) 
+            ranges <- c(min(fullMatrix), quantile(fullMatrix[fullMatrix != 0],
+                                                  c(0.5, 0.95), na.rm = TRUE))
         }
     }
 
@@ -92,7 +94,7 @@ draw_matrix_heatmap <- function(fullMatrix,
         bottom_annotation = ha,
         heatmap_legend_param = list(legend_direction = "horizontal",
                                     title_position = "leftcenter"),
-        show_row_names = FALSE,
+        show_row_names = showRN,
         show_column_names = FALSE,
         show_row_dend = FALSE,
         cluster_columns = FALSE,
@@ -109,11 +111,11 @@ draw_matrix_heatmap <- function(fullMatrix,
 
 
 #' @title Plot genomic region landmark indicator
-#' @description Plot a gene centered polygon for demarcating gene and its 
+#' @description Plot a gene centered polygon for demarcating gene and its
 #' upstream and downstream regions
 #'
 #' @param featureNames a string vector giving names of sub-regions
-#' @param vx a vector on integers denoting the x coordinates of start of each 
+#' @param vx a vector on integers denoting the x coordinates of start of each
 #'  sub-region
 #' @param xmax an integer denoting the left most boundary
 #' @return a ggplot object
@@ -135,28 +137,28 @@ draw_region_landmark <- function(featureNames, vx, xmax) {
     nfeatures <- length(featureNames)
     cols <- ggsci::pal_npg()(nfeatures)
     names(cols) <- featureNames
-    
+
     if (nfeatures == 5) {
-        values <- data.frame(fid = featureNames, 
+        values <- data.frame(fid = featureNames,
                              value = cols)
         positions <- data.frame(
             fid = rep(featureNames, each = 4),
-            x = c(vx[2], vx[1], vx[1], vx[2], vx[3], vx[2], vx[2], vx[3], vx[4], 
-                  vx[3], vx[3], vx[4], vx[5], vx[4], vx[4], vx[5], xmax, vx[5], 
+            x = c(vx[2], vx[1], vx[1], vx[2], vx[3], vx[2], vx[2], vx[3], vx[4],
+                  vx[3], vx[3], vx[4], vx[5], vx[4], vx[4], vx[5], xmax, vx[5],
                   vx[5], xmax),
-            y = c(3, 3, 4, 4, 2.5, 2.5, 4.5, 4.5, 2, 2, 5, 5, 2.5, 2.5, 4.5, 
+            y = c(3, 3, 4, 4, 2.5, 2.5, 4.5, 4.5, 2, 2, 5, 5, 2.5, 2.5, 4.5,
                   4.5, 3, 3, 4, 4) - 2
         )
     } else if (nfeatures == 3) {
         values <- data.frame(fid = factor(featureNames), value = cols)
         positions <- data.frame(
             fid = rep(featureNames, each = 4),
-            x = c(vx[2], vx[1], vx[1], vx[2], vx[3], vx[2], vx[2], vx[3], xmax, 
+            x = c(vx[2], vx[1], vx[1], vx[2], vx[3], vx[2], vx[2], vx[3], xmax,
                   vx[3], vx[3], xmax),
             y = c(3, 3, 4, 4, 2.5, 2.5, 4.5, 4.5, 3, 3, 4, 4) - 2
         )
     } else {
-        stop("Number of feautre names must be 3 or 5! other numbers are not 
+        stop("Number of feautre names must be 3 or 5! other numbers are not
              supported at this point.")
     }
 
@@ -188,7 +190,7 @@ draw_region_landmark <- function(featureNames, vx, xmax) {
 #' @description Plot sub-region labels under the landmark
 #'
 #' @param featureNames a string vector giving names of sub-regions
-#' @param scaled_bins a vector of integers denoting the lengths of each 
+#' @param scaled_bins a vector of integers denoting the lengths of each
 #'  sub-region
 #' @param xmax an integer denoting the right most boundary
 #' @return a ggplot object
@@ -210,7 +212,7 @@ draw_region_name <- function(featureNames,
     stopifnot(is.character(featureNames))
     stopifnot(is.numeric(scaled_bins))
     stopifnot(length(featureNames) == length(scaled_bins))
-    
+
     annotx <- scaled_bins / 2
     for (i in 2:length(scaled_bins)) {
         annotx[i] <- annotx[i] + sum(scaled_bins[seq_len(i - 1)])
@@ -249,10 +251,10 @@ draw_region_name <- function(featureNames,
 #' @param plot_df a dataframe with column names c(xc, yc, cn, "lower", "upper")
 #' @param xc a string denoting column name for values on x-axis
 #' @param yc a string denoting column name for numeric data to be plotted
-#' @param vx a vector on integers denoting the x coordinates of start of each 
+#' @param vx a vector on integers denoting the x coordinates of start of each
 #'  sub-region
 #' @param cn column name in plot_df for query samples grouping
-#' @param sn column name in plot_df for subject name to be shown in the plot 
+#' @param sn column name in plot_df for subject name to be shown in the plot
 #'  title
 #' @param Ylab a string for Y-axis label
 #' @return a ggplot object
@@ -287,14 +289,14 @@ draw_region_profile <- function(plot_df,
                                 Ylab = "Signal Intensity",
                                 vx) {
     stopifnot(c(xc, yc, cn) %in% colnames(plot_df))
-    p <- ggplot(plot_df, aes(x = .data[[xc]], y = .data[[yc]], 
+    p <- ggplot(plot_df, aes(x = .data[[xc]], y = .data[[yc]],
                              color = .data[[cn]])) +
         scale_fill_npg() +
         scale_color_npg() +
-        geom_line(size = 1.25) + 
-        geom_vline(xintercept = vx[2:length(vx)], linetype = "dotted", 
+        geom_line(size = 1.25) +
+        geom_vline(xintercept = vx[2:length(vx)], linetype = "dotted",
                    color = "blue", size = 0.5) +
-        geom_ribbon(aes(ymin = lower, ymax = upper, fill = .data[[cn]]), 
+        geom_ribbon(aes(ymin = lower, ymax = upper, fill = .data[[cn]]),
                     linetype = 0, alpha = 0.3) +
         theme_classic() +
         ylab(Ylab) +
@@ -307,7 +309,7 @@ draw_region_profile <- function(plot_df,
             axis.title.y = element_text(face="bold", size=18),
             axis.text.y = element_text(size=16),
             plot.margin = unit(c(1, 1, 0, 1), "lines")
-        ) 
+        )
     if(!is.null(sn))
         p <- p + ggtitle(paste(unique(plot_df[[sn]]), collapse = ", "))
 
@@ -320,15 +322,15 @@ draw_region_profile <- function(plot_df,
 #' @param plot_df a dataframe with column names c(xc, yc, cn, "lower", "upper")
 #' @param xc a string denoting column name for values on x-axis
 #' @param yc a string denoting column name for numeric data to be plotted
-#' @param cn a string denoting column name for sample grouping, like 'Query' or 
+#' @param cn a string denoting column name for sample grouping, like 'Query' or
 #'  'Reference'
-#' @param sn a string denoting column name for the subject of sample grouping, 
+#' @param sn a string denoting column name for the subject of sample grouping,
 #'  if 'cn' is 'Query', then 'sn' will be 'Reference'
 #' @param Xlab a string for x-axis label
 #' @param Ylab a string for y-axis label
-#' @param hl a vector of two integers defining upstream and downstream 
+#' @param hl a vector of two integers defining upstream and downstream
 #'  boundaries of the rectangle
-#' @param shade logical indicating whether to place a shaded rectangle 
+#' @param shade logical indicating whether to place a shaded rectangle
 #'  around the loci bounded by hl
 #'
 #' @return a ggplot object
@@ -362,14 +364,14 @@ draw_locus_profile <- function(plot_df,
                                shade = FALSE,
                                hl = c(0, 0)) {
     stopifnot(c(xc, yc, cn) %in% colnames(plot_df))
-    p <- ggplot(plot_df, aes(x = .data[[xc]], y = .data[[yc]], 
+    p <- ggplot(plot_df, aes(x = .data[[xc]], y = .data[[yc]],
                              color = .data[[cn]])) +
         scale_fill_npg() +
         scale_color_npg() +
-        geom_line(size = 1.25) + 
-        geom_vline(xintercept = 0, linetype = "dotted", color = "blue", 
+        geom_line(size = 1.25) +
+        geom_vline(xintercept = 0, linetype = "dotted", color = "blue",
                    size = 0.5) +
-        geom_ribbon(aes(ymin = lower, ymax = upper, fill = .data[[cn]]), 
+        geom_ribbon(aes(ymin = lower, ymax = upper, fill = .data[[cn]]),
                     linetype = 0, alpha = 0.3) +
         theme_classic() +
         xlab(Xlab) +
@@ -379,13 +381,13 @@ draw_locus_profile <- function(plot_df,
             legend.title = element_blank(),
             axis.text = element_text(face = "plain", size = 16),
             axis.title = element_text(face = "bold", size = 18)
-        ) 
-    
+        )
+
     if(!is.null(sn))
         p <- p + ggtitle(paste(unique(plot_df[[sn]]), collapse = ", "))
 
-    if (shade) p <- p + annotate("rect", xmin = hl[1], xmax = hl[2], 
-                                 ymin = -Inf, ymax = Inf, fill = "grey", 
+    if (shade) p <- p + annotate("rect", xmin = hl[1], xmax = hl[2],
+                                 ymin = -Inf, ymax = Inf, fill = "grey",
                                  color = "grey", alpha = 0.3)
 
     return(p)
@@ -393,28 +395,28 @@ draw_locus_profile <- function(plot_df,
 
 
 #' @title draw stacked plot
-#' @description Plot profile on top of heatmap, and align feature labels. 
-#' 
+#' @description Plot profile on top of heatmap, and align feature labels.
+#'
 #' @param plot_list a list of profile plots
 #' @param heatmap_list a list of heatmaps
-#' 
+#'
 #' @return a null value
 #' @note used by \code{\link{plot_locus}}, \code{\link{plot_5parts_metagene}},
 #'    \code{\link{plot_region}}
 #' @author Shuye Pu
-#' 
+#'
 #' @export draw_stacked_plot
 #'
- 
+
 draw_stacked_plot <- function(plot_list, heatmap_list){
   if (length(heatmap_list) > 0) {
-    groblist <- lapply(heatmap_list, function(x) 
+    groblist <- lapply(heatmap_list, function(x)
       grid.grabExpr(draw(x, heatmap_legend_side = "bottom")))
     names(groblist) <- names(heatmap_list)
   }else{
     groblist <- NULL
   }
-  
+
   for(i in seq_along(plot_list)){
     if(!is.null(groblist)){
       composite <- ggdraw() +
@@ -429,23 +431,23 @@ draw_stacked_plot <- function(plot_list, heatmap_list){
 }
 
 #' @title Plot boxplot with two factors
-#' @description Plot violin plot with boxplot components for data with one or 
-#' two factors, p-value significance levels are displayed, "***" = 0.001, 
+#' @description Plot violin plot with boxplot components for data with one or
+#' two factors, p-value significance levels are displayed, "***" = 0.001,
 #' "**" = 0.01, "*" = 0.05.
 #'
 #' @param stat_df a dataframe with column names c(xc, yc)
 #' @param xc a string denoting column name for grouping
-#' @param fc a string denoting column name for sub-grouping based on an 
+#' @param fc a string denoting column name for sub-grouping based on an
 #'  additional factor
 #' @param yc a string denoting column name for numeric data to be plotted
 #' @param Xlab a string for x-axis label
 #' @param Ylab a string for y-axis label
-#' @param comp a list of vectors denoting pair-wise comparisons to be performed 
+#' @param comp a list of vectors denoting pair-wise comparisons to be performed
 #'  between groups
-#' @param stats the name of pair-wise statistical tests, like t.test or 
+#' @param stats the name of pair-wise statistical tests, like t.test or
 #'  wilcox.test
-#' @param nf a integer normalizing factor for correct count of observations when 
-#'  the data table has two factors, such as those produced by `pivot_longer`, 
+#' @param nf a integer normalizing factor for correct count of observations when
+#'  the data table has two factors, such as those produced by `pivot_longer`,
 #'  equals to the number of factors
 #'
 #' @return a ggplot object
@@ -476,14 +478,14 @@ draw_boxplot_by_factor <- function(stat_df,
                                    Ylab = yc,
                                    nf = 1) {
     stopifnot(c(xc, yc, fc) %in% colnames(stat_df))
-    xlabs <- paste(levels(as.factor(stat_df[[xc]])), "\n(", 
+    xlabs <- paste(levels(as.factor(stat_df[[xc]])), "\n(",
                    table(stat_df[[xc]]) / nf, ")", sep = "")
-    ypos <- rep(max(stat_df[[yc]]), length(comp)) * 
+    ypos <- rep(max(stat_df[[yc]]), length(comp)) *
       seq(1, 1 + (length(comp) - 1) * 0.1, 0.1)
     outlier.shape <- 19
 
     if (fc == xc) {
-        p <- ggplot(stat_df, aes(x = .data[[xc]], y = .data[[yc]], 
+        p <- ggplot(stat_df, aes(x = .data[[xc]], y = .data[[yc]],
                                  fill = .data[[fc]])) +
             geom_violin(width = 0.5) +
             geom_boxplot(width = 0.2, outlier.shape = outlier.shape) +
@@ -491,15 +493,15 @@ draw_boxplot_by_factor <- function(stat_df,
             scale_color_npg() +
             theme_classic() +
             theme(
-                axis.text = element_text(face = "plain", size = 12, 
+                axis.text = element_text(face = "plain", size = 12,
                                          color = "black"),
                 # axis.title.x = element_blank(),
-                axis.title = element_text(face = "bold", size = 14, 
+                axis.title = element_text(face = "bold", size = 14,
                                           color = "black"),
                 legend.position = "none"
             ) +
             labs(y = Ylab, x = Xlab) +
-            geom_signif(comparisons = comp, test = stats, 
+            geom_signif(comparisons = comp, test = stats,
                         map_signif_level = TRUE, y_position = ypos) +
             scale_x_discrete(labels = xlabs)
     } else {
@@ -512,7 +514,7 @@ draw_boxplot_by_factor <- function(stat_df,
         }
         stat_df <- stat_df %>%
             mutate(x2 = as.integer(interaction(.data[[fc]], .data[[xc]])))
-        p <- ggplot(stat_df, aes(x = x2, y = .data[[yc]], group = x2, 
+        p <- ggplot(stat_df, aes(x = x2, y = .data[[yc]], group = x2,
                                  fill = .data[[fc]])) +
             geom_violin(width = 0.5) +
             geom_boxplot(width = 0.2, outlier.shape = outlier.shape) +
@@ -520,7 +522,7 @@ draw_boxplot_by_factor <- function(stat_df,
             scale_color_npg() +
             theme_classic() +
             theme(
-                axis.text = element_text(face = "plain", size = 12, 
+                axis.text = element_text(face = "plain", size = 12,
                                          color = "black"),
                 axis.title.x = element_blank(),
                 axis.title = element_text(face = "bold", size = 14,
@@ -528,9 +530,9 @@ draw_boxplot_by_factor <- function(stat_df,
                 legend.position = "bottom"
             ) +
             labs(y = Ylab) +
-            geom_signif(comparisons = comp, test = stats, 
+            geom_signif(comparisons = comp, test = stats,
                         map_signif_level = TRUE, y_position = ypos) +
-            scale_x_continuous(breaks = mid(sort(unique(stat_df$x2))), 
+            scale_x_continuous(breaks = mid(sort(unique(stat_df$x2))),
                                labels = xlabs)
     }
 
@@ -538,9 +540,9 @@ draw_boxplot_by_factor <- function(stat_df,
 }
 
 #' @title Plot boxplot without outliers
-#' @description Plot boxplot without outliers, useful when outliers have a wide 
-#' range and the median is squeezed at the bottom of the plot. The p-value 
-#' significance level is the same as those in 
+#' @description Plot boxplot without outliers, useful when outliers have a wide
+#' range and the median is squeezed at the bottom of the plot. The p-value
+#' significance level is the same as those in
 #' \code{\link{draw_boxplot_by_factor}}, but not displayed.
 #'
 #' @param stat_df a dataframe with column names c(xc, yc)
@@ -549,12 +551,12 @@ draw_boxplot_by_factor <- function(stat_df,
 #' @param yc a string denoting column name for numeric data to be plotted
 #' @param Xlab a string for x-axis label
 #' @param Ylab a string for y-axis label
-#' @param comp a list of vectors denoting pair-wise comparisons to be performed 
+#' @param comp a list of vectors denoting pair-wise comparisons to be performed
 #'  between groups
-#' @param stats the name of pair-wise statistical tests, like t.test or 
+#' @param stats the name of pair-wise statistical tests, like t.test or
 #'  wilcox.test
-#' @param nf a integer normalizing factor for correct count of observations when 
-#'  the data table has two factors, such as those produced by `pivot_longer`, 
+#' @param nf a integer normalizing factor for correct count of observations when
+#'  the data table has two factors, such as those produced by `pivot_longer`,
 #'  equals to the number of factors
 #'
 #' @return a ggplot object
@@ -581,25 +583,25 @@ draw_boxplot_wo_outlier <- function(stat_df,
                                     Ylab = yc,
                                     nf = 1) {
     stopifnot(c(xc, yc, fc) %in% colnames(stat_df))
-  
-    xlabs <- paste(levels(as.factor(stat_df[[xc]])), "\n(", 
+
+    xlabs <- paste(levels(as.factor(stat_df[[xc]])), "\n(",
                    table(stat_df[[xc]]) / nf, ")", sep = "")
     fomu <- as.formula(paste(yc, "~", xc))
     bp <- boxplot(fomu, stat_df, plot = FALSE)
-    
+
     lim <- c(min(bp$stats), max(bp$stats))
 
     if (fc == xc) {
-        p <- ggplot(stat_df, aes(x = .data[[xc]], y = .data[[yc]], 
+        p <- ggplot(stat_df, aes(x = .data[[xc]], y = .data[[yc]],
                                  fill = .data[[fc]])) +
             geom_boxplot(width = 0.2, outlier.shape = NA) +
             scale_fill_npg() +
             scale_color_npg() +
             theme_classic() +
             theme(
-                axis.text = element_text(face = "plain", size = 12, 
+                axis.text = element_text(face = "plain", size = 12,
                                          color = "black"),
-                axis.title = element_text(face = "bold", size = 14, 
+                axis.title = element_text(face = "bold", size = 14,
                                           color = "black"),
                 legend.position = "none"
             ) +
@@ -616,22 +618,22 @@ draw_boxplot_wo_outlier <- function(stat_df,
         }
         stat_df <- stat_df %>%
             mutate(x2 = as.integer(interaction(.data[[fc]], .data[[xc]])))
-        p <- ggplot(stat_df, aes(x = x2, y = .data[[yc]], group = x2, 
+        p <- ggplot(stat_df, aes(x = x2, y = .data[[yc]], group = x2,
                                  fill = .data[[fc]])) +
             geom_boxplot(width = 0.2, outlier.shape = NA) +
             scale_fill_npg() +
             scale_color_npg() +
             theme_classic() +
             theme(
-                axis.text = element_text(face = "plain", size = 12, 
+                axis.text = element_text(face = "plain", size = 12,
                                          color = "black"),
                 axis.title.x = element_blank(),
-                axis.title = element_text(face = "bold", size = 14, 
+                axis.title = element_text(face = "bold", size = 14,
                                           color = "black"),
                 legend.position = "bottom"
             ) +
             labs(y = Ylab) +
-            scale_x_continuous(breaks = mid(sort(unique(stat_df$x2))), 
+            scale_x_continuous(breaks = mid(sort(unique(stat_df$x2))),
                                labels = xlabs) +
             coord_cartesian(ylim = lim)
     }
@@ -639,23 +641,23 @@ draw_boxplot_wo_outlier <- function(stat_df,
     return(p)
 }
 #' @title Plot barplot for mean with standard error bars
-#' @description Plot barplot for mean with standard error bars, no p-value 
-#' significance levels are displayed, but ANOVA p-value is provided as tag and 
+#' @description Plot barplot for mean with standard error bars, no p-value
+#' significance levels are displayed, but ANOVA p-value is provided as tag and
 #' TukeyHSD test are displayed as caption.
 #'
 #' @param stat_df a dataframe with column names c(xc, yc)
 #' @param xc a string denoting column name for grouping
 #' @param yc a string denoting column name for numeric data to be plotted
-#' @param fc a string denoting column name for sub-grouping based on an 
+#' @param fc a string denoting column name for sub-grouping based on an
 #'  additional factor
-#' @param comp a list of vectors denoting pair-wise comparisons to be performed 
+#' @param comp a list of vectors denoting pair-wise comparisons to be performed
 #'  between groups
 #' @param Xlab a string for x-axis label
 #' @param Ylab a string for y-axis label
-#' @param Ylim a numeric vector of two elements, defining custom limits of 
+#' @param Ylim a numeric vector of two elements, defining custom limits of
 #'  y-axis
-#' @param nf a integer normalizing factor for correct count of observations when 
-#'  the data table has two factors, such as those produced by pivot_longer, 
+#' @param nf a integer normalizing factor for correct count of observations when
+#'  the data table has two factors, such as those produced by pivot_longer,
 #'  equals to the number of factors
 #'
 #' @return a ggplot object
@@ -701,29 +703,29 @@ draw_mean_se_barplot <- function(stat_df,
                 lower_limit = mean_Intensity - se
             )
         means_se <- means_se %>%
-            mutate(labelx = paste0(.data[[xc]], "\n(", N_Intensity / nf, ")")) 
+            mutate(labelx = paste0(.data[[xc]], "\n(", N_Intensity / nf, ")"))
         ## now .data is means_se, not stat_df anymore
         levels(means_se[[xc]]) <- levels(stat_df[[xc]])
 
-        p <- ggplot(means_se, aes(x = .data[[xc]], y = mean_Intensity, 
+        p <- ggplot(means_se, aes(x = .data[[xc]], y = mean_Intensity,
                                   fill = .data[[xc]])) +
             scale_fill_npg() +
             scale_color_npg() +
             geom_col(position = "identity") +
-            geom_errorbar(aes(ymin = lower_limit, ymax = upper_limit), 
+            geom_errorbar(aes(ymin = lower_limit, ymax = upper_limit),
                           position = position_dodge(width = 0.2), width = 0.2) +
             theme_classic() +
             theme(
-                axis.title = element_text(face = "bold", size = 14, 
+                axis.title = element_text(face = "bold", size = 14,
                                           color = "black", vjust = 0.25),
                 axis.title.x = element_blank(),
-                axis.text = element_text(face = "plain", size = 12, 
+                axis.text = element_text(face = "plain", size = 12,
                                          color = "black"),
                 legend.position = "none"
             ) +
             labs(y = paste0(Ylab, "\n(mean \u00b1 SE)"), x = Xlab) +
             scale_x_discrete(labels = means_se$labelx) +
-            ggtitle(label = paste("ANOVA p-value =", 
+            ggtitle(label = paste("ANOVA p-value =",
                                   format(stats$ANOVA, digits = 3)))
 
         if (!is.null(Ylim)) {
@@ -734,21 +736,21 @@ draw_mean_se_barplot <- function(stat_df,
         stats$HSD[, 4] <- format(stats$HSD[, 4], digits = 3)
 
         comp_row <- vapply(comp, function(x) {
-            arow <- paste0(levels(stat_df[[xc]])[x[2]], "-", 
+            arow <- paste0(levels(stat_df[[xc]])[x[2]], "-",
                            levels(stat_df[[xc]])[x[1]])
         }, character(1))
         stats_selected <- as.data.frame(stats$HSD) %>%
             filter(row.names(stats$HSD) %in% comp_row)
-        ptable <- tab_add_title(ggtexttable(stats_selected, 
-                                            theme = ttheme(base_size = 9)), 
-                                text = "post hoc TukeyHSD test", 
+        ptable <- tab_add_title(ggtexttable(stats_selected,
+                                            theme = ttheme(base_size = 9)),
+                                text = "post hoc TukeyHSD test",
                                 padding = unit(1.0, "line"), just = "left")
 
-        outp <- cowplot::plot_grid(p, ptable, ncol = 1, align = "l", 
+        outp <- cowplot::plot_grid(p, ptable, ncol = 1, align = "l",
                                    rel_heights = c(3, 2))
     } else {
         stat_df <- stat_df %>%
-            mutate(x2 = as.factor(as.integer(interaction(.data[[fc]], 
+            mutate(x2 = as.factor(as.integer(interaction(.data[[fc]],
                                                          .data[[xc]]))))
         stats <- aov_TukeyHSD(stat_df, "x2", yc)
 
@@ -765,28 +767,28 @@ draw_mean_se_barplot <- function(stat_df,
 
         levels(means_se[["x2"]]) <- levels(stat_df[["x2"]])
         means_se <- means_se %>%
-            mutate(labelx = paste0(.data[["x2"]], "\n(", N_Intensity, ")")) 
+            mutate(labelx = paste0(.data[["x2"]], "\n(", N_Intensity, ")"))
         ## now .data is means_se, not stat_df anymore
 
-        p <- ggplot(means_se, aes(x = x2, y = mean_Intensity, group = x2, 
+        p <- ggplot(means_se, aes(x = x2, y = mean_Intensity, group = x2,
                                   fill = x2)) +
             scale_fill_npg() +
             scale_color_npg() +
             geom_col(position = "identity") +
-            geom_errorbar(aes(ymin = lower_limit, ymax = upper_limit), 
+            geom_errorbar(aes(ymin = lower_limit, ymax = upper_limit),
                           position = position_dodge(width = 0.2), width = 0.2) +
             theme_classic() +
             theme(
-                axis.title = element_text(face = "bold", size = 14, 
+                axis.title = element_text(face = "bold", size = 14,
                                           color = "black", vjust = 0.25),
                 axis.title.x = element_blank(),
-                axis.text = element_text(face = "plain", size = 12, 
+                axis.text = element_text(face = "plain", size = 12,
                                          color = "black"),
                 legend.position = "none"
             ) +
             labs(y = paste0(Ylab, "(mean \u00b1 SE)"), x = Xlab) +
             scale_x_discrete(labels = means_se$labelx) +
-            ggtitle(label = paste("ANOVA p-value =", 
+            ggtitle(label = paste("ANOVA p-value =",
                                   format(stats$ANOVA, digits = 3)))
 
         if (!is.null(Ylim)) {
@@ -797,17 +799,17 @@ draw_mean_se_barplot <- function(stat_df,
         stats$HSD[, 4] <- format(stats$HSD[, 4], digits = 3)
 
         comp_row <- vapply(comp, function(x) {
-            arow <- paste0(levels(stat_df[["x2"]])[x[2]], "-", 
+            arow <- paste0(levels(stat_df[["x2"]])[x[2]], "-",
                            levels(stat_df[["x2"]])[x[1]])
         }, character(1))
         stats_selected <- as.data.frame(stats$HSD) %>%
             filter(row.names(stats$HSD) %in% comp_row)
-        ptable <- tab_add_title(ggtexttable(stats_selected, 
-                                            theme = ttheme(base_size = 9)), 
-                                text = "post hoc TukeyHSD test", 
+        ptable <- tab_add_title(ggtexttable(stats_selected,
+                                            theme = ttheme(base_size = 9)),
+                                text = "post hoc TukeyHSD test",
                                 padding = unit(1.0, "line"), just = "left")
 
-        outp <- cowplot::plot_grid(p, ptable, ncol = 1, align = "l", 
+        outp <- cowplot::plot_grid(p, ptable, ncol = 1, align = "l",
                                    rel_heights = c(3, 2))
     }
 
@@ -815,13 +817,13 @@ draw_mean_se_barplot <- function(stat_df,
 }
 
 #' @title Plot quantile over value
-#' @description Plot quantiles as y-axis, and values as x-axis. Same as 
+#' @description Plot quantiles as y-axis, and values as x-axis. Same as
 #' `geom_ecdf`, but allows sub-grouping by a second factor.
 #'
 #' @param stat_df a dataframe with column names c(xc, yc)
 #' @param xc a string denoting column name for grouping
 #' @param yc a string denoting column name for numeric data to be plotted
-#' @param fc a string denoting column name for sub-grouping based on an 
+#' @param fc a string denoting column name for sub-grouping based on an
 #'  additional factor
 #' @param Ylab a string for y-axis label
 #'
@@ -860,7 +862,7 @@ draw_quantile_plot <- function(stat_df,
             group_by(.data[[xc]]) %>%
             mutate(Fraction = ecdf(.data[[yc]])(.data[[yc]]))
 
-        p <- ggplot(data = long_df, aes(x = .data[[yc]], y = Fraction, 
+        p <- ggplot(data = long_df, aes(x = .data[[yc]], y = Fraction,
                                         color = .data[[xc]])) +
             scale_color_npg() +
             geom_line(size = 1.25) +
@@ -870,7 +872,7 @@ draw_quantile_plot <- function(stat_df,
                 legend.position = "top",
                 legend.title = element_blank(),
                 axis.text = element_text(angle = 0, size = 12, vjust = 0),
-                axis.title = element_text(face = "bold", color = "black", 
+                axis.title = element_text(face = "bold", color = "black",
                                           size = 14, vjust = 0.25)
             )
     } else {
@@ -880,7 +882,7 @@ draw_quantile_plot <- function(stat_df,
             group_by(x2) %>%
             mutate(Fraction = ecdf(.data[[yc]])(.data[[yc]]))
 
-        p <- ggplot(data = long_df, aes(x = .data[[yc]], y = Fraction, 
+        p <- ggplot(data = long_df, aes(x = .data[[yc]], y = Fraction,
                                         color = as.factor(x2))) +
             scale_color_npg() +
             geom_line(size = 1.25) +
@@ -890,7 +892,7 @@ draw_quantile_plot <- function(stat_df,
                 legend.position = "top",
                 legend.title = element_blank(),
                 axis.text = element_text(angle = 0, size = 12, vjust = 0),
-                axis.title = element_text(face = "bold", color = "black", 
+                axis.title = element_text(face = "bold", color = "black",
                                           size = 14, vjust = 0.25)
             )
     }
@@ -899,8 +901,8 @@ draw_quantile_plot <- function(stat_df,
 }
 
 #' @title Plot fraction of cumulative sum over rank
-#' @description Plot cumulative sum over rank as line plot, both cumulative sum 
-#' and rank are scaled between 0 and 1. This is the same as the fingerprint plot 
+#' @description Plot cumulative sum over rank as line plot, both cumulative sum
+#' and rank are scaled between 0 and 1. This is the same as the fingerprint plot
 #' of the deepTools.
 #'
 #' @param stat_df a dataframe with column names c(xc, yc)
@@ -945,7 +947,7 @@ draw_rank_plot <- function(stat_df,
         mutate(Rank = rank(cumCount)) %>%
         mutate(Fraction = cumCount / max(cumCount), Rank = Rank / max(Rank))
 
-    p <- ggplot(data = long_df, aes(x = Rank, y = Fraction, 
+    p <- ggplot(data = long_df, aes(x = Rank, y = Fraction,
                                     color = .data[[xc]])) +
         scale_color_npg() +
         geom_line(size = 1.25) +
@@ -964,24 +966,24 @@ draw_rank_plot <- function(stat_df,
 }
 
 #' @title Make combo plot for statistics plots
-#' @description Place violin plot, boxplot without outliers, mean+se barplot and 
+#' @description Place violin plot, boxplot without outliers, mean+se barplot and
 #' quantile plot on the same page
 #'
 #' @param stat_df a dataframe with column names c(xc, yc)
 #' @param xc a string denoting column name for grouping
 #' @param yc a string denoting column name for numeric data to be plotted
-#' @param fc a string denoting column name for sub-grouping based on an 
+#' @param fc a string denoting column name for sub-grouping based on an
 #'  additional factor
-#' @param comp a list of vectors denoting pair-wise comparisons to be performed 
+#' @param comp a list of vectors denoting pair-wise comparisons to be performed
 #'  between groups
-#' @param stats the name of pair-wise statistical tests, like t.test or 
+#' @param stats the name of pair-wise statistical tests, like t.test or
 #'  wilcox.test
 #' @param Xlab a string for x-axis label
 #' @param Ylab a string for y-axis label
 #' @param Ylim a numeric vector of two elements, defining custom limits of y-axis
-#' @param title a string for plot title 
-#' @param nf a integer normalizing factor for correct count of observations when 
-#'  the data table has two factors, such as those produced by pivot_longer, 
+#' @param title a string for plot title
+#' @param nf a integer normalizing factor for correct count of observations when
+#'  the data table has two factors, such as those produced by pivot_longer,
 #'  equals to the number of factors
 #'
 #' @return a ggplot object
@@ -1019,53 +1021,53 @@ draw_combo_plot <- function(stat_df,
                             title = "",
                             nf = 1) {
     stopifnot(c(xc, yc, fc) %in% colnames(stat_df))
-    bbf <- draw_boxplot_by_factor(stat_df, xc = xc, yc = yc, comp = comp, 
-                                  stats = stats, Xlab = Xlab, Ylab = Ylab, 
+    bbf <- draw_boxplot_by_factor(stat_df, xc = xc, yc = yc, comp = comp,
+                                  stats = stats, Xlab = Xlab, Ylab = Ylab,
                                   fc = fc, nf = nf)
-    bwo <- draw_boxplot_wo_outlier(stat_df, xc = xc, yc = yc, comp = comp, 
-                                   stats = stats, Xlab = Xlab, Ylab = Ylab, 
+    bwo <- draw_boxplot_wo_outlier(stat_df, xc = xc, yc = yc, comp = comp,
+                                   stats = stats, Xlab = Xlab, Ylab = Ylab,
                                    fc = fc, nf = nf)
-    msb <- draw_mean_se_barplot(stat_df, xc = xc, yc = yc, comp = comp, 
-                                Xlab = Xlab, Ylab = Ylab, fc = fc, Ylim = Ylim, 
+    msb <- draw_mean_se_barplot(stat_df, xc = xc, yc = yc, comp = comp,
+                                Xlab = Xlab, Ylab = Ylab, fc = fc, Ylim = Ylim,
                                 nf = nf)
     q <- draw_quantile_plot(stat_df, xc = xc, yc = yc, Ylab = Ylab, fc = fc)
 
-    combo <- cowplot::plot_grid(bbf, bwo, q, msb, nrow = 2, axis = "b", 
+    combo <- cowplot::plot_grid(bbf, bwo, q, msb, nrow = 2, axis = "b",
                                 rel_widths = c(1, 1), rel_heights = c(1, 1))
     title <- ggdraw() + draw_label(title)
     combo <- plot_grid(title, combo, ncol=1, rel_heights=c(0.1, 1))
-    
+
 
     return(combo)
 }
 
 #' @title Plot signal profile around start, center, and end of genomic regions
-#' @description Plot lines with standard error as the error band, also plots 
+#' @description Plot lines with standard error as the error band, also plots
 #' number of regions having non-zero signals
 #'
-#' @param plot_df a dataframe with column names c(xc, yc, cn, "Interval", 
+#' @param plot_df a dataframe with column names c(xc, yc, cn, "Interval",
 #'  "lower", "upper")
 #' @param xc a string denoting column name for values on x-axis
 #' @param yc a string denoting column name for numeric data to be plotted
 #' @param cn a string denoting column name for grouping
-#' @param ext a vector of 4 integers denoting upstream and downstream extension 
-#'  around start and end, the range of extensions must be within the range of 
+#' @param ext a vector of 4 integers denoting upstream and downstream extension
+#'  around start and end, the range of extensions must be within the range of
 #'  `xc` of the `plot_df`
-#' @param hl a vector of 4 integers defining upstream and downstream boundaries 
+#' @param hl a vector of 4 integers defining upstream and downstream boundaries
 #'  of the rectangle for start and end
 #' @param atitle a string for the title of the plot
 #' @param insert a integer denoting the width of the center region
 #' @param Ylab a string for y-axis label
-#' @param shade logical, indicating whether to place a shaded rectangle around 
+#' @param shade logical, indicating whether to place a shaded rectangle around
 #'  the point of interest
-#' @param stack logical, indicating whether to plot the number of valid 
+#' @param stack logical, indicating whether to plot the number of valid
 #'  (non-zero) data points in each bin
 #'
 #' @return a ggplot object
-#' @note used by \code{\link{plot_start_end}}, 
+#' @note used by \code{\link{plot_start_end}},
 #'  \code{\link{plot_start_end_with_random}}
 #' @author Shuye Pu
-#' 
+#'
 #' @examples
 #' library(dplyr)
 #' Reference <- rep(rep(c("Ref1", "Ref2"), each = 100), 2)
@@ -1092,13 +1094,13 @@ draw_combo_plot <- function(stat_df,
 #'     mutate(Group = paste(Query, Reference, sep = ":")) %>%
 #'     mutate(Location = rep("End", 400)) %>%
 #'     mutate(Interval = sample.int(2000, 400))
-#'     
+#'
 #' df <- rbind(start_df, center_df, end_df)
-#' p <- draw_stacked_profile(df, cn = "Group", shade = TRUE, 
+#' p <- draw_stacked_profile(df, cn = "Group", shade = TRUE,
 #'     ext = c(-50, 50, -50, 50),
 #'     hl = c(-20, 20, -25, 25), insert = 100)
 #' p
-#' 
+#'
 #'
 #' @export draw_stacked_profile
 #'
@@ -1116,22 +1118,22 @@ draw_stacked_profile <- function(plot_df,
                                  stack = TRUE) {
     stopifnot(c(xc, yc, cn) %in% colnames(plot_df))
     stopifnot(is.numeric(c(ext, hl, insert)))
-    
+
     ylimits <- c(min(plot_df$lower), max(plot_df$upper))
     ylimits_intervals <- c(0, max(plot_df$Interval))
 
     aplot_df_start <- plot_df %>%
         filter(grepl("Start", Location))
 
-    ps <- ggplot(aplot_df_start, aes(x = .data[[xc]], y = .data[[yc]], 
+    ps <- ggplot(aplot_df_start, aes(x = .data[[xc]], y = .data[[yc]],
                                      color = .data[[cn]])) +
         scale_fill_npg() +
         scale_color_npg() +
         geom_line(size = 1.25) +
-        ylim(ylimits) + 
-        geom_vline(xintercept = 0, linetype = "dotted", color = "blue", 
+        ylim(ylimits) +
+        geom_vline(xintercept = 0, linetype = "dotted", color = "blue",
                    size = 0.5) +
-        geom_ribbon(aes(ymin = lower, ymax = upper, fill = .data[[cn]]), 
+        geom_ribbon(aes(ymin = lower, ymax = upper, fill = .data[[cn]]),
                     linetype = 0, alpha = 0.3) +
         theme_classic() +
         theme(legend.position = "none") +
@@ -1145,17 +1147,17 @@ draw_stacked_profile <- function(plot_df,
             axis.title.x = element_blank(),
             axis.line.x = element_blank()
         )
-    if (shade) ps <- ps + annotate("rect", xmin = hl[1], xmax = hl[2], 
-                                   ymin = -Inf, ymax = Inf, fill = "grey", 
+    if (shade) ps <- ps + annotate("rect", xmin = hl[1], xmax = hl[2],
+                                   ymin = -Inf, ymax = Inf, fill = "grey",
                                    alpha = 0.3)
 
-    psi <- ggplot(aplot_df_start, aes(x = .data[[xc]], y = Interval, 
+    psi <- ggplot(aplot_df_start, aes(x = .data[[xc]], y = Interval,
                                       color = .data[[cn]])) +
         scale_fill_npg() +
         scale_color_npg() +
         geom_line(size = 1.25) +
         ylim(ylimits_intervals) +
-        geom_vline(xintercept = 0, linetype = "dotted", color = "blue", 
+        geom_vline(xintercept = 0, linetype = "dotted", color = "blue",
                    size = 0.5) +
         theme_classic() +
         theme(
@@ -1165,24 +1167,24 @@ draw_stacked_profile <- function(plot_df,
         xlab("5'") +
         scale_x_continuous(limits = c(ext[1], ext[2])) +
         ylab("n")
-    if (shade) psi <- psi + annotate("rect", xmin = hl[1], xmax = hl[2], 
-                                     ymin = -Inf, ymax = Inf, fill = "grey", 
+    if (shade) psi <- psi + annotate("rect", xmin = hl[1], xmax = hl[2],
+                                     ymin = -Inf, ymax = Inf, fill = "grey",
                                      alpha = 0.3)
-    ps_stack <- plot_grid(ps, psi, ncol = 1, align = "v", 
+    ps_stack <- plot_grid(ps, psi, ncol = 1, align = "v",
                           rel_heights = c(1, 0.25))
 
     if (insert > 0) {
         aplot_df_center <- plot_df %>%
             filter(grepl("Center", Location))
-        pc <- ggplot(aplot_df_center, aes(x = .data[[xc]], y = .data[[yc]], 
+        pc <- ggplot(aplot_df_center, aes(x = .data[[xc]], y = .data[[yc]],
                                           color = .data[[cn]])) +
             scale_fill_npg() +
             scale_color_npg() +
             geom_line(size = 1.25) +
             ylim(ylimits) + # geom_point(color="grey30", size=2) +
-            geom_vline(xintercept = 0, linetype = "dotted", color = "blue", 
+            geom_vline(xintercept = 0, linetype = "dotted", color = "blue",
                        size = 0.5) +
-            geom_ribbon(aes(ymin = lower, ymax = upper, fill = .data[[cn]]), 
+            geom_ribbon(aes(ymin = lower, ymax = upper, fill = .data[[cn]]),
                         linetype = 0, alpha = 0.3) +
             theme_classic() +
             theme(legend.position = "none") +
@@ -1195,13 +1197,13 @@ draw_stacked_profile <- function(plot_df,
                 plot.margin = unit(c(1.2, 0.5, 0, 0.5), "lines")
             )
 
-        pci <- ggplot(aplot_df_center, aes(x = .data[[xc]], y = Interval, 
+        pci <- ggplot(aplot_df_center, aes(x = .data[[xc]], y = Interval,
                                            color = .data[[cn]])) +
             scale_fill_npg() +
             scale_color_npg() +
             geom_line(size = 1.25) +
             ylim(ylimits_intervals) +
-            geom_vline(xintercept = 0, linetype = "dotted", color = "blue", 
+            geom_vline(xintercept = 0, linetype = "dotted", color = "blue",
                        size = 0.5) +
             theme_classic() +
             theme(legend.position = "none") +
@@ -1213,7 +1215,7 @@ draw_stacked_profile <- function(plot_df,
                 axis.line.y = element_blank(),
                 plot.margin = unit(c(0, 0.5, 1.2, 0.5), "lines")
             )
-        pc_stack <- plot_grid(pc, pci, ncol = 1, align = "v", 
+        pc_stack <- plot_grid(pc, pci, ncol = 1, align = "v",
                               rel_heights = c(1, 0.25))
     } else {
         pc_stack <- NULL
@@ -1221,7 +1223,7 @@ draw_stacked_profile <- function(plot_df,
 
     aplot_df_end <- plot_df %>%
         filter(grepl("End", Location))
-    pe <- ggplot(aplot_df_end, aes(x = .data[[xc]], y = .data[[yc]], 
+    pe <- ggplot(aplot_df_end, aes(x = .data[[xc]], y = .data[[yc]],
                                    color = .data[[cn]])) +
         scale_fill_npg() +
         scale_color_npg() +
@@ -1229,7 +1231,7 @@ draw_stacked_profile <- function(plot_df,
         ylim(ylimits) +
         geom_vline(xintercept = 0, linetype = "dotted", color = "blue",
                    size = 0.5) +
-        geom_ribbon(aes(ymin = lower, ymax = upper, fill = .data[[cn]]), 
+        geom_ribbon(aes(ymin = lower, ymax = upper, fill = .data[[cn]]),
                     linetype = 0, alpha = 0.3) +
         theme_classic() +
         theme(
@@ -1241,7 +1243,7 @@ draw_stacked_profile <- function(plot_df,
         ) +
         scale_x_continuous(limits = c(ext[3], ext[4])) +
         ggtitle("") +
-        guides(fill = "none", color = guide_legend(keyheight = 0.75)) + 
+        guides(fill = "none", color = guide_legend(keyheight = 0.75)) +
         theme(
             axis.text = element_blank(),
             axis.ticks = element_blank(),
@@ -1250,11 +1252,11 @@ draw_stacked_profile <- function(plot_df,
             plot.margin = unit(c(1.2, 1.2, 0, 0.5), "lines")
         )
 
-    if (shade) pe <- pe + annotate("rect", xmin = hl[3], xmax = hl[4], 
-                                   ymin = -Inf, ymax = Inf, fill = "grey", 
+    if (shade) pe <- pe + annotate("rect", xmin = hl[3], xmax = hl[4],
+                                   ymin = -Inf, ymax = Inf, fill = "grey",
                                    alpha = 0.3)
 
-    pei <- ggplot(aplot_df_end, aes(x = .data[[xc]], y = Interval, 
+    pei <- ggplot(aplot_df_end, aes(x = .data[[xc]], y = Interval,
                                     color = .data[[cn]])) +
         scale_fill_npg() +
         scale_color_npg() +
@@ -1263,7 +1265,7 @@ draw_stacked_profile <- function(plot_df,
         theme_classic() +
         theme(legend.position = "none") +
         xlab("3'") +
-        geom_vline(xintercept = 0, linetype = "dotted", color = "blue", 
+        geom_vline(xintercept = 0, linetype = "dotted", color = "blue",
                    size = 0.5) +
         scale_x_continuous(limits = c(ext[3], ext[4])) +
         theme(
@@ -1273,11 +1275,11 @@ draw_stacked_profile <- function(plot_df,
             axis.title.y = element_blank(),
             plot.margin = unit(c(0, 1.2, 1.2, 0.5), "lines")
         )
-    if (shade) pei <- pei + annotate("rect", xmin = hl[3], xmax = hl[4], 
-                                     ymin = -Inf, ymax = Inf, fill = "grey", 
+    if (shade) pei <- pei + annotate("rect", xmin = hl[3], xmax = hl[4],
+                                     ymin = -Inf, ymax = Inf, fill = "grey",
                                      alpha = 0.3)
 
-    pe_stack <- plot_grid(pe, pei, ncol = 1, align = "v", 
+    pe_stack <- plot_grid(pe, pei, ncol = 1, align = "v",
                           rel_heights = c(1, 0.25))
 
     if (insert > 0) {
@@ -1290,10 +1292,10 @@ draw_stacked_profile <- function(plot_df,
         }
     } else {
         if (stack) {
-            p <- plot_grid(ps_stack, pe_stack, ncol = 2, align = "h", 
+            p <- plot_grid(ps_stack, pe_stack, ncol = 2, align = "h",
                            rel_widths = c(1, 0.9))
         } else {
-            p <- plot_grid(ps, pe, ncol = 2, align = "h", 
+            p <- plot_grid(ps, pe, ncol = 2, align = "h",
                            rel_widths = c(1, 0.9))
         }
     }
@@ -1302,14 +1304,14 @@ draw_stacked_profile <- function(plot_df,
 
 #' @title Plot two-sets Venn diagram
 #'
-#' @description This is a helper function for Venn diagram plot. A Venn diagram 
-#' is plotted as output. For GRanges, as A overlap B may not be the same as B 
-#' overlap A, the order of GRanges in a list matters, certain order may produce 
+#' @description This is a helper function for Venn diagram plot. A Venn diagram
+#' is plotted as output. For GRanges, as A overlap B may not be the same as B
+#' overlap A, the order of GRanges in a list matters, certain order may produce
 #' an error.
 #' @param apair a list of two vectors
-#' @param overlap_fun the name of the function that defines overlap, depending 
-#'  on the type of object in the vectors. For GRanges, use 
-#'  \code{\link{filter_by_overlaps_stranded}} or 
+#' @param overlap_fun the name of the function that defines overlap, depending
+#'  on the type of object in the vectors. For GRanges, use
+#'  \code{\link{filter_by_overlaps_stranded}} or
 #'  \code{\link{filter_by_nonoverlaps_stranded}}, for gene names, use intersect.
 #' @param title main title of the figure
 #'
@@ -1349,7 +1351,7 @@ overlap_pair <- function(apair, overlap_fun, title = NULL) {
     )
 
     grid.draw(venn.plot)
-    grid.text(paste("Jaccard:", jaccard), unit(0.8, "npc"), unit(0.025, "npc"), 
+    grid.text(paste("Jaccard:", jaccard), unit(0.8, "npc"), unit(0.025, "npc"),
               draw = TRUE)
     grid.text(title, unit(0.25, "npc"), unit(0.975, "npc"), draw = TRUE)
     grid.newpage()
@@ -1359,14 +1361,14 @@ overlap_pair <- function(apair, overlap_fun, title = NULL) {
 
 #' @title Plot three-sets Venn diagram
 #'
-#' @description This is a helper function for Venn diagram plot. A Venn diagram 
-#' is plotted as output. For GRanges, as A overlap B may not be the same as B 
-#' overlap A, the order of GRanges in a list matters, certain order may produce 
+#' @description This is a helper function for Venn diagram plot. A Venn diagram
+#' is plotted as output. For GRanges, as A overlap B may not be the same as B
+#' overlap A, the order of GRanges in a list matters, certain order may produce
 #' an error.
 #' @param atriple a list of three vectors
-#' @param overlap_fun the name of the function that defines overlap, depending 
-#'  on the type of object in the vectors. For GRanges, use 
-#'  \code{\link{filter_by_overlaps_stranded}} or 
+#' @param overlap_fun the name of the function that defines overlap, depending
+#'  on the type of object in the vectors. For GRanges, use
+#'  \code{\link{filter_by_overlaps_stranded}} or
 #'  \code{\link{filter_by_nonoverlaps_stranded}}, for gene names, use intersect.
 #' @param title main title of the figure
 #' @return a VennDiagram object
@@ -1403,21 +1405,21 @@ overlap_pair <- function(apair, overlap_fun, title = NULL) {
 overlap_triple <- function(atriple, overlap_fun, title = NULL) {
     ## sort the gr by decreasing size to avoid n13 < n123
     sizes <- sort(vapply(atriple, length, numeric(1)), decreasing = TRUE)
-    atriple <- atriple[names(sizes)] 
+    atriple <- atriple[names(sizes)]
 
     overlap12 <- length(Reduce(overlap_fun, atriple[c(1, 2)]))
     overlap13 <- length(Reduce(overlap_fun, atriple[c(1, 3)]))
     overlap23 <- length(Reduce(overlap_fun, atriple[c(2, 3)]))
     overlap123 <- length(Reduce(overlap_fun, atriple))
-    
-    # check consistency if bed overlaps produce inconsistent values 
+
+    # check consistency if bed overlaps produce inconsistent values
     if(overlap123 > min(overlap12, overlap13, overlap23)){
       overlap123 <- min(overlap12, overlap13, overlap23)
     }
 
-    venn.plot <- draw.triple.venn(sizes[1], sizes[2], sizes[3], overlap12, 
+    venn.plot <- draw.triple.venn(sizes[1], sizes[2], sizes[3], overlap12,
                                   overlap23, overlap13, overlap123,
-                                  category = names(atriple), 
+                                  category = names(atriple),
                                   lty = rep("blank", 3),
                                   fill = c("#0020C2", "#64E986", "#990012"),
                                   cat.just = rep(list(c(0.5, 0)), 3),
@@ -1433,17 +1435,17 @@ overlap_triple <- function(atriple, overlap_fun, title = NULL) {
 
 #' @title Plot four-sets Venn diagram
 #'
-#' @description This is a helper function for Venn diagram plot. A Venn diagram 
-#' is plotted as output. For GRanges, as A overlap B may not be the same as B 
-#' overlap A, the order of GRanges in a list matters, certain order may produce 
+#' @description This is a helper function for Venn diagram plot. A Venn diagram
+#' is plotted as output. For GRanges, as A overlap B may not be the same as B
+#' overlap A, the order of GRanges in a list matters, certain order may produce
 #' an error.
 #' @param aquad a list of four vectors
-#' @param overlap_fun the name of the function that defines overlap, depending 
-#'  on the type of object in the vectors. For GRanges, use 
-#'  \code{\link{filter_by_overlaps_stranded}} or 
-#'  \code{\link{filter_by_nonoverlaps_stranded}}, for gene names, use intersect. 
+#' @param overlap_fun the name of the function that defines overlap, depending
+#'  on the type of object in the vectors. For GRanges, use
+#'  \code{\link{filter_by_overlaps_stranded}} or
+#'  \code{\link{filter_by_nonoverlaps_stranded}}, for gene names, use intersect.
 #' @param title main title of the figure
-#'  
+#'
 #' @return a VennDiagram object
 #' @author Shuye Pu
 #'
@@ -1483,7 +1485,7 @@ overlap_triple <- function(atriple, overlap_fun, title = NULL) {
 overlap_quad <- function(aquad, overlap_fun, title = NULL) {
     ## sort the gr by decreasing size to avoid n13 < n123
     sizes <- sort(vapply(aquad, length, numeric(1)), decreasing = TRUE)
-    aquad <- aquad[names(sizes)] 
+    aquad <- aquad[names(sizes)]
 
     overlap12 <- length(Reduce(overlap_fun, aquad[c(1, 2)]))
     overlap13 <- length(Reduce(overlap_fun, aquad[c(1, 3)]))
@@ -1496,8 +1498,8 @@ overlap_quad <- function(aquad, overlap_fun, title = NULL) {
     overlap134 <- length(Reduce(overlap_fun, aquad[c(1, 3, 4)]))
     overlap234 <- length(Reduce(overlap_fun, aquad[c(2, 3, 4)]))
     overlap1234 <- length(Reduce(overlap_fun, aquad))
-    
-    # check consistency if bed overlaps produce inconsistent values 
+
+    # check consistency if bed overlaps produce inconsistent values
     if(overlap123 > min(overlap12, overlap13, overlap23)){
       overlap123 <- min(overlap12, overlap13, overlap23)
     }
@@ -1510,20 +1512,20 @@ overlap_quad <- function(aquad, overlap_fun, title = NULL) {
     if(overlap234 > min(overlap23, overlap24, overlap34)){
       overlap234 <- min(overlap23, overlap24, overlap34)
     }
-    
+
     if(overlap1234 > min(overlap123, overlap124, overlap134, overlap234)){
       overlap1234 <- min(overlap123, overlap124, overlap134, overlap234)
     }
-    
-    venn.plot <- draw.quad.venn(sizes[1], sizes[2], sizes[3], sizes[4], 
-                                overlap12, overlap13, overlap14, overlap23, 
+
+    venn.plot <- draw.quad.venn(sizes[1], sizes[2], sizes[3], sizes[4],
+                                overlap12, overlap13, overlap14, overlap23,
                                 overlap24, overlap34, overlap123, overlap124,
                                 overlap134, overlap234, overlap1234,
                                 category = names(aquad),
-                                lty = rep("blank", 4), 
-                                fill = c("#0020C2", "#64E986", "#990012", 
-                                         "#c6dcff"),  
-                                cat.just = rep(list(c(0.5, 0)), 4), 
+                                lty = rep("blank", 4),
+                                fill = c("#0020C2", "#64E986", "#990012",
+                                         "#c6dcff"),
+                                cat.just = rep(list(c(0.5, 0)), 4),
                                 cex = rep(2, 15), cat.pos = c(0, 0, 0, 0)
     )
 
