@@ -460,10 +460,17 @@ plot_locus_with_random <- function(queryFiles,
                     rm <- rml[[rLs[i]]][[centerLabel]][[regionName]]
                     im <- iml[[inputLabels[i]]][[centerLabel]][[regionName]]
 
-                    fullMatrix <- ratio_over_input(rm, im, verbose)
+                    ## if the values are not log transformed, compute ratio directly,
+                    ## otherwise, compute log of ratio by taking difference of the
+                    ## log transformed values
+                    if (is.na(transform)) {
+                        fullMatrix <- ratio_over_input(rm, im, verbose)
 
-                    fullMatrix <- process_scoreMatrix(
-                        fullMatrix, scale, rmOutlier, transform, verbose)
+                        fullMatrix <- process_scoreMatrix(
+                            fullMatrix, scale, rmOutlier, transform, verbose)
+                    }else{
+                        fullMatrix <- rm - im
+                    }
 
                     rml[[rLs[i]]][[centerLabel]][[regionName]] <- fullMatrix
 

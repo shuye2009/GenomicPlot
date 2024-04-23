@@ -1,3 +1,6 @@
+# CHANGES IN VERSION 1.0.9
+   - Fixed a bug in plot_region
+   
 # CHANGES IN VERSION 1.0.8
    - Allow visualization and analysis to be limited to specific chromosomes
    - Show heatmap row names only when the number of rows <= 30

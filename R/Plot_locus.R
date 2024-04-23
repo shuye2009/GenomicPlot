@@ -542,8 +542,9 @@ plot_locus <- function(queryFiles,
                     inputMatrix_list[[inputLabels[i]]][[centerLabel]], verbose)
 
                 fullMatrix <- process_scoreMatrix(
-                    fullMatrix, scale, rmOutlier, transform = transform,
+                    fullMatrix, scale, rmOutlier, transform = NA,
                     verbose = verbose)
+
                 colnames(fullMatrix) <- as.character(colLabel)
 
                 ratioMatrix_list[[ratiolabels[i]]][[centerLabel]] <- fullMatrix
