@@ -1,3 +1,6 @@
+# CHANGES IN VERSION 1.0.10
+   - Handle NCBI style of seqlevels (seqname)
+
 # CHANGES IN VERSION 1.0.9
    - Fixed a bug in plot_region
    
