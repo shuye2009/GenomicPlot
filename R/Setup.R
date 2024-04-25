@@ -13,7 +13,7 @@ utils::globalVariables(
 #' @importFrom GenomicAlignments readGAlignments
 #' @importFrom GenomeInfoDb Seqinfo seqinfo seqlevels seqnames seqinfo<-
 #' @importFrom GenomeInfoDb seqlevels<- seqnames<- keepStandardChromosomes
-#' @importFrom GenomeInfoDb seqlengths
+#' @importFrom GenomeInfoDb seqlengths seqlevelsStyle seqlevelsStyle<-
 #' @importFrom rtracklayer export.bed import.bw wigToBigWig asBED
 #' @importFrom RCAS importGtf queryGff
 #' @importFrom ggpubr ggtexttable ttheme tab_add_title

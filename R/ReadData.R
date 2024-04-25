@@ -458,17 +458,11 @@ handle_bed <- function(inputFile,
     }
 
     ## make input comply with GenomeInfoDb
+    if("NCBI" %in% seqlevelsStyle(queryRegions)){
+        seqlevelsStyle(queryRegions) <- "UCSC"
+    }
     seqInfo <- set_seqinfo(importParams$genome)
 
-    if (c("chr1") %in% as.vector(seqnames(queryRegions))
-        && seqnames(seqInfo)[1] == "1") {
-        seqnames(seqInfo) <- paste0("chr", seqnames(seqInfo))
-        seqnames(seqInfo)[25] <- "chrM"
-    } else if (c("1") %in% as.vector(seqnames(queryRegions))
-               && seqnames(seqInfo)[1] == "chr1") {
-        seqnames(seqInfo) <- gsub("chr", "", seqnames(seqInfo))
-        seqnames(seqInfo)[25] <- "MT"
-    }
     queryRegions <- queryRegions[as.vector(seqnames(queryRegions))
                                  %in% seqnames(seqInfo)]
     seqlevels(queryRegions) <- seqlevels(seqInfo)
@@ -569,6 +563,9 @@ handle_bedGraph <- function(inputFile,
     }
 
     ## make input comply with GenomeInfoDb
+    if("NCBI" %in% seqlevelsStyle(queryRegions)){
+        seqlevelsStyle(queryRegions) <- "UCSC"
+    }
     seqInfo <- set_seqinfo(importParams$genome)
 
     queryRegions <- queryRegions[as.vector(seqnames(queryRegions))
@@ -678,6 +675,10 @@ handle_bam <- function(inputFile, importParams = NULL, verbose = FALSE) {
 
     ## make input comply with GenomeInfoDb, use cached chromInfo to avoid
     ## dependency on UCSC web service
+    if("NCBI" %in% seqlevelsStyle(queryRegions)){
+        seqlevelsStyle(queryRegions) <- "UCSC"
+    }
+
     seqInfo <- set_seqinfo(importParams$genome)
     queryRegions <- queryRegions[as.vector(seqnames(queryRegions))
                                  %in% seqnames(seqInfo)]
@@ -766,6 +767,9 @@ handle_bw <- function(inputFile, importParams, verbose = FALSE) {
     }
 
     ## make input comply with GenomeInfoDb
+    if("NCBI" %in% seqlevelsStyle(queryRegions)){
+        seqlevelsStyle(queryRegions) <- "UCSC"
+    }
     seqInfo <- set_seqinfo(importParams$genome)
     queryRegions <- queryRegions[as.vector(seqnames(queryRegions))
                                  %in% seqnames(seqInfo)]
