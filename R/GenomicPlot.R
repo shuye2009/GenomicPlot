@@ -105,6 +105,7 @@ plot_overlap_bed <- function(bedList,
         pdf(paste0(outPrefix, ".pdf"), width = hw[2], height = hw[1])
     }
 
+    if(verbose) message("[plot_overlap_bed] started ...\n")
     functionName <- as.character(match.call()[[1]])
     params <- plot_named_list(as.list(environment()))
     force(params)
@@ -172,6 +173,7 @@ plot_overlap_bed <- function(bedList,
         print(params)
         on.exit(dev.off(), add = TRUE)
     }
+    if(verbose) message("[plot_overlap_bed] finished!\n")
 }
 
 #' @title Plot Venn diagrams depicting overlap of gene lists

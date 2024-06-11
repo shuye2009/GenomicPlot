@@ -1,3 +1,7 @@
+# CHANGES IN VERSION 1.2.2
+   - Fixed a bug in prepare_3parts_genomic_features
+   - Add messages to each function 
+   
 # CHANGES IN VERSION 1.2.1
    - Updated dependency on R >= 4.4.0 and genomation >= 1.36.0
 

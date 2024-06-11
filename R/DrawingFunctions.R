@@ -53,7 +53,7 @@ draw_matrix_heatmap <- function(fullMatrix,
     fullMatrix <- rank_rows(fullMatrix, ranking)
 
     if (verbose) {
-        message("Drawing heatmap\n")
+        message("[draw_matrix_heatmap] Drawing heatmap ...\n")
         vdataName <- gsub(":|/|,|\\.|\\s", "_", dataName, fixed = FALSE)
         ## replace characters not allowed in file names
         write.table(fullMatrix, paste(vdataName, "_matrix.tab", sep = ""),
@@ -106,6 +106,7 @@ draw_matrix_heatmap <- function(fullMatrix,
         column_title_side = "bottom"
     )
 
+    message("[draw_matrix_heatmap] finished!\n")
     return(h)
 }
 
@@ -289,6 +290,7 @@ draw_region_profile <- function(plot_df,
                                 Ylab = "Signal Intensity",
                                 vx) {
     stopifnot(c(xc, yc, cn) %in% colnames(plot_df))
+    message("[draw_region_profile] started ...\n")
     p <- ggplot(plot_df, aes(x = .data[[xc]], y = .data[[yc]],
                              color = .data[[cn]])) +
         scale_fill_npg() +
@@ -313,6 +315,7 @@ draw_region_profile <- function(plot_df,
     if(!is.null(sn))
         p <- p + ggtitle(paste(unique(plot_df[[sn]]), collapse = ", "))
 
+    message("[draw_region_profile] finished!\n")
     return(p)
 }
 
@@ -364,6 +367,8 @@ draw_locus_profile <- function(plot_df,
                                shade = FALSE,
                                hl = c(0, 0)) {
     stopifnot(c(xc, yc, cn) %in% colnames(plot_df))
+
+  message("[draw_locus_profile] started ...\n")
     p <- ggplot(plot_df, aes(x = .data[[xc]], y = .data[[yc]],
                              color = .data[[cn]])) +
         scale_fill_npg() +
@@ -390,6 +395,7 @@ draw_locus_profile <- function(plot_df,
                                  ymin = -Inf, ymax = Inf, fill = "grey",
                                  color = "grey", alpha = 0.3)
 
+    message("[draw_locus_profile] finished\n")
     return(p)
 }
 

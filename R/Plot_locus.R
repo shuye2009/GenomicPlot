@@ -132,6 +132,8 @@ plot_locus <- function(queryFiles,
     stopifnot(is.numeric(c(ext, hl, binSize, nc, hw, rmOutlier)))
     stopifnot(transform %in% c("log", "log2", "log10", NA))
     stopifnot(all(file.exists(queryFiles)))
+
+    if (verbose) message("[plot_locus] started ...\n")
     if (is.null(names(queryFiles)) || any(names(queryFiles) == ""))
         stop("Each file must have a name attribute!")
 
@@ -219,7 +221,7 @@ plot_locus <- function(queryFiles,
         }
     }
 
-    if (verbose) message("Preparing centers...\n")
+    if (verbose) message("[plot_locus] Preparing centers...\n")
     centerLabels <- names(centerInputs)
     centerList <- list()
 
@@ -247,7 +249,7 @@ plot_locus <- function(queryFiles,
     }
 
 
-    if (verbose) message("Computing coverage for Sample...\n")
+    if (verbose) message("[plot_locus] Computing coverage for Sample...\n")
 
     for (queryLabel in queryLabels) {
         myInput <- queryInputs[[queryLabel]]
@@ -293,7 +295,7 @@ plot_locus <- function(queryFiles,
     Ylab <- ifelse(!is.na(transform) && is.null(inputFiles),
                    paste0(transform, " (", Ylab, ")"), Ylab)
 
-    if (verbose) message("Collecting coverage data...\n")
+    if (verbose) message("[plot_locus] Collecting coverage data...\n")
     ## plot multiple bed files on each center
 
     for (queryLabel in queryLabels) {
@@ -365,7 +367,7 @@ plot_locus <- function(queryFiles,
                    .keep = "all")
     }
 
-    if (verbose) message("Plotting profile and boxplot...\n")
+    if (verbose) message("[plot_locus] Plotting profile and boxplot...\n")
 
     plot_list <- list()
     queryLabels <- queryLabels[!queryLabels %in% inputLabels]
@@ -527,7 +529,7 @@ plot_locus <- function(queryFiles,
         draw_stacked_plot(plot_list, heatmap_list[names(plot_list)])
 
 
-        if (verbose) message("Computing Ratio over input...\n")
+        if (verbose) message("[plot_locus] Computing Ratio over input...\n")
         Ylab <- ifelse(is.na(transform), "Ratio-over-Input",
                        paste0(transform, " (Ratio-over-Input)"))
 
@@ -554,7 +556,7 @@ plot_locus <- function(queryFiles,
         stat_df <- list()
         heatmap_list <- list()
         ## plot multiple bed files on each center
-        if (verbose) message("Collecting ratio data...\n")
+        if (verbose) message("[plot_locus] Collecting ratio data...\n")
 
         for (ratiolabel in ratiolabels) {
             if (verbose) message("Ratio label: ", ratiolabel, "\n")
@@ -629,7 +631,7 @@ plot_locus <- function(queryFiles,
                        .keep = "all")
         }
 
-        if (verbose) message("Plotting ratio profile and boxplot...\n")
+        if (verbose) message("[plot_locus] Plotting ratio profile and boxplot...\n")
         plot_list <- list()
         for (i in seq_along(ratiolabels)) {
             for (beds in combn(ratiolabels, i, simplify = FALSE)) {
@@ -715,5 +717,6 @@ plot_locus <- function(queryFiles,
         on.exit(dev.off(), add = TRUE)
     }
 
+    if (verbose) message("[plot_locus] finished!\n")
     invisible(list("plot" = mplot_dt, "stat" = mstat_dt))
 }

@@ -137,6 +137,7 @@ plot_locus_with_random <- function(queryFiles,
     if (is.null(names(queryFiles)) || any(names(queryFiles) == ""))
         stop("Each file must have a name attribute!")
 
+    if (verbose) message("[plot_locus_with_random] started ...\n")
     functionName <- as.character(match.call()[[1]])
     params <- plot_named_list(as.list(environment()))
     force(params)
@@ -594,4 +595,5 @@ plot_locus_with_random <- function(queryFiles,
         print(params)
         on.exit(dev.off(), add = TRUE)
     }
+    if (verbose) message("[plot_locus_with_random] finished!\n")
 }

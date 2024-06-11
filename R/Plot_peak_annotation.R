@@ -66,6 +66,7 @@ plot_peak_annotation <- function(peakFile,
     if (is.null(names(peakFile)) || any(names(peakFile) == ""))
         stop("Each file must have a name attribute!")
 
+    if (verbose) message("[plot_peak_annotation] started ...\n")
     functionName <- as.character(match.call()[[1]])
     params <- plot_named_list(as.list(environment()))
     force(params)
@@ -203,6 +204,7 @@ plot_peak_annotation <- function(peakFile,
             on.exit(dev.off(), add = TRUE)
             if (verbose) sink()
         }
+        if (verbose) message("[plot_peak_annotation] finished!\n")
         invisible(list(annotation = NULL, stat = df, simplified = NULL))
     } else {
         if (verbose) message("Collecting gene info...\n")
@@ -444,6 +446,7 @@ plot_peak_annotation <- function(peakFile,
             print(params)
             on.exit(dev.off(), add = TRUE)
         }
+        if (verbose) message("[plot_peak_annotation] finished!\n")
         invisible(list(annotation = dfs, stat = dfa, simplified = dfb))
     }
 }

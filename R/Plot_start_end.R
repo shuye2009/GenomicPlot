@@ -115,6 +115,7 @@ plot_start_end <- function(queryFiles,
     if (is.null(names(queryFiles)) || any(names(queryFiles) == ""))
         stop("Each file must have a name attribute!")
 
+    if (verbose) message("[plot_start_end] started ...\n")
     functionName <- as.character(match.call()[[1]])
     params <- plot_named_list(as.list(environment()))
     force(params)
@@ -467,5 +468,6 @@ plot_start_end <- function(queryFiles,
         on.exit(dev.off(), add = TRUE)
     }
 
+    if (verbose) message("[plot_start_end] finished!\n")
     invisible(plot_df)
 }

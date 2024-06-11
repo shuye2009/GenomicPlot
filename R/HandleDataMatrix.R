@@ -69,7 +69,7 @@ rank_rows <- function(fullmatrix,
 
 inspect_matrix <- function(fullmatrix,
                            verbose = FALSE) {
-    if (verbose) message("Inspecting matrix\n")
+    if (verbose) message("[inspect_matrix] started\n")
     size <- nrow(fullmatrix) * ncol(fullmatrix)
     n_infinite <- sum(is.infinite(fullmatrix))
     n_NA <- sum(is.na(fullmatrix))
@@ -83,7 +83,10 @@ inspect_matrix <- function(fullmatrix,
     stat_df <- data.frame(n_invalid, fraction_invalid)
     rownames(stat_df) <- c("infinite", "NA", "NaN", "zero", "negative")
 
-    if (verbose) print(stat_df)
+    if (verbose){
+        print(stat_df)
+        message("[inspect_matrix] finished\n")
+    }
 
     invisible(stat_df)
 }
@@ -122,7 +125,7 @@ impute_hm <- function(fullmatrix,
         return(fullmatrix)
     }
     if (verbose) {
-        message("Imputing missing values...\nMatrix quartiles:\n")
+        message("[impute_hm] Imputing missing values...\nMatrix quartiles:\n")
         message(paste(quantile(fullmatrix), collapse = " "), "\n")
     }
 
@@ -136,6 +139,7 @@ impute_hm <- function(fullmatrix,
         message("\nMatrix quantiles after imputing:\n")
         message(paste(quantile(fullmatrix), collapse = " "), "\n")
         message("The imputed value is: ", halfmin, "\n")
+        message("[impute_hm] finished!\n")
     }
 
     return(fullmatrix)
@@ -202,6 +206,7 @@ process_scoreMatrix <- function(fullmatrix,
     stopifnot(is.logical(scale))
     stopifnot(transform %in% c("log", "log2", "log10", NA))
 
+    if(verbose) message("[process_scoreMatrix] started ...\n")
     if(is.null(nrow(fullmatrix))) fullmatrix <- matrix(fullmatrix, nrow = 1)
 
     inspect_matrix(fullmatrix, verbose = verbose)
@@ -258,6 +263,7 @@ process_scoreMatrix <- function(fullmatrix,
     fullmatrix[is.na(fullmatrix)] <- 0
     if(is.null(nrow(fullmatrix))) fullmatrix <- matrix(fullmatrix, nrow = 1)
 
+    if(verbose) message("[process_scoreMatrix] finished!\n")
     invisible(fullmatrix)
 }
 

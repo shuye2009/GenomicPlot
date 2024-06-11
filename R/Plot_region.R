@@ -119,6 +119,7 @@ plot_region <- function(queryFiles,
     if (is.null(names(queryFiles)) || any(names(queryFiles) == ""))
         stop("Each file must have a name attribute!")
 
+    if (verbose) message("[plot_region] started ...\n")
     functionName <- as.character(match.call()[[1]])
     params <- plot_named_list(as.list(environment()))
     force(params)
@@ -719,5 +720,6 @@ plot_region <- function(queryFiles,
         on.exit(dev.off(), add = TRUE)
     }
 
+    if (verbose) message("[plot_region] finished!\n")
     invisible(mplot_df)
 }

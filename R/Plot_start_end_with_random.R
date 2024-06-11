@@ -127,6 +127,7 @@ plot_start_end_with_random <- function(queryFiles,
     if (is.null(names(queryFiles)) || any(names(queryFiles) == ""))
         stop("Each file must have a name attribute!")
 
+    if (verbose) message("[plot_start_end_with_random] started ...\n")
     functionName <- as.character(match.call()[[1]])
     params <- plot_named_list(as.list(environment()))
     force(params)
@@ -577,5 +578,6 @@ plot_start_end_with_random <- function(queryFiles,
         on.exit(dev.off(), add = TRUE)
     }
 
+    if (verbose) message("[plot_start_end_with_random] finished!\n")
     invisible(plot_df)
 }

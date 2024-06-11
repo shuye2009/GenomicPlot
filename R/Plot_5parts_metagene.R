@@ -97,6 +97,7 @@ plot_5parts_metagene <- function(queryFiles,
     if (is.null(names(queryFiles)) || any(names(queryFiles) == ""))
         stop("Each file must have a name attribute!")
 
+    if (verbose) message("[plot_5parts_metagene] started ...\n")
     functionName <- as.character(match.call()[[1]])
     params <- plot_named_list(as.list(environment()))
     force(params)
@@ -425,7 +426,7 @@ plot_5parts_metagene <- function(queryFiles,
         print(params)
         on.exit(dev.off(), add = TRUE)
         if (verbose) {
-            message("plot_5parts_metagene runs successfully!\n")
+            message("[plot_5parts_metagene] runs successfully!\n")
         }
     }
 

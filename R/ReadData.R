@@ -148,6 +148,7 @@ handle_input <- function(inputFiles,
         stop("Each file must have a name attribute!")
     if (is.null(importParams)) importParams <- setImportParams()
 
+    if (verbose) message("[handle_input] started ...\n")
     original_outRle <- importParams$outRle
     if (importParams$useSizeFactor && length(inputFiles) > 1) {
         importParams$outRle <- FALSE
@@ -259,6 +260,7 @@ handle_input <- function(inputFiles,
             x
         })
     }
+    if (verbose) message("[handle_input] finished!\n")
     invisible(outlist)
 }
 
@@ -399,6 +401,7 @@ handle_bed <- function(inputFile,
     stopifnot(file.exists(inputFile))
     if (is.null(names(inputFile)) || names(inputFile) == "")
         stop("Each file must have a name attribute!")
+    if (verbose) message("[handle_bed] started ...\n")
     beddata <- read.delim2(inputFile, header = FALSE, comment.char = "#")
 
     nco <- ncol(beddata)
@@ -475,6 +478,7 @@ handle_bed <- function(inputFile,
         seqinfo(queryRegions) <- seqInfo
     }
 
+    if (verbose) message("[handle_bed] finished!\n")
     invisible(list("query" = queryRegions, "size" = libsize, "type" = "bed",
                    "weight" = weight_col))
 }
@@ -519,6 +523,8 @@ handle_bedGraph <- function(inputFile,
     stopifnot(file.exists(inputFile))
     if (is.null(names(inputFile)) || names(inputFile) == "")
         stop("Each file must have a name attribute!")
+
+    if (verbose) message("[handle_bedGraph] started ...\n")
     beddata <- read.delim2(inputFile, header = FALSE, comment.char = "#",
                            skip = importParams$skip)
 
@@ -580,6 +586,7 @@ handle_bedGraph <- function(inputFile,
         seqinfo(queryRegions) <- seqInfo
     }
 
+    if (verbose) message("[handle_bedGraph] finished!\n")
     invisible(list("query" = queryRegions, "size" = libsize, "type" = "bedGraph",
                    "weight" = weight_col))
 }
@@ -631,6 +638,7 @@ handle_bam <- function(inputFile, importParams = NULL, verbose = FALSE) {
     if (is.null(names(inputFile)) || names(inputFile) == "")
         stop("Each file must have a name attribute!")
 
+    if (verbose) message("[handle_bam] started ...\n")
     paired.end <- testPairedEndBam(inputFile)
     if (paired.end) {
         flag <- scanBamFlag(isPaired = TRUE, isProperPair = TRUE,
@@ -690,6 +698,7 @@ handle_bam <- function(inputFile, importParams = NULL, verbose = FALSE) {
         seqinfo(queryRegions) <- seqInfo
     }
 
+    if (verbose) message("[handle_bam] finished!\n")
     invisible(list("query" = queryRegions, "size" = libsize, "type" = "bam",
                    "weight" = weight_col))
 }
@@ -739,6 +748,7 @@ handle_bw <- function(inputFile, importParams, verbose = FALSE) {
     if (is.null(names(inputFile)) || names(inputFile) == "")
         stop("Each file must have a name attribute!")
 
+    if (verbose) message("[handle_bw] started ...\n")
     weight_col <- "score"
     libsize <- NULL
 
@@ -783,6 +793,7 @@ handle_bw <- function(inputFile, importParams, verbose = FALSE) {
         GenomeInfoDb::seqinfo(queryRegions) <- seqInfo
     }
 
+    if (verbose) message("[handle_bw] finished!\n")
     invisible(list("query" = queryRegions, "size" = libsize, "type" = "bw",
                    "weight" = weight_col))
 }
@@ -833,6 +844,7 @@ handle_wig <- function(inputFile,
     if (is.null(names(inputFile)) || names(inputFile) == "")
         stop("Each file must have a name attribute!")
 
+    if (verbose) message("[handle_wig] started ...\n")
     neg_file <- find_mate(inputFile, verbose)
     stranded <- ifelse(!is.null(neg_file), TRUE, FALSE)
 
@@ -847,6 +859,7 @@ handle_wig <- function(inputFile,
 
     out <- handle_bw(bwfile, importParams, verbose)
 
+    if (verbose) message("[handle_wig] finished!\n")
     invisible(out)
 }
 

@@ -30,6 +30,7 @@
 #'
 #'
 extract_longest_tx <- function(txdb) {
+    message("[extract_longest_tx]")
     tl <- GenomicFeatures::transcriptLengths(txdb, with.utr5_len = TRUE,
                                              with.cds_len = TRUE,
                                              with.utr3_len = TRUE)
@@ -102,6 +103,7 @@ extract_longest_tx <- function(txdb) {
 #' @export set_seqinfo
 #'
 set_seqinfo <- function(genome = "hg19") {
+    message("[set_seqinfo]")
     if(grepl("GRCh37", genome)) genome <- "hg19"
     if(grepl("GRCh38", genome)) genome <- "hg38"
 
@@ -138,6 +140,7 @@ custom_TxDb_from_GTF <- function(gtfFile, genome = "hg19") {
     if(grepl("GRCh37", genome)) genome <- "hg19"
     if(grepl("GRCh38", genome)) genome <- "hg38"
 
+    message("[custom_TxDb_from_GTF]")
     chromInfo <- set_seqinfo(genome)
     gff <- RCAS::importGtf(saveObjectAsRds = TRUE, filePath = gtfFile)
     gff <- gff[as.vector(seqnames(gff)) %in% seqlevels(chromInfo)]
@@ -206,6 +209,7 @@ get_genomic_feature_coordinates <- function(txdb,
                                             protein_coding = FALSE) {
     stopifnot(featureName %in% c("utr3", "utr5", "cds", "intron", "exon",
                                  "transcript", "gene"))
+    message("[get_genomic_feature_coordinates] for ", featureName)
     if (is.null(featureSource)) {
         featureSource <- "unknown_source"
     }
@@ -290,6 +294,7 @@ get_genomic_feature_coordinates <- function(txdb,
                 export.bed(gr_feature_longest, outfile)
             }
         }
+        message("[get_genomic_feature_coordinates] for ", featureName, " finished!\n")
         invisible(list("GRanges" = gr_feature_longest,
                        "GRangesList" = feature_longest, "Output" = outfile))
     } else {
@@ -327,6 +332,7 @@ get_genomic_feature_coordinates <- function(txdb,
                 export.bed(gr_feature, outfile)
             }
         }
+        message("[get_genomic_feature_coordinates] for ", featureName, " finished!\n")
         invisible(list("GRanges" = gr_feature, "GRangesList" = feature,
                        "Output" = outfile))
     }
@@ -384,7 +390,8 @@ prepare_3parts_genomic_features <- function(txdb,
     stopifnot(featureName %in% c("utr3", "utr5", "cds", "transcript"))
     stopifnot(is.numeric(c(nbins, fiveP, threeP)))
     stopifnot(fiveP <= 0 && threeP >= 0)
-    if (verbose) message("Preparing features ...\n")
+    if (verbose)
+        message("[prepare_3parts_genomic_features] started ...\n")
 
     ## prepare transcripts that are suitable for overlap
     if (featureName %in% c("utr5", "cds", "utr3")) {
@@ -416,7 +423,7 @@ prepare_3parts_genomic_features <- function(txdb,
     wf <- vapply(as.list(width(feature)), sum, numeric(1))
     means <- c(promoter = -fiveP, median(wf), TTS = threeP)
     scaled_bins <- round(means * nbins / sum(means))
-    selected_tx <- names(feature[wf > scaled_bins[2]])
+    sel_tx <- names(feature[wf > scaled_bins[2]]) # selected_tx
 
     promoter <- flank(gn$GRanges, width = -fiveP, both = FALSE, start = TRUE,
                       ignore.strand = FALSE)
@@ -426,11 +433,12 @@ prepare_3parts_genomic_features <- function(txdb,
     promoter <- check_constraints(promoter, genome = txdb$user_genome[1])
     TTS <- check_constraints(TTS, genome = txdb$user_genome[1])
 
+    sel_tx <- sel_tx[sel_tx %in% intersect(names(promoter), names(TTS))]
     windowRs <- list(
         as(split(promoter, as.factor(names(promoter))),
-           "GRangesList")[selected_tx],
-        feature[selected_tx],
-        as(split(TTS, as.factor(names(TTS))), "GRangesList")[selected_tx]
+           "GRangesList")[sel_tx],
+        feature[sel_tx],
+        as(split(TTS, as.factor(names(TTS))), "GRangesList")[sel_tx]
     )
 
     names(windowRs) <- featureNames
@@ -443,6 +451,7 @@ prepare_3parts_genomic_features <- function(txdb,
             "Number of transcripts: ",
             paste(vapply(windowRs, length, numeric(1)), collapse = " "), "\n"
         )
+        message("[prepare_3parts_genomic_features] finished!\n")
     }
 
     invisible(list(
@@ -498,7 +507,8 @@ prepare_5parts_genomic_features <- function(txdb,
     ## prepare transcripts
     stopifnot(is.numeric(c(nbins, fiveP, threeP)))
     stopifnot(fiveP <= 0 && threeP >= 0)
-    if (verbose) message("Preparing genomic features ...\n")
+    if (verbose)
+        message("[prepare_5parts_genomic_features] started ...\n")
     five <- fiveP / 1000
     five <- paste0(five, "Kb")
     if (fiveP == 0) five <- "-0Kb"
@@ -582,6 +592,7 @@ prepare_5parts_genomic_features <- function(txdb,
         message("Number of transcripts: ",
             paste(vapply(windowRs, length, numeric(1)), collapse = " "), "\n"
         )
+        message("[prepare_5parts_genomic_features] finished!\n")
     }
 
     invisible(list("windowRs" = windowRs, "nbins" = nbins,
@@ -624,6 +635,7 @@ get_txdb_features <- function(txdb,
                               nc = 2) {
     stopifnot(is.numeric(c(dsTSS, fiveP, threeP)))
     stopifnot(fiveP <= 0 && threeP >= 0)
+    message("[get_txdb_features]")
     utr5 <- get_genomic_feature_coordinates(txdb, "utr5", longest = TRUE,
                                             protein_coding = TRUE)
     utr3 <- get_genomic_feature_coordinates(txdb, "utr3", longest = TRUE,
@@ -765,6 +777,7 @@ get_targeted_genes <- function(peak,
         return(pre)
     }
 
+    message("[get_targeted_genes]")
     num_peaks <- length(peak)
     num_genes <- length(unique(features$CDS$tx_name))
 
@@ -879,6 +892,7 @@ make_subTxDb_from_GTF <- function(gtfFile,
                                   genome = "hg19",
                                   geneList,
                                   geneCol = 1) {
+    message("[make_subTxDb_from_GTF] ", gtfFile)
     gff <- RCAS::importGtf(saveObjectAsRds = TRUE, filePath = gtfFile)
     if (length(geneList) == 1) {
         if (file.exists(geneList)) {
@@ -929,6 +943,7 @@ make_subTxDb_from_GTF <- function(gtfFile,
 gene2tx <- function(gtfFile,
                     geneList,
                     geneCol = 1) {
+    message("[gene2tx]")
     gff <- RCAS::importGtf(saveObjectAsRds = TRUE,
                            readFromRds = FALSE, filePath = gtfFile)
 
@@ -981,6 +996,7 @@ gene2tx <- function(gtfFile,
 check_constraints <- function(gr, genome, queryRle = NULL) {
     stopifnot(is.character(genome))
 
+    message("[check_constraints]")
     seqInfo <- set_seqinfo(genome)
     len <- seqlengths(seqInfo)
 
@@ -1042,6 +1058,7 @@ check_constraints <- function(gr, genome, queryRle = NULL) {
 filter_by_overlaps_stranded <- function(query, subject, maxgap = -1L,
                                         minoverlap = 0L, ignore.order = TRUE)
     {
+    message("[filter_by_overlaps_stranded]")
     plus_query <- query[strand(query) == "+"]
     minus_query <- query[strand(query) == "-"]
     plus_subject <- subject[strand(subject) == "+"]
@@ -1110,6 +1127,7 @@ filter_by_overlaps_stranded <- function(query, subject, maxgap = -1L,
 filter_by_nonoverlaps_stranded <- function(query, subject,  maxgap = -1L,
                                            minoverlap = 0L,
                                            ignore.order = TRUE) {
+    message("[filter_by_nonoverlaps_stranded]")
     overlaps <- filter_by_overlaps_stranded(query, subject, maxgap = maxgap,
                                             minoverlap = minoverlap,
                                             ignore.order = ignore.order)
@@ -1155,6 +1173,7 @@ filter_by_nonoverlaps_stranded <- function(query, subject,  maxgap = -1L,
 filter_by_overlaps_nonstranded <- function(query, subject, maxgap = -1L,
                                         minoverlap = 0L, ignore.order = TRUE)
 {
+    message("[filter_by_overlaps_nonstranded]\n")
     overlaps <- filter_by_overlaps(query, subject, maxgap = maxgap,
                                    minoverlap = minoverlap)
 

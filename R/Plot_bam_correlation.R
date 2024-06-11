@@ -47,6 +47,7 @@ plot_bam_correlation <- function(bamFiles,
     if (is.null(names(bamFiles)) || any(names(bamFiles) == ""))
         stop("Each file must have a name attribute!")
 
+    if(verbose) message("[plot_bam_correlation] started ...\n")
     functionName <- as.character(match.call()[[1]])
     params <- plot_named_list(as.list(environment()))
     force(params)
@@ -203,5 +204,6 @@ plot_bam_correlation <- function(bamFiles,
         on.exit(dev.off(), add = TRUE)
     }
 
+    if(verbose) message("[plot_bam_correlation] finished!\n")
     invisible(df)
 }
