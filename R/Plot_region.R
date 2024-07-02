@@ -293,7 +293,7 @@ plot_region <- function(queryFiles,
                                                           bin_num, bin_op,
                                                           weight_col, stranded,
                                                           nc = nc)
-                    rownames(fullMatrix) <- names(windowR)
+                    #rownames(fullMatrix) <- names(windowR)
                     sml[[queryLabel]][[centerLabel]][[w]] <- fullMatrix
                 }
             }

@@ -130,11 +130,6 @@ parallel_scoreMatrixBin <- function(queryRegions,
                                     nc = 2) {
 
     stopifnot(is.numeric(c(bin_num, nc)))
-    call_scoreMatrixBin <- function(windowR) {
-        ScoreMatrixBin(target = queryRegions, windows = windowR,
-                       bin.num = bin_num, bin.op = bin_op,
-                       weight.col = weight_col, strand.aware = stranded)
-    }
 
     cl <- start_parallel(nc)
     wRs <- split(windowRs, factor(cut(seq_along(windowRs), breaks = nc)))
@@ -155,6 +150,7 @@ parallel_scoreMatrixBin <- function(queryRegions,
         y
     })
     smdt <- Reduce(rbind, sm)
+    rownames(smdt) <- names(windowRs)
 
     invisible(smdt)
 }
