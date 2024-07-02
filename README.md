@@ -25,7 +25,7 @@ or the latest build from [GitHub](https://github.com/shuye2009/GenomicPlot) with
 ``` r
 if (!require("remotes", quietly = TRUE))
    install.packages("remotes")
-remotes::install_github("shuye2009/GenomicPlot", ref = "RELEASE_3_18")
+remotes::install_github("shuye2009/GenomicPlot", ref = "RELEASE_3_19")
 ```
 
 You can install the development version of GenomicPlot from Bioconductor:
