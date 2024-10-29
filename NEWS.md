@@ -1,3 +1,7 @@
+# CHANGES IN VERSION 1.3.5
+   - Fix a bug in maploss calculation in make_subTxDb_from_GTF.
+   - Fix user-genome issue in make_subTxDb_from_GTF
+
 # CHANGES IN VERSION 1.3.4
    - Modify pseudo count for ratio matrix
    

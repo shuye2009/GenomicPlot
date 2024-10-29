@@ -893,6 +893,10 @@ make_subTxDb_from_GTF <- function(gtfFile,
                                   geneList,
                                   geneCol = 1) {
     message("[make_subTxDb_from_GTF] ", gtfFile)
+    if(grepl("GRCh37", genome)) genome <- "hg19"
+    if(grepl("GRCh38", genome)) genome <- "hg38"
+    chromInfo <- set_seqinfo(genome)
+
     gff <- RCAS::importGtf(saveObjectAsRds = TRUE, filePath = gtfFile)
     if (length(geneList) == 1) {
         if (file.exists(geneList)) {
@@ -904,13 +908,14 @@ make_subTxDb_from_GTF <- function(gtfFile,
     }
 
     subgff <- gff[gff$gene_name %in% geneList]
-    maploss <- length(geneList) - length(subgff)
+    maploss <- length(geneList) - length(unique(subgff$gene_name))
     message("In make_subTxDb_from_GTF, number of gene symbols failed to map: ",
             maploss, "\n")
 
-    txdb <- txdbmaker::makeTxDbFromGRanges(subgff,
-                                   metadata = data.frame(name = "genome",
-                                                         value = genome))
+    subgff <- subgff[as.vector(seqnames(subgff)) %in% seqlevels(chromInfo)]
+    seqlevels(subgff) <- seqlevels(chromInfo)
+    seqinfo(subgff) <- chromInfo
+    txdb <- txdbmaker::makeTxDbFromGRanges(subgff)
 
     return(txdb)
 }
