@@ -88,26 +88,34 @@ draw_matrix_heatmap <- function(fullMatrix,
         }
     }
 
-    h <- Heatmap(fullMatrix,
-        name = "Value",
-        col = colorRamp2(ranges, c("#151B54", "#F5F5F5", "#dd5d16")),
-        bottom_annotation = ha,
-        heatmap_legend_param = list(legend_direction = "horizontal",
-                                    title_position = "leftcenter"),
-        show_row_names = showRN,
-        show_column_names = FALSE,
-        show_row_dend = FALSE,
-        cluster_columns = FALSE,
-        cluster_rows = FALSE,
-        column_split = features,
-        column_gap = unit(0, "mm"),
-        column_title = "%s",
-        column_title_gp = gpar(fontsize = 16, fontface = "plain"),
-        column_title_side = "bottom"
-    )
+    if(ranges[2] > ranges[1] && ranges[3] > ranges[2]){
+      h <- Heatmap(fullMatrix,
+                   name = "Value",
+                   col = colorRamp2(ranges, c("#151B54", "#F5F5F5", "#dd5d16")),
+                   bottom_annotation = ha,
+                   heatmap_legend_param = list(legend_direction = "horizontal",
+                                               title_position = "leftcenter"),
+                   show_row_names = showRN,
+                   show_column_names = FALSE,
+                   show_row_dend = FALSE,
+                   cluster_columns = FALSE,
+                   cluster_rows = FALSE,
+                   column_split = features,
+                   column_gap = unit(0, "mm"),
+                   column_title = "%s",
+                   column_title_gp = gpar(fontsize = 16, fontface = "plain"),
+                   column_title_side = "bottom"
+      )
 
-    message("[draw_matrix_heatmap] finished!\n")
-    return(h)
+      message("[draw_matrix_heatmap] finished!\n")
+      return(h)
+    }else{
+      message("[draw_matrix_heatmap] failed! The matix does not have enough
+              unique values!\n")
+      return(NULL)
+    }
+
+
 }
 
 
@@ -415,7 +423,7 @@ draw_locus_profile <- function(plot_df,
 #'
 
 draw_stacked_plot <- function(plot_list, heatmap_list){
-  if (length(heatmap_list) > 0) {
+  if (all(!is.null(unlist(heatmap_list)))) {
     groblist <- lapply(heatmap_list, function(x)
       grid.grabExpr(draw(x, heatmap_legend_side = "bottom")))
     names(groblist) <- names(heatmap_list)

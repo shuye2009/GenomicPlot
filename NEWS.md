@@ -1,3 +1,6 @@
+# CHANGES IN VERSION 1.5.1
+   - Fix a bug in draw_matrix_heatmap to allow it to handle extreme cases
+
 # CHANGES IN VERSION 1.3.5
    - Fix a bug in maploss calculation in make_subTxDb_from_GTF.
    - Fix user-genome issue in make_subTxDb_from_GTF
