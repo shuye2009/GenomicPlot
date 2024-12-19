@@ -79,7 +79,9 @@ draw_matrix_heatmap <- function(fullMatrix,
     }
     if (is.null(ranges)) {
         ranges <- quantile(fullMatrix, c(0.25, 0.5, 0.75), na.rm = TRUE)
-        if (ranges[1] == ranges[3]) {
+        if(min(fullMatrix) == max(fullMatrix)){
+          ranges = c(0,0,0) # dummy values for homogeneous matrix
+        }else if (ranges[1] == ranges[3]) {
             message("75% of values are not unique, heatmap may not show
                     signals effectively\n")
           # use quantile of non-zero values
@@ -88,7 +90,7 @@ draw_matrix_heatmap <- function(fullMatrix,
         }
     }
 
-    if(ranges[2] > ranges[1] && ranges[3] > ranges[2]){
+    if(ranges[2] > ranges[1]){
       h <- Heatmap(fullMatrix,
                    name = "Value",
                    col = colorRamp2(ranges, c("#151B54", "#F5F5F5", "#dd5d16")),
