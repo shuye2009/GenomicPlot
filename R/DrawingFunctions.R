@@ -90,7 +90,7 @@ draw_matrix_heatmap <- function(fullMatrix,
         }
     }
 
-    if(ranges[2] > ranges[1]){
+    if(ranges[3] > ranges[1]){
       h <- Heatmap(fullMatrix,
                    name = "Value",
                    col = colorRamp2(ranges, c("#151B54", "#F5F5F5", "#dd5d16")),
@@ -114,6 +114,7 @@ draw_matrix_heatmap <- function(fullMatrix,
     }else{
       message("[draw_matrix_heatmap] failed! The matix does not have enough
               unique values!\n")
+      message("Values of ranges for color gradients: ", paste(ranges, collapse = ","))
       return(NULL)
     }
 
