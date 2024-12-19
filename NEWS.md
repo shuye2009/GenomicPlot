@@ -1,4 +1,4 @@
-# CHANGES IN VERSION 1.5.1
+# CHANGES IN VERSION 1.5.2
    - Modified draw_matrix_heatmap to handle momogeneous matrix
    
 # CHANGES IN VERSION 1.5.1
