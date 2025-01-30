@@ -1,3 +1,6 @@
+# CHANGES IN VERSION 1.5.3
+   - Modified handle_bed to allow skipping of first n rows
+   
 # CHANGES IN VERSION 1.5.2
    - Modified draw_matrix_heatmap to handle momogeneous matrix
    

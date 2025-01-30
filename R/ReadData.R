@@ -402,7 +402,8 @@ handle_bed <- function(inputFile,
     if (is.null(names(inputFile)) || names(inputFile) == "")
         stop("Each file must have a name attribute!")
     if (verbose) message("[handle_bed] started ...\n")
-    beddata <- read.delim2(inputFile, header = FALSE, comment.char = "#")
+    beddata <- read.delim2(inputFile, header = FALSE, comment.char = "#",
+                           skip=importParams$skip)
 
     nco <- ncol(beddata)
     if (nco > 6 && verbose) {
