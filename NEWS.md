@@ -1,8 +1,8 @@
-# CHANGES IN VERSION 1.7.1
+# CHANGES IN VERSION 1.6.1
    - Updated test function
    - Bump up version number to trigger Bioconductor build
 
-# CHANGES IN VERSION 1.7.0
+# CHANGES IN VERSION 1.6.0
    - Import seqlevelsStyle from GenomeInfoDb
    - Bump up version number
    
