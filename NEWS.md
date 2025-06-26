@@ -1,5 +1,6 @@
 # CHANGES IN VERSION 1.7.0
    - import seqlevelsStyle from GenomeInfoDb
+   
 # CHANGES IN VERSION 1.5.3
    - Fixed a bug in draw_boxplot_by_factor when 2 factors are present, display counts of each factor in the x labels, instead of average of the counts
 
