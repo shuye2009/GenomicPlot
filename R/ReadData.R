@@ -462,8 +462,8 @@ handle_bed <- function(inputFile,
     }
 
     ## make input comply with GenomeInfoDb
-    if("NCBI" %in% seqlevelsStyle(queryRegions)){
-        seqlevelsStyle(queryRegions) <- "UCSC"
+    if("NCBI" %in% GenomeInfoDb::seqlevelsStyle(queryRegions)){
+        GenomeInfoDb::seqlevelsStyle(queryRegions) <- "UCSC"
     }
     seqInfo <- set_seqinfo(importParams$genome)
 
