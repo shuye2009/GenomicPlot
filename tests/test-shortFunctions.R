@@ -235,15 +235,17 @@ test_that("testing draw_boxplot_wo_outlier", {
 })
 
 test_that("testing draw_boxplot_by_factor", {
-   stat_df <- data.frame(
-     Feature = rep(c("A", "B"), c(20, 30)),
-     Intensity = c(rnorm(20, 2, 0.5), rnorm(30, 3, 0.6))
+  stat_df <- data.frame(
+       Feature = rep(c("A", "B", "A", "B"), c(15, 15, 15, 15)),
+       Covar = rep(c("treat", "control", "dummy"), c(20, 20, 20)),
+       Intensity = c(rnorm(30, 2, 0.5), rnorm(30, 3, 0.6))
    )
    p <- draw_boxplot_by_factor(stat_df,
-     xc = "Feature", yc = "Intensity",
-     Ylab = "Signal Intensity"
+       fc = "Feature", yc = "Intensity",
+       xc = "Covar", Ylab = "Signal Intensity",
+       comp = list(c(1, 2), c(3, 4), c(5, 6)),
+       nf = 2
    )
-
 })
 
 test_that("testing draw_locus_profile", {
