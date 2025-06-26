@@ -1,6 +1,9 @@
 # CHANGES IN VERSION 1.5.3
    - Fixed a bug in draw_boxplot_by_factor when 2 factors are present, display counts of each factor in the x labels, instead of average of the counts
 
+# CHANGES IN VERSION 1.5.3
+   - Modified handle_bed to allow skipping of first n rows
+   
 # CHANGES IN VERSION 1.5.2
    - Modified draw_matrix_heatmap to handle momogeneous matrix
    
