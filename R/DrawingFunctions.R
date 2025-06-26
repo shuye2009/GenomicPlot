@@ -480,8 +480,7 @@ draw_stacked_plot <- function(plot_list, heatmap_list){
 #' )
 #' p <- draw_boxplot_by_factor(stat_df,
 #'     fc = "Feature", yc = "Intensity",
-#'     xc = "Covar",
-#'     Ylab = "Signal Intensity",
+#'     xc = "Covar", Ylab = "Signal Intensity",
 #'     comp = list(c(1, 2), c(3, 4), c(5, 6)),
 #'     nf = 2
 #' )
@@ -501,7 +500,7 @@ draw_boxplot_by_factor <- function(stat_df,
     stopifnot(c(xc, yc, fc) %in% colnames(stat_df))
     xlabs <- paste(levels(as.factor(stat_df[[xc]])), "\n(",
                    table(stat_df[[xc]]), ")", sep = "")
-    if(n == 2){
+    if(nf == 2){
       n_counts <- apply(table(stat_df[c(xc, fc)]), 1, paste, collapse=" ")
       xlabs <- paste(levels(as.factor(stat_df[[xc]])), "\n(",
                      n_counts[levels(as.factor(stat_df[[xc]]))], ")", 
@@ -614,7 +613,7 @@ draw_boxplot_wo_outlier <- function(stat_df,
 
     xlabs <- paste(levels(as.factor(stat_df[[xc]])), "\n(",
                    table(stat_df[[xc]]), ")", sep = "")
-    if(n == 2){
+    if(nf == 2){
       n_counts <- apply(table(stat_df[c(xc, fc)]), 1, paste, collapse=" ")
       xlabs <- paste(levels(as.factor(stat_df[[xc]])), "\n(",
                      n_counts[levels(as.factor(stat_df[[xc]]))], ")", 
