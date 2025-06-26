@@ -465,7 +465,7 @@ draw_stacked_plot <- function(plot_list, heatmap_list){
 #'  wilcox.test
 #' @param nf a integer normalizing factor for correct count of observations when
 #'  the data table has two factors, such as those produced by `pivot_longer`,
-#'  equals to the number of factors
+#'  equals to the number of factors (values can only be 1 or 2)
 #'
 #' @return a ggplot object
 #' @note used by \code{\link{plot_locus}}, \code{\link{plot_locus_with_random}},
@@ -474,12 +474,16 @@ draw_stacked_plot <- function(plot_list, heatmap_list){
 #'
 #' @examples
 #' stat_df <- data.frame(
-#'     Feature = rep(c("A", "B"), c(20, 30)),
-#'     Intensity = c(rnorm(20, 2, 0.5), rnorm(30, 3, 0.6))
+#'     Feature = rep(c("A", "B", "A", "B"), c(15, 15, 15, 15)),
+#'     Covar = rep(c("treat", "control", "dummy"), c(20, 20, 20)),
+#'     Intensity = c(rnorm(30, 2, 0.5), rnorm(30, 3, 0.6))
 #' )
 #' p <- draw_boxplot_by_factor(stat_df,
-#'     xc = "Feature", yc = "Intensity",
-#'     Ylab = "Signal Intensity"
+#'     fc = "Feature", yc = "Intensity",
+#'     xc = "Covar",
+#'     Ylab = "Signal Intensity",
+#'     comp = list(c(1, 2), c(3, 4), c(5, 6)),
+#'     nf = 2
 #' )
 #' p
 #' @export draw_boxplot_by_factor
@@ -488,7 +492,7 @@ draw_stacked_plot <- function(plot_list, heatmap_list){
 draw_boxplot_by_factor <- function(stat_df,
                                    xc = "Feature",
                                    yc = "Intensity",
-                                   fc = xc,
+                                   fc = "",
                                    comp = list(c(1, 2)),
                                    stats = "wilcox.test",
                                    Xlab = xc,
@@ -496,7 +500,14 @@ draw_boxplot_by_factor <- function(stat_df,
                                    nf = 1) {
     stopifnot(c(xc, yc, fc) %in% colnames(stat_df))
     xlabs <- paste(levels(as.factor(stat_df[[xc]])), "\n(",
-                   table(stat_df[[xc]]) / nf, ")", sep = "")
+                   table(stat_df[[xc]]), ")", sep = "")
+    if(n == 2){
+      n_counts <- apply(table(stat_df[c(xc, fc)]), 1, paste, collapse=" ")
+      xlabs <- paste(levels(as.factor(stat_df[[xc]])), "\n(",
+                     n_counts[levels(as.factor(stat_df[[xc]]))], ")", 
+                     sep = "")
+    }
+    
     ypos <- rep(max(stat_df[[yc]]), length(comp)) *
       seq(1, 1 + (length(comp) - 1) * 0.1, 0.1)
     outlier.shape <- 19
@@ -602,7 +613,14 @@ draw_boxplot_wo_outlier <- function(stat_df,
     stopifnot(c(xc, yc, fc) %in% colnames(stat_df))
 
     xlabs <- paste(levels(as.factor(stat_df[[xc]])), "\n(",
-                   table(stat_df[[xc]]) / nf, ")", sep = "")
+                   table(stat_df[[xc]]), ")", sep = "")
+    if(n == 2){
+      n_counts <- apply(table(stat_df[c(xc, fc)]), 1, paste, collapse=" ")
+      xlabs <- paste(levels(as.factor(stat_df[[xc]])), "\n(",
+                     n_counts[levels(as.factor(stat_df[[xc]]))], ")", 
+                     sep = "")
+    }
+    
     fomu <- as.formula(paste(yc, "~", xc))
     bp <- boxplot(fomu, stat_df, plot = FALSE)
 
