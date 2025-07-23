@@ -570,8 +570,8 @@ handle_bedGraph <- function(inputFile,
     }
 
     ## make input comply with GenomeInfoDb
-    if("NCBI" %in% seqlevelsStyle(queryRegions)){
-        seqlevelsStyle(queryRegions) <- "UCSC"
+    if("NCBI" %in% GenomeInfoDb::seqlevelsStyle(queryRegions)){
+        GenomeInfoDb::seqlevelsStyle(queryRegions) <- "UCSC"
     }
     seqInfo <- set_seqinfo(importParams$genome)
 
@@ -684,8 +684,8 @@ handle_bam <- function(inputFile, importParams = NULL, verbose = FALSE) {
 
     ## make input comply with GenomeInfoDb, use cached chromInfo to avoid
     ## dependency on UCSC web service
-    if("NCBI" %in% seqlevelsStyle(queryRegions)){
-        seqlevelsStyle(queryRegions) <- "UCSC"
+    if("NCBI" %in% GenomeInfoDb::seqlevelsStyle(queryRegions)){
+	GenomeInfoDb::seqlevelsStyle(queryRegions) <- "UCSC"
     }
     seqInfo <- set_seqinfo(importParams$genome)
     queryRegions <- queryRegions[as.vector(seqnames(queryRegions))
@@ -777,21 +777,21 @@ handle_bw <- function(inputFile, importParams, verbose = FALSE) {
     }
 
     ## make input comply with GenomeInfoDb
-    if("NCBI" %in% seqlevelsStyle(queryRegions)){
-        seqlevelsStyle(queryRegions) <- "UCSC"
+    if("NCBI" %in% GenomeInfoDb::seqlevelsStyle(queryRegions)){
+        GenomeInfoDb::seqlevelsStyle(queryRegions) <- "UCSC"
     }
     seqInfo <- set_seqinfo(importParams$genome)
     queryRegions <- queryRegions[as.vector(seqnames(queryRegions))
                                  %in% seqnames(seqInfo)]
-    GenomeInfoDb::seqlevels(queryRegions) <- GenomeInfoDb::seqlevels(seqInfo)
-    GenomeInfoDb::seqinfo(queryRegions) <- seqInfo
+    Seqinfo::seqlevels(queryRegions) <- Seqinfo::seqlevels(seqInfo)
+    Seqinfo::seqinfo(queryRegions) <- seqInfo
 
     libsize <- sum(score(queryRegions) * width(queryRegions),
                               na.rm = TRUE)/100 # assuming read length is 100
 
     if (importParams$outRle) {
         queryRegions <- coverage(queryRegions, weight = weight_col)
-        GenomeInfoDb::seqinfo(queryRegions) <- seqInfo
+        Seqinfo::seqinfo(queryRegions) <- seqInfo
     }
 
     if (verbose) message("[handle_bw] finished!\n")

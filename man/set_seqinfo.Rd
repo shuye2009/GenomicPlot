@@ -10,7 +10,7 @@ set_seqinfo(genome = "hg19")
 \item{genome}{a string denoting the genome name and version}
 }
 \value{
-a Seqinfo object defined in the GenomeInfoDb package.
+a Seqinfo object defined in the Seqinfo package.
 }
 \description{
 This is a helper function for making Seqinfo objects, which is

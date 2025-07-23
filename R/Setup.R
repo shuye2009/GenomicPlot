@@ -11,9 +11,8 @@ utils::globalVariables(
 #' @importFrom dplyr rename_with summarize n_distinct lead n all_of
 #' @importFrom plyranges filter filter_by_overlaps
 #' @importFrom GenomicAlignments readGAlignments
-#' @importFrom GenomeInfoDb Seqinfo seqinfo seqlevels seqnames seqinfo<-
-#' @importFrom GenomeInfoDb seqlevels<- seqnames<- keepStandardChromosomes
-#' @importFrom GenomeInfoDb seqlengths seqlevelsStyle seqlevelsStyle<-
+#' @importFrom Seqinfo Seqinfo seqinfo seqlevels seqnames seqlengths
+#' @importFrom Seqinfo seqinfo<- seqlevels<- seqnames<-
 #' @importFrom rtracklayer export.bed import.bw wigToBigWig asBED
 #' @importFrom RCAS importGtf queryGff
 #' @importFrom ggpubr ggtexttable ttheme tab_add_title
