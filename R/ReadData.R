@@ -676,8 +676,7 @@ handle_bam <- function(inputFile, importParams = NULL, verbose = FALSE) {
     }
 
     if(!is.null(importParams$chr)){
-        queryRegions <- queryRegions %>%
-            plyranges::filter(seqnames %in% importParams$chr)
+        queryRegions <- queryRegions[queryRegions$seqnames %in% importParams$chr]
     }
 
     weight_col <- "score"
@@ -772,8 +771,7 @@ handle_bw <- function(inputFile, importParams, verbose = FALSE) {
     }
 
     if(!is.null(importParams$chr)){
-        queryRegions <- queryRegions %>%
-            plyranges::filter(seqnames %in% importParams$chr)
+      queryRegions <- queryRegions[queryRegions$seqnames %in% importParams$chr]
     }
 
     ## make input comply with GenomeInfoDb
