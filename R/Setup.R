@@ -9,7 +9,7 @@ utils::globalVariables(
 #' @importFrom dplyr bind_cols bind_rows mutate filter arrange %>% group_by
 #' @importFrom dplyr select count full_join left_join desc inner_join
 #' @importFrom dplyr rename_with summarize n_distinct lead n all_of
-#' @importFrom plyranges filter filter_by_overlaps
+#' @importFrom plyranges filter_by_overlaps
 #' @importFrom GenomicAlignments readGAlignments
 #' @importFrom GenomeInfoDb Seqinfo seqinfo seqlevels seqnames seqinfo<-
 #' @importFrom GenomeInfoDb seqlevels<- seqnames<- keepStandardChromosomes

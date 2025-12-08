@@ -1,3 +1,7 @@
+# CHANGES IN VERSION 1.9.1
+   - Fix bugs caused by plyranges update
+   - Bump up version number to trigger Bioconductor build
+
 # CHANGES IN VERSION 1.7.1
    - Updated test function
    - Bump up version number to trigger Bioconductor build
