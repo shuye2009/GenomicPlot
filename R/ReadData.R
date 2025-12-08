@@ -771,7 +771,11 @@ handle_bw <- function(inputFile, importParams, verbose = FALSE) {
     }
 
     if(!is.null(importParams$chr)){
+<<<<<<< HEAD
         queryRegions <- queryRegions[queryRegions$seqnames %in% importParams$chr]
+=======
+      queryRegions <- queryRegions[queryRegions$seqnames %in% importParams$chr]
+>>>>>>> 0666dffd58b3e1b26de10d75491173db28c10904
     }
 
     ## make input comply with GenomeInfoDb
