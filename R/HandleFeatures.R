@@ -92,7 +92,7 @@ extract_longest_tx <- function(txdb) {
 #'
 #' @param genome a string denoting the genome name and version
 #'
-#' @return a Seqinfo object defined in the GenomeInfoDb package.
+#' @return a Seqinfo object defined in the Seqinfo package.
 #'
 #' @author Shuye Pu
 #'
