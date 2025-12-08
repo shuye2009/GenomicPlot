@@ -63,7 +63,7 @@ extract_longest_tx <- function(txdb) {
     head(longest_cdstxid)
 
     npc <- tl %>%
-        filter(!gene_id %in% longest_cdstxid$gene_id)
+        dplyr::filter(!gene_id %in% longest_cdstxid$gene_id)
     ## npc stands for non-protein-coding
 
     ## choose tx with longest length for each non-protein-coding gene
@@ -820,7 +820,7 @@ get_targeted_genes <- function(peak,
     annot_table <- bind_rows(annot_list)
     annot_table <- annot_table %>%
         group_by(chrPeak, startPeak, endPeak, strandPeak) %>%
-        filter(n() == 1 | feature_name == precedence(unique(feature_name)))
+        dplyr::filter(dplyr::n() == 1 | feature_name == precedence(unique(feature_name)))
     ## if the peak is assigned to only one feature, associate that feature with
     ## the peak, else if the peak is assigned to multiple features, associate
     ## the feature with the best precedence order with the peak.

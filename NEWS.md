@@ -1,3 +1,7 @@
+# CHANGES IN VERSION 1.8.1
+   - Fix bugs caused by updated plyranges package
+   - bump up version number
+
 # CHANGES IN VERSION 1.7.2
    - Add Seqinfo to Imports
    - Move GenomeInfoDb from Imports to Suggests
