@@ -89,7 +89,7 @@ plot_peak_annotation <- function(peakFile,
         pdf(paste0(outPrefix, ".pdf"), height = hw[1], width = hw[2])
     }
 
-    chromInfo <- set_seqinfo(importParams$genome)
+    chromInfo <- set_seqinfo(importParams$genome, importParams$chromInfo)
     gff <- RCAS::importGtf(saveObjectAsRds = TRUE, filePath = gtfFile)
     gff <- gff[as.vector(seqnames(gff)) %in% seqlevels(chromInfo)]
     seqlevels(gff) <- seqlevels(chromInfo)

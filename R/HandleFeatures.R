@@ -63,7 +63,7 @@ extract_longest_tx <- function(txdb) {
     head(longest_cdstxid)
 
     npc <- tl %>%
-        filter(!gene_id %in% longest_cdstxid$gene_id)
+        dplyr::filter(!gene_id %in% longest_cdstxid$gene_id)
     ## npc stands for non-protein-coding
 
     ## choose tx with longest length for each non-protein-coding gene
@@ -91,26 +91,68 @@ extract_longest_tx <- function(txdb) {
 #' included.
 #'
 #' @param genome a string denoting the genome name and version
-#'
+#' @param chromInfo a data frame with three columns: chr, start and end
+#' 
 #' @return a Seqinfo object defined in the Seqinfo package.
 #'
 #' @author Shuye Pu
 #'
 #' @examples
 #'
+#' # Default usage with standard chromosome information
 #' out <- set_seqinfo(genome = "hg19")
+#' 
+#' # Custom chromosome information
+#' custom_chrom <- data.frame(chr=c("chr1","chr2"), start=c(0,0), end=c(1000000,2000000))
+#' out_custom <- set_seqinfo(genome = "hg199", chromInfo = custom_chrom)
 #'
 #' @export set_seqinfo
 #'
-set_seqinfo <- function(genome = "hg19") {
+set_seqinfo <- function(genome = "hg19", chromInfo = NULL) {
     message("[set_seqinfo]")
     if(grepl("GRCh37", genome)) genome <- "hg19"
     if(grepl("GRCh38", genome)) genome <- "hg38"
 
-    chromInfo <- circlize::read.chromInfo(species = genome)$df
-    seqi <- Seqinfo(seqnames = chromInfo$chr, seqlengths = chromInfo$end,
-                    isCircular = rep(FALSE, nrow(chromInfo)),
-                    genome = genome)
+    # Try to get standard chromosome information first
+    tryCatch({
+        chromDf <- circlize::read.chromInfo(species = genome)$df
+    }, error = function(e) {
+        # If circlize fails, try to use provided chromInfo
+        if(is.null(chromInfo)) {
+            stop("Failed to get chromosome information for genome '", genome, 
+                 "' and no custom chromInfo provided. Error: ", e$message)
+        }
+        
+        # Try to validate and use custom chromInfo
+        tryCatch({
+            # Validate chromInfo structure
+            required_cols <- c("chr", "start", "end")
+            if(!all(required_cols %in% colnames(chromInfo))) {
+                stop("chromInfo must contain columns: ", paste(required_cols, collapse=", "))
+            }
+            if(nrow(chromInfo) == 0) {
+                stop("chromInfo cannot be empty")
+            }
+            if(any(chromInfo$start < 0) || any(chromInfo$end <= chromInfo$start)) {
+                stop("chromInfo has invalid coordinates: start must be >= 0 and end > start")
+            }
+            
+            chromDf <<- chromInfo
+            message("Using custom chromosome information due to circlize error: ", e$message)
+        }, error = function(e2) {
+            stop("Both circlize and custom chromInfo failed. Circlize error: ", e$message, 
+                 ". Custom chromInfo error: ", e2$message)
+        })
+    })
+    
+    tryCatch({
+        seqi <- Seqinfo(seqnames = chromDf$chr, seqlengths = chromDf$end,
+                        isCircular = rep(FALSE, nrow(chromDf)),
+                        genome = genome)
+    }, error = function(e) {
+        stop("Failed to create Seqinfo object: ", e$message)
+    })
+    
     return(seqi)
 }
 
@@ -136,12 +178,12 @@ set_seqinfo <- function(genome = "hg19") {
 #'
 #' @export custom_TxDb_from_GTF
 #'
-custom_TxDb_from_GTF <- function(gtfFile, genome = "hg19") {
+custom_TxDb_from_GTF <- function(gtfFile, genome = "hg19", chromInfo = NULL) {
     if(grepl("GRCh37", genome)) genome <- "hg19"
     if(grepl("GRCh38", genome)) genome <- "hg38"
 
     message("[custom_TxDb_from_GTF]")
-    chromInfo <- set_seqinfo(genome)
+    chromInfo <- set_seqinfo(genome, chromInfo)
     gff <- RCAS::importGtf(saveObjectAsRds = TRUE, filePath = gtfFile)
     gff <- gff[as.vector(seqnames(gff)) %in% seqlevels(chromInfo)]
     seqlevels(gff) <- seqlevels(chromInfo)
@@ -820,7 +862,7 @@ get_targeted_genes <- function(peak,
     annot_table <- bind_rows(annot_list)
     annot_table <- annot_table %>%
         group_by(chrPeak, startPeak, endPeak, strandPeak) %>%
-        filter(n() == 1 | feature_name == precedence(unique(feature_name)))
+        dplyr::filter(n() == 1 | feature_name == precedence(unique(feature_name)))
     ## if the peak is assigned to only one feature, associate that feature with
     ## the peak, else if the peak is assigned to multiple features, associate
     ## the feature with the best precedence order with the peak.
@@ -890,12 +932,13 @@ get_targeted_genes <- function(peak,
 
 make_subTxDb_from_GTF <- function(gtfFile,
                                   genome = "hg19",
+                                  chromInfo = NULL,
                                   geneList,
                                   geneCol = 1) {
     message("[make_subTxDb_from_GTF] ", gtfFile)
     if(grepl("GRCh37", genome)) genome <- "hg19"
     if(grepl("GRCh38", genome)) genome <- "hg38"
-    chromInfo <- set_seqinfo(genome)
+    chromInfo <- set_seqinfo(genome, chromInfo)
 
     gff <- RCAS::importGtf(saveObjectAsRds = TRUE, filePath = gtfFile)
     if (length(geneList) == 1) {
@@ -998,11 +1041,11 @@ gene2tx <- function(gtfFile,
 #'
 #' @export check_constraints
 #'
-check_constraints <- function(gr, genome, queryRle = NULL) {
+check_constraints <- function(gr, genome, chromInfo = NULL, queryRle = NULL) {
     stopifnot(is.character(genome))
 
     message("[check_constraints]")
-    seqInfo <- set_seqinfo(genome)
+    seqInfo <- set_seqinfo(genome, chromInfo)
     len <- seqlengths(seqInfo)
 
     # limit gr to chromosomes in chromInfo

@@ -18,6 +18,7 @@
 #' @param norm logical, indicating whether the output RleList should be
 #'  normalized to RPM using library sizes.
 #' @param genome a string denoting the genome name and version.
+#' @param chromInfo a data frame with three columns: chr, start and end
 #' @param useSizeFactor logical, indicating whether the library size should be
 #'  adjusted with a size factor, using the 'calcNormFactors' function in the
 #'  edgeR package, only applicable to ChIPseq data.
@@ -50,6 +51,7 @@ setImportParams <- function(
         useSizeFactor = FALSE,
         saveRds = FALSE,
         genome = "hg19",
+        chromInfo = NULL,
         val = 4,
         skip = 0,
         chr = NULL) {
@@ -63,7 +65,7 @@ setImportParams <- function(
         offset = offset, fix_width = fix_width, fix_point = fix_point,
         norm = norm, useScore = useScore, outRle = outRle,
         useSizeFactor = useSizeFactor, saveRds = saveRds,
-        genome = genome, val = val, skip = skip, chr = chr
+        genome = genome, chromInfo = chromInfo, val = val, skip = skip, chr = chr
     ))
 }
 
@@ -246,7 +248,9 @@ handle_input <- function(inputFiles,
     if (importParams$useSizeFactor && (length(inputFiles) > 1)) {
         outlist <- effective_size(outlist = outlist,
                                   outRle = importParams$outRle,
-                                  genome = importParams$genome, nc = nc)
+                                  genome = importParams$genome, 
+                                  chromInfo = importParams$chromInfo,
+                                  nc = nc)
     }
 
     ## compute RPM
@@ -277,6 +281,7 @@ handle_input <- function(inputFiles,
 #' @param outRle logical, indicating whether the 'query' element of the output
 #'  should be an RleList object or a GRanges object
 #' @param genome a string denoting the genome name and version
+#' @param chromInfo a data frame with three columns: chr, start and end
 #' @param nc integer, number of cores for parallel processing
 #' @param verbose logical, whether to output additional information
 #'
@@ -313,11 +318,12 @@ handle_input <- function(inputFiles,
 effective_size <- function(outlist,
                            outRle,
                            genome = "hg19",
+                           chromInfo = NULL,
                            nc = 2,
                            verbose = FALSE) {
     if (verbose) message("Estimating size factor\n")
 
-    seqi <- set_seqinfo(genome)
+    seqi <- set_seqinfo(genome, chromInfo)
 
     grange_list <- lapply(outlist, function(x) x$query)
 
@@ -465,7 +471,7 @@ handle_bed <- function(inputFile,
     if("NCBI" %in% GenomeInfoDb::seqlevelsStyle(queryRegions)){
         GenomeInfoDb::seqlevelsStyle(queryRegions) <- "UCSC"
     }
-    seqInfo <- set_seqinfo(importParams$genome)
+    seqInfo <- set_seqinfo(importParams$genome, importParams$chromInfo)
 
     queryRegions <- queryRegions[as.vector(seqnames(queryRegions))
                                  %in% seqnames(seqInfo)]
@@ -573,7 +579,7 @@ handle_bedGraph <- function(inputFile,
     if("NCBI" %in% GenomeInfoDb::seqlevelsStyle(queryRegions)){
         GenomeInfoDb::seqlevelsStyle(queryRegions) <- "UCSC"
     }
-    seqInfo <- set_seqinfo(importParams$genome)
+    seqInfo <- set_seqinfo(importParams$genome, chromInfo=importParams$chromInfo)
 
     queryRegions <- queryRegions[as.vector(seqnames(queryRegions))
                                  %in% seqnames(seqInfo)]
@@ -686,7 +692,7 @@ handle_bam <- function(inputFile, importParams = NULL, verbose = FALSE) {
     if("NCBI" %in% GenomeInfoDb::seqlevelsStyle(queryRegions)){
 	GenomeInfoDb::seqlevelsStyle(queryRegions) <- "UCSC"
     }
-    seqInfo <- set_seqinfo(importParams$genome)
+    seqInfo <- set_seqinfo(importParams$genome, importParams$chromInfo)
     queryRegions <- queryRegions[as.vector(seqnames(queryRegions))
                                  %in% seqnames(seqInfo)]
     seqlevels(queryRegions) <- seqlevels(seqInfo)
@@ -778,7 +784,7 @@ handle_bw <- function(inputFile, importParams, verbose = FALSE) {
     if("NCBI" %in% GenomeInfoDb::seqlevelsStyle(queryRegions)){
         GenomeInfoDb::seqlevelsStyle(queryRegions) <- "UCSC"
     }
-    seqInfo <- set_seqinfo(importParams$genome)
+    seqInfo <- set_seqinfo(importParams$genome, importParams$chromInfo)
     queryRegions <- queryRegions[as.vector(seqnames(queryRegions))
                                  %in% seqnames(seqInfo)]
     Seqinfo::seqlevels(queryRegions) <- Seqinfo::seqlevels(seqInfo)
@@ -847,7 +853,7 @@ handle_wig <- function(inputFile,
     neg_file <- find_mate(inputFile, verbose)
     stranded <- ifelse(!is.null(neg_file), TRUE, FALSE)
 
-    seqinfo <- set_seqinfo(importParams$genome)
+    seqinfo <- set_seqinfo(importParams$genome, importParams$chromInfo)
     wigToBigWig(inputFile, seqinfo, clip = TRUE)
 
     if (stranded) {

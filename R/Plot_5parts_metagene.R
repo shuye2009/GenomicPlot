@@ -374,7 +374,7 @@ plot_5parts_metagene <- function(queryFiles,
     for (aFeature in names(gFeatures_list)) {
         for (queryLabel in queryLabels) {
             aplot_df <- mplot_dfs %>%
-                filter(Query == paste(queryLabel, aFeature, sep = ":"))
+                dplyr::filter(Query == paste(queryLabel, aFeature, sep = ":"))
             p <- draw_region_profile(plot_df = aplot_df, cn = "Query",
                                      vx = vx, Ylab = Ylab)
             outp <- plot_grid(p, pp, ppp, ncol = 1, align = "v", axis = "lr",
@@ -403,7 +403,7 @@ plot_5parts_metagene <- function(queryFiles,
         for (aFeature in names(gFeatures_list)) {
             for (ratiolabel in ratiolabels) {
                 aplot_df <- mplot_dfs_ratio %>%
-                    filter(Query == paste(ratiolabel, aFeature, sep = ":"))
+                    dplyr::filter(Query == paste(ratiolabel, aFeature, sep = ":"))
                 p <- draw_region_profile(plot_df = aplot_df, cn = "Query",
                                          vx = vx, Ylab = Ylabr)
                 outp <- plot_grid(p, pp, ppp, ncol = 1, align = "v",

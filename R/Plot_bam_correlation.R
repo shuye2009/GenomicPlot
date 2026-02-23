@@ -70,7 +70,7 @@ plot_bam_correlation <- function(bamFiles,
     if (verbose) message("Computing bam correlation...\n")
     outlist <- handle_input(inputFiles = bamFiles, importParams, nc = nc)
 
-    seqi <- set_seqinfo(importParams$genome)
+    seqi <- set_seqinfo(importParams$genome, importParams$chromInfo)
 
     tileBins <- tileGenome(seqi, tilewidth = binSize,
                            cut.last.tile.in.chrom = TRUE)
