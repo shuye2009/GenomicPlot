@@ -25,7 +25,7 @@ Collate:
     "Plot_locus_with_random.R" "Plot_peak_annotation.R" "Plot_bam_correlation.R"
 Depends: R (>= 4.4.0), GenomicRanges (>= 1.46.1)
 Imports: methods, Rsamtools, parallel, tidyr, rtracklayer (>= 1.54.0),
-   plyranges (>= 1.14.0), cowplot (>= 1.1.1), VennDiagram, ggplotify, Seqinfo,
+   plyranges (>= 1.14.0), cowplot (>= 1.1.1), VennDiagram, ggplotify, 
    IRanges, ComplexHeatmap, RCAS (>= 1.20.0), scales (>= 1.2.0), GenomicAlignments 
    (>= 1.30.0), edgeR, circlize, viridis, ggsignif (>= 0.6.3), ggsci (>= 2.9), 
    ggpubr, grDevices, graphics, stats, utils, GenomicFeatures, genomation (>= 1.36.0),
