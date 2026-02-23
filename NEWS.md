@@ -1,4 +1,9 @@
 
+
+# CHANGES IN VERSION 1.9.2
+   - Add chromInfo parameter support for non model organisms (custom organisms)
+   - Bump up version number to trigger Bioconductor build
+
 # CHANGES IN VERSION 1.9.1
    - Fix bugs caused by plyranges update
    - Bump up version number to trigger Bioconductor build
