@@ -787,15 +787,15 @@ handle_bw <- function(inputFile, importParams, verbose = FALSE) {
     seqInfo <- set_seqinfo(importParams$genome, importParams$chromInfo)
     queryRegions <- queryRegions[as.vector(seqnames(queryRegions))
                                  %in% seqnames(seqInfo)]
-    Seqinfo::seqlevels(queryRegions) <- Seqinfo::seqlevels(seqInfo)
-    Seqinfo::seqinfo(queryRegions) <- seqInfo
+    GenomeInfoDb::seqlevels(queryRegions) <- GenomeInfoDb::seqlevels(seqInfo)
+    GenomeInfoDb::seqinfo(queryRegions) <- seqInfo
 
     libsize <- sum(score(queryRegions) * width(queryRegions),
                               na.rm = TRUE)/100 # assuming read length is 100
 
     if (importParams$outRle) {
         queryRegions <- coverage(queryRegions, weight = weight_col)
-        Seqinfo::seqinfo(queryRegions) <- seqInfo
+        GenomeInfoDb::seqinfo(queryRegions) <- seqInfo
     }
 
     if (verbose) message("[handle_bw] finished!\n")
