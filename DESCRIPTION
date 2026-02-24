@@ -4,6 +4,8 @@ Title: Plot profiles of next generation sequencing data in genomic features
 Version: 1.9.2
 Authors@R: person("Shuye", "Pu", email = "shuye2009@gmail.com", role = c("aut", "cre"), 
    comment = c(ORCID = "0000-0002-6664-8438"))
+Author: Shuye Pu <shuye2009@gmail.com>
+Maintainer: Shuye Pu <shuye2009@gmail.com>
 Description: Visualization of next generation sequencing (NGS) data is essential 
    for interpreting high-throughput genomics experiment results. 'GenomicPlot' 
    facilitates plotting of NGS data in various formats (bam, bed, wig and bigwig);
