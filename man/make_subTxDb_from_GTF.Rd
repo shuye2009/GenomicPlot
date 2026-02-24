@@ -4,12 +4,20 @@
 \alias{make_subTxDb_from_GTF}
 \title{Make TxDb object from a GTF file for a subset of genes}
 \usage{
-make_subTxDb_from_GTF(gtfFile, genome = "hg19", geneList, geneCol = 1)
+make_subTxDb_from_GTF(
+  gtfFile,
+  genome = "hg19",
+  chromInfo = NULL,
+  geneList,
+  geneCol = 1
+)
 }
 \arguments{
 \item{gtfFile}{path to a GTF file}
 
 \item{genome}{version of genome, like "hg19"}
+
+\item{chromInfo}{a data frame with three columns: chr, start and end}
 
 \item{geneList}{path to a tab-delimited text file with one gene name on each
 line, or a character vector of gene names}

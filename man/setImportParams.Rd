@@ -14,6 +14,7 @@ setImportParams(
   useSizeFactor = FALSE,
   saveRds = FALSE,
   genome = "hg19",
+  chromInfo = NULL,
   val = 4,
   skip = 0,
   chr = NULL
@@ -48,6 +49,8 @@ edgeR package, only applicable to ChIPseq data.}
 be saved for fast reloading}
 
 \item{genome}{a string denoting the genome name and version.}
+
+\item{chromInfo}{a data frame with three columns: chr, start and end}
 
 \item{val}{integer, indicating the column that will be used as score/value.
 default 4 for bedGraph.}

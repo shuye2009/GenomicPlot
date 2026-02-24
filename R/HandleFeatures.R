@@ -163,6 +163,7 @@ set_seqinfo <- function(genome = "hg19", chromInfo = NULL) {
 #'
 #' @param gtfFile path to a gene annotation gtf file
 #' @param genome a string denoting the genome name and version
+#' @param chromInfo a data frame with three columns: chr, start and end
 #'
 #' @return a TxDb object defined in the GenomicFeatures package.
 #'
@@ -911,6 +912,7 @@ get_targeted_genes <- function(peak,
 #'
 #' @param gtfFile path to a GTF file
 #' @param genome version of genome, like "hg19"
+#' @param chromInfo a data frame with three columns: chr, start and end
 #' @param geneList path to a tab-delimited text file with one gene name on each
 #'  line, or a character vector of gene names
 #' @param geneCol the position of the column that containing gene names in the
@@ -1017,6 +1019,7 @@ gene2tx <- function(gtfFile,
 #'
 #' @param gr a GenomicRanges object
 #' @param genome genomic version name such as "hg19"
+#' @param chromInfo a data frame with three columns: chr, start and end
 #' @param queryRle a RleList object used as a query against gr
 #'
 #' @return a GRanges object

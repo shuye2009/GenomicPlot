@@ -4,12 +4,14 @@
 \alias{custom_TxDb_from_GTF}
 \title{Make custom TxDb object from a GTF/GFF file}
 \usage{
-custom_TxDb_from_GTF(gtfFile, genome = "hg19")
+custom_TxDb_from_GTF(gtfFile, genome = "hg19", chromInfo = NULL)
 }
 \arguments{
 \item{gtfFile}{path to a gene annotation gtf file}
 
 \item{genome}{a string denoting the genome name and version}
+
+\item{chromInfo}{a data frame with three columns: chr, start and end}
 }
 \value{
 a TxDb object defined in the GenomicFeatures package.

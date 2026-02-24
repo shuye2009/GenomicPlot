@@ -4,12 +4,14 @@
 \alias{check_constraints}
 \title{Check constraints of genomic ranges}
 \usage{
-check_constraints(gr, genome, queryRle = NULL)
+check_constraints(gr, genome, chromInfo = NULL, queryRle = NULL)
 }
 \arguments{
 \item{gr}{a GenomicRanges object}
 
 \item{genome}{genomic version name such as "hg19"}
+
+\item{chromInfo}{a data frame with three columns: chr, start and end}
 
 \item{queryRle}{a RleList object used as a query against gr}
 }
