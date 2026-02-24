@@ -4,10 +4,11 @@
 \alias{set_seqinfo}
 \title{Set standard chromosome size of model organisms}
 \usage{
-set_seqinfo(genome = "hg19")
+set_seqinfo(genome = "hg19", chromInfo = NULL)
 }
 \arguments{
 \item{genome}{a string denoting the genome name and version}
+\item{chromInfo}{a data frame with three columns: chr, start and end}
 }
 \value{
 a Seqinfo object defined in the Seqinfo package.
@@ -20,7 +21,12 @@ included.
 }
 \examples{
 
+# Default usage with standard chromosome information
 out <- set_seqinfo(genome = "hg19")
+
+# Custom chromosome information
+custom_chrom <- data.frame(chr=c("chr1","chr2"), start=c(0,0), end=c(1000000,2000000))
+out_custom <- set_seqinfo(genome = "hg19", chromInfo = custom_chrom)
 
 }
 \author{
