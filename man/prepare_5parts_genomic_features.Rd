@@ -11,6 +11,7 @@ prepare_5parts_genomic_features(
   fiveP = -1000,
   threeP = 1000,
   longest = TRUE,
+  chromInfo = NULL,
   verbose = FALSE,
   subsetTx = NULL
 )
@@ -29,6 +30,8 @@ prepare_5parts_genomic_features(
 
 \item{longest}{logical, indicating whether the output should be limited to
 the longest transcript of each gene}
+
+\item{chromInfo}{a data frame with three columns: chr, start and end}
 
 \item{verbose}{logical, whether to output additional information}
 

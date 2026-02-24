@@ -199,14 +199,14 @@ plot_start_end_with_random <- function(queryFiles,
 
     fs <- check_constraints(promoters(resize(feature, width = 1, fix = "start"),
                          upstream = -ext[1], downstream = ext[2]),
-                         importParams$genome)
+                         importParams$genome, importParams$chromInfo)
     fe <- check_constraints(promoters(resize(feature, width = 1, fix = "end"),
                          upstream = -ext[3], downstream = ext[4]),
-                         importParams$genome)
+                         importParams$genome, importParams$chromInfo)
     fc <- check_constraints(promoters(resize(feature, width = 1, fix = "center"),
                          upstream = round(insert / 2),
                          downstream = round(insert / 2)),
-                         importParams$genome)
+                         importParams$genome, importParams$chromInfo)
 
     if (randomize) {
         random_points <- sample(ext[1]:ext[4], length(feature), replace = TRUE)
@@ -214,16 +214,16 @@ plot_start_end_with_random <- function(queryFiles,
         rfs <- check_constraints(promoters(resize(
                               rfeature, width = 1, fix = "start"),
                               upstream = -ext[1], downstream = ext[2]),
-                              importParams$genome)
+                              importParams$genome, importParams$chromInfo)
         rfe <- check_constraints(promoters(resize(
                               rfeature, width = 1, fix = "end"),
                               upstream = -ext[3], downstream = ext[4]),
-                              importParams$genome)
+                              importParams$genome, importParams$chromInfo)
         rfc <- check_constraints(promoters(resize(
                               rfeature, width = 1, fix = "center"),
                               upstream = round(insert / 2),
                               downstream = round(insert / 2)),
-                              importParams$genome)
+                              importParams$genome, importParams$chromInfo)
     }
 
     ext[2] <- ext[2] - (ext[2] - ext[1]) %% binSize

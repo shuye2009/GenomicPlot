@@ -236,7 +236,7 @@ plot_locus <- function(queryFiles,
             windowRegions <- promoters(windowRegions, upstream = -ext[1],
                                        downstream = ext[2])
             windowRegions <- check_constraints(windowRegions,
-                                               importParams$genome)
+                                               importParams$genome, importParams$chromInfo)
         } else {
             stop("invalid reference point!
                  Must be one of c('center', 'start', 'end')")

@@ -228,7 +228,7 @@ plot_region <- function(queryFiles,
             centerInput <- centerInputs[[centerLabel]]
             centerGr <- centerInput$query
             centerGr <- check_constraints(centerGr, importParams$genome,
-                                          queryRegions)
+                                          importParams$chromInfo, queryRegions)
 
             if (fiveP > 0 && threeP < 0) {
                # to avoid generating negative width in the narrow function below
@@ -250,9 +250,9 @@ plot_region <- function(queryFiles,
                                   both = FALSE, use.names = TRUE,
                                   ignore.strand = !stranded)
             upstreamGr <- check_constraints(upstreamGr, importParams$genome,
-                                            queryRegions)
+                                            importParams$chromInfo, queryRegions)
             downstreamGr <- check_constraints(downstreamGr, importParams$genome,
-                                              queryRegions)
+                                              importParams$chromInfo, queryRegions)
 
             if (fiveP > 0) {
                 centerGrPlus <- narrow(centerGrPlus, start = fiveP, end = NA)

@@ -383,7 +383,7 @@ get_genomic_feature_coordinates <- function(txdb,
 
 
 #' @title Demarcate genes into promoter, gene body  and TTS features
-#
+#'
 #' @description This is a helper function for 'plot_3parts_metagene', used to
 #' speed up plotting of multiple data sets with the same configuration. Use
 #' featureName='transcript' and meta=FALSE and longest=TRUE for genes.
@@ -401,6 +401,7 @@ get_genomic_feature_coordinates <- function(txdb,
 #'  the longest transcript of each gene
 #' @param protein_coding logical, indicating whether to limit to protein_coding
 #'  genes
+#' @param chromInfo a data frame with three columns: chr, start and end
 #'
 #' @return a named list with the elements c("windowRs", "nbins", "scaled_bins",
 #'  "fiveP", "threeP", "meta", "longest")
@@ -428,6 +429,7 @@ prepare_3parts_genomic_features <- function(txdb,
                                             threeP = 1000,
                                             longest = TRUE,
                                             protein_coding = TRUE,
+                                            chromInfo = NULL,
                                             verbose = FALSE) {
     ## prepare transcripts
     stopifnot(featureName %in% c("utr3", "utr5", "cds", "transcript"))
@@ -473,8 +475,8 @@ prepare_3parts_genomic_features <- function(txdb,
     TTS <- flank(gn$GRanges, width = threeP, both = FALSE, start = FALSE,
                  ignore.strand = FALSE)
 
-    promoter <- check_constraints(promoter, genome = txdb$user_genome[1])
-    TTS <- check_constraints(TTS, genome = txdb$user_genome[1])
+    promoter <- check_constraints(promoter, genome = txdb$user_genome[1], chromInfo = chromInfo)
+    TTS <- check_constraints(TTS, genome = txdb$user_genome[1], chromInfo = chromInfo)
 
     sel_tx <- sel_tx[sel_tx %in% intersect(names(promoter), names(TTS))]
     windowRs <- list(
@@ -504,7 +506,7 @@ prepare_3parts_genomic_features <- function(txdb,
 }
 
 #' @title Demarcate genes into promoter, 5'UTR, CDS, 3'UTR and TTS features
-#
+#'
 #' @description This is a helper function for 'plot_5parts_metagene', used to
 #' speed up plotting of multiple data sets with the same configuration. Only
 #' protein-coding genes are considered.
@@ -518,6 +520,7 @@ prepare_3parts_genomic_features <- function(txdb,
 #' @param verbose logical, whether to output additional information
 #' @param longest logical, indicating whether the output should be limited to
 #'  the longest transcript of each gene
+#' @param chromInfo a data frame with three columns: chr, start and end
 #' @param subsetTx a vector of transcript names (eg. ENST00000587541.1) for
 #'  subsetting the genome
 #'
@@ -545,6 +548,7 @@ prepare_5parts_genomic_features <- function(txdb,
                                             fiveP = -1000,
                                             threeP = 1000,
                                             longest = TRUE,
+                                            chromInfo = NULL,
                                             verbose = FALSE,
                                             subsetTx = NULL) {
     ## prepare transcripts
@@ -577,8 +581,8 @@ prepare_5parts_genomic_features <- function(txdb,
     TTS <- flank(gn$GRanges, width = threeP, both = FALSE, start = FALSE,
                  ignore.strand = FALSE)
 
-    promoter <- check_constraints(promoter, genome = txdb$user_genome[1])
-    TTS <- check_constraints(TTS, genome = txdb$user_genome[1])
+    promoter <- check_constraints(promoter, genome = txdb$user_genome[1], chromInfo = chromInfo)
+    TTS <- check_constraints(TTS, genome = txdb$user_genome[1], chromInfo = chromInfo)
 
     if (meta) {
         utr5_grl <- utr5$GRangesList
@@ -655,6 +659,7 @@ prepare_5parts_genomic_features <- function(txdb,
 #' @param fiveP extension upstream of the 5' boundary of genes
 #' @param threeP extension downstream of the 3' boundary of genes
 #' @param dsTSS range of promoter extending downstream of TSS
+#' @param chromInfo a data frame with three columns: chr, start and end
 #' @param nc number of cores for parallel processing
 #'
 #' @return a GRangesList object
@@ -675,6 +680,7 @@ get_txdb_features <- function(txdb,
                               fiveP = -1000,
                               dsTSS = 300,
                               threeP = 1000,
+                              chromInfo = NULL,
                               nc = 2) {
     stopifnot(is.numeric(c(dsTSS, fiveP, threeP)))
     stopifnot(fiveP <= 0 && threeP >= 0)
@@ -703,7 +709,7 @@ get_txdb_features <- function(txdb,
         promoter <- GenomicRanges::promoters(gene_gr, upstream = -fiveP,
                                              downstream = dsTSS,
                                              use.names = TRUE)
-        promoter <- check_constraints(promoter, genome = txdb$user_genome[1])
+        promoter <- check_constraints(promoter, genome = txdb$user_genome[1], chromInfo = chromInfo)
 
         features[["Promoter"]] <- promoter
     } else {
@@ -713,7 +719,7 @@ get_txdb_features <- function(txdb,
     if (threeP >= 0) {
         TTS <- GenomicRanges::flank(gene_gr, width = threeP, both = FALSE,
                                     start = FALSE, ignore.strand = FALSE)
-        TTS <- check_constraints(TTS, genome = txdb$user_genome[1])
+        TTS <- check_constraints(TTS, genome = txdb$user_genome[1], chromInfo = chromInfo)
 
         ol <- GenomicRanges::findOverlaps(TTS, gene_gr)
         queries <- unique(ol@from)

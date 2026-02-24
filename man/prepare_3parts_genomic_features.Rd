@@ -13,6 +13,7 @@ prepare_3parts_genomic_features(
   threeP = 1000,
   longest = TRUE,
   protein_coding = TRUE,
+  chromInfo = NULL,
   verbose = FALSE
 )
 }
@@ -36,6 +37,8 @@ the longest transcript of each gene}
 
 \item{protein_coding}{logical, indicating whether to limit to protein_coding
 genes}
+
+\item{chromInfo}{a data frame with three columns: chr, start and end}
 
 \item{verbose}{logical, whether to output additional information}
 }

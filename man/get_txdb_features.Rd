@@ -4,7 +4,14 @@
 \alias{get_txdb_features}
 \title{Get genomic coordinates of features of protein-coding genes}
 \usage{
-get_txdb_features(txdb, fiveP = -1000, dsTSS = 300, threeP = 1000, nc = 2)
+get_txdb_features(
+  txdb,
+  fiveP = -1000,
+  dsTSS = 300,
+  threeP = 1000,
+  chromInfo = NULL,
+  nc = 2
+)
 }
 \arguments{
 \item{txdb}{a TxDb object defined in the GenomicFeatures package}
@@ -14,6 +21,8 @@ get_txdb_features(txdb, fiveP = -1000, dsTSS = 300, threeP = 1000, nc = 2)
 \item{dsTSS}{range of promoter extending downstream of TSS}
 
 \item{threeP}{extension downstream of the 3' boundary of genes}
+
+\item{chromInfo}{a data frame with three columns: chr, start and end}
 
 \item{nc}{number of cores for parallel processing}
 }
